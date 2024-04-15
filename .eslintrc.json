@@ -1,0 +1,113 @@
+{
+  "env": {
+    "browser": true
+  },
+  "ignorePatterns": [
+    "**/*.css",
+    "**/*.scss",
+    "**/*.ico"
+  ],
+  "extends": [
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "prettier",
+    "@feature-sliced",
+    "@feature-sliced/eslint-config/rules/import-order/experimental",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "plugin:prettier/recommended",
+    "plugin:sonarjs/recommended",
+    "plugin:tailwindcss/recommended",
+    "plugin:react-redux/recommended",
+    "plugin:react/jsx-runtime"
+  ],
+  "globals": {
+    "alert": "readonly",
+    "document": "readonly",
+    "localStorage": "readonly",
+    "sessionStorage": "readonly",
+    "window": "readonly"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prettier",
+    "import",
+    "boundaries",
+    "@feature-sliced/eslint-plugin-messages",
+    "eslint-plugin-sonarjs",
+    "jsx-a11y",
+    "mysticatea",
+    "prefer-object-spread",
+    "risxss",
+    "react-hooks",
+    "react-redux",
+    "react"
+  ],
+  "processor": "@feature-sliced/messages/fs",
+  "root": true,
+  "rules": {
+    "@typescript-eslint/no-empty-interface": 0,
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "complexity": [
+      "error",
+      13
+    ],
+    "curly": "error",
+    "mysticatea/no-useless-rest-spread": "error",
+    "no-debugger": "warn",
+    "no-template-curly-in-string": "off",
+    "no-unused-vars": "off",
+    "prefer-object-spread/prefer-object-spread": 2,
+    "prettier/prettier": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error",
+    "react-redux/useSelector-prefer-selectors": "off",
+    "react/jsx-boolean-value": 1,
+    "react/jsx-curly-brace-presence": [
+      1,
+      {
+        "children": "always",
+        "propElementValues": "always",
+        "props": "never"
+      }
+    ],
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [
+          ".ts",
+          ".tsx"
+        ]
+      }
+    ],
+    "react/no-array-index-key": 2,
+    "react/prefer-stateless-function": 2,
+    "risxss/catch-potential-xss-react": "error"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    },
+    "react": {
+      "version": "detect"
+    }
+  }
+}
