@@ -1,6 +1,11 @@
+import './globals.css';
+
 import type { Metadata } from 'next';
 import { Advent_Pro } from 'next/font/google';
-import './globals.css';
+
+import { cn } from '@/shared/lib/cn';
+
+import { AppHeader } from '@/widgets/layout/app-header';
 
 const advent = Advent_Pro({ subsets: ['latin'] });
 
@@ -16,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={advent.className}>{children}</body>
+      <body className={cn('flex min-h-screen flex-col', advent.className)}>
+        <AppHeader />
+        {children}
+      </body>
     </html>
   );
 }

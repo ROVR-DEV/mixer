@@ -1,7 +1,15 @@
+import { getTrack } from '@/entities/track';
+
+import { Timeline } from '@/widgets/timeline';
+
 import { HomePageProps } from './interfaces';
 
-export const HomePage = ({ ..._props }: HomePageProps) => {
+export const HomePage = async ({ searchParams }: HomePageProps) => {
+  const { data: _track } = await getTrack(searchParams.id);
+
   return (
-    <main className='flex min-h-screen flex-col items-center justify-between p-24'></main>
+    <main className='flex flex-1'>
+      {searchParams.id && <Timeline className='flex flex-1 flex-col' />}
+    </main>
   );
 };

@@ -1,0 +1,13 @@
+.timelineSlider {
+  @apply appearance-none w-full h-[9px] bg-secondary-light outline-none rounded-xl;
+}
+
+.timelineSlider::-webkit-slider-thumb {
+  @apply appearance-none h-[9px] bg-accent border border-white rounded-l;
+  width: var(--thumb-width);
+}
+
+.timelineSlider::-moz-range-thumb {
+  @apply h-[9px] bg-accent;
+  width: var(--thumb-width);
+}
