@@ -20,7 +20,8 @@ COPY --from=install /app/node_modules node_modules
 COPY . .
 
 RUN yarn build && \
-    chown -R node: /var/www/*
+    chown -R node:node /var/www/* && \
+    chmod -R 777 /var/www/.next
 
 EXPOSE 3000
 
