@@ -1,3 +1,5 @@
+'use client';
+
 import useResizeObserver from '@react-hook/resize-observer';
 import { RefObject, useLayoutEffect, useState } from 'react';
 

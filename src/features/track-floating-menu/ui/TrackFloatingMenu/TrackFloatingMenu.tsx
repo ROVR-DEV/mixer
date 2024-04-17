@@ -29,7 +29,9 @@ export const TrackFloatingMenu = ({
       {...props}
     >
       <TrackFloatingMenuGroup>
-        <MoveIcon />
+        <div className='cursor-move'>
+          <MoveIcon />
+        </div>
         <IconButton variant='inverse'>
           <CursorIcon />
         </IconButton>

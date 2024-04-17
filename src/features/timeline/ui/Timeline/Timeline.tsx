@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useSize } from '@/shared/lib/useSize';
+import { useWheel } from '@/shared/lib/useWheel';
 
 import { TimelineGrid } from '..';
 import { TimelineRuler } from '../TimelineRuler';
@@ -54,15 +55,7 @@ export const Timeline = () => {
     }
   };
 
-  useEffect(() => {
-    const element = ref.current;
-    if (element) {
-      element.addEventListener('wheel', handleWheel, { passive: false });
-      return () => element.removeEventListener('wheel', handleWheel);
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useWheel(handleWheel, ref);
 
   return (
     <div className='flex size-full'>

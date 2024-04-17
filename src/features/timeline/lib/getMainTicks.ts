@@ -30,7 +30,7 @@ const getRealSubTickSegmentWidth = (
 
 const createTick = (index: number, segmentWidth: number, step: number) => ({
   x: index * segmentWidth,
-  number: index * step + 1,
+  number: index * step,
 });
 
 const getMainTicks = (width: number, step: number, segmentWidth: number) => {

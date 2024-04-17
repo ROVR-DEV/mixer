@@ -9,6 +9,7 @@ export const tailwindConfig: Config = {
         primary: '#161616',
         secondary: { DEFAULT: '#2D2D2D', light: '#494949' },
         third: { DEFAULT: '#9B9B9B', light: '#7C7C7C' },
+        ruler: '#9B9B9B',
       },
     },
   },

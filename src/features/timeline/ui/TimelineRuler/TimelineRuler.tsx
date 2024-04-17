@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { CSSProperties, useEffect, useRef } from 'react';
 
 import {
   drawVerticalLine,
@@ -13,31 +13,41 @@ import {
 
 import { TimelineRulerProps } from './interfaces';
 
+const drawMainDash = (
+  ctx: CanvasRenderingContext2D,
+  offset: number,
+  text: string,
+  color: CSSProperties['color'] = 'white',
+) => {
+  const x = offset + 1;
+
+  const lineHeight = 19;
+
+  drawVerticalLine(ctx, x, lineHeight, color);
+
+  ctx.fillStyle = color;
+  ctx.fillText(text, x - 3, ctx.canvas.height - lineHeight - 3);
+};
+
+const tickValueToTime = (value: number) => {
+  const minutes = (value / 60).toFixed();
+  const seconds = value.toLocaleString('en-US', {
+    minimumIntegerDigits: 2,
+    useGrouping: false,
+  });
+
+  return { minutes, seconds };
+};
+
 const TimelineRuler = ({
+  ticksStartPadding = 0,
   shiftPercent,
   zoom,
   width,
+  color = 'white',
   ...props
 }: TimelineRulerProps) => {
   const canvas = useRef<HTMLCanvasElement | null>(null);
-
-  const drawMainDash = (
-    ctx: CanvasRenderingContext2D,
-    offset: number,
-    text: string,
-  ) => {
-    const x = offset + 1;
-
-    ctx.beginPath();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 1;
-    ctx.moveTo(x, ctx.canvas.height);
-    ctx.lineTo(x, ctx.canvas.height / 2);
-    ctx.stroke();
-
-    ctx.fillStyle = 'white';
-    ctx.fillText(text, x + 4, ctx.canvas.height / 2 + 3);
-  };
 
   useEffect(() => {
     const element = canvas.current;
@@ -54,7 +64,9 @@ const TimelineRuler = ({
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // const shiftX = (shiftPercent / 100) * width * zoom;
+    const shiftX = (shiftPercent / 100) * width * zoom;
+
+    console.log(shiftPercent);
 
     const step = getStep(zoom);
     const segmentWidth = getSegmentWidth(zoom);
@@ -84,25 +96,34 @@ const TimelineRuler = ({
     };
 
     ticks.mainTicks.forEach((tick) => {
-      drawMainDash(ctx, tick.x, tick.number.toString());
-      ticks.subTicks.forEach((subTick, i) =>
-        drawVerticalLine(
+      if (tick.x >= shiftX) {
+        const { minutes, seconds } = tickValueToTime(tick.number * 1000);
+
+        drawMainDash(
           ctx,
-          tick.x + subTick.x,
-          subTickHeightRule(i) ? subTickHeight.short : subTickHeight.tall,
-        ),
-      );
+          tick.x + ticksStartPadding - shiftX,
+          `${minutes}:${seconds}`,
+          color,
+        );
+
+        ticks.subTicks.forEach((subTick, i) =>
+          drawVerticalLine(
+            ctx,
+            tick.x + subTick.x + ticksStartPadding - shiftX,
+            subTickHeightRule(i) ? subTickHeight.short : subTickHeight.tall,
+            color,
+          ),
+        );
+      }
     });
-  }, [zoom, shiftPercent, width]);
+  }, [zoom, shiftPercent, width, ticksStartPadding, color]);
 
   return (
-    <canvas
-      className='border-b border-b-white'
-      width={width}
-      height={18}
-      ref={canvas}
-      {...props}
-    />
+    <div className='relative w-full'>
+      <canvas width={width} height={30} ref={canvas} {...props} />
+      <div className='absolute bottom-[13px] w-full border-t border-t-ruler' />
+      <div className='absolute bottom-0 w-full border-b border-b-ruler' />
+    </div>
   );
 };
 

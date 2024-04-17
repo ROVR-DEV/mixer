@@ -1,13 +1,13 @@
 .timelineSlider {
-  @apply appearance-none w-full h-[9px] bg-secondary-light outline-none rounded-xl;
+  @apply appearance-none h-[9px] bg-secondary-light outline-none rounded-xl overflow-hidden;
 }
 
 .timelineSlider::-webkit-slider-thumb {
-  @apply appearance-none h-[9px] bg-accent border border-white rounded-l;
+  @apply appearance-none h-[9px] bg-accent rounded;
   width: var(--thumb-width);
 }
 
 .timelineSlider::-moz-range-thumb {
-  @apply h-[9px] bg-accent;
+  @apply h-[9px] bg-accent rounded;
   width: var(--thumb-width);
 }
