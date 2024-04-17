@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/Sphinx-Tech-LTD/mixerdev:latest
+    image: ghcr.io/sphinx-tech-ltd/mixerdev:latest
     env_file:
       - .env.local
     ports:

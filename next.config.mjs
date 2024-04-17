@@ -29,6 +29,7 @@ const webpack = (config) => {
 
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   experimental: {
     optimizePackageImports: [
       '@/app',

@@ -17,7 +17,6 @@ jobs:
 
     env:
       IMAGE_NAME: ${{ github.repository }}
-      DEPLOY_FILES: docker-compose.yml
 
     steps:
       - uses: actions/checkout@v4
@@ -38,17 +37,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=schedule,pattern={{date 'YYYYMMDD-hhmmss'}}
-
-      - name: Copy deploy configs
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.TEST_SERVER_HOST }}
-          username: ${{ secrets.TEST_SERVER_USER }}
-          key: ${{ secrets.TEST_SERVER_KEY }}
-          source: ${{ env.DEPLOY_FILES }}
-          target: ~/mixerdev
-          overwrite: true
+            type=raw,value=latest
+            type=sha,enable=true,priority=100,prefix=sha-,suffix=,format=short
 
       - name: Build and push image
         uses: docker/build-push-action@v5
@@ -64,8 +54,21 @@ jobs:
 
     env:
       REPO_NAME: ${{ github.event.repository.name }}
+      DEPLOY_FILES: docker-compose.yml
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy deploy configs
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.TEST_SERVER_HOST }}
+          username: ${{ secrets.TEST_SERVER_USER }}
+          key: ${{ secrets.TEST_SERVER_KEY }}
+          source: ${{ env.DEPLOY_FILES }}
+          target: ~/mixerdev
+          overwrite: true
+
       - name: Deploy on server
         uses: appleboy/ssh-action@master
         with:
@@ -75,6 +78,8 @@ jobs:
           envs: REPO_NAME
           script: |
             cd mixerdev
+
+            docker compose down
 
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
 
