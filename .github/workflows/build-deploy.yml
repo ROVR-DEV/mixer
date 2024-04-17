@@ -53,7 +53,6 @@ jobs:
     needs: build
 
     env:
-      REPO_NAME: ${{ github.event.repository.name }}
       DEPLOY_FILES: docker-compose.yml
 
     steps:
@@ -75,7 +74,6 @@ jobs:
           host: ${{ secrets.TEST_SERVER_HOST }}
           username: ${{ secrets.TEST_SERVER_USER }}
           key: ${{ secrets.TEST_SERVER_KEY }}
-          envs: REPO_NAME
           script: |
             cd mixerdev
 
@@ -83,6 +81,7 @@ jobs:
 
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
 
+            docker compose pull
             docker compose up -d
 
             docker logout
