@@ -1,7 +1,7 @@
 services:
   frontend:
-    build: .
+    image: ghcr.io/Sphinx-Tech-LTD/mixerdev:latest
     env_file:
       - .env.local
     ports:
-     - 3000:3000
+      - 3000:3000
