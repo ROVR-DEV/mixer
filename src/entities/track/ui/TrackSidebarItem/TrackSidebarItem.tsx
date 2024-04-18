@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 
 import { TrackSidebarItemProps } from './interfaces';
@@ -16,3 +18,5 @@ export const TrackSidebarItem = ({
     />
   );
 };
+
+export const TrackSidebarItemMemoized = memo(TrackSidebarItem);

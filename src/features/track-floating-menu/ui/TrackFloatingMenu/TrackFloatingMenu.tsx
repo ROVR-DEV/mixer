@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 import { IconButton } from '@/shared/ui';
 import {
@@ -64,3 +66,5 @@ export const TrackFloatingMenu = ({
     </div>
   );
 };
+
+export const TrackFloatingMenuMemoized = memo(TrackFloatingMenu);

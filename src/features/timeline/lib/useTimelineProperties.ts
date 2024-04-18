@@ -15,7 +15,11 @@ const setProtected = <T = number>(
     return bounds(newValue) ? newValue : prevState;
   });
 
-export const useTimelineProperties = (timelineRef: RefObject<HTMLElement>) => {
+export const useTimelineProperties = (
+  timelineRef: RefObject<HTMLElement>,
+  zoomStep: number = 0.25,
+  shiftStep: number = 5,
+) => {
   const [zoom, setZoomBase] = useState(1);
   const [shift, setShiftBase] = useState(0);
 
@@ -35,12 +39,12 @@ export const useTimelineProperties = (timelineRef: RefObject<HTMLElement>) => {
 
   const handleZoom = (deltaY: number) => {
     const sign = deltaY >= 0 ? -1 : 1;
-    setZoomProtected((prevState) => prevState + sign * 0.25);
+    setZoomProtected((prevState) => prevState + sign * zoomStep);
   };
 
   const handleHorizontalScroll = (deltaY: number) => {
     const sign = deltaY >= 0 ? 1 : -1;
-    setShiftProtected((prevState) => prevState + 10 * sign);
+    setShiftProtected((prevState) => prevState + sign * shiftStep);
   };
 
   const handleWheel = (e: WheelEvent) => {

@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 
 import { TrackListSidebarProps } from './interfaces';
@@ -10,3 +12,5 @@ export const TrackSidebar = ({
     <div className={cn('border-r border-r-secondary', className)} {...props} />
   );
 };
+
+export const TrackSidebarMemoized = memo(TrackSidebar);

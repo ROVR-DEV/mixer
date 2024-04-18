@@ -16,13 +16,13 @@ export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
       {...props}
     >
       <div className='flex items-center gap-5'>
-        <Button>
+        <Button aria-label='Save mix'>
           <SaveMixIcon />
         </Button>
         <Link className='text-accent' href='#'>
           {'Hello LeFto'}
         </Link>
-        <IconButton variant='primaryFilled'>
+        <IconButton variant='primaryFilled' aria-label='profile'>
           {<PersonIcon height={18} />}
         </IconButton>
       </div>

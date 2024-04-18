@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 import { Badge, IconButton } from '@/shared/ui';
 import { PlayIcon, StopIcon } from '@/shared/ui/assets';
@@ -19,10 +21,14 @@ export const TrackInfoPanel = ({
       {...props}
     >
       <div className='col-start-2 flex flex-1 items-center justify-center gap-4'>
-        <IconButton variant='secondaryFilled'>
+        <IconButton variant='secondaryFilled' aria-label='Stop'>
           <StopIcon />
         </IconButton>
-        <IconButton className='pl-[2px]' variant='primaryFilled'>
+        <IconButton
+          className='pl-[2px]'
+          variant='primaryFilled'
+          aria-label='Play'
+        >
           <PlayIcon />
         </IconButton>
         <Badge variant='filled'>{'005:01:40'}</Badge>
@@ -33,3 +39,5 @@ export const TrackInfoPanel = ({
     </div>
   );
 };
+
+export const TrackInfoPanelMemoized = memo(TrackInfoPanel);

@@ -1,10 +1,12 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 import { Badge, IconButton } from '@/shared/ui';
 import {
   Channel01Icon,
   MuteChannelIcon,
   SingleChannelIcon,
-  UndefinedChannelIcon,
+  AutomationChannelIcon,
 } from '@/shared/ui/assets';
 
 import { TrackChannelControlProps } from './interfaces';
@@ -21,15 +23,27 @@ export const TrackChannelControl = ({
       <Badge>
         <Channel01Icon />
       </Badge>
-      <IconButton variant='secondary'>
+      <IconButton
+        variant='secondary'
+        aria-label='Mute channel'
+        role='switch'
+        aria-checked='false'
+      >
         <MuteChannelIcon />
       </IconButton>
-      <IconButton variant='secondary'>
+      <IconButton
+        variant='secondary'
+        aria-label='Single channel'
+        role='switch'
+        aria-checked='false'
+      >
         <SingleChannelIcon />
       </IconButton>
-      <IconButton variant='secondary'>
-        <UndefinedChannelIcon />
+      <IconButton variant='secondary' aria-label='Show/hide automation'>
+        <AutomationChannelIcon />
       </IconButton>
     </div>
   );
 };
+
+export const TrackChannelControlMemoized = memo(TrackChannelControl);

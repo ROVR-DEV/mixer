@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { PlaylistInfoProps } from './interfaces';
 
 export const PlaylistInfo = ({ ...props }: PlaylistInfoProps) => {
@@ -15,3 +17,5 @@ export const PlaylistInfo = ({ ...props }: PlaylistInfoProps) => {
     </span>
   );
 };
+
+export const PlaylistInfoMemoized = memo(PlaylistInfo);

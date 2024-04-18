@@ -4,19 +4,23 @@ import { useRef, useState } from 'react';
 
 import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
-import { IconButton } from '@/shared/ui';
-import { PlusIcon } from '@/shared/ui/assets';
-
-import { PlaylistInfo, TrackSidebar, TrackSidebarItem } from '@/entities/track';
 
 import {
-  TimelineRuler,
+  AddNewChannelButtonMemoized,
+  PlaylistInfoMemoized,
+  TrackSidebarItem,
+  TrackSidebarItemMemoized,
+  TrackSidebarMemoized,
+} from '@/entities/track';
+
+import {
   TimelineSlider,
   useTimelineProperties,
+  TimelineRulerMemoized,
 } from '@/features/timeline';
-import { TrackChannelControl } from '@/features/track-channel-control';
-import { TrackFloatingMenu } from '@/features/track-floating-menu';
-import { TrackInfoPanel } from '@/features/track-info-panel';
+import { TrackChannelControlMemoized } from '@/features/track-channel-control';
+import { TrackFloatingMenuMemoized } from '@/features/track-floating-menu';
+import { TrackInfoPanelMemoized } from '@/features/track-info-panel';
 
 import { TimelineProps } from './interfaces';
 
@@ -73,17 +77,17 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
-      <TrackInfoPanel className='px-6 py-3' />
+      <TrackInfoPanelMemoized className='px-6 py-3' />
       <hr className='border-secondary' />
       <div className='flex grow flex-col overflow-hidden'>
         <div className='flex'>
-          <TrackSidebar className='min-w-[294px]'>
+          <TrackSidebarMemoized className='min-w-[294px]'>
             <TrackSidebarItem className='items-start' disableBorder>
-              <PlaylistInfo />
+              <PlaylistInfoMemoized />
             </TrackSidebarItem>
-          </TrackSidebar>
+          </TrackSidebarMemoized>
           <div ref={containerRef} className='flex w-full items-center'>
-            <TimelineRuler
+            <TimelineRulerMemoized
               color='#9B9B9B'
               ticksStartPadding={5}
               width={width}
@@ -99,18 +103,19 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
             className='min-w-[294px] grow overflow-y-auto'
             onScroll={handleSidebarVerticalScroll}
           >
-            <TrackSidebar className='h-full'>
+            <TrackSidebarMemoized className='h-full'>
               {channels.map((channel) => (
-                <TrackSidebarItem key={channel.id}>
-                  <TrackChannelControl />
-                </TrackSidebarItem>
+                <TrackSidebarItemMemoized key={channel.id}>
+                  <TrackChannelControlMemoized />
+                </TrackSidebarItemMemoized>
               ))}
-              <TrackSidebarItem className='justify-center' disableBorder>
-                <IconButton onClick={addNewChannel}>
-                  <PlusIcon />
-                </IconButton>
-              </TrackSidebarItem>
-            </TrackSidebar>
+              <TrackSidebarItemMemoized
+                className='justify-center'
+                disableBorder
+              >
+                <AddNewChannelButtonMemoized onClick={addNewChannel} />
+              </TrackSidebarItemMemoized>
+            </TrackSidebarMemoized>
           </div>
           <div className='relative flex w-full grow flex-col overflow-y-auto'>
             <div
@@ -119,9 +124,9 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
               onScroll={handleTimelineVerticalScroll}
             >
               {channels.map((channel) => (
-                <TrackSidebarItem key={channel.id} />
+                <TrackSidebarItemMemoized key={channel.id} />
               ))}
-              <TrackSidebarItem className='invisible' />
+              <TrackSidebarItemMemoized className='invisible' />
             </div>
             <div className='w-full px-2'>
               <TimelineSlider
@@ -131,7 +136,7 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
                 onChange={(e) => setShift(Number(e.currentTarget.value))}
               />
             </div>
-            <TrackFloatingMenu className='absolute inset-x-0 bottom-[40px] mx-auto w-max' />
+            <TrackFloatingMenuMemoized className='absolute inset-x-0 bottom-[40px] mx-auto w-max' />
           </div>
         </div>
       </div>

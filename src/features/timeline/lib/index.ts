@@ -5,3 +5,5 @@ export * from './getTickSegmentWidth';
 export * from './getSubTickSegmentWidth';
 export * from './getSubTickHeight';
 export * from './useTimelineProperties';
+export * from './getTickSegmentWidthZoomed';
+export * from './getZoomStepBreakpoint';

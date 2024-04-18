@@ -1,2 +1,2 @@
-export { default as TimelineRuler } from './TimelineRuler';
+export * from './TimelineRuler';
 export type * from './interfaces';
