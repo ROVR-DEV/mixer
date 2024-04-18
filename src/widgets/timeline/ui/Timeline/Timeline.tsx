@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
+import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
 import { IconButton } from '@/shared/ui';
 import { PlusIcon } from '@/shared/ui/assets';
@@ -19,20 +20,62 @@ import { TrackInfoPanel } from '@/features/track-info-panel';
 
 import { TimelineProps } from './interfaces';
 
-export const Timeline = ({ ...props }: TimelineProps) => {
+export const Timeline = ({ className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
 
   const _size = useSize(containerRef);
   const width = _size?.width ?? 0;
 
   const { zoom, shift, setShift } = useTimelineProperties(timelineRef);
+  const [channels, setChannels] = useState<{ id: string }[]>([
+    { id: Math.random().toString() },
+    { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+    // { id: Math.random().toString() },
+  ]);
+
+  const addNewChannel = () => {
+    setChannels((prevState) => [
+      ...prevState,
+      { id: Math.random().toString() },
+    ]);
+  };
+
+  const handleSidebarVerticalScroll = (
+    e: React.UIEvent<HTMLDivElement, UIEvent>,
+  ) => {
+    if (timelineRef.current) {
+      timelineRef.current.scrollTop = (e.target as HTMLElement).scrollTop;
+    }
+  };
+
+  const handleTimelineVerticalScroll = (
+    e: React.UIEvent<HTMLDivElement, UIEvent>,
+  ) => {
+    if (sidebarRef.current) {
+      sidebarRef.current.scrollTop = (e.target as HTMLElement).scrollTop;
+    }
+  };
 
   return (
-    <div {...props}>
+    <div className={cn('flex flex-col', className)} {...props}>
       <TrackInfoPanel className='px-6 py-3' />
       <hr className='border-secondary' />
-      <div className='flex flex-1 flex-col'>
+      <div className='flex grow flex-col overflow-hidden'>
         <div className='flex'>
           <TrackSidebar className='min-w-[294px]'>
             <TrackSidebarItem className='items-start' disableBorder>
@@ -50,25 +93,37 @@ export const Timeline = ({ ...props }: TimelineProps) => {
           </div>
         </div>
         <hr className='border-secondary' />
-        <div className='flex flex-1'>
-          <TrackSidebar className='min-w-[294px]'>
-            <TrackSidebarItem>
-              <TrackChannelControl />
-            </TrackSidebarItem>
-            <TrackSidebarItem>
-              <TrackChannelControl />
-            </TrackSidebarItem>
-            <TrackSidebarItem className='justify-center' disableBorder>
-              <IconButton>
-                <PlusIcon />
-              </IconButton>
-            </TrackSidebarItem>
-          </TrackSidebar>
+        <div className='flex grow overflow-hidden'>
           <div
-            className='relative flex w-full flex-1 basis-full'
-            ref={timelineRef}
+            ref={sidebarRef}
+            className='min-w-[294px] grow overflow-y-auto'
+            onScroll={handleSidebarVerticalScroll}
           >
-            <div className='absolute bottom-1 w-full self-end px-2'>
+            <TrackSidebar className='h-full'>
+              {channels.map((channel) => (
+                <TrackSidebarItem key={channel.id}>
+                  <TrackChannelControl />
+                </TrackSidebarItem>
+              ))}
+              <TrackSidebarItem className='justify-center' disableBorder>
+                <IconButton onClick={addNewChannel}>
+                  <PlusIcon />
+                </IconButton>
+              </TrackSidebarItem>
+            </TrackSidebar>
+          </div>
+          <div className='relative flex w-full grow flex-col overflow-y-auto'>
+            <div
+              className='h-full grow overflow-auto'
+              ref={timelineRef}
+              onScroll={handleTimelineVerticalScroll}
+            >
+              {channels.map((channel) => (
+                <TrackSidebarItem key={channel.id} />
+              ))}
+              <TrackSidebarItem className='invisible' />
+            </div>
+            <div className='w-full px-2'>
               <TimelineSlider
                 className='w-full'
                 zoom={zoom}

@@ -21,7 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={cn('flex min-h-screen flex-col', advent.className)}>
+      <body
+        className={cn('flex flex-col min-h-screen h-screen', advent.className)}
+      >
         <AppHeader />
         {children}
       </body>

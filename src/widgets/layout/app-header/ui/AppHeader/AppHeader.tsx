@@ -8,7 +8,7 @@ import { AppHeaderProps } from './interfaces';
 
 export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
   return (
-    <div
+    <header
       className={cn(
         'flex h-16 items-center justify-end border-b border-b-secondary px-5 py-4',
         className,
@@ -26,6 +26,6 @@ export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
           {<PersonIcon height={18} />}
         </IconButton>
       </div>
-    </div>
+    </header>
   );
 };

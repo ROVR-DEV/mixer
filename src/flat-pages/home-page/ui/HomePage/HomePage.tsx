@@ -8,8 +8,10 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
   const { data: _track } = await getTrack(searchParams.id);
 
   return (
-    <main className='flex flex-1'>
-      {searchParams.id && <Timeline className='flex flex-1 flex-col' />}
+    <main className='h-[calc(100%-64px)] max-h-[calc(100%_-_64px)] min-h-[calc(100%-64px)]'>
+      {searchParams.id && (
+        <Timeline className='h-full max-h-full overflow-hidden' />
+      )}
     </main>
   );
 };
