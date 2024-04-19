@@ -6,4 +6,5 @@ export interface TimelineSliderProps
     HTMLInputElement
   > {
   zoom: number;
+  realWidth: number;
 }

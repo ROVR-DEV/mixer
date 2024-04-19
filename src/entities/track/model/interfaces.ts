@@ -1,8 +1,8 @@
-export interface Track {
+export interface Playlist {
   duration: string;
   show_cover: null;
   curator: Curator;
-  tracks: TrackElement[];
+  tracks: Track[];
   mixes: Mixes;
   id: number;
   title: string;
@@ -19,7 +19,7 @@ export interface Track {
   archived_at: null;
   deleted_at: null;
   status: string;
-  show: TrackShow;
+  show: PlaylistShow;
 }
 
 export interface Curator {
@@ -91,7 +91,7 @@ export interface Auto {
   duration: number;
 }
 
-export interface TrackShow {
+export interface PlaylistShow {
   id: number;
   title: string;
   description: null;
@@ -112,7 +112,7 @@ export interface TrackShow {
   next_curator: null;
 }
 
-export interface TrackElement {
+export interface Track {
   duration: string;
   start: number;
   end: number;

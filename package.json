@@ -18,6 +18,7 @@
   "dependencies": {
     "@react-hook/resize-observer": "^1.2.6",
     "clsx": "^2.1.0",
+    "howler": "^2.2.4",
     "next": "14.2.1",
     "react": "^18",
     "react-dom": "^18"
@@ -26,6 +27,7 @@
     "@feature-sliced/eslint-config": "^0.1.0-beta.6",
     "@feature-sliced/eslint-plugin-messages": "^0.1.0-beta.2",
     "@svgr/webpack": "^8.1.0",
+    "@types/howler": "^2.2.11",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

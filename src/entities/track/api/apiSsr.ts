@@ -1,8 +1,8 @@
-import { Track } from '../model';
+import { Playlist } from '../model';
 
 export const getTrack = async (
   id: string,
-): Promise<{ data: Track | undefined; error: Error | undefined }> => {
+): Promise<{ data: Playlist | undefined; error: Error | undefined }> => {
   try {
     const res = await fetch(
       `${process.env.BACKEND_API_URL}/site/playlist/${id}`,

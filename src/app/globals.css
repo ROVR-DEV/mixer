@@ -21,3 +21,22 @@ body {
 svg {
   flex-shrink: 0;
 }
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme(colors.third.DEFAULT);
+  border-radius: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.43);
+  border-radius: 9px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.53);
+}

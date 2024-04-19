@@ -1,6 +1,15 @@
-import { Dispatch, RefObject, SetStateAction, useState } from 'react';
+import { Dispatch, RefObject, SetStateAction, useMemo, useState } from 'react';
 
 import { useWheel } from '@/shared/lib/useWheel';
+
+import {
+  STEP_IN_SECONDS_RANGES,
+  TICK_SEGMENT_WIDTH_RANGES,
+  ZOOM_BREAKPOINT_RANGES,
+} from '../config';
+
+import { getByRanges } from './getByRanges';
+import { getTickSegmentWidthZoomed } from './getTickSegmentWidthZoomed';
 
 const setProtected = <T = number>(
   setFn: Dispatch<SetStateAction<T>>,
@@ -17,13 +26,25 @@ const setProtected = <T = number>(
 
 export const useTimelineProperties = (
   timelineRef: RefObject<HTMLElement>,
-  maxShift: number,
+  width: number,
+  realWidth: number,
   shiftStep: number = 5,
   zoomRule: (prevZoom: number, sign: number) => number = (prevZoom, sign) =>
     sign > 0 ? prevZoom * 1.25 : prevZoom / 1.25,
 ) => {
   const [zoom, setZoomBase] = useState(1);
   const [shift, setShiftBase] = useState(0);
+
+  const pixelsPerSecond = useMemo(() => {
+    const range = getByRanges(zoom, STEP_IN_SECONDS_RANGES);
+    const zoomStepBreakpoint = getByRanges(zoom, ZOOM_BREAKPOINT_RANGES);
+    const tickSegmentWidth = getTickSegmentWidthZoomed(
+      getByRanges(zoom, TICK_SEGMENT_WIDTH_RANGES).min,
+      zoom,
+      zoomStepBreakpoint,
+    );
+    return tickSegmentWidth / range;
+  }, [zoom]);
 
   const setZoomProtected = (value: SetStateAction<number>) =>
     setProtected(setZoomBase, value, (newState) => {
@@ -40,8 +61,8 @@ export const useTimelineProperties = (
     setProtected(setShiftBase, value, (newState) => {
       if (newState < 0) {
         return 0;
-      } else if (newState >= maxShift * zoom - maxShift) {
-        return maxShift * zoom - maxShift;
+      } else if (newState >= realWidth * pixelsPerSecond * zoom) {
+        return realWidth * pixelsPerSecond * zoom;
       } else {
         return newState;
       }
@@ -79,5 +100,6 @@ export const useTimelineProperties = (
     shift,
     setZoom: setZoomProtected,
     setShift: setShiftProtected,
+    pixelsPerSecond,
   };
 };

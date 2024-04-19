@@ -8,9 +8,11 @@ import { useSize } from '@/shared/lib/useSize';
 import {
   AddNewChannelButtonMemoized,
   PlaylistInfoMemoized,
+  Track,
   TrackSidebarItem,
   TrackSidebarItemMemoized,
   TrackSidebarMemoized,
+  TrackWaveformCard,
 } from '@/entities/track';
 
 import {
@@ -24,68 +26,64 @@ import { TrackInfoPanelMemoized } from '@/features/track-info-panel';
 
 import { TimelineProps } from './interfaces';
 
-export const Timeline = ({ className, ...props }: TimelineProps) => {
+export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
-  const sidebarRef = useRef<HTMLDivElement | null>(null);
-
   const _size = useSize(containerRef);
   const width = _size?.width ?? 0;
-  const realWidth = 1880;
+  const realWidth = playlist.tracks.reduce((prev, current) => {
+    return prev && prev.end > current.end ? prev : current;
+  }).end;
 
-  const { zoom, shift, setShift } = useTimelineProperties(
+  const { zoom, shift, setShift, pixelsPerSecond } = useTimelineProperties(
     timelineRef,
+    width,
     realWidth,
     100,
   );
 
-  const [channels, setChannels] = useState<{ id: string }[]>([
-    { id: Math.random().toString() },
-    { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
-    // { id: Math.random().toString() },
+  const [channels, setChannels] = useState<{ id: number }[]>([
+    {
+      id: 1,
+    },
+    {
+      id: 2,
+    },
   ]);
 
   const addNewChannel = () => {
     setChannels((prevState) => [
       ...prevState,
-      { id: Math.random().toString() },
+      { id: (prevState.at(-1)?.id ?? 0) + 1 },
     ]);
   };
 
-  const handleSidebarVerticalScroll = (
-    e: React.UIEvent<HTMLDivElement, UIEvent>,
-  ) => {
-    if (timelineRef.current) {
-      timelineRef.current.scrollTop = (e.target as HTMLElement).scrollTop;
-    }
-  };
+  const trackMapFunction = (track: Track) => {
+    const durationInSeconds = track.end - track.start;
 
-  const handleTimelineVerticalScroll = (
-    e: React.UIEvent<HTMLDivElement, UIEvent>,
-  ) => {
-    if (sidebarRef.current) {
-      sidebarRef.current.scrollTop = (e.target as HTMLElement).scrollTop;
-    }
+    const shiftFromLeft = track.start * pixelsPerSecond - shift;
+    const width = durationInSeconds * pixelsPerSecond;
+
+    return (
+      <TrackWaveformCard
+        className='absolute'
+        key={track.uuid}
+        track={track}
+        style={{
+          // display: Math.abs(shiftFromLeft) < width ? 'none' : 'flex',
+          width: width,
+          left: shiftFromLeft,
+        }}
+      />
+    );
   };
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
       <TrackInfoPanelMemoized className='px-6 py-3' />
       <hr className='border-secondary' />
-      <div className='flex grow flex-col overflow-hidden'>
+      <div className='flex h-full grow flex-col overflow-hidden'>
         <div className='flex'>
           <TrackSidebarMemoized className='min-w-[294px]'>
             <TrackSidebarItem className='items-start' disableBorder>
@@ -98,19 +96,15 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
               timelineWidth={realWidth}
               ticksStartPadding={5}
               width={width}
-              shift={shift}
+              shift={shift * pixelsPerSecond}
               zoom={zoom}
             />
           </div>
         </div>
         <hr className='border-secondary' />
-        <div className='flex grow overflow-hidden'>
-          <div
-            ref={sidebarRef}
-            className='min-w-[294px] grow overflow-y-auto'
-            onScroll={handleSidebarVerticalScroll}
-          >
-            <TrackSidebarMemoized className='h-full'>
+        <div className='flex h-full grow overflow-auto'>
+          <div className='min-h-max min-w-[294px] grow'>
+            <TrackSidebarMemoized className='min-h-full'>
               {channels.map((channel, index) => (
                 <TrackSidebarItemMemoized key={channel.id}>
                   <TrackChannelControlMemoized number={index + 1} />
@@ -124,28 +118,36 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
               </TrackSidebarItemMemoized>
             </TrackSidebarMemoized>
           </div>
-          <div className='relative flex w-full grow flex-col overflow-y-auto'>
-            <div
-              className='h-full grow overflow-auto'
-              ref={timelineRef}
-              onScroll={handleTimelineVerticalScroll}
-            >
-              {channels.map((channel) => (
-                <TrackSidebarItemMemoized key={channel.id} />
-              ))}
-              <TrackSidebarItemMemoized className='invisible' />
-            </div>
-            <div className='w-full px-2'>
-              <TimelineSlider
-                className='w-full'
-                zoom={zoom}
-                value={shift}
-                max={realWidth * zoom - realWidth}
-                onChange={(e) => setShift(Number(e.currentTarget.value))}
-              />
-            </div>
-            <TrackFloatingMenuMemoized className='absolute inset-x-0 bottom-[40px] mx-auto w-max' />
+          <div
+            className='min-h-max w-full grow overflow-hidden'
+            ref={timelineRef}
+          >
+            <TrackSidebarItemMemoized className='relative'>
+              {playlist.tracks
+                .filter((_, i) => i % 2 === 0)
+                .map(trackMapFunction)}
+            </TrackSidebarItemMemoized>
+            <TrackSidebarItemMemoized className='relative'>
+              {playlist.tracks
+                .filter((_, i) => i % 2 !== 0)
+                .map(trackMapFunction)}
+            </TrackSidebarItemMemoized>
+            <TrackSidebarItemMemoized className='invisible' />
           </div>
+        </div>
+      </div>
+      <div className='relative flex grow'>
+        <div className='min-w-[294px]' />
+        <div className='w-full px-2'>
+          <TimelineSlider
+            className='w-full'
+            zoom={zoom}
+            value={shift}
+            realWidth={realWidth}
+            max={realWidth * pixelsPerSecond * zoom - width}
+            onChange={(e) => setShift(Number(e.currentTarget.value))}
+          />
+          <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[294px] right-0 mx-auto w-max' />
         </div>
       </div>
     </div>

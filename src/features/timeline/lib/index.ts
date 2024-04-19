@@ -7,3 +7,4 @@ export * from './isSubTickTall';
 export * from './useTimelineProperties';
 export * from './drawRuler';
 export * from './drawRulerInSeconds';
+export * from './getByRanges';

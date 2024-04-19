@@ -1,8 +1,8 @@
 import { DetailedHTMLProps, HTMLAttributes } from 'react';
 
-import { Playlist } from '@/entities/track';
+import { Track } from '../../model';
 
-export interface TimelineProps
+export interface TrackWaveformCardProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-  playlist: Playlist;
+  track: Track;
 }
