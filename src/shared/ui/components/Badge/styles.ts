@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 import { BadgeVariant } from './types';
 
 const baseStyles =
-  'flex items-center justify-center rounded-full px-4 py-[10px] leading-4';
+  'flex items-center justify-center rounded-full px-4 py-[10px]';
 
 const defaultStyles: Record<BadgeVariant, string> = {
   default: cn(
@@ -12,7 +12,7 @@ const defaultStyles: Record<BadgeVariant, string> = {
   ),
   filled: cn(
     baseStyles,
-    'border border-transparent bg-accent [&_svg]:fill-primary text-primary font-semibold',
+    'border border-transparent bg-accent [&_svg]:fill-primary text-primary',
   ),
 };
 

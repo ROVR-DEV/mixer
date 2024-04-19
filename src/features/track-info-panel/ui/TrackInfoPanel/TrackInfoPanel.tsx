@@ -31,7 +31,9 @@ export const TrackInfoPanel = ({
         >
           <PlayIcon />
         </IconButton>
-        <Badge variant='filled'>{'005:01:40'}</Badge>
+        <Badge className='h-[34px]' variant='filled'>
+          <span className='text-[19px] font-fix'>{'005:01:40'}</span>
+        </Badge>
       </div>
       <div className='flex justify-end'>
         <TrackInfo className='w-max' />

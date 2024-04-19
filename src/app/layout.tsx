@@ -1,18 +1,12 @@
 import './globals.css';
 
-import type { Metadata } from 'next';
-import { Advent_Pro } from 'next/font/google';
-
 import { cn } from '@/shared/lib/cn';
 
 import { AppHeader } from '@/widgets/layout/app-header';
 
-const advent = Advent_Pro({ subsets: ['latin'] });
+import { appMetadata, kernFont } from './__init';
 
-export const metadata: Metadata = {
-  title: 'Mixer',
-  description: '',
-};
+export const metadata = appMetadata;
 
 export default function RootLayout({
   children,
@@ -22,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body
-        className={cn('flex flex-col min-h-screen h-screen', advent.className)}
+        className={cn(
+          'flex flex-col min-h-screen h-screen',
+          kernFont.className,
+        )}
       >
         <AppHeader />
         {children}

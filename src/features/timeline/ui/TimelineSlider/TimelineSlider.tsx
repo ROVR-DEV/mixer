@@ -10,11 +10,11 @@ const TimelineSlider = ({ zoom, className, ...props }: TimelineSliderProps) => {
     <input
       type='range'
       min={0}
-      max={50}
+      max={100}
       className={cn(styles.timelineSlider, className)}
       style={{
         // @ts-expect-error Type
-        '--thumb-width': `calc(100% / ${zoom})`,
+        '--thumb-width': `max(calc(100% / ${zoom}),20px)`,
       }}
       {...props}
     />

@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
 export const tailwindConfig: Config = {
   content: ['./src/**/*.{ts,tsx}'],
@@ -13,5 +14,13 @@ export const tailwindConfig: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addUtilities }) => {
+      addUtilities({
+        '.font-fix': {
+          paddingTop: '4px',
+        },
+      });
+    }),
+  ],
 };

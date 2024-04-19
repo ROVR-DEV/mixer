@@ -4,14 +4,14 @@ import { PlaylistInfoProps } from './interfaces';
 
 export const PlaylistInfo = ({ ...props }: PlaylistInfoProps) => {
   return (
-    <span {...props}>
+    <span className='text-third' {...props}>
       <span>
-        <span>{'Playlist time: '}</span>
+        <span className='font-bold'>{'Playlist time: '}</span>
         <span>{'030:04:39'}</span>
       </span>
       <br />
       <span>
-        <span>{'Tracks: '}</span>
+        <span className='font-bold'>{'Tracks: '}</span>
         <span>{'37'}</span>
       </span>
     </span>

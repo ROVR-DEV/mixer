@@ -83,11 +83,11 @@ export const Timeline = () => {
         <div className='flex w-full'>
           <TimelineRuler
             width={size?.width ?? 1440}
-            shiftPercent={zoom > 1 ? shift : 0}
+            shift={zoom > 1 ? shift : 0}
             zoom={zoom}
           />
         </div>
-        <div className='w-max-full flex size-full flex-col'>
+        <div className='flex size-full flex-col'>
           <div
             ref={ref}
             className='flex size-full touch-pan-y select-none flex-col border-b border-neutral-600'

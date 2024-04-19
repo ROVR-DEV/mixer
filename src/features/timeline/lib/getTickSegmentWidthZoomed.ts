@@ -3,8 +3,7 @@ export const getTickSegmentWidthZoomed = (
   zoom: number,
   zoomStepBreakpoint: number,
 ) => {
-  const fixedZoom =
-    zoom >= zoomStepBreakpoint ? 1 + (zoom % zoomStepBreakpoint) : zoom;
+  const fixedZoom = zoom / zoomStepBreakpoint;
 
   return tickSegmentWidth * fixedZoom;
 };

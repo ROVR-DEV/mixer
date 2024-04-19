@@ -32,8 +32,14 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
 
   const _size = useSize(containerRef);
   const width = _size?.width ?? 0;
+  const realWidth = 1880;
 
-  const { zoom, shift, setShift } = useTimelineProperties(timelineRef);
+  const { zoom, shift, setShift } = useTimelineProperties(
+    timelineRef,
+    realWidth,
+    100,
+  );
+
   const [channels, setChannels] = useState<{ id: string }[]>([
     { id: Math.random().toString() },
     { id: Math.random().toString() },
@@ -89,9 +95,10 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
           <div ref={containerRef} className='flex w-full items-center'>
             <TimelineRulerMemoized
               color='#9B9B9B'
+              timelineWidth={realWidth}
               ticksStartPadding={5}
               width={width}
-              shiftPercent={shift}
+              shift={shift}
               zoom={zoom}
             />
           </div>
@@ -104,9 +111,9 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
             onScroll={handleSidebarVerticalScroll}
           >
             <TrackSidebarMemoized className='h-full'>
-              {channels.map((channel) => (
+              {channels.map((channel, index) => (
                 <TrackSidebarItemMemoized key={channel.id}>
-                  <TrackChannelControlMemoized />
+                  <TrackChannelControlMemoized number={index + 1} />
                 </TrackSidebarItemMemoized>
               ))}
               <TrackSidebarItemMemoized
@@ -133,6 +140,7 @@ export const Timeline = ({ className, ...props }: TimelineProps) => {
                 className='w-full'
                 zoom={zoom}
                 value={shift}
+                max={realWidth * zoom - realWidth}
                 onChange={(e) => setShift(Number(e.currentTarget.value))}
               />
             </div>

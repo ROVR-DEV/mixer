@@ -7,5 +7,6 @@ export const drawVerticalLine = (
   color: CSSProperties['color'] = 'white',
 ) => {
   ctx.strokeStyle = color;
-  ctx.fillRect(x, ctx.canvas.height - height, 1, height);
+  ctx.fillStyle = color;
+  ctx.fillRect(x, ctx.canvas.clientHeight - height, 1, height);
 };

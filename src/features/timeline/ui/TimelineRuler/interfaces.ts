@@ -5,9 +5,11 @@ export interface TimelineRulerProps
     CanvasHTMLAttributes<HTMLCanvasElement>,
     HTMLCanvasElement
   > {
-  ticksStartPadding?: number;
-  shiftPercent: number;
-  zoom: number;
+  timelineWidth: number;
   width: number;
+  height?: number;
+  zoom: number;
+  ticksStartPadding?: number;
+  shift: number;
   color?: CSSProperties['color'];
 }

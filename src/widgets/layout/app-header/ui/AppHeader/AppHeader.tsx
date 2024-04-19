@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { cn } from '@/shared/lib/cn';
 import { Button, IconButton } from '@/shared/ui';
-import { PersonIcon, SaveMixIcon } from '@/shared/ui/assets';
+import { PersonIcon } from '@/shared/ui/assets';
 
 import { AppHeaderProps } from './interfaces';
 
@@ -16,14 +16,21 @@ export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
       {...props}
     >
       <div className='flex items-center gap-5'>
-        <Button aria-label='Save mix'>
-          <SaveMixIcon />
+        <Button
+          aria-label='Save mix'
+          className='h-7 text-[13px] uppercase italic'
+        >
+          <span className='font-fix'>{'Save mix'}</span>
         </Button>
         <Link className='text-accent' href='#'>
-          {'Hello LeFto'}
+          <span className='font-fix'>{'Hello LeFto'}</span>
         </Link>
-        <IconButton variant='primaryFilled' aria-label='profile'>
-          {<PersonIcon height={18} />}
+        <IconButton
+          className='size-7'
+          variant='primaryFilled'
+          aria-label='profile'
+        >
+          {<PersonIcon height={14} />}
         </IconButton>
       </div>
     </header>
