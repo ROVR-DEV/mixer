@@ -14,6 +14,8 @@ export const TrackWaveformCard = ({
         className,
       )}
       {...props}
+      // eslint-disable-next-line no-console
+      onClick={() => console.log(track)}
     >
       {track.title}
       <span className='mt-auto overflow-hidden text-ellipsis text-nowrap text-[12px]'>

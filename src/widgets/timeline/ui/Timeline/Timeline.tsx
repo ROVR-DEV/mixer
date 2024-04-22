@@ -26,6 +26,8 @@ import { TrackInfoPanelMemoized } from '@/features/track-info-panel';
 
 import { TimelineProps } from './interfaces';
 
+const ticksStartPadding = 5;
+
 export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -62,7 +64,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const trackMapFunction = (track: Track) => {
     const durationInSeconds = track.end - track.start;
 
-    const shiftFromLeft = track.start * pixelsPerSecond - shift;
+    const shiftFromLeft =
+      ticksStartPadding + track.start * pixelsPerSecond - shift;
     const width = durationInSeconds * pixelsPerSecond;
 
     return (
