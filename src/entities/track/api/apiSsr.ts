@@ -18,9 +18,7 @@ export const getTrack = async (
   uuid: string,
 ): Promise<{ data: Blob | undefined; error: Error | undefined }> => {
   const baseUrl =
-    typeof window === 'undefined'
-      ? process.env.BACKEND_API_URL
-      : process.env.NEXT_PUBLIC_BACKEND_API_URL;
+    typeof window === 'undefined' ? process.env.BACKEND_API_URL : 'api';
 
   try {
     const res = await fetch(`${baseUrl}/track/${uuid}/play`, {

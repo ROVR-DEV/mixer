@@ -43,7 +43,7 @@ const nextConfig = {
   rewrites: async () => {
     return [
       {
-        source: `${process.env.NEXT_PUBLIC_BACKEND_API_URL || ''}/:path*`,
+        source: `/api/:path*`,
         destination: `${process.env.BACKEND_API_URL || ''}/:path*`,
       },
     ];
