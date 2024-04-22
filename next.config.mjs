@@ -40,14 +40,6 @@ const nextConfig = {
       '@/shared',
     ],
   },
-  rewrites: async () => {
-    return [
-      {
-        source: `/api/:path*`,
-        destination: `${process.env.BACKEND_API_URL || ''}/:path*`,
-      },
-    ];
-  },
   webpack: webpack,
 };
 
