@@ -28,7 +28,7 @@ export const getTrack = async (
         Authorization: 'Bearer 1e10f824-8fb2-4951-9815-d84d7bb141f5',
         'x-id': (Math.random() * 10000).toString(),
       },
-      cache: 'force-cache',
+      cache: 'no-cache',
     });
 
     return {
