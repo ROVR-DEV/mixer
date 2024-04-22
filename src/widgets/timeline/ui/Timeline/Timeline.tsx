@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
@@ -12,7 +12,7 @@ import {
   TrackSidebarItem,
   TrackSidebarItemMemoized,
   TrackSidebarMemoized,
-  TrackWaveformCard,
+  TrackWaveformCardMemoized,
 } from '@/entities/track';
 
 import {
@@ -34,9 +34,12 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const _size = useSize(containerRef);
   const width = _size?.width ?? 0;
-  const realWidth = playlist.tracks.reduce((prev, current) => {
-    return prev && prev.end > current.end ? prev : current;
-  }).end;
+  const realWidth = Math.max(
+    playlist.tracks.reduce((prev, current) => {
+      return prev && prev.end > current.end ? prev : current;
+    }).end,
+    1440,
+  );
 
   const { zoom, shift, setShift, pixelsPerSecond } = useTimelineProperties(
     timelineRef,
@@ -64,23 +67,42 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const trackMapFunction = (track: Track) => {
     const durationInSeconds = track.end - track.start;
 
-    const shiftFromLeft =
-      ticksStartPadding + track.start * pixelsPerSecond - shift;
-    const width = durationInSeconds * pixelsPerSecond;
+    const trackStartPosition = track.start * pixelsPerSecond;
+    const trackEndPosition = track.end * pixelsPerSecond;
+
+    const shiftFromLeft = ticksStartPadding + trackStartPosition - shift;
+    const trackWidth = durationInSeconds * pixelsPerSecond;
+
+    const isVisible =
+      trackStartPosition < width + shift && trackEndPosition > shift;
 
     return (
-      <TrackWaveformCard
+      <TrackWaveformCardMemoized
         className='absolute'
         key={track.uuid}
         track={track}
+        enabled={isVisible}
         style={{
-          // display: Math.abs(shiftFromLeft) < width ? 'none' : 'flex',
-          width: width,
+          display: isVisible ? 'flex' : 'none',
+          width: trackWidth,
           left: shiftFromLeft,
         }}
       />
     );
   };
+
+  const { evenTracks, oddTracks } = useMemo(
+    () => ({
+      evenTracks: playlist.tracks
+        .filter((_, i) => i % 2 === 0)
+        .map(trackMapFunction),
+      oddTracks: playlist.tracks
+        .filter((_, i) => i % 2 !== 0)
+        .map(trackMapFunction),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [playlist.tracks, shift, pixelsPerSecond, width],
+  );
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
@@ -126,14 +148,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             ref={timelineRef}
           >
             <TrackSidebarItemMemoized className='relative'>
-              {playlist.tracks
-                .filter((_, i) => i % 2 === 0)
-                .map(trackMapFunction)}
+              {evenTracks}
             </TrackSidebarItemMemoized>
             <TrackSidebarItemMemoized className='relative'>
-              {playlist.tracks
-                .filter((_, i) => i % 2 !== 0)
-                .map(trackMapFunction)}
+              {oddTracks}
             </TrackSidebarItemMemoized>
             <TrackSidebarItemMemoized className='invisible' />
           </div>

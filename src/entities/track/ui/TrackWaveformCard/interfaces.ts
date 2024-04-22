@@ -5,4 +5,5 @@ import { Track } from '../../model';
 export interface TrackWaveformCardProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   track: Track;
+  enabled?: boolean;
 }
