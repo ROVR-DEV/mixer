@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
@@ -31,6 +31,8 @@ const ticksStartPadding = 5;
 export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const _size = useSize(containerRef);
   const width = _size?.width ?? 0;
@@ -104,11 +106,99 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     [playlist.tracks, shift, pixelsPerSecond, width],
   );
 
+  const playHeadRef = useRef<HTMLDivElement | null>(null);
+  const time = useRef<number>(0);
+  const startRef = useRef<number | undefined>(undefined);
+  const prevRef = useRef<number>(0);
+
+  const calculateTrack = () => {
+    const playHead = playHeadRef.current;
+    if (!playHead) {
+      return;
+    }
+    const newPosition =
+      time.current * pixelsPerSecond - shift + ticksStartPadding;
+
+    playHead.style.left = `${newPosition}px`;
+    if (newPosition < 0 || newPosition > width) {
+      playHead.style.display = 'none';
+    } else {
+      playHead.style.display = 'block';
+    }
+  };
+
+  const animatePlayHead = (timeStamp: number) => {
+    const playHead = playHeadRef.current;
+    if (!playHead) {
+      return;
+    }
+
+    const playing = playHead.dataset.playing;
+
+    if (!playing) {
+      startRef.current = undefined;
+      prevRef.current = 0;
+      return;
+    }
+
+    if (startRef.current === undefined) {
+      startRef.current = timeStamp;
+      prevRef.current = timeStamp;
+    }
+
+    time.current += 1 * ((timeStamp - prevRef.current) / 1000);
+
+    calculateTrack();
+
+    prevRef.current = timeStamp;
+    requestAnimationFrame(animatePlayHead);
+  };
+
+  const handlePlay = () => {
+    setIsPlaying(true);
+    const playHead = playHeadRef.current;
+    if (!playHead) {
+      return;
+    }
+
+    playHead.dataset.playing = 'true';
+    requestAnimationFrame(animatePlayHead);
+  };
+
+  const handleStop = () => {
+    setIsPlaying(false);
+
+    const playHead = playHeadRef.current;
+    if (!playHead) {
+      return;
+    }
+
+    playHead.dataset.playing = '';
+  };
+
+  useEffect(() => {
+    calculateTrack();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pixelsPerSecond, shift, width]);
+
   return (
     <div className={cn('flex flex-col', className)} {...props}>
-      <TrackInfoPanelMemoized className='px-6 py-3' />
+      <TrackInfoPanelMemoized
+        playing={isPlaying}
+        className='px-6 py-3'
+        onPlay={handlePlay}
+        onStop={handleStop}
+        time={time}
+      />
       <hr className='border-secondary' />
-      <div className='flex h-full grow flex-col overflow-hidden'>
+      <div className='relative flex h-full grow flex-col'>
+        <div className='absolute left-[294px] z-10 h-full'>
+          <div className='absolute top-0 h-full' ref={playHeadRef}>
+            <div className='absolute -left-2 size-4 bg-accent' />
+            <div className='absolute -left-2 top-4 size-0 border-x-8 border-t-8 border-x-transparent border-t-accent' />
+            <div className='mx-auto h-full w-px bg-accent' />
+          </div>
+        </div>
         <div className='flex'>
           <TrackSidebarMemoized className='min-w-[294px]'>
             <TrackSidebarItem className='items-start' disableBorder>
@@ -144,7 +234,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             </TrackSidebarMemoized>
           </div>
           <div
-            className='min-h-max w-full grow overflow-hidden'
+            className='relative min-h-max w-full grow overflow-hidden'
             ref={timelineRef}
           >
             <TrackSidebarItemMemoized className='relative'>
