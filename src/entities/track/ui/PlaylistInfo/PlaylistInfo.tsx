@@ -9,7 +9,7 @@ export const PlaylistInfo = ({
   tracksCount,
   ...props
 }: PlaylistInfoProps) => {
-  const { seconds, milliseconds, microseconds } = useMemo(() => {
+  const { minutes, seconds, milliseconds } = useMemo(() => {
     return parseSecondsToParts(totalPlaytime);
   }, [totalPlaytime]);
 
@@ -17,7 +17,7 @@ export const PlaylistInfo = ({
     <span className='text-third' {...props}>
       <span>
         <span className='font-bold'>{'Playlist time: '}</span>
-        <span>{`${seconds}:${milliseconds}:${microseconds}`}</span>
+        <span>{`${minutes}:${seconds}:${milliseconds}`}</span>
       </span>
       <br />
       <span>

@@ -6,42 +6,15 @@ import WaveSurfer from 'wavesurfer.js';
 import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
 
-import { getTrack } from '../../api';
-
 import { TrackWaveformCardProps } from './interfaces';
 
 export const TrackWaveformCard = ({
   track,
-  enabled = true,
+  trackData,
   className,
   ...props
 }: TrackWaveformCardProps) => {
-  const [trackBlobData, setTrackBlobData] = useState<{
-    data: Blob | undefined;
-    error: Error | undefined;
-  }>({ data: undefined, error: undefined });
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    if (!enabled) {
-      return;
-    }
-
-    if (trackBlobData.data) {
-      return;
-    }
-
-    (async () => {
-      const blob = await getTrack(track.uuid);
-
-      setTrackBlobData(blob);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, track.uuid]);
 
   const containerSize = useSize(containerRef);
 
@@ -77,13 +50,13 @@ export const TrackWaveformCard = ({
   }, [containerSize?.height]);
 
   useEffect(() => {
-    if (!trackBlobData.data) {
+    if (!trackData) {
       return;
     }
 
-    wavesurfer?.loadBlob(trackBlobData.data);
+    wavesurfer?.loadBlob(trackData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackBlobData]);
+  }, [trackData]);
 
   return (
     <div
@@ -102,8 +75,8 @@ export const TrackWaveformCard = ({
         {track.title}
       </span>
       <div ref={containerRef} className='relative h-[60px]'>
-        {trackBlobData.error && (
-          <span className='absolute top-0'>{trackBlobData.error.message}</span>
+        {!trackData && (
+          <span className='absolute top-0'>{'Failed to load'}</span>
         )}
         <div id={`#waveform-${track.uuid}`} />
       </div>

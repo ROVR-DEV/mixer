@@ -14,6 +14,7 @@ import {
   TrackSidebarMemoized,
   TrackWaveformCardMemoized,
   getPlaylistMaxTime,
+  getTrack,
 } from '@/entities/track';
 
 import {
@@ -32,6 +33,31 @@ const ticksStartPadding = 5;
 export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+
+  const [tracks, setTracks] = useState<Record<string, Blob | undefined> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    (async () => {
+      const getBlobBoundByUuid = async (uuid: string) => [
+        uuid,
+        await getTrack(uuid),
+      ];
+
+      const blobs = await Promise.all(
+        playlist.tracks.map((track) => getBlobBoundByUuid(track.uuid)),
+      );
+
+      setTracks(Object.fromEntries(blobs));
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(playlist.tracks.map((track) => track.uuid))]);
 
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -79,7 +105,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         className='absolute'
         key={track.uuid}
         track={track}
-        enabled={false}
+        trackData={tracks?.[track.uuid]}
         style={{
           display: isVisible ? 'flex' : 'none',
           width: trackWidth,
@@ -232,17 +258,26 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
               </TrackSidebarItemMemoized>
             </TrackSidebarMemoized>
           </div>
+
           <div
             className='relative min-h-max w-full grow overflow-hidden'
             ref={timelineRef}
           >
-            <TrackSidebarItemMemoized className='relative'>
-              {evenTracks}
-            </TrackSidebarItemMemoized>
-            <TrackSidebarItemMemoized className='relative'>
-              {oddTracks}
-            </TrackSidebarItemMemoized>
-            <TrackSidebarItemMemoized className='invisible' />
+            {tracks === null ? (
+              <span className='flex size-full items-center justify-center'>
+                {'Loading...'}
+              </span>
+            ) : (
+              <>
+                <TrackSidebarItemMemoized className='relative'>
+                  {evenTracks}
+                </TrackSidebarItemMemoized>
+                <TrackSidebarItemMemoized className='relative'>
+                  {oddTracks}
+                </TrackSidebarItemMemoized>
+                <TrackSidebarItemMemoized className='invisible' />
+              </>
+            )}
           </div>
         </div>
       </div>

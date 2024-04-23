@@ -26,12 +26,11 @@ export const TrackInfoPanel = ({
     const timeValue = time.current;
 
     if (timeElement && timeValue !== null) {
-      const { seconds, milliseconds, microseconds } =
-        parseSecondsToParts(timeValue);
+      const { minutes, seconds, milliseconds } = parseSecondsToParts(timeValue);
 
-      timeElement.children[0].textContent = formatNumberWithPads(seconds);
-      timeElement.children[2].textContent = formatNumberWithPads(milliseconds);
-      timeElement.children[4].textContent = formatNumberWithPads(microseconds);
+      timeElement.children[0].textContent = formatNumberWithPads(minutes);
+      timeElement.children[2].textContent = formatNumberWithPads(seconds, 2);
+      timeElement.children[4].textContent = formatNumberWithPads(milliseconds);
     }
 
     if (playingRef.current) {
@@ -80,7 +79,7 @@ export const TrackInfoPanel = ({
           <span className='flex text-[19px] font-fix' ref={timeRef}>
             <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
             <span className='max-w-[4px]'>{':'}</span>
-            <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
+            <span className='w-[25px] min-w-[25px] max-w-[25px] text-center' />
             <span className='max-w-[4px]'>{':'}</span>
             <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
           </span>
