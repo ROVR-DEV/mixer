@@ -11,6 +11,7 @@ const DEFAULT_RANGES: Omit<ResultRange, 'result'>[] = [
 ];
 
 const STEP_IN_SECONDS = [30, 10, 5, 1, 0.5, 0.1, 0.05];
+
 const TICK_SEGMENT_WIDTH = [
   { min: 123, max: 201 },
   { min: 80, max: 125 },
@@ -20,6 +21,7 @@ const TICK_SEGMENT_WIDTH = [
   { min: 82, max: 134 },
   { min: 75, max: Number.MAX_VALUE },
 ];
+
 const SUB_TICK_SEGMENT_WIDTH = [
   { min: 42, max: 68 },
   { min: 7, max: 14 },

@@ -13,6 +13,7 @@ import {
   TrackSidebarItemMemoized,
   TrackSidebarMemoized,
   TrackWaveformCardMemoized,
+  getPlaylistMaxTime,
 } from '@/entities/track';
 
 import {
@@ -34,21 +35,13 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const playlistTotalTime = getPlaylistMaxTime(playlist);
+
   const _size = useSize(containerRef);
   const width = _size?.width ?? 0;
-  const realWidth = Math.max(
-    playlist.tracks.reduce((prev, current) => {
-      return prev && prev.end > current.end ? prev : current;
-    }).end,
-    1440,
-  );
 
-  const { zoom, shift, setShift, pixelsPerSecond } = useTimelineProperties(
-    timelineRef,
-    width,
-    realWidth,
-    100,
-  );
+  const { zoom, shift, setShift, pixelsPerSecond, realWidth } =
+    useTimelineProperties(timelineRef, width, playlistTotalTime, 100);
 
   const [channels, setChannels] = useState<{ id: number }[]>([
     {
@@ -72,18 +65,21 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     const trackStartPosition = track.start * pixelsPerSecond;
     const trackEndPosition = track.end * pixelsPerSecond;
 
-    const shiftFromLeft = ticksStartPadding + trackStartPosition - shift;
+    const shiftPixels = shift * pixelsPerSecond;
+
+    const shiftFromLeft = ticksStartPadding + trackStartPosition - shiftPixels;
     const trackWidth = durationInSeconds * pixelsPerSecond;
 
     const isVisible =
-      trackStartPosition < width + shift && trackEndPosition > shift;
+      trackStartPosition < width + shiftPixels &&
+      trackEndPosition > shiftPixels;
 
     return (
       <TrackWaveformCardMemoized
         className='absolute'
         key={track.uuid}
         track={track}
-        enabled={isVisible}
+        enabled={false}
         style={{
           display: isVisible ? 'flex' : 'none',
           width: trackWidth,
@@ -202,7 +198,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         <div className='flex'>
           <TrackSidebarMemoized className='min-w-[294px]'>
             <TrackSidebarItem className='items-start' disableBorder>
-              <PlaylistInfoMemoized />
+              <PlaylistInfoMemoized
+                totalPlaytime={playlistTotalTime}
+                tracksCount={playlist.tracks.length}
+              />
             </TrackSidebarItem>
           </TrackSidebarMemoized>
           <div ref={containerRef} className='flex w-full items-center'>
@@ -254,8 +253,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             className='w-full'
             zoom={zoom}
             value={shift}
-            realWidth={realWidth}
-            max={realWidth * pixelsPerSecond * zoom - width}
+            realWidth={realWidth - width * 0.1}
+            max={realWidth - width * 0.1}
             onChange={(e) => setShift(Number(e.currentTarget.value))}
           />
           <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[294px] right-0 mx-auto w-max' />

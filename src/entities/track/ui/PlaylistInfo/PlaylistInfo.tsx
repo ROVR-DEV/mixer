@@ -1,18 +1,28 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
+
+import { parseSecondsToParts } from '../../lib';
 
 import { PlaylistInfoProps } from './interfaces';
 
-export const PlaylistInfo = ({ ...props }: PlaylistInfoProps) => {
+export const PlaylistInfo = ({
+  totalPlaytime,
+  tracksCount,
+  ...props
+}: PlaylistInfoProps) => {
+  const { seconds, milliseconds, microseconds } = useMemo(() => {
+    return parseSecondsToParts(totalPlaytime);
+  }, [totalPlaytime]);
+
   return (
     <span className='text-third' {...props}>
       <span>
         <span className='font-bold'>{'Playlist time: '}</span>
-        <span>{'030:04:39'}</span>
+        <span>{`${seconds}:${milliseconds}:${microseconds}`}</span>
       </span>
       <br />
       <span>
         <span className='font-bold'>{'Tracks: '}</span>
-        <span>{'37'}</span>
+        <span>{tracksCount}</span>
       </span>
     </span>
   );

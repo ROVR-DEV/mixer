@@ -27,7 +27,7 @@ const setProtected = <T = number>(
 export const useTimelineProperties = (
   timelineRef: RefObject<HTMLElement>,
   width: number,
-  realWidth: number,
+  playlistTotalTime: number,
   shiftStep: number = 5,
   zoomRule: (prevZoom: number, sign: number) => number = (prevZoom, sign) =>
     sign > 0 ? prevZoom * 1.25 : prevZoom / 1.25,
@@ -46,6 +46,14 @@ export const useTimelineProperties = (
     return tickSegmentWidth / range;
   }, [zoom]);
 
+  const realWidth = useMemo(
+    () => Math.max(playlistTotalTime, 1440),
+    [playlistTotalTime],
+  );
+
+  const shiftStepZoomed = shiftStep / zoom;
+  const bufferWidth = width * 0.1;
+
   const setZoomProtected = (value: SetStateAction<number>) =>
     setProtected(setZoomBase, value, (newState) => {
       if (newState < 1) {
@@ -61,8 +69,8 @@ export const useTimelineProperties = (
     setProtected(setShiftBase, value, (newState) => {
       if (newState < 0) {
         return 0;
-      } else if (newState >= realWidth * pixelsPerSecond * zoom) {
-        return realWidth * pixelsPerSecond * zoom;
+      } else if (newState >= realWidth - bufferWidth) {
+        return Math.min(newState, realWidth - bufferWidth);
       } else {
         return newState;
       }
@@ -76,7 +84,7 @@ export const useTimelineProperties = (
 
   const handleHorizontalScroll = (deltaY: number) => {
     const sign = deltaY >= 0 ? 1 : -1;
-    setShiftProtected((prevState) => prevState + sign * shiftStep);
+    setShiftProtected((prevState) => prevState + sign * shiftStepZoomed);
   };
 
   const handleWheel = (e: WheelEvent) => {
@@ -101,5 +109,6 @@ export const useTimelineProperties = (
     setZoom: setZoomProtected,
     setShift: setShiftProtected,
     pixelsPerSecond,
+    realWidth,
   };
 };

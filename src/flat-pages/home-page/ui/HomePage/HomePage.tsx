@@ -13,22 +13,18 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
   //   ),
   // );
 
-  // if (playlist) {
-  // playlist.tracks = playlist.tracks.slice(0, 1);
-
-  // playlist.tracks[0].start += 1000;
-  // playlist.tracks[0].end += 1000;
-  // const tr = playlist.tracks.find(
-  //   (track) => track.uuid === 'cbd3f74f-88e9-47d9-900f-7fedfa321820',
-  // )!;
-
-  // tr.end = tr.end - tr.start;
-  // tr.start = 0;
-
-  // playlist.tracks = [tr];
-
-  // console.log(playlist.tracks);
-  // }
+  if (playlist) {
+    // playlist.tracks = playlist.tracks.slice(0, 1);
+    // playlist.tracks[0].start += 1000;
+    // playlist.tracks[0].end += 1000;
+    // const tr = playlist.tracks.find(
+    //   (track) => track.uuid === 'cbd3f74f-88e9-47d9-900f-7fedfa321820',
+    // )!;
+    // tr.end = tr.end - tr.start;
+    // tr.start = 0;
+    // playlist.tracks = [tr];
+    // console.log(playlist.tracks);
+  }
 
   return (
     <main className='h-[calc(100%-64px)] max-h-[calc(100%_-_64px)] min-h-[calc(100%-64px)]'>

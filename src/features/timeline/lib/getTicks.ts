@@ -8,7 +8,7 @@ const createTick = (
   isFirstTick: boolean,
   step: number,
 ) => ({
-  x: index * segmentWidth + index * Number(!isFirstTick),
+  x: index * segmentWidth,
   number: index * step,
 });
 
