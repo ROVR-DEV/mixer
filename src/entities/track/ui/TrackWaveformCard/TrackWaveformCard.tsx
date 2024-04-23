@@ -54,6 +54,7 @@ export const TrackWaveformCard = ({
       return;
     }
 
+    wavesurfer?.empty();
     wavesurfer?.loadBlob(trackData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackData]);

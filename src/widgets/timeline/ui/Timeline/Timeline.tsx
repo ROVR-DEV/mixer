@@ -46,7 +46,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     (async () => {
       const getBlobBoundByUuid = async (uuid: string) => [
         uuid,
-        await getTrack(uuid),
+        (await getTrack(uuid)).data,
       ];
 
       const blobs = await Promise.all(
@@ -125,7 +125,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         .map(trackMapFunction),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playlist.tracks, shift, pixelsPerSecond, width],
+    [playlist.tracks, shift, pixelsPerSecond, width, tracks],
   );
 
   const playHeadRef = useRef<HTMLDivElement | null>(null);
