@@ -35,7 +35,15 @@ export const TrackWaveformCard = ({
       return;
     }
 
-    const wavesurfer = WaveSurfer.create({
+    if (!trackData) {
+      return;
+    }
+
+    if (wavesurfer) {
+      return;
+    }
+
+    const newWavesurfer = WaveSurfer.create({
       barWidth: 1.5,
       barGap: 2.8,
       barHeight: 3,
@@ -46,18 +54,16 @@ export const TrackWaveformCard = ({
       cursorColor: 'transparent',
     });
 
-    setWavesurfer(wavesurfer);
-  }, [containerSize?.height]);
-
-  useEffect(() => {
-    if (!trackData) {
-      return;
+    if (trackData instanceof Blob) {
+      newWavesurfer?.loadBlob(trackData);
+    } else {
+      newWavesurfer?.load(trackData);
     }
 
-    wavesurfer?.empty();
-    wavesurfer?.loadBlob(trackData);
+    setWavesurfer(newWavesurfer);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackData]);
+  }, [trackData, containerSize?.height]);
 
   return (
     <div
