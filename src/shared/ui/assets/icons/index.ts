@@ -18,4 +18,4 @@ export { default as ScissorsIcon } from './scissors.svg';
 export { default as MagnifierIcon } from './magnifier.svg';
 export { default as CursorIcon } from './cursor.svg';
 
-export { default as Channel01Icon } from './channel-01.svg';
+export { default as ArrowDownIcon } from './arrow-down.svg';

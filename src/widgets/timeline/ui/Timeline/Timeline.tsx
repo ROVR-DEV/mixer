@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
+import { IconButton } from '@/shared/ui';
+import { ArrowDownIcon } from '@/shared/ui/assets';
 
 import {
   AddNewChannelButtonMemoized,
@@ -292,7 +294,17 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             max={realWidth - width * 0.1}
             onChange={(e) => setShift(Number(e.currentTarget.value))}
           />
-          <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[294px] right-0 mx-auto w-max' />
+
+          <div className='absolute bottom-[40px] left-[294px] right-0 mx-auto flex w-max items-center gap-2'>
+            <TrackFloatingMenuMemoized />
+            <IconButton
+              className='size-[33px] pt-1'
+              variant='primaryFilled'
+              svgFillType='stroke'
+            >
+              <ArrowDownIcon />
+            </IconButton>
+          </div>
         </div>
       </div>
     </div>

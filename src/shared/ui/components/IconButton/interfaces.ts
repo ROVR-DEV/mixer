@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, DetailedHTMLProps } from 'react';
 
-import { IconButtonVariant } from './types';
+import { IconButtonSvgFillType, IconButtonVariant } from './types';
 
 export interface IconButtonProps
   extends DetailedHTMLProps<
@@ -8,4 +8,5 @@ export interface IconButtonProps
     HTMLButtonElement
   > {
   variant?: IconButtonVariant;
+  svgFillType?: IconButtonSvgFillType;
 }

@@ -54,12 +54,12 @@ export const TrackInfoPanel = ({
   return (
     <div
       className={cn(
-        'grid grid-rows-1 grid-cols-[1fr_auto_1fr] gap-4 justify-center',
+        'grid grid-rows-1 grid-cols-[1fr_auto_1fr] gap-4 justify-center items-center',
         className,
       )}
       {...props}
     >
-      <div className='col-start-2 flex flex-1 items-center justify-center gap-4'>
+      <div className='flex flex-1 items-center justify-end gap-4'>
         <IconButton
           variant={playing ? 'primaryFilled' : 'secondaryFilled'}
           aria-label='Stop'
@@ -75,16 +75,16 @@ export const TrackInfoPanel = ({
         >
           <PlayIcon />
         </IconButton>
-        <Badge className='h-[34px] w-[140px]' variant='filled'>
-          <span className='flex text-[19px] font-fix' ref={timeRef}>
-            <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
-            <span className='max-w-[4px]'>{':'}</span>
-            <span className='w-[25px] min-w-[25px] max-w-[25px] text-center' />
-            <span className='max-w-[4px]'>{':'}</span>
-            <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
-          </span>
-        </Badge>
       </div>
+      <Badge className='col-start-2 h-[34px] w-[140px]' variant='filled'>
+        <span className='flex text-[19px] font-fix' ref={timeRef}>
+          <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
+          <span className='max-w-[4px]'>{':'}</span>
+          <span className='w-[25px] min-w-[25px] max-w-[25px] text-center' />
+          <span className='max-w-[4px]'>{':'}</span>
+          <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
+        </span>
+      </Badge>
       <div className='flex justify-end'>
         <TrackInfo className='w-max' />
       </div>

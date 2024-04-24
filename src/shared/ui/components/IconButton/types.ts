@@ -5,3 +5,5 @@ export type IconButtonVariant =
   | 'secondary'
   | 'secondaryFilled'
   | 'inverse';
+
+export type IconButtonSvgFillType = 'fill' | 'stroke' | 'both';

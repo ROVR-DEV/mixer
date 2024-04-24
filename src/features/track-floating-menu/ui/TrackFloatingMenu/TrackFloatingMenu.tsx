@@ -25,7 +25,7 @@ export const TrackFloatingMenu = ({
   return (
     <div
       className={cn(
-        'flex items-center rounded-lg bg-accent divide-x-[3px] divide-secondary/30',
+        'flex items-center rounded-lg bg-accent divide-x divide-primary',
         className,
       )}
       {...props}
@@ -34,7 +34,7 @@ export const TrackFloatingMenu = ({
         <div className='cursor-move'>
           <MoveIcon />
         </div>
-        <IconButton variant='inverse'>
+        <IconButton variant='inverse' svgFillType='stroke'>
           <CursorIcon />
         </IconButton>
         <IconButton variant='unstyled'>
