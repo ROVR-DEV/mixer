@@ -30,7 +30,10 @@ export const TrackInfoPanel = ({
 
       timeElement.children[0].textContent = formatNumberWithPads(minutes);
       timeElement.children[2].textContent = formatNumberWithPads(seconds, 2);
-      timeElement.children[4].textContent = formatNumberWithPads(milliseconds);
+      timeElement.children[4].textContent = formatNumberWithPads(
+        Math.floor(milliseconds / 10),
+        2,
+      );
     }
 
     if (playingRef.current) {
@@ -82,7 +85,7 @@ export const TrackInfoPanel = ({
           <span className='max-w-[4px]'>{':'}</span>
           <span className='w-[25px] min-w-[25px] max-w-[25px] text-center' />
           <span className='max-w-[4px]'>{':'}</span>
-          <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
+          <span className='w-[25px] min-w-[25px] max-w-[25px] text-center' />
         </span>
       </Badge>
       <div className='flex w-[450px] justify-self-end'>
