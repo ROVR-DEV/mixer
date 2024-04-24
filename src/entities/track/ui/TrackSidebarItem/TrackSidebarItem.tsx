@@ -11,7 +11,7 @@ export const TrackSidebarItem = ({
 }: TrackSidebarItemProps) => {
   return (
     <div
-      className={cn('px-6 py-4 h-24 flex items-center', className, {
+      className={cn('p-4 h-24 flex items-center', className, {
         'border-b border-b-secondary': !disableBorder,
       })}
       {...props}

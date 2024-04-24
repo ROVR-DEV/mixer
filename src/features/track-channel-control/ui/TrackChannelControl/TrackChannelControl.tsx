@@ -6,12 +6,15 @@ import {
   MuteChannelIcon,
   SingleChannelIcon,
   AutomationChannelIcon,
+  CrossIcon,
 } from '@/shared/ui/assets';
 
 import { TrackChannelControlProps } from './interfaces';
 
 export const TrackChannelControl = ({
   number,
+  isAbleToRemove,
+  onClickRemove,
   className,
   ...props
 }: TrackChannelControlProps) => {
@@ -25,7 +28,7 @@ export const TrackChannelControl = ({
       className={cn('flex items-center gap-[10px] w-max', className)}
       {...props}
     >
-      <Badge className='h-7'>
+      <Badge className='h-7 px-2'>
         <span className='text-[13px] uppercase italic font-fix'>
           <span>{'Channel '}</span>
           <span>{channelNumber}</span>
@@ -56,6 +59,16 @@ export const TrackChannelControl = ({
       >
         <AutomationChannelIcon />
       </IconButton>
+      {isAbleToRemove && (
+        <IconButton
+          className='size-7 border-error'
+          variant='secondary'
+          aria-label='Remove channel'
+          onClick={onClickRemove}
+        >
+          <CrossIcon />
+        </IconButton>
+      )}
     </div>
   );
 };

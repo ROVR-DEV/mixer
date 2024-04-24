@@ -221,7 +221,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       />
       <hr className='border-secondary' />
       <div className='relative flex h-full grow flex-col'>
-        <div className='absolute left-[294px] z-10 h-full'>
+        <div className='absolute left-[296px] z-10 h-full'>
           <div className='absolute top-0 h-full' ref={playHeadRef}>
             <div className='absolute -left-2 size-4 bg-accent' />
             <div className='absolute -left-2 top-4 size-0 border-x-8 border-t-8 border-x-transparent border-t-accent' />
@@ -229,7 +229,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           </div>
         </div>
         <div className='flex'>
-          <TrackSidebarMemoized className='min-w-[294px]'>
+          <TrackSidebarMemoized className='min-w-[296px]'>
             <TrackSidebarItem className='items-start' disableBorder>
               <PlaylistInfoMemoized
                 totalPlaytime={playlistTotalTime}
@@ -250,11 +250,19 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         </div>
         <hr className='border-secondary' />
         <div className='flex h-full grow overflow-auto'>
-          <div className='min-h-max min-w-[294px] grow'>
+          <div className='min-h-max min-w-[296px] grow'>
             <TrackSidebarMemoized className='min-h-full'>
               {channels.map((channel, index) => (
                 <TrackSidebarItemMemoized key={channel.id}>
-                  <TrackChannelControlMemoized number={index + 1} />
+                  <TrackChannelControlMemoized
+                    number={index + 1}
+                    isAbleToRemove={index > 1}
+                    onClickRemove={() =>
+                      setChannels((prevState) => [
+                        ...prevState.slice(0, prevState.length - 1),
+                      ])
+                    }
+                  />
                 </TrackSidebarItemMemoized>
               ))}
               <TrackSidebarItemMemoized
@@ -290,7 +298,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         </div>
       </div>
       <div className='relative flex grow'>
-        <div className='min-w-[294px]' />
+        <div className='min-w-[296px]' />
         <div className='w-full px-2'>
           <TimelineSlider
             className='w-full'
@@ -300,7 +308,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             max={realWidth - width * 0.1}
             onChange={(e) => setShift(Number(e.currentTarget.value))}
           />
-          <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[294px] right-0 mx-auto flex w-max' />
+          <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[296px] right-0 mx-auto flex w-max' />
         </div>
       </div>
     </div>
