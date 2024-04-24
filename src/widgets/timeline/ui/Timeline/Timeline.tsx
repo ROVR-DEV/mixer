@@ -4,8 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/shared/lib/cn';
 import { useSize } from '@/shared/lib/useSize';
-import { IconButton } from '@/shared/ui';
-import { ArrowDownIcon } from '@/shared/ui/assets';
 
 import {
   AddNewChannelButtonMemoized,
@@ -40,6 +38,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     null,
   );
 
+  const [loadedTracksCount, setLoadedTracksCount] = useState(0);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -52,7 +52,12 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       ];
 
       const blobs = await Promise.all(
-        playlist.tracks.map((track) => getBlobBoundByUuid(track.uuid)),
+        playlist.tracks.map((track) =>
+          getBlobBoundByUuid(track.uuid).then((res) => {
+            setLoadedTracksCount((prevState) => prevState + 1);
+            return res;
+          }),
+        ),
       );
 
       setTracks(Object.fromEntries(blobs));
@@ -266,8 +271,9 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             ref={timelineRef}
           >
             {tracks === null ? (
-              <span className='flex size-full items-center justify-center'>
-                {'Loading...'}
+              <span className='flex size-full flex-col items-center justify-center'>
+                <span>{'Loading...'}</span>
+                <span>{`${loadedTracksCount} / ${playlist.tracks.length}`}</span>
               </span>
             ) : (
               <>
@@ -294,17 +300,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             max={realWidth - width * 0.1}
             onChange={(e) => setShift(Number(e.currentTarget.value))}
           />
-
-          <div className='absolute bottom-[40px] left-[294px] right-0 mx-auto flex w-max items-center gap-2'>
-            <TrackFloatingMenuMemoized />
-            <IconButton
-              className='size-[33px] pt-1'
-              variant='primaryFilled'
-              svgFillType='stroke'
-            >
-              <ArrowDownIcon />
-            </IconButton>
-          </div>
+          <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[294px] right-0 mx-auto flex w-max' />
         </div>
       </div>
     </div>
