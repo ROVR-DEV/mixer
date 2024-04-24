@@ -11,7 +11,7 @@ export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
   return (
     <header
       className={cn(
-        'grid grid-rows-1 grid-cols-[1fr_auto_1fr] h-16 items-center justify-end border-b border-b-secondary px-5 py-4',
+        'grid grid-rows-1 grid-cols-[1fr_auto_1fr] h-16 items-center justify-end border-b border-b-secondary px-6 py-4',
         className,
       )}
       {...props}
@@ -22,7 +22,7 @@ export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
         alt='Rovr logo'
         priority
       />
-      <div className='col-start-3 flex items-center justify-end gap-[230px]'>
+      <div className='col-start-3 flex w-[450px] items-center justify-between justify-self-end'>
         <Button
           aria-label='Save mix'
           className='h-7 text-[13px] uppercase italic'

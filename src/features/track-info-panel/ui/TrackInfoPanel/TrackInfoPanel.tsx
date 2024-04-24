@@ -59,7 +59,7 @@ export const TrackInfoPanel = ({
       )}
       {...props}
     >
-      <div className='flex flex-1 items-center justify-end gap-4'>
+      <div className='flex flex-1 items-center gap-4 justify-self-end'>
         <IconButton
           variant={playing ? 'primaryFilled' : 'secondaryFilled'}
           aria-label='Stop'
@@ -85,8 +85,8 @@ export const TrackInfoPanel = ({
           <span className='w-[38px] min-w-[38px] max-w-[38px] text-center' />
         </span>
       </Badge>
-      <div className='flex justify-end'>
-        <TrackInfo className='w-max' />
+      <div className='flex w-[450px] justify-self-end'>
+        <TrackInfo className='w-full' />
       </div>
     </div>
   );
