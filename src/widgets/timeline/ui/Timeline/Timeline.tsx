@@ -21,6 +21,12 @@ import {
   TimelineSlider,
   useTimelineProperties,
   TimelineRulerMemoized,
+  TimelineRulerRef,
+  TimelineGridRef,
+  TimelineGridMemoized,
+  Tick,
+  useTicks,
+  getDpi,
 } from '@/features/timeline';
 import { TrackChannelControlMemoized } from '@/features/track-channel-control';
 import { TrackFloatingMenuMemoized } from '@/features/track-floating-menu';
@@ -33,6 +39,9 @@ const ticksStartPadding = 5;
 export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+
+  const rulerRef = useRef<TimelineRulerRef | null>(null);
+  const gridRef = useRef<TimelineGridRef | null>(null);
 
   const [tracks, setTracks] = useState<Record<string, Blob | undefined> | null>(
     null,
@@ -76,14 +85,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const { zoom, shift, setShift, pixelsPerSecond, realWidth } =
     useTimelineProperties(timelineRef, width, playlistTotalTime, 100);
 
-  const [channels, setChannels] = useState<{ id: number }[]>([
-    {
-      id: 1,
-    },
-    {
-      id: 2,
-    },
-  ]);
+  const dpi = useMemo(() => getDpi(), []);
+  // const ticks = useTicks(realWidth * dpi, zoom, shift);
+
+  const [channels, setChannels] = useState<{ id: number }[]>([]);
 
   const addNewChannel = () => {
     setChannels((prevState) => [
@@ -210,6 +215,37 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pixelsPerSecond, shift, width]);
 
+  const trackNodes = useMemo(
+    () =>
+      channels.map((channel) => (
+        <TrackSidebarItemMemoized
+          key={`${channel.id}-track`}
+          className='relative'
+        ></TrackSidebarItemMemoized>
+      )),
+    [channels],
+  );
+
+  const renderRuler = (ticks: { mainTicks: Tick[]; subTicks: Tick[] }) =>
+    rulerRef.current?.render(ticks, shift, ticksStartPadding, '#9B9B9B');
+
+  const renderGrid = (ticks: { mainTicks: Tick[]; subTicks: Tick[] }) =>
+    gridRef.current?.render(
+      ticks,
+      shift,
+      ticksStartPadding - 16,
+      '#555555',
+      '#2D2D2D',
+    );
+
+  const ticks = useTicks(realWidth * dpi, zoom, shift);
+
+  useEffect(() => {
+    renderRuler(ticks);
+    renderGrid(ticks);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticks, channels]);
+
   return (
     <div className={cn('flex flex-col', className)} {...props}>
       <TrackInfoPanelMemoized
@@ -238,25 +274,38 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             </TrackSidebarItem>
           </TrackSidebarMemoized>
           <div ref={containerRef} className='flex w-full items-center'>
-            <TimelineRulerMemoized
-              color='#9B9B9B'
-              timelineWidth={realWidth}
-              ticksStartPadding={5}
-              width={width}
-              shift={shift * pixelsPerSecond}
-              zoom={zoom}
-            />
+            <TimelineRulerMemoized width={width} ref={rulerRef} />
           </div>
         </div>
         <hr className='border-secondary' />
         <div className='flex h-full grow overflow-auto'>
           <div className='min-h-max min-w-[296px] grow'>
             <TrackSidebarMemoized className='min-h-full'>
+              <TrackSidebarItemMemoized>
+                <TrackChannelControlMemoized
+                  number={1}
+                  onClickRemove={() =>
+                    setChannels((prevState) => [
+                      ...prevState.slice(0, prevState.length - 1),
+                    ])
+                  }
+                />
+              </TrackSidebarItemMemoized>
+              <TrackSidebarItemMemoized>
+                <TrackChannelControlMemoized
+                  number={2}
+                  onClickRemove={() =>
+                    setChannels((prevState) => [
+                      ...prevState.slice(0, prevState.length - 1),
+                    ])
+                  }
+                />
+              </TrackSidebarItemMemoized>
               {channels.map((channel, index) => (
-                <TrackSidebarItemMemoized key={channel.id}>
+                <TrackSidebarItemMemoized key={`${channel.id}-channel`}>
                   <TrackChannelControlMemoized
-                    number={index + 1}
-                    isAbleToRemove={index > 1}
+                    number={index + 3}
+                    isAbleToRemove
                     onClickRemove={() =>
                       setChannels((prevState) => [
                         ...prevState.slice(0, prevState.length - 1),
@@ -278,6 +327,12 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             className='relative min-h-max w-full grow overflow-hidden'
             ref={timelineRef}
           >
+            <TimelineGridMemoized
+              className='absolute'
+              width={width}
+              height={(channels.length + 2) * 96}
+              ref={gridRef}
+            />
             {tracks === null ? (
               <span className='flex size-full flex-col items-center justify-center'>
                 <span>{'Loading...'}</span>
@@ -291,7 +346,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
                 <TrackSidebarItemMemoized className='relative'>
                   {oddTracks}
                 </TrackSidebarItemMemoized>
-                <TrackSidebarItemMemoized className='invisible' />
+                {trackNodes}
               </>
             )}
           </div>

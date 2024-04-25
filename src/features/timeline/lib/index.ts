@@ -8,3 +8,7 @@ export * from './useTimelineProperties';
 export * from './drawRuler';
 export * from './drawRulerInSeconds';
 export * from './getByRanges';
+export * from './drawGrid';
+export * from './drawGridInSeconds';
+export * from './useTicks';
+export * from './getDpi';

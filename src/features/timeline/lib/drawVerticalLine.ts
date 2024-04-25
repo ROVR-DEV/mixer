@@ -1,10 +1,10 @@
-import { CSSProperties } from 'react';
+import { Property } from 'csstype';
 
 export const drawVerticalLine = (
   ctx: CanvasRenderingContext2D,
   x: number,
   height: number,
-  color: CSSProperties['color'] = 'white',
+  color: Property.Color,
 ) => {
   ctx.strokeStyle = color;
   ctx.fillStyle = color;

@@ -1,63 +1,91 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Property } from 'csstype';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 
-// import {
-//   drawVerticalLine,
-//   getTicks,
-//   getSegmentWidth,
-//   getStepInSeconds,
-//   getSubTickSegmentWidth,
-// } from '../../lib';
+import { drawGrid } from '../../lib';
+import { Tick } from '../../model';
+import { TimelineCanvas } from '../TimelineCanvas';
 
-import { TimelineGridProps } from './interfaces';
+import { TimelineGridProps, TimelineGridRef } from './interfaces';
 
-const TimelineGrid = ({ width, color, zoom, ...props }: TimelineGridProps) => {
-  const ref = useRef<HTMLCanvasElement | null>(null);
+export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
+  function TimelineGrid({ width, height = 1, ...props }, ref) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
+    const dpi =
+      typeof window !== 'undefined' && window.devicePixelRatio
+        ? window.devicePixelRatio
+        : 1;
 
-  useEffect(() => {
-    // const canvas = ref.current;
-    // if (!canvas) {
-    //   return;
-    // }
-    // const ctx = canvas.getContext('2d');
-    // if (!ctx) {
-    //   return;
-    // }
-    // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    // const step = getStepInSeconds(zoom);
-    // const tickSegmentWidth = getSegmentWidth(zoom);
-    // const subTickSegmentWidth = getSubTickSegmentWidth();
-    // const ticks = getTicks(
-    //   width * zoom,
-    //   zoom,
-    //   step,
-    //   tickSegmentWidth.min,
-    //   tickSegmentWidth.max,
-    //   subTickSegmentWidth.min,
-    //   subTickSegmentWidth.max,
-    // );
-    // ticks.mainTicks.forEach((tick) => {
-    //   drawVerticalLine(ctx, tick.x, 1, color);
-    //   if (zoom >= 3) {
-    //     ticks.subTicks.forEach((subTick, i) => {
-    //       if (i % 2 === 1 || zoom >= 4.25) {
-    //         drawVerticalLine(ctx, tick.x + subTick.x, 1, color);
-    //       }
-    //     });
-    //   }
-    // });
-  }, [color, width, zoom]);
+    const handleCanvasRef = (newRef: HTMLCanvasElement | null) => {
+      if (!newRef) {
+        return;
+      }
 
-  return (
-    <canvas
-      className='size-full'
-      ref={ref}
-      width={width}
-      height={1}
-      {...props}
-    />
-  );
-};
+      canvasRef.current = newRef;
 
-export default TimelineGrid;
+      const element = canvasRef.current;
+
+      if (!element) {
+        return;
+      }
+
+      const ctx = element.getContext('2d');
+      if (!ctx) {
+        return;
+      }
+
+      ctx.scale(dpi, dpi);
+
+      canvasCtxRef.current = ctx;
+    };
+
+    const render = useCallback(
+      (
+        ticks: { mainTicks: Tick[]; subTicks: Tick[] },
+        shift: number,
+        ticksStartPadding: number,
+        tickColor?: Property.Color | undefined,
+        subTickColor?: Property.Color | undefined,
+      ) => {
+        const ctx = canvasCtxRef.current;
+
+        if (!ctx) {
+          return;
+        }
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        drawGrid(ctx, ticks, ticksStartPadding, shift, tickColor, subTickColor);
+      },
+      [],
+    );
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        render,
+      }),
+      [render],
+    );
+
+    return (
+      <TimelineCanvas
+        width={width}
+        height={height}
+        dpi={dpi}
+        ref={handleCanvasRef}
+        {...props}
+      />
+    );
+  },
+);
+
+export const TimelineGridMemoized = memo(TimelineGrid);

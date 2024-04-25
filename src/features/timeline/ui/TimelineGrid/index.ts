@@ -1,2 +1,2 @@
-export { default as TimelineGrid } from './TimelineGrid';
+export * from './TimelineGrid';
 export type * from './interfaces';

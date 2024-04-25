@@ -1,3 +1,5 @@
+import { memoize } from 'lodash-es';
+
 import { Tick } from '../model';
 
 import { getTickSegmentWidthZoomed } from './getTickSegmentWidthZoomed';
@@ -26,6 +28,8 @@ export const getMainTicks = (
   );
 };
 
+const getMainTicksMemoized = memoize(getMainTicks);
+
 export const getSubTicks = (
   subTickCount: number,
   subTickSegmentWidth: number,
@@ -34,6 +38,8 @@ export const getSubTicks = (
     createTick(i + 1, subTickSegmentWidth, false, 1),
   );
 };
+
+const getSubTicksMemoized = memoize(getSubTicks);
 
 export const getTicks = (
   width: number,
@@ -53,14 +59,14 @@ export const getTicks = (
 
   const subTickCount = subTickCountRule(step);
 
-  const mainTicks = getMainTicks(
+  const mainTicks = getMainTicksMemoized(
     width,
     shift,
     step,
     getTickSegmentWidthZoomed(tickSegmentWidth.min, zoom, zoomStepBreakpoint),
   );
 
-  const subTicks = getSubTicks(
+  const subTicks = getSubTicksMemoized(
     subTickCount,
     getTickSegmentWidthZoomed(
       subTickSegmentWidth.min,

@@ -1,91 +1,96 @@
 'use client';
 
-import { memo, useEffect, useRef, useState } from 'react';
+import { Property } from 'csstype';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 
-import { drawRulerInSeconds } from '../../lib';
+import { drawRuler, getSubTickHeight } from '../../lib';
+import { Tick } from '../../model';
+import { TimelineCanvas } from '../TimelineCanvas';
 
-import { TimelineRulerProps } from './interfaces';
+import { TimelineRulerProps, TimelineRulerRef } from './interfaces';
 
-export const TimelineRuler = ({
-  timelineWidth,
-  width,
-  height = 30,
-  zoom,
-  ticksStartPadding = 0,
-  shift,
-  color = 'white',
-  // style,
-  ...props
-}: TimelineRulerProps) => {
-  const canvas = useRef<HTMLCanvasElement | null>(null);
-
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-
-  const [dpi, setDpi] = useState(1);
-
-  useEffect(() => {
-    setDpi(
+export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
+  function TimelineRuler({ width, height = 30, ...props }, ref) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
+    const dpi =
       typeof window !== 'undefined' && window.devicePixelRatio
         ? window.devicePixelRatio
-        : 1,
-    );
-  }, []);
+        : 1;
 
-  useEffect(() => {
-    const element = canvas.current;
+    const handleCanvasRef = (newRef: HTMLCanvasElement | null) => {
+      if (!newRef) {
+        return;
+      }
 
-    if (!element) {
-      return;
-    }
+      canvasRef.current = newRef;
 
-    const ctx = element.getContext('2d');
+      const element = canvasRef.current;
 
-    if (!ctx) {
-      return;
-    }
+      if (!element) {
+        return;
+      }
 
-    setCtx(ctx);
-  }, []);
+      const ctx = element.getContext('2d');
+      if (!ctx) {
+        return;
+      }
 
-  useEffect(() => {
-    if (!ctx) {
-      return;
-    }
-
-    const ctxTransforms = ctx.getTransform();
-    if (ctxTransforms.a !== dpi) {
       ctx.scale(dpi, dpi);
-    }
 
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      canvasCtxRef.current = ctx;
+    };
 
-    drawRulerInSeconds(
-      ctx,
-      timelineWidth * dpi,
-      zoom,
-      shift,
-      ticksStartPadding,
-      color,
+    const render = useCallback(
+      (
+        ticks: { mainTicks: Tick[]; subTicks: Tick[] },
+        shift: number,
+        ticksStartPadding: number,
+        color?: Property.Color | undefined,
+      ) => {
+        const ctx = canvasCtxRef.current;
+
+        if (!ctx) {
+          return;
+        }
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        const subTickHeight = getSubTickHeight(ticks.subTicks.length);
+
+        drawRuler(ctx, ticks, subTickHeight, ticksStartPadding, shift, color);
+      },
+      [],
     );
-  }, [zoom, width, shift, ticksStartPadding, color, ctx, dpi, timelineWidth]);
 
-  return (
-    <div className='relative w-full'>
-      <canvas
-        width={width * dpi}
-        height={height * dpi}
-        ref={canvas}
-        style={{
-          width,
-          height,
-          aspectRatio: `auto ${width}/${height}`,
-        }}
-        {...props}
-      />
-      <div className='absolute bottom-[13px] w-full border-t border-t-ruler' />
-      <div className='absolute bottom-0 w-full border-b border-b-ruler' />
-    </div>
-  );
-};
+    useImperativeHandle(
+      ref,
+      () => ({
+        render,
+      }),
+      [render],
+    );
+
+    return (
+      <div className='relative w-full'>
+        <TimelineCanvas
+          width={width}
+          height={height}
+          dpi={dpi}
+          ref={handleCanvasRef}
+          {...props}
+        />
+        <div className='absolute bottom-[13px] w-full border-t border-t-ruler' />
+        <div className='absolute bottom-0 w-full border-b border-b-ruler' />
+      </div>
+    );
+  },
+);
 
 export const TimelineRulerMemoized = memo(TimelineRuler);

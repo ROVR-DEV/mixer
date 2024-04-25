@@ -68,7 +68,7 @@ export const TrackWaveformCard = ({
   return (
     <div
       className={cn(
-        'flex flex-col h-[84px] px-2 py-1 border border-third-light rounded-md',
+        'flex flex-col h-[84px] px-2 py-1 border border-third-light rounded-md bg-primary',
         className,
       )}
       {...props}
