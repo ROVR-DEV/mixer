@@ -154,8 +154,11 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     if (!playHead) {
       return;
     }
+
     const newPosition =
-      time.current * pixelsPerSecond - shift + ticksStartPadding;
+      time.current * pixelsPerSecond -
+      shift * pixelsPerSecond +
+      ticksStartPadding;
 
     playHead.style.left = `${newPosition}px`;
     if (newPosition < 0 || newPosition > width) {
@@ -194,30 +197,34 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const handlePlay = () => {
     setIsPlaying(true);
-    const playHead = playHeadRef.current;
-    if (!playHead) {
-      return;
-    }
-
-    playHead.dataset.playing = 'true';
-    requestAnimationFrame(animatePlayHead);
   };
 
   const handleStop = () => {
     setIsPlaying(false);
-
-    const playHead = playHeadRef.current;
-    if (!playHead) {
-      return;
-    }
-
-    playHead.dataset.playing = '';
   };
 
   useEffect(() => {
     calculateTrack();
+
+    if (isPlaying) {
+      const playHead = playHeadRef.current;
+      if (!playHead) {
+        return;
+      }
+
+      playHead.dataset.playing = 'true';
+      const animationId = requestAnimationFrame(animatePlayHead);
+      return () => window.cancelAnimationFrame(animationId);
+    } else {
+      const playHead = playHeadRef.current;
+      if (!playHead) {
+        return;
+      }
+
+      playHead.dataset.playing = '';
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pixelsPerSecond, shift, width]);
+  }, [pixelsPerSecond, shift, width, isPlaying]);
 
   const trackNodes = useMemo(
     () =>
