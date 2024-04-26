@@ -11,7 +11,7 @@ import {
 
 import { drawGrid } from '../../lib';
 import { Tick } from '../../model';
-import { TimelineCanvas } from '../TimelineCanvas';
+import { TimelineCanvasMemoized } from '../TimelineCanvas';
 
 import { TimelineGridProps, TimelineGridRef } from './interfaces';
 
@@ -77,7 +77,7 @@ export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
     );
 
     return (
-      <TimelineCanvas
+      <TimelineCanvasMemoized
         width={width}
         height={height}
         dpi={dpi}

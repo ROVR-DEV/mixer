@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 import { Badge, IconButton } from '@/shared/ui';
 import {
   MuteChannelIcon,

@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 
 import { TimelineSliderProps } from './interfaces';
 import styles from './styles.module.css';

@@ -1,4 +1,4 @@
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 
 import { IconButtonProps } from './interfaces';
 import { getStyles } from './styles';

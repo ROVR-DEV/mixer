@@ -1,4 +1,4 @@
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 
 import { BadgeProps } from './interfaces';
 import { getStyles } from './styles';

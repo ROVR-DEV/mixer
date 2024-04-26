@@ -1,5 +1,6 @@
 import { CSSProperties } from 'react';
 
+import { tickValueSecondsFormatter } from '../config';
 import { Tick } from '../model';
 
 import { drawVerticalLine } from './drawVerticalLine';
@@ -20,10 +21,7 @@ const drawMainDash = (
 
 const tickValueToTime = (value: number) => {
   const minutes = Math.floor(value / 60);
-  const seconds = (value - minutes * 60).toLocaleString('en-US', {
-    minimumIntegerDigits: 2,
-    useGrouping: false,
-  });
+  const seconds = tickValueSecondsFormatter.format(value - minutes * 60);
 
   return { minutes, seconds };
 };

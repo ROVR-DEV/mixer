@@ -28,7 +28,11 @@ export const getMainTicks = (
   );
 };
 
-const getMainTicksMemoized = memoize(getMainTicks);
+const getMainTicksMemoized = memoize(
+  getMainTicks,
+  (width: number, shift: number, step: number, segmentWidth: number) =>
+    `${width}-${shift}-${step}-${segmentWidth}`,
+);
 
 export const getSubTicks = (
   subTickCount: number,
@@ -39,7 +43,11 @@ export const getSubTicks = (
   );
 };
 
-const getSubTicksMemoized = memoize(getSubTicks);
+const getSubTicksMemoized = memoize(
+  getSubTicks,
+  (subTickCount, subTickSegmentWidthZoomed) =>
+    `${subTickCount}-${subTickSegmentWidthZoomed}`,
+);
 
 export const getTicks = (
   width: number,
@@ -57,23 +65,26 @@ export const getTicks = (
   const tickSegmentWidth = tickSegmentWidthRule(zoom);
   const subTickSegmentWidth = subTickSegmentWidthRule(zoom);
 
+  const tickSegmentWidthZoomed = getTickSegmentWidthZoomed(
+    tickSegmentWidth.min,
+    zoom,
+    zoomStepBreakpoint,
+  );
+  const subTickSegmentWidthZoomed = getTickSegmentWidthZoomed(
+    subTickSegmentWidth.min,
+    zoom,
+    zoomStepBreakpoint,
+  );
+
   const subTickCount = subTickCountRule(step);
 
   const mainTicks = getMainTicksMemoized(
     width,
     shift,
     step,
-    getTickSegmentWidthZoomed(tickSegmentWidth.min, zoom, zoomStepBreakpoint),
+    tickSegmentWidthZoomed,
   );
-
-  const subTicks = getSubTicksMemoized(
-    subTickCount,
-    getTickSegmentWidthZoomed(
-      subTickSegmentWidth.min,
-      zoom,
-      zoomStepBreakpoint,
-    ),
-  );
+  const subTicks = getSubTicksMemoized(subTickCount, subTickSegmentWidthZoomed);
 
   return { mainTicks, subTicks };
 };

@@ -1,6 +1,6 @@
 import './globals.css';
 
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 
 import { AppHeader } from '@/widgets/layout/app-header';
 

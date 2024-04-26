@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { TimelineCanvasProps } from './interfaces';
 
@@ -20,3 +20,5 @@ export const TimelineCanvas = forwardRef<
     />
   );
 });
+
+export const TimelineCanvasMemoized = memo(TimelineCanvas);

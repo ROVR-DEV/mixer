@@ -1,14 +1,22 @@
 import { memo, useEffect, useRef } from 'react';
 
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 import { Badge, IconButton } from '@/shared/ui';
 import { PlayIcon, StopIcon } from '@/shared/ui/assets';
 
 import { TrackInfo, parseSecondsToParts } from '@/entities/track';
 
-import { formatNumberWithPads } from '../../lib';
-
 import { TrackInfoPanelProps } from './interfaces';
+
+const minutesFormatter = new Intl.NumberFormat('en-US', {
+  minimumIntegerDigits: 3,
+  useGrouping: false,
+});
+
+const secondsAndMillisecondsFormatter = new Intl.NumberFormat('en-US', {
+  minimumIntegerDigits: 2,
+  useGrouping: false,
+});
 
 export const TrackInfoPanel = ({
   onPlay,
@@ -28,12 +36,11 @@ export const TrackInfoPanel = ({
     if (timeElement && timeValue !== null) {
       const { minutes, seconds, milliseconds } = parseSecondsToParts(timeValue);
 
-      timeElement.children[0].textContent = formatNumberWithPads(minutes);
-      timeElement.children[2].textContent = formatNumberWithPads(seconds, 2);
-      timeElement.children[4].textContent = formatNumberWithPads(
-        Math.floor(milliseconds / 10),
-        2,
-      );
+      timeElement.children[0].textContent = minutesFormatter.format(minutes);
+      timeElement.children[2].textContent =
+        secondsAndMillisecondsFormatter.format(seconds);
+      timeElement.children[4].textContent =
+        secondsAndMillisecondsFormatter.format(Math.floor(milliseconds / 10));
     }
 
     if (playingRef.current) {

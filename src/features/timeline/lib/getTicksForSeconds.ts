@@ -1,5 +1,3 @@
-import { memoize } from 'lodash-es';
-
 import {
   STEP_IN_SECONDS_RANGES,
   SUB_TICK_SEGMENT_WIDTH_RANGES,
@@ -15,8 +13,8 @@ export const getTicksForSeconds = (
   width: number,
   zoom: number,
   shift: number,
-) =>
-  getTicks(
+) => {
+  return getTicks(
     width,
     zoom,
     shift,
@@ -26,5 +24,4 @@ export const getTicksForSeconds = (
     (zoom) => getByRanges(zoom, SUB_TICK_SEGMENT_WIDTH_RANGES),
     (zoom) => getByRanges(zoom, ZOOM_BREAKPOINT_RANGES),
   );
-
-export const getTicksForSecondsMemoized = memoize(getTicksForSeconds);
+};

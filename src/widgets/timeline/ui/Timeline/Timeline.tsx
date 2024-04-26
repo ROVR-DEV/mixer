@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { cn } from '@/shared/lib/cn';
-import { useSize } from '@/shared/lib/useSize';
+import { useSize, cn } from '@/shared/lib';
 
 import {
   AddNewChannelButtonMemoized,
@@ -53,8 +52,12 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     if (typeof window === 'undefined') {
       return;
     }
+    if (process.env.NEXT_PUBLIC_DEBUG_LOAD_TRACKS === 'false') {
+      setTracks({});
+      return;
+    }
 
-    (async () => {
+    const updateTracks = async () => {
       const getBlobBoundByUuid = async (uuid: string) => [
         uuid,
         (await getTrack(uuid)).data,
@@ -70,8 +73,9 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       );
 
       setTracks(Object.fromEntries(blobs));
-    })();
+    };
 
+    updateTracks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(playlist.tracks.map((track) => track.uuid))]);
 
@@ -221,30 +225,49 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         <TrackSidebarItemMemoized
           key={`${channel.id}-track`}
           className='relative'
-        ></TrackSidebarItemMemoized>
+        />
       )),
     [channels],
   );
 
   const renderRuler = (ticks: { mainTicks: Tick[]; subTicks: Tick[] }) =>
-    rulerRef.current?.render(ticks, shift, ticksStartPadding, '#9B9B9B');
+    rulerRef.current?.render(
+      ticks,
+      shift * pixelsPerSecond,
+      ticksStartPadding,
+      '#9B9B9B',
+    );
 
   const renderGrid = (ticks: { mainTicks: Tick[]; subTicks: Tick[] }) =>
     gridRef.current?.render(
       ticks,
-      shift,
-      ticksStartPadding - 16,
+      shift * pixelsPerSecond,
+      ticksStartPadding,
       '#555555',
       '#2D2D2D',
     );
 
-  const ticks = useTicks(realWidth * dpi, zoom, shift);
+  const ticks = useTicks(realWidth * dpi, zoom, shift * pixelsPerSecond);
 
   useEffect(() => {
     renderRuler(ticks);
     renderGrid(ticks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticks, channels]);
+  }, [ticks, channels, width]);
+
+  useEffect(() => {
+    const drawRulerAndGrid = () => {
+      renderRuler(ticks);
+      renderGrid(ticks);
+    };
+
+    drawRulerAndGrid();
+
+    window.addEventListener('resize', drawRulerAndGrid);
+
+    return () => window.removeEventListener('resize', drawRulerAndGrid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticks]);
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
@@ -327,12 +350,6 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             className='relative min-h-max w-full grow overflow-hidden'
             ref={timelineRef}
           >
-            <TimelineGridMemoized
-              className='absolute'
-              width={width}
-              height={(channels.length + 2) * 96}
-              ref={gridRef}
-            />
             {tracks === null ? (
               <span className='flex size-full flex-col items-center justify-center'>
                 <span>{'Loading...'}</span>
@@ -340,6 +357,12 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
               </span>
             ) : (
               <>
+                <TimelineGridMemoized
+                  className='absolute'
+                  width={width}
+                  height={(channels.length + 2) * 96}
+                  ref={gridRef}
+                />
                 <TrackSidebarItemMemoized className='relative'>
                   {evenTracks}
                 </TrackSidebarItemMemoized>

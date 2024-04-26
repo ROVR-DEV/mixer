@@ -11,7 +11,7 @@ import {
 
 import { drawRuler, getSubTickHeight } from '../../lib';
 import { Tick } from '../../model';
-import { TimelineCanvas } from '../TimelineCanvas';
+import { TimelineCanvasMemoized } from '../TimelineCanvas';
 
 import { TimelineRulerProps, TimelineRulerRef } from './interfaces';
 
@@ -79,7 +79,7 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
 
     return (
       <div className='relative w-full'>
-        <TimelineCanvas
+        <TimelineCanvasMemoized
           width={width}
           height={height}
           dpi={dpi}

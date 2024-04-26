@@ -3,8 +3,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
-import { cn } from '@/shared/lib/cn';
-import { useSize } from '@/shared/lib/useSize';
+import { useSize, cn } from '@/shared/lib';
 
 import { TrackWaveformCardProps } from './interfaces';
 

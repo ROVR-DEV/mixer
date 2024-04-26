@@ -4,9 +4,12 @@ import { CanvasHTMLAttributes, DetailedHTMLProps } from 'react';
 import { Tick } from '../../model';
 
 export interface TimelineRulerProps
-  extends DetailedHTMLProps<
-    CanvasHTMLAttributes<HTMLCanvasElement>,
-    HTMLCanvasElement
+  extends Omit<
+    DetailedHTMLProps<
+      CanvasHTMLAttributes<HTMLCanvasElement>,
+      HTMLCanvasElement
+    >,
+    'ref'
   > {
   width: number;
   height?: number;
@@ -19,11 +22,4 @@ export interface TimelineRulerRef {
     shift: number,
     color?: Property.Color | undefined,
   ) => void;
-  // render: (
-  //   width: number,
-  //   zoom: number,
-  //   shift: number,
-  //   ticksStartPadding: number,
-  //   color?: Property.Color | undefined,
-  // ) => void;
 }

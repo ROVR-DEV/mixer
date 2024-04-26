@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { cn } from '@/shared/lib/cn';
+import { cn } from '@/shared/lib';
 import { Button, IconButton } from '@/shared/ui';
 import { PersonIcon, LogoImageRaw } from '@/shared/ui/assets';
 

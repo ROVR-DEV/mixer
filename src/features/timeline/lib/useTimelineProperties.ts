@@ -1,6 +1,6 @@
 import { Dispatch, RefObject, SetStateAction, useMemo, useState } from 'react';
 
-import { useWheel } from '@/shared/lib/useWheel';
+import { useWheel } from '@/shared/lib';
 
 import {
   STEP_IN_SECONDS_RANGES,
