@@ -10,10 +10,7 @@ export interface TimelineGridProps
       HTMLCanvasElement
     >,
     'ref'
-  > {
-  width: number;
-  height?: number;
-}
+  > {}
 
 export interface TimelineGridRef {
   render: (

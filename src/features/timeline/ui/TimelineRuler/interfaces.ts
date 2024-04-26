@@ -10,10 +10,7 @@ export interface TimelineRulerProps
       HTMLCanvasElement
     >,
     'ref'
-  > {
-  width: number;
-  height?: number;
-}
+  > {}
 
 export interface TimelineRulerRef {
   render: (

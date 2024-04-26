@@ -294,7 +294,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             </TrackSidebarItem>
           </TrackSidebarMemoized>
           <div ref={containerRef} className='flex w-full items-center'>
-            <TimelineRulerMemoized width={width} ref={rulerRef} />
+            <TimelineRulerMemoized className='h-[30px] w-full' ref={rulerRef} />
           </div>
         </div>
         <hr className='border-secondary' />
@@ -355,9 +355,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             ) : (
               <>
                 <TimelineGridMemoized
-                  className='absolute'
-                  width={width}
-                  height={(channels.length + 2) * 96}
+                  className='absolute w-full'
+                  style={{ height: (channels.length + 2) * 96 }}
                   ref={gridRef}
                 />
                 <TrackSidebarItemMemoized className='relative'>

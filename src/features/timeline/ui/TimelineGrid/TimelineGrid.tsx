@@ -5,24 +5,20 @@ import {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useRef,
 } from 'react';
 
-import { drawGrid } from '../../lib';
+import { drawGrid, getDpi, setupCanvasAndCtx } from '../../lib';
 import { Tick } from '../../model';
-import { TimelineCanvasMemoized } from '../TimelineCanvas';
 
 import { TimelineGridProps, TimelineGridRef } from './interfaces';
 
 export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
-  function TimelineGrid({ width, height = 1, ...props }, ref) {
+  function TimelineGrid({ ...props }, ref) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-    const dpi =
-      typeof window !== 'undefined' && window.devicePixelRatio
-        ? window.devicePixelRatio
-        : 1;
 
     const handleCanvasRef = (newRef: HTMLCanvasElement | null) => {
       if (!newRef) {
@@ -31,18 +27,18 @@ export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
 
       canvasRef.current = newRef;
 
-      const element = canvasRef.current;
+      const canvas = canvasRef.current;
 
-      if (!element) {
+      if (!canvas) {
         return;
       }
 
-      const ctx = element.getContext('2d');
+      const dpi = getDpi();
+
+      const ctx = setupCanvasAndCtx(canvas, dpi);
       if (!ctx) {
         return;
       }
-
-      ctx.scale(dpi, dpi);
 
       canvasCtxRef.current = ctx;
     };
@@ -76,15 +72,28 @@ export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
       [render],
     );
 
-    return (
-      <TimelineCanvasMemoized
-        width={width}
-        height={height}
-        dpi={dpi}
-        ref={handleCanvasRef}
-        {...props}
-      />
-    );
+    useEffect(() => {
+      const recalculateDpi = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+          return;
+        }
+
+        const dpi = getDpi();
+
+        const ctx = setupCanvasAndCtx(canvas, dpi);
+        if (!ctx) {
+          return;
+        }
+
+        canvasCtxRef.current = ctx;
+      };
+
+      window.addEventListener('resize', recalculateDpi);
+      return () => window.removeEventListener('resize', recalculateDpi);
+    }, []);
+
+    return <canvas ref={handleCanvasRef} {...props} />;
   },
 );
 

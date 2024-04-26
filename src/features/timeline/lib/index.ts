@@ -12,3 +12,4 @@ export * from './drawGrid';
 export * from './drawGridInSeconds';
 export * from './useTicks';
 export * from './getDpi';
+export * from './setupCanvas';

@@ -5,24 +5,26 @@ import {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useRef,
 } from 'react';
 
-import { drawRuler, getSubTickHeight } from '../../lib';
+import {
+  drawRuler,
+  getDpi,
+  getSubTickHeight,
+  setupCanvasAndCtx,
+} from '../../lib';
 import { Tick } from '../../model';
-import { TimelineCanvasMemoized } from '../TimelineCanvas';
 
 import { TimelineRulerProps, TimelineRulerRef } from './interfaces';
 
 export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
-  function TimelineRuler({ width, height = 30, ...props }, ref) {
+  function TimelineRuler({ ...props }, ref) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-    const dpi =
-      typeof window !== 'undefined' && window.devicePixelRatio
-        ? window.devicePixelRatio
-        : 1;
+    const dpi = getDpi();
 
     const handleCanvasRef = (newRef: HTMLCanvasElement | null) => {
       if (!newRef) {
@@ -31,18 +33,19 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
 
       canvasRef.current = newRef;
 
-      const element = canvasRef.current;
+      const canvas = canvasRef.current;
 
-      if (!element) {
+      if (!canvas) {
         return;
       }
 
-      const ctx = element.getContext('2d');
+      const dpi = getDpi();
+
+      const ctx = setupCanvasAndCtx(canvas, dpi);
+
       if (!ctx) {
         return;
       }
-
-      ctx.scale(dpi, dpi);
 
       canvasCtxRef.current = ctx;
     };
@@ -74,18 +77,35 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
       () => ({
         render,
       }),
-      [render],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [render, dpi],
     );
+
+    useEffect(() => {
+      const recalculateDpi = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+          return;
+        }
+
+        const dpi = getDpi();
+
+        const ctx = setupCanvasAndCtx(canvas, dpi);
+        if (!ctx) {
+          return;
+        }
+
+        canvasCtxRef.current = ctx;
+      };
+
+      window.addEventListener('resize', recalculateDpi);
+      return () => window.removeEventListener('resize', recalculateDpi);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
       <div className='relative w-full'>
-        <TimelineCanvasMemoized
-          width={width}
-          height={height}
-          dpi={dpi}
-          ref={handleCanvasRef}
-          {...props}
-        />
+        <canvas ref={handleCanvasRef} {...props} />
         <div className='absolute bottom-[13px] w-full border-t border-t-ruler' />
         <div className='absolute bottom-0 w-full border-b border-b-ruler' />
       </div>
