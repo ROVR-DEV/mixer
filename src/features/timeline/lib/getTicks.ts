@@ -56,6 +56,7 @@ export const getTicks = (
   stepRule: (zoom: number) => number,
   subTickCountRule: (step: number) => number,
   tickSegmentWidthRule: (zoom: number) => { min: number; max: number },
+  // TODO unused
   subTickSegmentWidthRule: (zoom: number) => { min: number; max: number },
   zoomStepBreakpointRule: (zoom: number) => number,
 ): { mainTicks: Tick[]; subTicks: Tick[] } => {
@@ -63,18 +64,18 @@ export const getTicks = (
   const zoomStepBreakpoint = zoomStepBreakpointRule(zoom);
 
   const tickSegmentWidth = tickSegmentWidthRule(zoom);
-  const subTickSegmentWidth = subTickSegmentWidthRule(zoom);
+  // const subTickSegmentWidth = subTickSegmentWidthRule(zoom);
 
   const tickSegmentWidthZoomed = getTickSegmentWidthZoomed(
     tickSegmentWidth.min,
     zoom,
     zoomStepBreakpoint,
   );
-  const subTickSegmentWidthZoomed = getTickSegmentWidthZoomed(
-    subTickSegmentWidth.min,
-    zoom,
-    zoomStepBreakpoint,
-  );
+  // const subTickSegmentWidthZoomed = getTickSegmentWidthZoomed(
+  //   subTickSegmentWidth.min,
+  //   zoom,
+  //   zoomStepBreakpoint,
+  // );
 
   const subTickCount = subTickCountRule(step);
 
@@ -84,7 +85,11 @@ export const getTicks = (
     step,
     tickSegmentWidthZoomed,
   );
-  const subTicks = getSubTicksMemoized(subTickCount, subTickSegmentWidthZoomed);
+
+  const subTicks = getSubTicksMemoized(
+    subTickCount,
+    tickSegmentWidthZoomed / (subTickCount + 1),
+  );
 
   return { mainTicks, subTicks };
 };

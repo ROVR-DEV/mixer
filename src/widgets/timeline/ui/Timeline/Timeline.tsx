@@ -251,23 +251,13 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   useEffect(() => {
     renderRuler(ticks);
-    renderGrid(ticks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticks, channels, width]);
 
   useEffect(() => {
-    const drawRulerAndGrid = () => {
-      renderRuler(ticks);
-      renderGrid(ticks);
-    };
-
-    drawRulerAndGrid();
-
-    window.addEventListener('resize', drawRulerAndGrid);
-
-    return () => window.removeEventListener('resize', drawRulerAndGrid);
+    renderGrid(ticks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticks]);
+  }, [ticks, channels, width, tracks]);
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
