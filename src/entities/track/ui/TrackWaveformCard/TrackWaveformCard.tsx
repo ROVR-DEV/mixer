@@ -53,6 +53,8 @@ export const TrackWaveformCard = ({
       cursorColor: 'transparent',
     });
 
+    newWavesurfer.toggleInteraction(false);
+
     if (trackData instanceof Blob) {
       newWavesurfer?.loadBlob(trackData);
     } else {
