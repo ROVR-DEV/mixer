@@ -13,3 +13,5 @@ export * from './drawGridInSeconds';
 export * from './useTicks';
 export * from './getDpi';
 export * from './setupCanvas';
+export * from './usePlayHeadMove';
+export * from './clampTime';

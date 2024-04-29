@@ -5,5 +5,5 @@ import { Track } from '../../model';
 export interface TrackWaveformCardProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   track: Track;
-  trackData: Blob | undefined;
+  trackData: Blob | string | undefined;
 }

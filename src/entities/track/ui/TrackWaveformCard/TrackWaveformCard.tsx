@@ -67,7 +67,7 @@ export const TrackWaveformCard = ({
   return (
     <div
       className={cn(
-        'flex flex-col h-[84px] px-2 py-1 border border-third-light rounded-md bg-primary',
+        'flex flex-col h-[84px] py-1 border border-third-light rounded-md bg-primary',
         className,
       )}
       {...props}
@@ -75,18 +75,23 @@ export const TrackWaveformCard = ({
       onClick={() => console.log(track)}
     >
       <span
-        className='w-max text-[10px]'
+        className='w-max px-2 text-[10px]'
         onClick={() => wavesurfer?.playPause()}
       >
         {track.title}
       </span>
-      <div ref={containerRef} className='relative h-[60px]'>
+      <div
+        ref={containerRef}
+        className={cn('relative h-[60px]', {
+          'flex items-center': !trackData,
+        })}
+      >
         {!trackData && (
-          <span className='absolute top-0'>{'Failed to load'}</span>
+          <span className='absolute px-2'>{'Failed to load'}</span>
         )}
         <div id={`#waveform-${track.uuid}`} />
       </div>
-      <span className='mt-auto overflow-hidden text-ellipsis text-nowrap text-[12px]'>
+      <span className='mt-auto overflow-hidden text-ellipsis text-nowrap px-2 text-[12px]'>
         <span>{'Track info: '}</span>
         <span>{'No track selected (00:00:00)'}</span>
       </span>

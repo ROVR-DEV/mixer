@@ -10,6 +10,7 @@
 body {
   color: var(--foreground-color);
   background: var(--background-color);
+  user-select: none;
 }
 
 @layer utilities {

@@ -24,7 +24,7 @@ const TimelineSlider = ({
       className={cn(styles.timelineSlider, className)}
       style={{
         // @ts-expect-error Type
-        '--thumb-width': `calc(${ref.current?.clientWidth} / ${realWidth * zoom} * 100%)`,
+        '--thumb-width': `calc(max(20px, ${ref.current?.clientWidth} / ${realWidth * zoom} * 100%))`,
       }}
       {...props}
     />

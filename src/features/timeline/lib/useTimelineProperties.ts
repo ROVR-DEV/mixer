@@ -9,6 +9,7 @@ import {
 } from '../config';
 
 import { getByRanges } from './getByRanges';
+import { getDpi } from './getDpi';
 import { getTickSegmentWidthZoomed } from './getTickSegmentWidthZoomed';
 
 const setProtected = <T = number>(
@@ -34,6 +35,7 @@ export const useTimelineProperties = (
 ) => {
   const [zoom, setZoomBase] = useState(1);
   const [shift, setShiftBase] = useState(0);
+  const dpi = useMemo(() => getDpi(), []);
 
   const pixelsPerSecond = useMemo(() => {
     const range = getByRanges(zoom, STEP_IN_SECONDS_RANGES);
@@ -69,8 +71,8 @@ export const useTimelineProperties = (
     setProtected(setShiftBase, value, (newState) => {
       if (newState < 0) {
         return 0;
-      } else if (newState >= realWidth - bufferWidth) {
-        return Math.min(newState, realWidth - bufferWidth);
+      } else if (newState >= realWidth * dpi - bufferWidth) {
+        return Math.min(newState, realWidth * dpi - bufferWidth);
       } else {
         return newState;
       }

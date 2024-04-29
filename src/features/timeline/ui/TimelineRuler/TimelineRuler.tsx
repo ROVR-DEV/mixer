@@ -104,7 +104,7 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
     }, []);
 
     return (
-      <div className='relative w-full'>
+      <div className='pointer-events-none relative w-full'>
         <canvas ref={handleCanvasRef} {...props} />
         <div className='absolute bottom-[13px] w-full border-t border-t-ruler' />
         <div className='absolute bottom-0 w-full border-b border-b-ruler' />
