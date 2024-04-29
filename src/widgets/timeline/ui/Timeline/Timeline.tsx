@@ -219,8 +219,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const handleClickPlayHead = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+
       time.current = clampTime(
-        (e.nativeEvent.offsetX - ticksStartPadding) / pixelsPerSecond + shift,
+        (e.pageX - ticksStartPadding - 294) / pixelsPerSecond + shift,
       );
 
       updatePlayHeadAndTime();
