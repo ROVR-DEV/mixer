@@ -11,12 +11,14 @@ export const TrackWaveformCard = ({
   track,
   trackData,
   className,
+  onAddTrackBuffer,
   ...props
 }: TrackWaveformCardProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const containerSize = useSize(containerRef);
 
+  // TODO: maybe pass waver via props?
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
 
   useEffect(() => {
@@ -61,6 +63,10 @@ export const TrackWaveformCard = ({
       newWavesurfer?.load(trackData);
     }
 
+    // TODO: we need to add buffers on timeline initialize at once
+    onAddTrackBuffer(track.id, newWavesurfer);
+
+    // TODO: maybe pass waver via props?
     setWavesurfer(newWavesurfer);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
