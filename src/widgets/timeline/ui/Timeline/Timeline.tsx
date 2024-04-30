@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import WaveSurfer from 'wavesurfer.js';
 
 import { useSize, cn } from '@/shared/lib';
 
@@ -57,6 +58,16 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const size = useSize(containerRef);
   const timelineWindowWidth = size?.width ?? 0;
+
+  const tracksBuffers = useRef<{
+    [key: number]: WaveSurfer;
+  }>({});
+
+  const onAppendTrackBuffer = (trackId: number, trackBuffer: WaveSurfer) =>
+    (tracksBuffers.current = {
+      ...tracksBuffers.current,
+      [trackId]: trackBuffer,
+    });
 
   const playlistTotalTime = useMemo(
     () => getPlaylistMaxTime(playlist),
@@ -120,6 +131,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             width: trackWidth,
             left: shiftFromLeft,
           }}
+          onAddTrackBuffer={onAppendTrackBuffer}
         />
       );
     },
@@ -142,15 +154,43 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const startRef = useRef<number | undefined>(undefined);
   const prevRef = useRef<number>(0);
 
+  const getIntersectingByTimeTracks = useCallback(
+    (time: number) =>
+      playlist.tracks.filter(({ start, end }) => time >= start && time < end),
+    [playlist.tracks],
+  );
+
+  const getTrackBuffer = (trackId: number) => tracksBuffers.current[trackId];
+
   const updatePlayHeadAndTime = useCallback(() => {
+    const tracks = getIntersectingByTimeTracks(time.current);
+
+    // TODO: тут надо как-то оптимизировать это, жесткая долбёжка: https://www.youtube.com/watch?v=szMd_uh8xtc
+    if (isPlaying && tracks.length > 0) {
+      tracks.forEach(({ id }) => {
+        const trackBuffer = getTrackBuffer(id);
+
+        if (trackBuffer && !trackBuffer.isPlaying()) {
+          trackBuffer.play();
+        }
+      });
+    }
+
     playHeadRef.current?.updatePosition(
       time.current,
       shift,
       pixelsPerSecond,
       timelineWindowWidth,
     );
+
     clockRef.current?.updateTime(time.current);
-  }, [pixelsPerSecond, shift, timelineWindowWidth]);
+  }, [
+    pixelsPerSecond,
+    shift,
+    timelineWindowWidth,
+    isPlaying,
+    getIntersectingByTimeTracks,
+  ]);
 
   const animatePlayHead = useCallback(
     (timeStamp: number) => {
@@ -180,11 +220,33 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const handlePlay = () => {
     setIsPlaying(true);
     playingRef.current = true;
+
+    const tracks = getIntersectingByTimeTracks(time.current);
+
+    if (tracks.length === 0) {
+      return;
+    }
+
+    tracks.forEach(({ start, end, id }) => {
+      const trackSeekPercent = (time.current - start) / (end - start);
+
+      const trackBuffer = getTrackBuffer(id);
+      trackBuffer.seekTo(trackSeekPercent);
+      trackBuffer.play();
+    });
   };
 
   const handleStop = () => {
     setIsPlaying(false);
     playingRef.current = false;
+
+    const tracks = Object.values(tracksBuffers.current);
+
+    if (tracks.length === 0) {
+      return;
+    }
+
+    tracks.forEach((track) => track.pause());
   };
 
   const renderRuler = (
@@ -225,9 +287,45 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         (e.pageX - ticksStartPadding - 294) / pixelsPerSecond + shift,
       );
 
+      if (isPlaying) {
+        handleStop();
+        handlePlay();
+      } else {
+        handleStop();
+      }
+
+      const tracksIds = {
+        filled: [] as number[],
+        empty: [] as number[],
+      };
+
+      playlist.tracks.forEach(({ start, end, id }) => {
+        if (start >= time.current) {
+          tracksIds.empty.push(id);
+        } else if (time.current >= end) {
+          tracksIds.filled.push(id);
+        }
+      });
+
+      tracksIds.filled.forEach((id) => {
+        const trackBuffer = getTrackBuffer(id);
+
+        if (trackBuffer) {
+          trackBuffer.seekTo(1);
+        }
+      });
+
+      tracksIds.empty.forEach((id) => {
+        const trackBuffer = getTrackBuffer(id);
+
+        if (trackBuffer) {
+          trackBuffer.seekTo(0);
+        }
+      });
+
       updatePlayHeadAndTime();
     },
-    [pixelsPerSecond, shift, updatePlayHeadAndTime],
+    [pixelsPerSecond, shift, updatePlayHeadAndTime, isPlaying, playlist.tracks],
   );
 
   useEffect(() => {
