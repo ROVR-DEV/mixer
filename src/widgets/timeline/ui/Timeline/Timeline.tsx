@@ -26,7 +26,6 @@ import {
   TimelineGridMemoized,
   Tick,
   useTicks,
-  getDpi,
   TimelinePlayHead,
   usePlayHeadMove,
   clampTime,
@@ -54,10 +53,9 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const playingRef = useRef(isPlaying);
 
-  const dpi = useMemo(() => getDpi(), []);
-
   const size = useSize(containerRef);
-  const timelineWindowWidth = size?.width ?? 0;
+  const timelineClientWidth = size?.width ?? 0;
+  const paddingTimeSeconds = 120;
 
   const tracksBuffers = useRef<{
     [key: number]: WaveSurfer;
@@ -75,15 +73,17 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   );
   const { tracks, loadedTracksCount } = useTracks(playlist);
 
-  const { zoom, shift, setShift, pixelsPerSecond, realWidth } =
+  const { zoom, shift, setShift, pixelsPerSecond, timelineScrollWidth } =
     useTimelineProperties(
       timelineRef,
-      timelineWindowWidth,
+      containerRef,
+      timelineClientWidth,
       playlistTotalTime,
-      100,
+      50,
+      paddingTimeSeconds,
     );
 
-  const ticks = useTicks(realWidth * dpi, zoom, shift * pixelsPerSecond);
+  const ticks = useTicks(timelineScrollWidth, zoom, shift * pixelsPerSecond);
 
   const addNewChannel = () => {
     setChannels((prevState) => [
@@ -117,7 +117,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       const trackWidth = durationInSeconds * pixelsPerSecond;
 
       const isVisible =
-        trackStartPosition < timelineWindowWidth + shiftPixels &&
+        trackStartPosition < timelineClientWidth + shiftPixels &&
         trackEndPosition > shiftPixels;
 
       return (
@@ -135,7 +135,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         />
       );
     },
-    [pixelsPerSecond, shift, timelineWindowWidth, tracks],
+    [pixelsPerSecond, shift, timelineClientWidth, tracks],
   );
 
   const { evenTracks, oddTracks } = useMemo(
@@ -180,14 +180,14 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       time.current,
       shift,
       pixelsPerSecond,
-      timelineWindowWidth,
+      timelineClientWidth,
     );
 
     clockRef.current?.updateTime(time.current);
   }, [
     pixelsPerSecond,
     shift,
-    timelineWindowWidth,
+    timelineClientWidth,
     isPlaying,
     getIntersectingByTimeTracks,
   ]);
@@ -344,14 +344,14 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   useEffect(() => {
     renderRuler(ticks, shift * pixelsPerSecond, ticksStartPadding);
-  }, [ticks, channels, timelineWindowWidth, shift, pixelsPerSecond]);
+  }, [ticks, channels, timelineClientWidth, shift, pixelsPerSecond]);
 
   useEffect(() => {
     renderGrid(ticks, shift * pixelsPerSecond, ticksStartPadding);
   }, [
     ticks,
     channels,
-    timelineWindowWidth,
+    timelineClientWidth,
     shift,
     pixelsPerSecond,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -476,11 +476,20 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             className='w-full'
             zoom={zoom}
             value={shift}
-            realWidth={realWidth * dpi - timelineWindowWidth * 0.1}
-            max={realWidth * dpi - timelineWindowWidth * 0.1}
+            realWidth={
+              timelineScrollWidth - paddingTimeSeconds * pixelsPerSecond
+            }
+            max={
+              timelineScrollWidth / pixelsPerSecond -
+              timelineClientWidth / pixelsPerSecond +
+              paddingTimeSeconds
+            }
             onChange={(e) => setShift(Number(e.currentTarget.value))}
           />
-          <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[296px] right-0 mx-auto flex w-max' />
+          <TrackFloatingMenuMemoized
+            className='absolute bottom-[40px] left-[296px] right-0 z-20 mx-auto flex w-max
+          '
+          />
         </div>
       </div>
     </div>

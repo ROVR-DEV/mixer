@@ -27,9 +27,11 @@ const setProtected = <T = number>(
 
 export const useTimelineProperties = (
   timelineRef: RefObject<HTMLElement>,
-  width: number,
+  timelineRulerRef: RefObject<HTMLElement>,
+  timelineClientWidth: number,
   playlistTotalTime: number,
   shiftStep: number = 5,
+  paddingTimeSeconds: number,
   zoomRule: (prevZoom: number, sign: number) => number = (prevZoom, sign) =>
     sign > 0 ? prevZoom * 1.25 : prevZoom / 1.25,
 ) => {
@@ -48,13 +50,13 @@ export const useTimelineProperties = (
     return tickSegmentWidth / range;
   }, [zoom]);
 
-  const realWidth = useMemo(
-    () => Math.max(playlistTotalTime, 1440),
-    [playlistTotalTime],
+  const timelineScrollWidth = useMemo(
+    () =>
+      Math.max(playlistTotalTime * pixelsPerSecond, timelineClientWidth) * dpi,
+    [dpi, pixelsPerSecond, playlistTotalTime, timelineClientWidth],
   );
 
   const shiftStepZoomed = shiftStep / zoom;
-  const bufferWidth = width * 0.1;
 
   const setZoomProtected = (value: SetStateAction<number>) =>
     setProtected(setZoomBase, value, (newState) => {
@@ -69,10 +71,15 @@ export const useTimelineProperties = (
 
   const setShiftProtected = (value: SetStateAction<number>) =>
     setProtected(setShiftBase, value, (newState) => {
+      const rightBound =
+        timelineScrollWidth / pixelsPerSecond -
+        timelineClientWidth / pixelsPerSecond +
+        paddingTimeSeconds;
+
       if (newState < 0) {
         return 0;
-      } else if (newState >= realWidth * dpi - bufferWidth) {
-        return Math.min(newState, realWidth * dpi - bufferWidth);
+      } else if (newState >= rightBound) {
+        return Math.min(newState, rightBound);
       } else {
         return newState;
       }
@@ -81,7 +88,6 @@ export const useTimelineProperties = (
   const handleZoom = (deltaY: number) => {
     const sign = deltaY >= 0 ? -1 : 1;
     setZoomProtected((prevState) => zoomRule(prevState, sign));
-    setShiftProtected(shift);
   };
 
   const handleHorizontalScroll = (deltaY: number) => {
@@ -89,11 +95,54 @@ export const useTimelineProperties = (
     setShiftProtected((prevState) => prevState + sign * shiftStepZoomed);
   };
 
+  const scrollToZoom = (e: WheelEvent) => {
+    // setShiftProtected(shift);
+
+    if (
+      (zoom <= 1 && e.deltaY >= 0) ||
+      (zoom >= Math.pow(1.25, 33) && e.deltaY <= 0)
+    ) {
+      return;
+    }
+
+    const percent = e.offsetX / timelineClientWidth;
+
+    const sign = e.deltaY >= 0 ? -1 : 1;
+    const sideSign = percent >= 0.5 ? 1 : -1;
+
+    const newZoom = zoomRule(zoom, sign);
+
+    if (sign === 1) {
+      if (percent <= 0.1 || percent >= 0.9) {
+        setShiftProtected((prevState) => prevState + sideSign * shiftStep);
+      } else {
+        const preciseSideSign =
+          shift * pixelsPerSecond + timelineClientWidth / 2 <
+          timelineScrollWidth / 2
+            ? 1
+            : -1;
+
+        const widthDiff =
+          (timelineScrollWidth * newZoom - timelineScrollWidth * zoom) /
+          (pixelsPerSecond * newZoom) /
+          (3.12 * zoom);
+
+        setShiftProtected(
+          (prevState) => prevState + preciseSideSign * widthDiff,
+        );
+      }
+    } else {
+      setShiftProtected(shift);
+    }
+  };
+  // console.log(shift);
+
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
       e.preventDefault();
       e.stopPropagation();
       handleZoom(e.deltaY);
+      scrollToZoom(e);
     }
 
     if (e.shiftKey) {
@@ -104,6 +153,7 @@ export const useTimelineProperties = (
   };
 
   useWheel(handleWheel, timelineRef);
+  useWheel(handleWheel, timelineRulerRef);
 
   return {
     zoom,
@@ -111,6 +161,6 @@ export const useTimelineProperties = (
     setZoom: setZoomProtected,
     setShift: setShiftProtected,
     pixelsPerSecond,
-    realWidth,
+    timelineScrollWidth,
   };
 };

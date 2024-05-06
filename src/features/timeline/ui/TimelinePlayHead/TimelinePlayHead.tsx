@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
+import { PlayHeadIcon } from '@/shared/ui/assets';
 
 import { TimelinePlayHeadProps, TimelinePlayHeadRef } from './interfaces';
 
@@ -38,8 +39,9 @@ export const TimelinePlayHead = forwardRef<
       style={{ left: leftPadding }}
       {...props}
     >
-      <div className='absolute -left-2 size-4 bg-accent' />
-      <div className='absolute -left-2 top-4 size-0 border-x-8 border-t-8 border-x-transparent border-t-accent' />
+      {/* <div className='absolute -left-2 size-4 bg-accent' /> */}
+      {/* <div className='absolute -left-2 top-4 w-4 border-x-2 border-t-8 border-x-transparent border-t-accent' /> */}
+      <PlayHeadIcon className='absolute left-[-9px]' width={19} height={19} />
       <div className='mx-auto h-full w-px bg-accent' />
     </div>
   );
