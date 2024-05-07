@@ -39,10 +39,8 @@ export const TimelinePlayHead = forwardRef<
       style={{ left: leftPadding }}
       {...props}
     >
-      {/* <div className='absolute -left-2 size-4 bg-accent' /> */}
-      {/* <div className='absolute -left-2 top-4 w-4 border-x-2 border-t-8 border-x-transparent border-t-accent' /> */}
       <PlayHeadIcon className='absolute left-[-9px]' width={19} height={19} />
-      <div className='mx-auto h-full w-px bg-accent' />
+      <div className='mx-auto h-full w-px bg-accent/50' />
     </div>
   );
 });

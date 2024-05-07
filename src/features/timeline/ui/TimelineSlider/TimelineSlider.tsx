@@ -15,7 +15,7 @@ export const TimelineSlider = forwardRef<HTMLDivElement, TimelineSliderProps>(
     return (
       <div
         className={cn(
-          'my-2 w-full overflow-x-scroll',
+          'mb-2 w-full overflow-x-scroll',
           styles.timelineSlider,
           className,
         )}
