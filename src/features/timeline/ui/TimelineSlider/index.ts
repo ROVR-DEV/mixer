@@ -1,2 +1,2 @@
-export { default as TimelineSlider } from './TimelineSlider';
+export { TimelineSlider, TimelineSliderMemoized } from './TimelineSlider';
 export type * from './interfaces';

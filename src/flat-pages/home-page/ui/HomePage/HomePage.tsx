@@ -14,6 +14,7 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
   // );
 
   if (playlist) {
+    // playlist.tracks = [];
     // playlist.tracks = playlist.tracks.slice(0, 1);
     // playlist.tracks[0].start += 1000;
     // playlist.tracks[0].end += 1000;

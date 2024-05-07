@@ -5,6 +5,6 @@ export interface TimelineSliderProps
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   > {
-  zoom: number;
-  realWidth: number;
+  timelineScrollWidth: number;
+  xPadding?: number;
 }

@@ -1,34 +1,35 @@
 'use client';
 
-import { useRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
 
 import { TimelineSliderProps } from './interfaces';
 import styles from './styles.module.css';
 
-const TimelineSlider = ({
-  zoom,
-  realWidth,
-  className,
-  ...props
-}: TimelineSliderProps) => {
-  const ref = useRef<HTMLInputElement | null>(null);
+export const TimelineSlider = forwardRef<HTMLDivElement, TimelineSliderProps>(
+  function TimelineSlider(
+    { timelineScrollWidth, xPadding = 0, className, ...props },
+    ref,
+  ) {
+    return (
+      <div
+        className={cn(
+          'my-2 w-full overflow-x-scroll',
+          styles.timelineSlider,
+          className,
+        )}
+        ref={ref}
+        style={{ paddingLeft: xPadding, paddingRight: xPadding }}
+        {...props}
+      >
+        <div
+          className='h-px'
+          style={{ width: timelineScrollWidth - xPadding * 2 }}
+        />
+      </div>
+    );
+  },
+);
 
-  return (
-    <input
-      ref={ref}
-      type='range'
-      min={0}
-      max={100}
-      className={cn(styles.timelineSlider, className)}
-      style={{
-        // @ts-expect-error Type
-        '--thumb-width': `calc(max(20px, ${ref.current?.clientWidth} / ${realWidth * zoom} * 100%))`,
-      }}
-      {...props}
-    />
-  );
-};
-
-export default TimelineSlider;
+export const TimelineSliderMemoized = memo(TimelineSlider);

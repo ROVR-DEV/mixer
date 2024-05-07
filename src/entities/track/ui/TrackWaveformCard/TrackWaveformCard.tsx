@@ -53,6 +53,7 @@ export const TrackWaveformCard = ({
       container: container,
       plugins: [],
       cursorColor: 'transparent',
+      backend: 'WebAudio',
     });
 
     newWavesurfer.toggleInteraction(false);
@@ -84,7 +85,7 @@ export const TrackWaveformCard = ({
     >
       <span
         className='w-max px-2 text-[10px]'
-        onClick={() => wavesurfer?.playPause()}
+        onClick={() => wavesurfer?.zoom(1)}
       >
         {track.title}
       </span>

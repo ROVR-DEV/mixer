@@ -6,7 +6,7 @@ export const tailwindConfig: Config = {
   theme: {
     extend: {
       colors: {
-        accent: '#FFF057',
+        accent: { DEFAULT: '#FFF057', light: '#FFED24' },
         primary: '#161616',
         error: { DEFAULT: '#D64848' },
         secondary: { DEFAULT: '#2D2D2D', light: '#494949' },

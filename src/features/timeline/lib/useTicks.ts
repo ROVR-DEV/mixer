@@ -4,9 +4,9 @@ import { useMemo } from 'react';
 
 import { getTicksForSeconds } from './getTicksForSeconds';
 
-export const useTicks = (width: number, zoom: number, shift: number) => {
+export const useTicks = (visibleWidth: number, zoom: number, shift: number) => {
   return useMemo(
-    () => getTicksForSeconds(width, zoom, shift),
-    [shift, width, zoom],
+    () => getTicksForSeconds(visibleWidth, zoom, shift),
+    [shift, visibleWidth, zoom],
   );
 };

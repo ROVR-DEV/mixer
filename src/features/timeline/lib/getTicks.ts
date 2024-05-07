@@ -15,13 +15,13 @@ const createTick = (
 });
 
 export const getMainTicks = (
-  width: number,
+  visibleWidth: number,
   shift: number,
   step: number,
   segmentWidth: number,
 ) => {
-  const count = Math.ceil(width / segmentWidth) + 100;
-  const startIndex = Math.floor(shift / segmentWidth) - 100;
+  const count = Math.ceil(visibleWidth / segmentWidth) + 100;
+  const startIndex = Math.floor(shift / segmentWidth) - 50;
 
   return Array.from(Array(count)).map((_, i) =>
     createTick(startIndex + i, segmentWidth, startIndex + i === 0, step),
@@ -30,8 +30,8 @@ export const getMainTicks = (
 
 const getMainTicksMemoized = memoize(
   getMainTicks,
-  (width: number, shift: number, step: number, segmentWidth: number) =>
-    `${width}-${shift}-${step}-${segmentWidth}`,
+  (visibleWidth: number, shift: number, step: number, segmentWidth: number) =>
+    `${visibleWidth}-${shift}-${step}-${segmentWidth}`,
 );
 
 export const getSubTicks = (
@@ -50,7 +50,7 @@ const getSubTicksMemoized = memoize(
 );
 
 export const getTicks = (
-  width: number,
+  visibleWidth: number,
   zoom: number,
   shift: number,
   stepRule: (zoom: number) => number,
@@ -80,7 +80,7 @@ export const getTicks = (
   const subTickCount = subTickCountRule(step);
 
   const mainTicks = getMainTicksMemoized(
-    width,
+    visibleWidth,
     shift,
     step,
     tickSegmentWidthZoomed,

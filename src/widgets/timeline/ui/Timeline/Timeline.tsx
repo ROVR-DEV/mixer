@@ -18,7 +18,6 @@ import {
 } from '@/entities/track';
 
 import {
-  TimelineSlider,
   useTimelineProperties,
   TimelineRulerMemoized,
   TimelineRulerRef,
@@ -30,6 +29,7 @@ import {
   usePlayHeadMove,
   clampTime,
   TimelinePlayHeadRef,
+  TimelineSliderMemoized,
 } from '@/features/timeline';
 import { TrackChannelControlMemoized } from '@/features/track-channel-control';
 import { TrackFloatingMenuMemoized } from '@/features/track-floating-menu';
@@ -47,6 +47,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const gridRef = useRef<TimelineGridRef | null>(null);
   const clockRef = useRef<ClockRef | null>(null);
   const playHeadRef = useRef<TimelinePlayHeadRef | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const [channels, setChannels] = useState<{ id: number }[]>([]);
 
@@ -73,6 +74,14 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   );
   const { tracks, loadedTracksCount } = useTracks(playlist);
 
+  const handleShiftChange = (newShift: number) => {
+    if (!scrollRef.current) {
+      return;
+    }
+
+    scrollRef.current.scrollLeft = newShift;
+  };
+
   const { zoom, shift, setShift, pixelsPerSecond, timelineScrollWidth } =
     useTimelineProperties(
       timelineRef,
@@ -81,9 +90,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       playlistTotalTime,
       50,
       paddingTimeSeconds,
+      handleShiftChange,
     );
 
-  const ticks = useTicks(timelineScrollWidth, zoom, shift * pixelsPerSecond);
+  const ticks = useTicks(timelineClientWidth, zoom, shift * pixelsPerSecond);
 
   const addNewChannel = () => {
     setChannels((prevState) => [
@@ -253,20 +263,25 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     ticks: { mainTicks: Tick[]; subTicks: Tick[] },
     shift: number,
     ticksStartPadding: number,
-  ) => rulerRef.current?.render(ticks, shift, ticksStartPadding, '#9B9B9B');
+  ) =>
+    requestAnimationFrame(() => {
+      rulerRef.current?.render(ticks, shift, ticksStartPadding, '#9B9B9B');
+    });
 
   const renderGrid = (
     ticks: { mainTicks: Tick[]; subTicks: Tick[] },
     shift: number,
     ticksStartPadding: number,
   ) =>
-    gridRef.current?.render(
-      ticks,
-      shift,
-      ticksStartPadding,
-      '#555555',
-      '#2D2D2D',
-    );
+    requestAnimationFrame(() => {
+      gridRef.current?.render(
+        ticks,
+        shift,
+        ticksStartPadding,
+        '#555555',
+        '#2D2D2D',
+      );
+    });
 
   const handleMouseMovePlayHead = useCallback(
     (e: MouseEvent) => {
@@ -325,6 +340,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
       updatePlayHeadAndTime();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pixelsPerSecond, shift, updatePlayHeadAndTime, isPlaying, playlist.tracks],
   );
 
@@ -370,7 +386,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         clockRef={clockRef}
       />
       <hr className='border-secondary' />
-      <div className='relative flex h-full grow flex-col'>
+      <div className='relative flex h-full grow flex-col overflow-hidden'>
         <div className='flex'>
           <div className='pointer-events-none absolute left-[296px] z-10 h-full'>
             <TimelinePlayHead
@@ -379,7 +395,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             />
           </div>
           <TrackSidebarMemoized className='min-w-[296px]'>
-            <TrackSidebarItem className='items-start' disableBorder>
+            <TrackSidebarItem className='h-[72px] items-start' disableBorder>
               <PlaylistInfoMemoized
                 totalPlaytime={playlistTotalTime}
                 tracksCount={playlist.tracks.length}
@@ -387,7 +403,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             </TrackSidebarItem>
           </TrackSidebarMemoized>
           <div
-            className='flex w-full items-center'
+            className='flex w-full items-end pb-[9px]'
             onClick={handleClickPlayHead}
             ref={containerRef}
           >
@@ -471,26 +487,15 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       </div>
       <div className='relative flex grow'>
         <div className='min-w-[296px]' />
-        <div className='w-full px-2'>
-          <TimelineSlider
-            className='w-full'
-            zoom={zoom}
-            value={shift}
-            realWidth={
-              timelineScrollWidth - paddingTimeSeconds * pixelsPerSecond
-            }
-            max={
-              timelineScrollWidth / pixelsPerSecond -
-              timelineClientWidth / pixelsPerSecond +
-              paddingTimeSeconds
-            }
-            onChange={(e) => setShift(Number(e.currentTarget.value))}
-          />
-          <TrackFloatingMenuMemoized
-            className='absolute bottom-[40px] left-[296px] right-0 z-20 mx-auto flex w-max
-          '
-          />
-        </div>
+        <TimelineSliderMemoized
+          ref={scrollRef}
+          timelineScrollWidth={timelineScrollWidth}
+          xPadding={8}
+          onScroll={(e) => {
+            setShift(e.currentTarget.scrollLeft);
+          }}
+        />
+        <TrackFloatingMenuMemoized className='absolute bottom-[40px] left-[296px] right-0 z-20 mx-auto flex w-max' />
       </div>
     </div>
   );

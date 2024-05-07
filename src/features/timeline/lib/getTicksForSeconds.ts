@@ -10,12 +10,12 @@ import { getSubTickCountBySeconds } from './getSubTickCountBySeconds';
 import { getTicks } from './getTicks';
 
 export const getTicksForSeconds = (
-  width: number,
+  visibleWidth: number,
   zoom: number,
   shift: number,
 ) => {
   return getTicks(
-    width,
+    visibleWidth,
     zoom,
     shift,
     (zoom) => getByRanges(zoom, STEP_IN_SECONDS_RANGES),

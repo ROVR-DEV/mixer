@@ -15,3 +15,4 @@ export * from './getDpi';
 export * from './setupCanvas';
 export * from './usePlayHeadMove';
 export * from './clampTime';
+export * from './getRightTimelineBound';
