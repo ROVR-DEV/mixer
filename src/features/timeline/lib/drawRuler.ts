@@ -4,7 +4,6 @@ import { tickValueSecondsFormatter } from '../config';
 import { Tick } from '../model';
 
 import { drawVerticalLine } from './drawVerticalLine';
-import { isSubTickTall } from './isSubTickTall';
 
 const drawMainDash = (
   ctx: CanvasRenderingContext2D,
@@ -46,13 +45,11 @@ export const drawRuler = (
         color,
       );
 
-      ticks.subTicks.forEach((subTick, i) =>
+      ticks.subTicks.forEach((subTick) =>
         drawVerticalLine(
           ctx,
           tick.x + subTick.x + ticksStartPadding - shiftWidth,
-          isSubTickTall(i, ticks.subTicks.length)
-            ? subTickHeight.short
-            : subTickHeight.tall,
+          subTickHeight.short,
           color,
         ),
       );
