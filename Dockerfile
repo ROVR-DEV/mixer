@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* bun.lockb ./
 RUN \
     if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    elif [ -f bun.lockb ]; then bun install --froze-lockfile; \
+    elif [ -f bun.lockb ]; then bun install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
     elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
     else echo "Lockfile not found." && exit 1; \
