@@ -49,7 +49,7 @@ export const useTimelineProperties = (
   const [shift, setShiftBase] = useState(0);
   const dpi = useMemo(() => getDpi(), []);
 
-  const pixelsPerSecond = useMemo(() => {
+  const getPixelPerSeconds = useCallback((zoom: number) => {
     const range = getByRanges(zoom, STEP_IN_SECONDS_RANGES);
     const zoomStepBreakpoint = getByRanges(zoom, ZOOM_BREAKPOINT_RANGES);
     const tickSegmentWidth = getTickSegmentWidthZoomed(
@@ -57,9 +57,13 @@ export const useTimelineProperties = (
       zoom,
       zoomStepBreakpoint,
     );
-    // console.log(tickSegmentWidth);
     return tickSegmentWidth / range;
-  }, [zoom]);
+  }, []);
+
+  const pixelsPerSecond = useMemo(
+    () => getPixelPerSeconds(zoom),
+    [getPixelPerSeconds, zoom],
+  );
 
   const timelineScrollWidth = useMemo(
     () =>
@@ -75,16 +79,6 @@ export const useTimelineProperties = (
   );
 
   const clampZoom = (value: number) => {
-    if (value < 0) {
-      return 0;
-    } else if (value >= rightBound) {
-      return Math.min(value, rightBound);
-    } else {
-      return value;
-    }
-  };
-
-  const clampShift = (value: number) => {
     if (value < 1) {
       return 1;
     } else if (value > Math.pow(1.25, 33)) {
@@ -94,11 +88,21 @@ export const useTimelineProperties = (
     }
   };
 
+  const clampShift = (value: number) => {
+    if (value < 0) {
+      return 0;
+    } else if (value >= rightBound) {
+      return Math.min(value, rightBound);
+    } else {
+      return value;
+    }
+  };
+
   const setZoomProtected = (value: SetStateAction<number>) =>
-    setProtected(setZoomBase, value, clampShift);
+    setProtected(setZoomBase, value, clampZoom);
 
   const setShiftProtected = (value: SetStateAction<number>) =>
-    setProtected(setShiftBase, value, clampZoom);
+    setProtected(setShiftBase, value, clampShift);
 
   const handleZoom = (deltaY: number) => {
     const sign = deltaY >= 0 ? -1 : 1;
@@ -110,67 +114,42 @@ export const useTimelineProperties = (
     onShiftChange(clampShift(shift + sign * shiftStepZoomed));
     setShiftProtected((prevState) => prevState + sign * shiftStepZoomed);
   };
-  // console.log(rightBound);
 
-  // console.log(timelineScrollWidth);
+  const scrollToZoom = (e: WheelEvent) => {
+    if (
+      (zoom <= 1 && e.deltaY >= 0) ||
+      (zoom >= Math.pow(1.25, 33) && e.deltaY <= 0)
+    ) {
+      return;
+    }
 
-  const scrollToZoom = useCallback(
-    (e: WheelEvent) => {
-      // setShiftProtected(shift);
-      // console.log(rightBound);
+    const sign = e.deltaY >= 0 ? -1 : 1;
+    const newZoom = zoomRule(zoom, sign);
+    const x = e.pageX - 296 - 5;
 
-      // console.log(e);
+    const getNewShift = (prevState: number) => {
+      const virtualShift = prevState * pixelsPerSecond;
 
-      if (
-        (zoom <= 1 && e.deltaY >= 0) ||
-        (zoom >= Math.pow(1.25, 33) && e.deltaY <= 0)
-      ) {
-        return;
-      }
+      const currentVirtualX = virtualShift + x * zoom;
+      const newVirtualX = virtualShift + x * newZoom;
 
-      // const percent = e.offsetX / timelineClientWidth;
+      // eslint-disable-next-line no-console
+      // console.log('X:', x, currentVirtualX, newVirtualX);
 
-      // const sign = e.deltaY >= 0 ? -1 : 1;
-      // const sideSign = percent >= 0.5 ? 1 : -1;
+      const newPixelsPerSeconds = pixelsPerSecond * newZoom;
 
-      // const newZoom = zoomRule(zoom, sign);
+      return prevState + (newVirtualX - currentVirtualX) / newPixelsPerSeconds;
+    };
 
-      // const getNewShift = (prevShift: number) => {
-      //   const pointX = (e.clientX - prevShift) / zoom;
-      //   const newShift = e.clientX - pointX * newZoom;
-      //   return -newShift;
-      // };
+    const newShift = getNewShift(shift);
+    const clampedShift = clampShift(newShift);
 
-      // onShiftChange(clampShift(getNewShift(shift)));
-      // setShiftProtected(getNewShift);
+    // eslint-disable-next-line no-console
+    // console.log('Shift: ', newShift, clampedShift);
 
-      // if (sign === 1) {
-      //   if (percent <= 0.1 || percent >= 0.9) {
-      //     setShiftProtected((prevState) => prevState + sideSign * shiftStep);
-      //   } else {
-      //     const preciseSideSign =
-      //       shift * pixelsPerSecond + timelineClientWidth / 2 <
-      //       timelineScrollWidth / 2
-      //         ? 1
-      //         : -1;
-
-      //     const widthDiff =
-      //       (timelineScrollWidth * newZoom - timelineScrollWidth * zoom) /
-      //       (pixelsPerSecond * newZoom) /
-      //       (3.12 * zoom);
-
-      //     setShiftProtected(
-      //       (prevState) => prevState + preciseSideSign * widthDiff,
-      //     );
-      //   }
-      // } else {
-      //   setShiftProtected(shift);
-      // }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [zoom],
-  );
-  // console.log(shift);
+    onShiftChange(clampedShift);
+    setShiftProtected(clampedShift);
+  };
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {

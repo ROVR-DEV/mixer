@@ -376,6 +376,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   usePlayHeadMove(handleMouseMovePlayHead, containerRef);
 
+  // const tooltipRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className={cn('flex flex-col', className)} {...props}>
       <TrackInfoPanelMemoized
@@ -403,10 +405,21 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             </TrackSidebarItem>
           </TrackSidebarMemoized>
           <div
-            className='flex w-full items-end pb-[9px]'
+            className='relative flex w-full items-end pb-[9px]'
             onClick={handleClickPlayHead}
             ref={containerRef}
+            // onMouseMove={(e) => {
+            //   if (!tooltipRef.current) {
+            //     return;
+            //   }
+
+            //   const x = e.pageX - 296 - ticksStartPadding;
+
+            //   tooltipRef.current.textContent = `${x * zoom + shift * pixelsPerSecond}`;
+            //   tooltipRef.current.style.left = `${x}px`;
+            // }}
           >
+            {/* <div ref={tooltipRef} className='absolute' /> */}
             <TimelineRulerMemoized className='h-[30px] w-full' ref={rulerRef} />
           </div>
         </div>
