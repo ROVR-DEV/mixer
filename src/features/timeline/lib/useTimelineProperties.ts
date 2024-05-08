@@ -163,6 +163,10 @@ export const useTimelineProperties = (
       e.preventDefault();
       e.stopPropagation();
       handleHorizontalScroll(e.deltaY);
+    } else if (e.deltaX) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleHorizontalScroll(e.deltaX);
     }
   };
 

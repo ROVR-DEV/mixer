@@ -40,7 +40,7 @@ export const TimelinePlayHead = forwardRef<
       {...props}
     >
       <PlayHeadIcon className='absolute left-[-9px]' width={19} height={19} />
-      <div className='mx-auto h-full w-px bg-accent/50' />
+      <div className='mx-auto h-full w-px bg-accent/40' />
     </div>
   );
 });
