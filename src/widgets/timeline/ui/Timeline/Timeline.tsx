@@ -74,13 +74,14 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   );
   const { tracks, loadedTracksCount } = useTracks(playlist);
 
-  const handleShiftChange = (newShift: number) => {
+  const handleShiftChange = useCallback((newShift: number) => {
     if (!scrollRef.current) {
       return;
     }
 
+    scrollRef.current.dataset.synthetic = 'true';
     scrollRef.current.scrollLeft = newShift;
-  };
+  }, []);
 
   const { zoom, shift, setShift, pixelsPerSecond, timelineScrollWidth } =
     useTimelineProperties(
@@ -505,6 +506,11 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           timelineScrollWidth={timelineScrollWidth}
           xPadding={8}
           onScroll={(e) => {
+            if (e.currentTarget.dataset.synthetic) {
+              e.currentTarget.dataset.synthetic = '';
+              return;
+            }
+
             setShift(e.currentTarget.scrollLeft);
           }}
         />
