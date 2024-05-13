@@ -53,7 +53,7 @@ export const TrackWaveformCard = ({
       container: container,
       plugins: [],
       cursorColor: 'transparent',
-      backend: 'WebAudio',
+      progressColor: '#9B9B9B',
     });
 
     newWavesurfer.toggleInteraction(false);
@@ -76,33 +76,26 @@ export const TrackWaveformCard = ({
   return (
     <div
       className={cn(
-        'flex flex-col h-[84px] py-1 border border-third-light rounded-md bg-primary',
+        'grid grid-rows-[1fr_auto_1fr] h-[84px] border border-third-light rounded-md bg-primary',
         className,
       )}
       {...props}
-      // eslint-disable-next-line no-console
-      onClick={() => console.log(track)}
     >
-      <span
-        className='w-max px-2 text-[10px]'
-        onClick={() => wavesurfer?.zoom(1)}
-      >
-        {track.title}
-      </span>
       <div
         ref={containerRef}
-        className={cn('relative h-[60px]', {
+        className={cn('relative row-start-2 col-start-1 w-full h-[46px]', {
           'flex items-center': !trackData,
         })}
       >
         {!trackData && (
           <span className='absolute px-2'>{'Failed to load'}</span>
         )}
+        <div className='absolute inset-y-0 my-auto h-px w-full bg-third/40' />
         <div id={`#waveform-${track.uuid}`} />
       </div>
-      <span className='mt-auto overflow-hidden text-ellipsis text-nowrap px-2 text-[12px]'>
-        <span>{'Track info: '}</span>
-        <span>{'No track selected (00:00:00)'}</span>
+      <span className='col-start-1 row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap px-2 text-[12px] text-third'>
+        <span className='font-bold'>{`${track.title} | ${track.artist} `}</span>
+        <span className=''>{`(${track.duration})`}</span>
       </span>
     </div>
   );

@@ -138,7 +138,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           track={track}
           trackData={tracks?.[track.uuid]}
           style={{
-            display: isVisible ? 'flex' : 'none',
+            display: isVisible ? '' : 'none',
             width: trackWidth,
             left: shiftFromLeft,
           }}
@@ -384,8 +384,6 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   usePlayHeadMove(handleMouseMovePlayHead, containerRef);
 
-  // const tooltipRef = useRef<HTMLDivElement>(null);
-
   return (
     <div className={cn('flex flex-col', className)} {...props}>
       <TrackInfoPanelMemoized
@@ -483,10 +481,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
                   style={{ height: (channels.length + 2) * 96 }}
                   ref={gridRef}
                 />
-                <TrackSidebarItemMemoized className='relative'>
+                <TrackSidebarItemMemoized className='relative p-0'>
                   {evenTracks}
                 </TrackSidebarItemMemoized>
-                <TrackSidebarItemMemoized className='relative'>
+                <TrackSidebarItemMemoized className='relative p-0'>
                   {oddTracks}
                 </TrackSidebarItemMemoized>
                 {trackNodes}
