@@ -552,7 +552,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           </div>
 
           <div
-            className='relative min-h-max w-full grow'
+            className='relative min-h-max w-full grow overflow-x-clip'
             ref={timelineRef}
             onMouseUp={handleClickPlayHead}
           >
