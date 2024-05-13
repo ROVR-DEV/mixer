@@ -28,7 +28,6 @@ import {
   TimelinePlayHead,
   usePlayHeadMove,
   clampTime,
-  TimelinePlayHeadRef,
   TimelineSliderMemoized,
 } from '@/features/timeline';
 import { TrackChannelControlMemoized } from '@/features/track-channel-control';
@@ -37,7 +36,7 @@ import { ClockRef, TrackInfoPanelMemoized } from '@/features/track-info-panel';
 
 import { TimelineProps } from './interfaces';
 
-const ticksStartPadding = 5;
+const rulerLeftPadding = 5;
 
 export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,13 +45,17 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const rulerRef = useRef<TimelineRulerRef | null>(null);
   const gridRef = useRef<TimelineGridRef | null>(null);
   const clockRef = useRef<ClockRef | null>(null);
-  const playHeadRef = useRef<TimelinePlayHeadRef | null>(null);
+
+  const playHeadRef = useRef<HTMLDivElement | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [channels, setChannels] = useState<{ id: number }[]>([]);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const playingRef = useRef(isPlaying);
+
+  const timeAnimationFrame = useRef<number>(0);
 
   const size = useSize(containerRef);
   const timelineClientWidth = size?.width ?? 0;
@@ -73,6 +76,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     [playlist],
   );
   const { tracks, loadedTracksCount } = useTracks(playlist);
+  const isReady = tracks !== null;
 
   const handleShiftChange = useCallback((newShift: number) => {
     if (!scrollRef.current) {
@@ -93,6 +97,14 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       paddingTimeSeconds,
       handleShiftChange,
     );
+
+  const setAllShift = useCallback(
+    (newShift: number) => {
+      setShift(newShift);
+      handleShiftChange(newShift);
+    },
+    [handleShiftChange, setShift],
+  );
 
   const ticks = useTicks(timelineClientWidth, zoom, shift * pixelsPerSecond);
 
@@ -123,8 +135,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
       const shiftPixels = shift * pixelsPerSecond;
 
-      const shiftFromLeft =
-        ticksStartPadding + trackStartPosition - shiftPixels;
+      const shiftFromLeft = rulerLeftPadding + trackStartPosition - shiftPixels;
       const trackWidth = durationInSeconds * pixelsPerSecond;
 
       const isVisible =
@@ -173,7 +184,11 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const getTrackBuffer = (trackId: number) => tracksBuffers.current[trackId];
 
-  const updatePlayHeadAndTime = useCallback(() => {
+  const updateTrackBuffers = useCallback(() => {
+    if (!isReady) {
+      return;
+    }
+
     const tracks = getIntersectingByTimeTracks(time.current);
 
     // TODO: тут надо как-то оптимизировать это, жесткая долбёжка: https://www.youtube.com/watch?v=szMd_uh8xtc
@@ -186,22 +201,72 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         }
       });
     }
+  }, [getIntersectingByTimeTracks, isPlaying, isReady]);
 
-    playHeadRef.current?.updatePosition(
-      time.current,
-      shift,
-      pixelsPerSecond,
-      timelineClientWidth,
+  const realToVirtualPixels = useCallback(
+    (value: number) => {
+      return value * pixelsPerSecond;
+    },
+    [pixelsPerSecond],
+  );
+
+  const getPlayHeadPosition = useCallback(() => {
+    return (
+      realToVirtualPixels(time.current) -
+      realToVirtualPixels(shift) +
+      rulerLeftPadding
     );
+  }, [realToVirtualPixels, shift]);
 
-    clockRef.current?.updateTime(time.current);
+  const setViewToPlayHead = useCallback(
+    (timelineClientWidth: number, shift: number, pixelsPerSecond: number) => {
+      const playHeadVirtualPosition =
+        realToVirtualPixels(time.current) + rulerLeftPadding;
+      const virtualShift = realToVirtualPixels(shift);
+
+      if (
+        playHeadVirtualPosition < virtualShift ||
+        playHeadVirtualPosition >= timelineClientWidth + virtualShift
+      ) {
+        setAllShift(playHeadVirtualPosition / pixelsPerSecond);
+      }
+    },
+    [realToVirtualPixels, setAllShift],
+  );
+
+  const updatePlayHead = useCallback(() => {
+    const playHead = playHeadRef.current;
+    if (!playHead) {
+      return;
+    }
+
+    const newPosition = getPlayHeadPosition();
+
+    playHead.style.left = `${newPosition}px`;
+
+    if (playingRef.current) {
+      setViewToPlayHead(timelineClientWidth, shift, pixelsPerSecond);
+    }
+
+    playHead.style.display =
+      newPosition < 0 || newPosition > timelineClientWidth ? 'none' : '';
   }, [
+    getPlayHeadPosition,
     pixelsPerSecond,
+    setViewToPlayHead,
     shift,
     timelineClientWidth,
-    isPlaying,
-    getIntersectingByTimeTracks,
   ]);
+
+  const updateClock = () => {
+    clockRef.current?.updateTime(time.current);
+  };
+
+  const updatePlayHeadAndTime = useCallback(() => {
+    updateTrackBuffers();
+    updatePlayHead();
+    updateClock();
+  }, [updatePlayHead, updateTrackBuffers]);
 
   const animatePlayHead = useCallback(
     (timeStamp: number) => {
@@ -223,12 +288,16 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       updatePlayHeadAndTime();
 
       prevRef.current = timeStamp;
-      requestAnimationFrame(animatePlayHead);
+      timeAnimationFrame.current = requestAnimationFrame(animatePlayHead);
     },
     [updatePlayHeadAndTime],
   );
 
   const handlePlay = () => {
+    // if (!isReady) {
+    //   return;
+    // }
+
     setIsPlaying(true);
     playingRef.current = true;
 
@@ -250,6 +319,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const handleStop = () => {
     setIsPlaying(false);
     playingRef.current = false;
+    startRef.current = undefined;
 
     const tracks = Object.values(tracksBuffers.current);
 
@@ -294,7 +364,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const handleMouseMovePlayHead = useCallback(
     (e: MouseEvent) => {
       time.current = clampTime(
-        (e.pageX - ticksStartPadding - 294) / pixelsPerSecond + shift,
+        (e.pageX - rulerLeftPadding - 294) / pixelsPerSecond + shift,
       );
 
       requestAnimationFrame(updatePlayHeadAndTime);
@@ -307,7 +377,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       e.stopPropagation();
 
       time.current = clampTime(
-        (e.pageX - ticksStartPadding - 294) / pixelsPerSecond + shift,
+        (e.pageX - rulerLeftPadding - 294) / pixelsPerSecond + shift,
       );
 
       if (isPlaying) {
@@ -354,12 +424,17 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   useEffect(() => {
     const animationId = requestAnimationFrame(animatePlayHead);
+    timeAnimationFrame.current = animationId;
 
     if (!isPlaying) {
       window.cancelAnimationFrame(animationId);
+      window.cancelAnimationFrame(timeAnimationFrame.current);
     }
 
-    return () => window.cancelAnimationFrame(animationId);
+    return () => {
+      window.cancelAnimationFrame(animationId);
+      window.cancelAnimationFrame(timeAnimationFrame.current);
+    };
   }, [animatePlayHead, isPlaying]);
 
   useEffect(() => {
@@ -367,11 +442,11 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   }, [updatePlayHeadAndTime]);
 
   useEffect(() => {
-    renderRuler(ticks, shift * pixelsPerSecond, ticksStartPadding, zoom);
+    renderRuler(ticks, shift * pixelsPerSecond, rulerLeftPadding, zoom);
   }, [ticks, channels, timelineClientWidth, shift, pixelsPerSecond, zoom]);
 
   useEffect(() => {
-    renderGrid(ticks, shift * pixelsPerSecond, ticksStartPadding);
+    renderGrid(ticks, shift * pixelsPerSecond, rulerLeftPadding);
   }, [
     ticks,
     channels,
@@ -399,7 +474,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           <div className='pointer-events-none absolute left-[296px] z-10 h-full'>
             <TimelinePlayHead
               ref={playHeadRef}
-              leftPadding={ticksStartPadding}
+              style={{ left: rulerLeftPadding }}
             />
           </div>
           <TrackSidebarMemoized className='min-w-[296px]'>

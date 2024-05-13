@@ -1,42 +1,18 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef } from 'react';
 
 import { cn } from '@/shared/lib';
 import { PlayHeadIcon } from '@/shared/ui/assets';
 
-import { TimelinePlayHeadProps, TimelinePlayHeadRef } from './interfaces';
+import { TimelinePlayHeadProps } from './interfaces';
 
 export const TimelinePlayHead = forwardRef<
-  TimelinePlayHeadRef,
+  HTMLDivElement,
   TimelinePlayHeadProps
->(function TimelinePlayHead({ leftPadding, className, ...props }, ref) {
-  useImperativeHandle(ref, () => ({ updatePosition }));
-
-  const playHeadRef = useRef<HTMLDivElement | null>(null);
-
-  const updatePosition = (
-    time: number,
-    shift: number,
-    pixelsPerSecond: number,
-    timelineWidth: number,
-  ) => {
-    const playHead = playHeadRef.current;
-    if (!playHead) {
-      return;
-    }
-
-    const newPosition =
-      time * pixelsPerSecond - shift * pixelsPerSecond + leftPadding;
-
-    playHead.style.left = `${newPosition}px`;
-    playHead.style.display =
-      newPosition < 0 || newPosition > timelineWidth ? 'none' : 'block';
-  };
-
+>(function TimelinePlayHead({ className, ...props }, ref) {
   return (
     <div
       className={cn('absolute top-0 h-full', className)}
-      ref={playHeadRef}
-      style={{ left: leftPadding }}
+      ref={ref}
       {...props}
     >
       <PlayHeadIcon className='absolute left-[-9px]' width={19} height={19} />
