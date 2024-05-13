@@ -8,6 +8,7 @@ const drawMainDash = (
   ctx: CanvasRenderingContext2D,
   x: number,
   text: string,
+  isFirstDash: boolean,
   color: CSSProperties['color'] = 'white',
   height: number = 19,
 ) => {
@@ -18,7 +19,7 @@ const drawMainDash = (
   ctx.fillStyle = color;
   ctx.fillText(
     text,
-    x - renderedText.width / 2,
+    !isFirstDash ? x - renderedText.width / 2 : x,
     ctx.canvas.clientHeight - height - 3,
   );
 };
@@ -39,6 +40,7 @@ export const drawRuler = (
         ctx,
         tick.x + ticksStartPadding - shiftWidth,
         tickTextConverter(tick.number),
+        tick.x === 0,
         color,
       );
 
