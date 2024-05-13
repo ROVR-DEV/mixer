@@ -28,6 +28,7 @@ export const TrackInfoPanel = ({
     >
       <div className='flex flex-1 items-center gap-4 justify-self-end'>
         <IconButton
+          disabled={!playing}
           variant={playing ? 'primaryFilled' : 'secondaryFilled'}
           aria-label='Stop'
           onClick={onStop}
@@ -36,6 +37,7 @@ export const TrackInfoPanel = ({
         </IconButton>
         <IconButton
           className='pl-[2px]'
+          disabled={playing}
           variant={playing ? 'secondaryFilled' : 'primaryFilled'}
           aria-label='Play'
           onClick={onPlay}

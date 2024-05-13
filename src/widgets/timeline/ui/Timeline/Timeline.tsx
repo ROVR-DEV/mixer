@@ -5,6 +5,7 @@ import WaveSurfer from 'wavesurfer.js';
 
 import { useSize, cn } from '@/shared/lib';
 
+import { GlobalControlsEvent, useGlobalControls } from '@/entities/event';
 import {
   AddNewChannelButtonMemoized,
   PlaylistInfoMemoized,
@@ -422,6 +423,16 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     [pixelsPerSecond, shift, updatePlayHeadAndTime, isPlaying, playlist.tracks],
   );
 
+  const handleGlobalControls = (event: GlobalControlsEvent) => {
+    if (event.type === 'Play/Pause') {
+      if (isPlaying) {
+        handleStop();
+      } else {
+        handlePlay();
+      }
+    }
+  };
+
   useEffect(() => {
     const animationId = requestAnimationFrame(animatePlayHead);
     timeAnimationFrame.current = animationId;
@@ -458,6 +469,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   ]);
 
   usePlayHeadMove(handleMouseMovePlayHead, containerRef);
+  useGlobalControls(handleGlobalControls);
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
