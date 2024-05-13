@@ -506,7 +506,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           </div>
         </div>
         <hr className='border-secondary' />
-        <div className='flex h-full grow overflow-auto'>
+        <div className='flex h-full grow overflow-y-auto overflow-x-hidden'>
           <div className='min-h-max min-w-[296px] grow'>
             <TrackSidebarMemoized className='min-h-full'>
               <TrackSidebarItemMemoized>
@@ -552,7 +552,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           </div>
 
           <div
-            className='relative min-h-max w-full grow overflow-hidden'
+            className='relative min-h-max w-full grow'
             ref={timelineRef}
             onMouseUp={handleClickPlayHead}
           >
