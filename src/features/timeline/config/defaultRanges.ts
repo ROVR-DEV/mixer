@@ -1,6 +1,6 @@
 import { ResultRange } from '../model';
 
-const DEFAULT_RANGES: Omit<ResultRange, 'result'>[] = [
+export const DEFAULT_RANGES: Omit<ResultRange, 'result'>[] = [
   { start: 1, end: Math.pow(1.25, 3) },
   { start: Math.pow(1.25, 3), end: Math.pow(1.25, 6) },
   { start: Math.pow(1.25, 6), end: Math.pow(1.25, 13) },

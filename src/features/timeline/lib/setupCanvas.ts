@@ -8,6 +8,9 @@ export const setupCanvasAndCtx = (canvas: HTMLCanvasElement, dpi: number) => {
     return;
   }
 
+  const computedStyles = getComputedStyle(canvas);
+  ctx.font = `11.5px ${computedStyles.fontFamily}`;
+
   ctx.resetTransform();
   ctx.scale(dpi, dpi);
 

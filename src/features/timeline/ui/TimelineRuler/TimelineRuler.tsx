@@ -15,6 +15,7 @@ import {
   getDpi,
   getSubTickHeight,
   setupCanvasAndCtx,
+  tickValueToString,
 } from '../../lib';
 import { Tick } from '../../model';
 
@@ -55,6 +56,7 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
         ticks: { mainTicks: Tick[]; subTicks: Tick[] },
         shift: number,
         ticksStartPadding: number,
+        zoom: number,
         color?: Property.Color | undefined,
       ) => {
         const ctx = canvasCtxRef.current;
@@ -67,7 +69,15 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
 
         const subTickHeight = getSubTickHeight(ticks.subTicks.length);
 
-        drawRuler(ctx, ticks, subTickHeight, ticksStartPadding, shift, color);
+        drawRuler(
+          ctx,
+          ticks,
+          subTickHeight,
+          ticksStartPadding,
+          shift,
+          (value) => tickValueToString(value, zoom),
+          color,
+        );
       },
       [],
     );

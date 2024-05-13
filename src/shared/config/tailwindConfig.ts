@@ -13,6 +13,9 @@ export const tailwindConfig: Config = {
         third: { DEFAULT: '#9B9B9B', light: '#7C7C7C' },
         ruler: '#9B9B9B',
       },
+      fontFamily: {
+        sans: ['var(--font-kern)'],
+      },
     },
   },
   plugins: [

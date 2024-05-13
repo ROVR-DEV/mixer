@@ -264,9 +264,16 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     ticks: { mainTicks: Tick[]; subTicks: Tick[] },
     shift: number,
     ticksStartPadding: number,
+    zoom: number,
   ) =>
     requestAnimationFrame(() => {
-      rulerRef.current?.render(ticks, shift, ticksStartPadding, '#9B9B9B');
+      rulerRef.current?.render(
+        ticks,
+        shift,
+        ticksStartPadding,
+        zoom,
+        '#9B9B9B',
+      );
     });
 
   const renderGrid = (
@@ -360,8 +367,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   }, [updatePlayHeadAndTime]);
 
   useEffect(() => {
-    renderRuler(ticks, shift * pixelsPerSecond, ticksStartPadding);
-  }, [ticks, channels, timelineClientWidth, shift, pixelsPerSecond]);
+    renderRuler(ticks, shift * pixelsPerSecond, ticksStartPadding, zoom);
+  }, [ticks, channels, timelineClientWidth, shift, pixelsPerSecond, zoom]);
 
   useEffect(() => {
     renderGrid(ticks, shift * pixelsPerSecond, ticksStartPadding);
@@ -409,19 +416,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             className='relative flex w-full items-end pb-[9px]'
             onClick={handleClickPlayHead}
             ref={containerRef}
-            // onMouseMove={(e) => {
-            //   if (!tooltipRef.current) {
-            //     return;
-            //   }
-
-            //   const x = e.pageX - 296 - ticksStartPadding;
-
-            //   tooltipRef.current.textContent = `${x * zoom + shift * pixelsPerSecond}`;
-            //   tooltipRef.current.style.left = `${x}px`;
-            // }}
           >
-            {/* <div ref={tooltipRef} className='absolute' /> */}
-            <TimelineRulerMemoized className='h-[30px] w-full' ref={rulerRef} />
+            <TimelineRulerMemoized className='h-[32px] w-full' ref={rulerRef} />
           </div>
         </div>
         <hr className='border-secondary' />

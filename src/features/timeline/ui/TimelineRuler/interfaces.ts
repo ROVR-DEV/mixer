@@ -17,6 +17,7 @@ export interface TimelineRulerRef {
     ticks: { mainTicks: Tick[]; subTicks: Tick[] },
     ticksStartPadding: number,
     shift: number,
+    zoom: number,
     color?: Property.Color | undefined,
   ) => void;
 }

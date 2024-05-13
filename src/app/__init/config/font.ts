@@ -19,4 +19,5 @@ export const kernFont = localFont({
     },
   ],
   display: 'swap',
+  variable: '--font-kern',
 });

@@ -1,6 +1,5 @@
 import { CSSProperties } from 'react';
 
-import { tickValueSecondsFormatter } from '../config';
 import { Tick } from '../model';
 
 import { drawVerticalLine } from './drawVerticalLine';
@@ -14,15 +13,14 @@ const drawMainDash = (
 ) => {
   drawVerticalLine(ctx, x, height, color);
 
+  const renderedText = ctx.measureText(text);
+
   ctx.fillStyle = color;
-  ctx.fillText(text, x - 3, ctx.canvas.clientHeight - height - 3);
-};
-
-const tickValueToTime = (value: number) => {
-  const minutes = Math.floor(value / 60);
-  const seconds = tickValueSecondsFormatter.format(value - minutes * 60);
-
-  return { minutes, seconds };
+  ctx.fillText(
+    text,
+    x - renderedText.width / 2,
+    ctx.canvas.clientHeight - height - 3,
+  );
 };
 
 export const drawRuler = (
@@ -31,17 +29,16 @@ export const drawRuler = (
   subTickHeight: { short: number; tall: number },
   ticksStartPadding: number,
   shiftWidth: number,
+  tickTextConverter: (value: number) => string,
   color: CSSProperties['color'] = 'white',
 ) => {
   const bufferWidth = 1000;
   ticks.mainTicks.forEach((tick) => {
     if (tick.x >= shiftWidth - bufferWidth) {
-      const { minutes, seconds } = tickValueToTime(tick.number);
-
       drawMainDash(
         ctx,
         tick.x + ticksStartPadding - shiftWidth,
-        `${minutes}:${seconds}`,
+        tickTextConverter(tick.number),
         color,
       );
 
