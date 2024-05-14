@@ -14,6 +14,7 @@ export const TrackWaveformCard = ({
   className,
   onAddTrackBuffer,
   isSelected,
+  isSolo,
   ...props
 }: TrackWaveformCardProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +95,7 @@ export const TrackWaveformCard = ({
         'relative grid grid-rows-[1fr_auto_1fr] h-[84px] border transition-colors border-third-light text-third rounded-md bg-primary',
         className,
         { 'bg-accent !text-primary': isSelected },
+        { 'border-accent': isSolo || isSelected },
       )}
       {...props}
     >

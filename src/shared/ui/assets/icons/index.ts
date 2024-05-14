@@ -6,7 +6,7 @@ export { default as StopIcon } from './stop.svg';
 export { default as PlusIcon } from './plus.svg';
 
 export { default as MuteChannelIcon } from './mute-channel.svg';
-export { default as SingleChannelIcon } from './single-channel.svg';
+export { default as SoloChannelIcon } from './solo-channel.svg';
 export { default as AutomationChannelIcon } from './automation-channel.svg';
 
 export { default as MoveIcon } from './move.svg';

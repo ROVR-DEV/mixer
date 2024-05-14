@@ -9,4 +9,5 @@ export interface TrackWaveformCardProps
   trackData: Blob | string | undefined;
   onAddTrackBuffer: (trackId: number, trackBuffer: WaveSurfer) => void;
   isSelected?: boolean;
+  isSolo?: boolean;
 }

@@ -70,6 +70,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
 
+  const [soloChannelIds, setSoloChannelIds] = useState<number[]>([]);
   const [mutedChannelIds, setMutedChannelIds] = useState<number[]>([]);
 
   const tracksBuffers = useRef<{
@@ -126,33 +127,91 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     ]);
   };
 
+  const toggleChannelMute = (channelId: number, includes?: boolean) => {
+    setMutedChannelIds((prevState) => {
+      if (includes || prevState.includes(channelId)) {
+        return prevState.filter((id) => id !== channelId);
+      }
+
+      return [...prevState, channelId];
+    });
+  };
+
+  const toggleChannelSolo = (channelId: number, includes?: boolean) => {
+    setSoloChannelIds((prevState) => {
+      if (includes || prevState.includes(channelId)) {
+        return prevState.filter((id) => id !== channelId);
+      }
+
+      return [...prevState, channelId];
+    });
+  };
+
+  const handleMuteChannel = useCallback(
+    (trackId: number) => {
+      if (soloChannelIds.includes(trackId)) {
+        toggleChannelSolo(trackId, true);
+      }
+
+      toggleChannelMute(trackId);
+    },
+    [soloChannelIds],
+  );
+
+  const handleSoloChannel = useCallback(
+    (trackId: number) => {
+      if (mutedChannelIds.includes(trackId)) {
+        toggleChannelMute(trackId, true);
+      }
+
+      toggleChannelSolo(trackId);
+    },
+    [mutedChannelIds],
+  );
+
   const channelNodes = useMemo(
     () =>
-      channels.map((channel) => (
-        <TrackSidebarItemMemoized
-          key={`${channel.id}-channel`}
-          isSelected={selectedChannel?.id === channel.id}
-          onClick={() => setSelectedChannel(channel)}
-        >
-          <TrackChannelControlMemoized
-            number={channel.id}
+      channels.map((channel) => {
+        const isSolo = soloChannelIds.includes(channel.id);
+
+        return (
+          <TrackSidebarItemMemoized
+            key={`${channel.id}-channel`}
             isSelected={selectedChannel?.id === channel.id}
-            isAbleToRemove={channel.id > 2}
-            isMuted={mutedChannelIds.includes(channel.id)}
-            onClickMute={() => handleMuteChannel(channel.id)}
-            onClickRemove={() =>
-              setChannels((prevState) => [
-                ...prevState.slice(0, prevState.length - 1),
-              ])
-            }
-          />
-        </TrackSidebarItemMemoized>
-      )),
-    [channels, mutedChannelIds, selectedChannel?.id],
+            onClick={() => setSelectedChannel(channel)}
+          >
+            <TrackChannelControlMemoized
+              number={channel.id}
+              isSelected={selectedChannel?.id === channel.id}
+              isAbleToRemove={channel.id > 2}
+              isMuted={
+                (mutedChannelIds.includes(channel.id) && !isSolo) ||
+                (!!soloChannelIds.length && !isSolo)
+              }
+              isSolo={isSolo}
+              onClickMute={() => handleMuteChannel(channel.id)}
+              onClickSolo={() => handleSoloChannel(channel.id)}
+              onClickRemove={() =>
+                setChannels((prevState) => [
+                  ...prevState.slice(0, prevState.length - 1),
+                ])
+              }
+            />
+          </TrackSidebarItemMemoized>
+        );
+      }),
+    [
+      channels,
+      handleMuteChannel,
+      handleSoloChannel,
+      mutedChannelIds,
+      selectedChannel?.id,
+      soloChannelIds,
+    ],
   );
 
   const trackMapFunction = useCallback(
-    (track: Track) => {
+    (track: Track, channelId?: number) => {
       const durationInSeconds = track.end - track.start;
 
       const trackStartPosition = track.start * pixelsPerSecond;
@@ -174,6 +233,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         setSelectedTrack(track);
       };
 
+      const isSolo = channelId ? soloChannelIds.includes(channelId) : false;
+
       return (
         <TrackWaveformCardMemoized
           className='absolute'
@@ -185,6 +246,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             width: trackWidth,
             left: shiftFromLeft,
           }}
+          isSolo={isSolo}
           onAddTrackBuffer={onAppendTrackBuffer}
           isSelected={selectedTrack?.uuid === track.uuid}
           onClick={handleClick}
@@ -192,7 +254,14 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         />
       );
     },
-    [pixelsPerSecond, selectedTrack, shift, timelineClientWidth, tracks],
+    [
+      pixelsPerSecond,
+      selectedTrack?.uuid,
+      shift,
+      soloChannelIds,
+      timelineClientWidth,
+      tracks,
+    ],
   );
 
   const { evenTracks, oddTracks, evenTrackNodes, oddTracksNodes } =
@@ -203,34 +272,42 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       return {
         evenTracks,
         oddTracks,
-        evenTrackNodes: evenTracks.map(trackMapFunction),
-        oddTracksNodes: oddTracks.map(trackMapFunction),
+        evenTrackNodes: evenTracks.map((track) => trackMapFunction(track, 2)),
+        oddTracksNodes: oddTracks.map((track) => trackMapFunction(track, 1)),
       };
     }, [playlist.tracks, trackMapFunction]);
 
   const trackNodes = useMemo(
     () =>
-      channels.map((channel) => (
-        <TrackSidebarItemMemoized
-          key={`${channel.id}-track`}
-          className='relative'
-          isSelected={selectedChannel?.id === channel.id}
-          isMuted={mutedChannelIds.includes(channel.id)}
-          onClick={() => setSelectedChannel(channel)}
-        >
-          {channel.id === 1
-            ? oddTracksNodes
-            : channel.id === 2
-              ? evenTrackNodes
-              : null}
-        </TrackSidebarItemMemoized>
-      )),
+      channels.map((channel) => {
+        const isSolo = soloChannelIds.includes(channel.id);
+
+        return (
+          <TrackSidebarItemMemoized
+            key={`${channel.id}-track`}
+            className='relative'
+            isSelected={selectedChannel?.id === channel.id}
+            isMuted={
+              (mutedChannelIds.includes(channel.id) && !isSolo) ||
+              (!!soloChannelIds.length && !isSolo)
+            }
+            onClick={() => setSelectedChannel(channel)}
+          >
+            {channel.id === 1
+              ? oddTracksNodes
+              : channel.id === 2
+                ? evenTrackNodes
+                : null}
+          </TrackSidebarItemMemoized>
+        );
+      }),
     [
       channels,
       evenTrackNodes,
       mutedChannelIds,
       oddTracksNodes,
       selectedChannel?.id,
+      soloChannelIds,
     ],
   );
 
@@ -263,15 +340,35 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       }
     }, [] as number[]);
 
+    const soloTrackIds = soloChannelIds.reduce<number[]>((acc, channelId) => {
+      if (channelId === 1) {
+        return [...acc, ...oddTracks.map((track) => track.id)];
+      } else if (channelId === 2) {
+        return [...acc, ...evenTracks.map((track) => track.id)];
+      } else {
+        return acc;
+      }
+    }, [] as number[]);
+
     // TODO: тут надо как-то оптимизировать это, жесткая долбёжка: https://www.youtube.com/watch?v=szMd_uh8xtc
     if (isPlaying && tracks.length > 0) {
       tracks.forEach(({ id }) => {
         const trackBuffer = getTrackBuffer(id);
 
+        const isMuted = mutedTrackIds.includes(id);
+
+        const hasAtLeastOneSolo = !!soloChannelIds.length;
+        const isSolo = soloTrackIds.includes(id);
+
+        // console.log(
+        //   isSolo,
+        //   tracks.find((track) => track.id === id),
+        // );
+
         if (trackBuffer) {
-          if (mutedTrackIds.includes(id)) {
+          if (isMuted || (hasAtLeastOneSolo && !isSolo)) {
             trackBuffer.pause();
-          } else if (!trackBuffer.isPlaying()) {
+          } else if (isSolo || !trackBuffer.isPlaying()) {
             trackBuffer.play();
           }
         }
@@ -284,6 +381,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     isReady,
     mutedChannelIds,
     oddTracks,
+    soloChannelIds,
   ]);
 
   const realToVirtualPixels = useCallback(
@@ -377,9 +475,9 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   );
 
   const handlePlay = () => {
-    // if (!isReady) {
-    //   return;
-    // }
+    if (!isReady) {
+      return;
+    }
 
     setIsPlaying(true);
     playingRef.current = true;
@@ -394,8 +492,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
       const trackSeekPercent = (time.current - start) / (end - start);
 
       const trackBuffer = getTrackBuffer(id);
-      trackBuffer.seekTo(trackSeekPercent);
-      trackBuffer.play();
+      if (trackBuffer) {
+        trackBuffer.seekTo(trackSeekPercent);
+        trackBuffer.play();
+      }
     });
   };
 
@@ -517,16 +617,6 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const handleClickTimeline = () => {
     setSelectedTrack(null);
-  };
-
-  const handleMuteChannel = (trackId: number) => {
-    setMutedChannelIds((prevState) => {
-      if (prevState.includes(trackId)) {
-        return prevState.filter((id) => id !== trackId);
-      }
-
-      return [...prevState, trackId];
-    });
   };
 
   useEffect(() => {

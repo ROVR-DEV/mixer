@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib';
 import { Badge, IconButton } from '@/shared/ui';
 import {
   MuteChannelIcon,
-  SingleChannelIcon,
+  SoloChannelIcon,
   AutomationChannelIcon,
   CrossIcon,
 } from '@/shared/ui/assets';
@@ -15,7 +15,9 @@ export const TrackChannelControl = ({
   number,
   isAbleToRemove,
   isMuted,
+  isSolo,
   onClickRemove,
+  onClickSolo,
   onClickMute,
   isSelected,
   className,
@@ -40,7 +42,7 @@ export const TrackChannelControl = ({
       <IconButton
         className='size-7'
         variant={isMuted ? 'primaryFilled' : 'secondary'}
-        aria-label='Mute channel'
+        aria-label='Mute\unmute this track'
         role='switch'
         aria-checked={isMuted}
         onClick={onClickMute}
@@ -49,12 +51,13 @@ export const TrackChannelControl = ({
       </IconButton>
       <IconButton
         className='size-7'
-        variant='secondary'
-        aria-label='Single channel'
+        variant={isSolo ? 'primaryFilled' : 'secondary'}
+        aria-label='Solo this track'
         role='switch'
-        aria-checked='false'
+        aria-checked={isSolo}
+        onClick={onClickSolo}
       >
-        <SingleChannelIcon />
+        <SoloChannelIcon />
       </IconButton>
       <IconButton
         className='size-7'

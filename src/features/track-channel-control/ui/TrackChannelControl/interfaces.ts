@@ -5,7 +5,9 @@ export interface TrackChannelControlProps
   number: number;
   isAbleToRemove?: boolean;
   isMuted?: boolean;
+  isSolo?: boolean;
   onClickMute: () => void;
+  onClickSolo: () => void;
   onClickRemove: () => void;
   isSelected?: boolean;
 }
