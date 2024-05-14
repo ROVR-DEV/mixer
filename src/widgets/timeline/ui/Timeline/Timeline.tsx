@@ -239,6 +239,9 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         e.stopPropagation();
 
         setSelectedTrack(track);
+        if (channelId) {
+          setSelectedChannel({ id: channelId });
+        }
       };
 
       const isSolo = channelId ? soloChannelIds.includes(channelId) : false;
