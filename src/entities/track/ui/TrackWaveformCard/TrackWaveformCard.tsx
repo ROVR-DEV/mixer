@@ -83,9 +83,9 @@ export const TrackWaveformCard = ({
     }
 
     if (isSelected) {
-      wavesurfer.setOptions({ waveColor: '#161616' });
+      wavesurfer.setOptions({ waveColor: '#161616', progressColor: '#161616' });
     } else {
-      wavesurfer.setOptions({ waveColor: '#9B9B9B' });
+      wavesurfer.setOptions({ waveColor: '#9B9B9B', progressColor: '#9B9B9B' });
     }
   }, [isSelected, wavesurfer]);
 
