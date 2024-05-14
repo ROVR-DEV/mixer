@@ -92,7 +92,7 @@ export const TrackWaveformCard = ({
   return (
     <div
       className={cn(
-        'relative grid grid-rows-[1fr_auto_1fr] h-[84px] border transition-colors border-third-light text-third rounded-md bg-primary',
+        'relative grid grid-rows-[1fr_auto_1fr] h-[84px] border transition-colors border-third-dark text-third rounded-md bg-primary',
         className,
         { 'bg-accent !text-primary': isSelected },
         { 'border-accent': isSolo || isSelected },

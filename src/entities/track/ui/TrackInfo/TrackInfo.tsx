@@ -22,7 +22,7 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
           )}
         >
           <span
-            className={cn('font-bold text-third-light', {
+            className={cn('font-bold text-third-dark', {
               'text-accent': !!track,
             })}
           >
