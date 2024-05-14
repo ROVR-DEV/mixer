@@ -6,8 +6,9 @@ export interface TrackChannelControlProps
   isAbleToRemove?: boolean;
   isMuted?: boolean;
   isSolo?: boolean;
-  onClickMute: () => void;
-  onClickSolo: () => void;
-  onClickRemove: () => void;
+  onClickMute: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClickSolo: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClickRemove: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClickAutomation: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isSelected?: boolean;
 }

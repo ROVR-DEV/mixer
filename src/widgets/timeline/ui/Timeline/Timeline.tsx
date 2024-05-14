@@ -189,13 +189,21 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
                 (!!soloChannelIds.length && !isSolo)
               }
               isSolo={isSolo}
-              onClickMute={() => handleMuteChannel(channel.id)}
-              onClickSolo={() => handleSoloChannel(channel.id)}
-              onClickRemove={() =>
+              onClickMute={(e) => {
+                e.stopPropagation();
+                handleMuteChannel(channel.id);
+              }}
+              onClickSolo={(e) => {
+                e.stopPropagation();
+                handleSoloChannel(channel.id);
+              }}
+              onClickRemove={(e) => {
+                e.stopPropagation();
                 setChannels((prevState) => [
                   ...prevState.slice(0, prevState.length - 1),
-                ])
-              }
+                ]);
+              }}
+              onClickAutomation={(e) => e.stopPropagation()}
             />
           </TrackSidebarItemMemoized>
         );

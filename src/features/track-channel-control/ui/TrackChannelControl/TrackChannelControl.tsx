@@ -19,6 +19,7 @@ export const TrackChannelControl = ({
   onClickRemove,
   onClickSolo,
   onClickMute,
+  onClickAutomation,
   isSelected,
   className,
   ...props
@@ -63,6 +64,8 @@ export const TrackChannelControl = ({
         className='size-7'
         variant='secondary'
         aria-label='Show/hide automation'
+        onClick={onClickAutomation}
+        disabled
       >
         <AutomationChannelIcon />
       </IconButton>
