@@ -4,5 +4,5 @@ export interface TrackSidebarItemProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   disableBorder?: boolean;
   isSelected?: boolean;
-  translucentBackgroundWhenSelected?: boolean;
+  isMuted?: boolean;
 }

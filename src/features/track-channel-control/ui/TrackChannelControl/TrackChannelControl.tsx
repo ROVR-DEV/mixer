@@ -14,7 +14,9 @@ import { TrackChannelControlProps } from './interfaces';
 export const TrackChannelControl = ({
   number,
   isAbleToRemove,
+  isMuted,
   onClickRemove,
+  onClickMute,
   isSelected,
   className,
   ...props
@@ -37,10 +39,11 @@ export const TrackChannelControl = ({
       </Badge>
       <IconButton
         className='size-7'
-        variant='secondary'
+        variant={isMuted ? 'primaryFilled' : 'secondary'}
         aria-label='Mute channel'
         role='switch'
-        aria-checked='false'
+        aria-checked={isMuted}
+        onClick={onClickMute}
       >
         <MuteChannelIcon />
       </IconButton>

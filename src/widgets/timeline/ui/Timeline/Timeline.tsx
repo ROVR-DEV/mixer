@@ -70,6 +70,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
 
+  const [mutedChannelIds, setMutedChannelIds] = useState<number[]>([]);
+
   const tracksBuffers = useRef<{
     [key: number]: WaveSurfer;
   }>({});
@@ -136,6 +138,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             number={channel.id}
             isSelected={selectedChannel?.id === channel.id}
             isAbleToRemove={channel.id > 2}
+            isMuted={mutedChannelIds.includes(channel.id)}
+            onClickMute={() => handleMuteChannel(channel.id)}
             onClickRemove={() =>
               setChannels((prevState) => [
                 ...prevState.slice(0, prevState.length - 1),
@@ -144,7 +148,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
           />
         </TrackSidebarItemMemoized>
       )),
-    [channels, selectedChannel?.id],
+    [channels, mutedChannelIds, selectedChannel?.id],
   );
 
   const trackMapFunction = useCallback(
@@ -191,17 +195,18 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     [pixelsPerSecond, selectedTrack, shift, timelineClientWidth, tracks],
   );
 
-  const { evenTracks, oddTracks } = useMemo(
-    () => ({
-      evenTracks: playlist.tracks
-        .filter((_, i) => i % 2 === 0)
-        .map(trackMapFunction),
-      oddTracks: playlist.tracks
-        .filter((_, i) => i % 2 !== 0)
-        .map(trackMapFunction),
-    }),
-    [playlist.tracks, trackMapFunction],
-  );
+  const { evenTracks, oddTracks, evenTrackNodes, oddTracksNodes } =
+    useMemo(() => {
+      const evenTracks = playlist.tracks.filter((_, i) => i % 2 === 0);
+      const oddTracks = playlist.tracks.filter((_, i) => i % 2 !== 0);
+
+      return {
+        evenTracks,
+        oddTracks,
+        evenTrackNodes: evenTracks.map(trackMapFunction),
+        oddTracksNodes: oddTracks.map(trackMapFunction),
+      };
+    }, [playlist.tracks, trackMapFunction]);
 
   const trackNodes = useMemo(
     () =>
@@ -209,14 +214,24 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         <TrackSidebarItemMemoized
           key={`${channel.id}-track`}
           className='relative'
-          translucentBackgroundWhenSelected
           isSelected={selectedChannel?.id === channel.id}
+          isMuted={mutedChannelIds.includes(channel.id)}
           onClick={() => setSelectedChannel(channel)}
         >
-          {channel.id === 1 ? oddTracks : channel.id === 2 ? evenTracks : null}
+          {channel.id === 1
+            ? oddTracksNodes
+            : channel.id === 2
+              ? evenTrackNodes
+              : null}
         </TrackSidebarItemMemoized>
       )),
-    [channels, evenTracks, oddTracks, selectedChannel?.id],
+    [
+      channels,
+      evenTrackNodes,
+      mutedChannelIds,
+      oddTracksNodes,
+      selectedChannel?.id,
+    ],
   );
 
   const time = useRef<number>(0);
@@ -238,17 +253,38 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
     const tracks = getIntersectingByTimeTracks(time.current);
 
+    const mutedTrackIds = mutedChannelIds.reduce<number[]>((acc, channelId) => {
+      if (channelId === 1) {
+        return [...acc, ...oddTracks.map((track) => track.id)];
+      } else if (channelId === 2) {
+        return [...acc, ...evenTracks.map((track) => track.id)];
+      } else {
+        return acc;
+      }
+    }, [] as number[]);
+
     // TODO: тут надо как-то оптимизировать это, жесткая долбёжка: https://www.youtube.com/watch?v=szMd_uh8xtc
     if (isPlaying && tracks.length > 0) {
       tracks.forEach(({ id }) => {
         const trackBuffer = getTrackBuffer(id);
 
-        if (trackBuffer && !trackBuffer.isPlaying()) {
-          trackBuffer.play();
+        if (trackBuffer) {
+          if (mutedTrackIds.includes(id)) {
+            trackBuffer.pause();
+          } else if (!trackBuffer.isPlaying()) {
+            trackBuffer.play();
+          }
         }
       });
     }
-  }, [getIntersectingByTimeTracks, isPlaying, isReady]);
+  }, [
+    evenTracks,
+    getIntersectingByTimeTracks,
+    isPlaying,
+    isReady,
+    mutedChannelIds,
+    oddTracks,
+  ]);
 
   const realToVirtualPixels = useCallback(
     (value: number) => {
@@ -481,6 +517,16 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const handleClickTimeline = () => {
     setSelectedTrack(null);
+  };
+
+  const handleMuteChannel = (trackId: number) => {
+    setMutedChannelIds((prevState) => {
+      if (prevState.includes(trackId)) {
+        return prevState.filter((id) => id !== trackId);
+      }
+
+      return [...prevState, trackId];
+    });
   };
 
   useEffect(() => {

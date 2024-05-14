@@ -7,19 +7,24 @@ import { TrackSidebarItemProps } from './interfaces';
 export const TrackSidebarItem = ({
   disableBorder,
   isSelected,
-  translucentBackgroundWhenSelected,
+  isMuted,
   className,
+  children,
   ...props
 }: TrackSidebarItemProps) => {
   return (
     <div
-      className={cn('p-4 h-24 flex items-center', className, {
+      className={cn('p-4 h-24 flex items-center relative', className, {
         'border-b border-b-secondary': !disableBorder,
-        'bg-primary-dark/50': isSelected && translucentBackgroundWhenSelected,
-        'bg-primary-dark': isSelected && !translucentBackgroundWhenSelected,
+        'bg-primary-dark': isSelected && !isMuted,
       })}
       {...props}
-    />
+    >
+      {children}
+      {isMuted && (
+        <div className='absolute left-0 top-0 size-full bg-third-light/10' />
+      )}
+    </div>
   );
 };
 
