@@ -4,6 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 import { useSize, cn } from '@/shared/lib';
+import { Badge, Button } from '@/shared/ui';
 
 import { TrackWaveformCardProps } from './interfaces';
 
@@ -12,6 +13,7 @@ export const TrackWaveformCard = ({
   trackData,
   className,
   onAddTrackBuffer,
+  isSelected,
   ...props
 }: TrackWaveformCardProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -54,6 +56,7 @@ export const TrackWaveformCard = ({
       plugins: [],
       cursorColor: 'transparent',
       progressColor: '#9B9B9B',
+      waveColor: '#9B9B9B',
     });
 
     newWavesurfer.toggleInteraction(false);
@@ -73,14 +76,41 @@ export const TrackWaveformCard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackData, containerSize?.height]);
 
+  useEffect(() => {
+    if (!wavesurfer) {
+      return;
+    }
+
+    if (isSelected) {
+      wavesurfer.setOptions({ waveColor: '#161616' });
+    } else {
+      wavesurfer.setOptions({ waveColor: '#9B9B9B' });
+    }
+  }, [isSelected, wavesurfer]);
+
   return (
     <div
       className={cn(
-        'grid grid-rows-[1fr_auto_1fr] h-[84px] border border-third-light rounded-md bg-primary',
+        'relative grid grid-rows-[1fr_auto_1fr] h-[84px] border transition-colors border-third-light text-third rounded-md bg-primary',
         className,
+        { 'bg-accent !text-primary': isSelected },
       )}
       {...props}
     >
+      <Button
+        className={cn('absolute hidden left-1.5 top-1.5 p-0', {
+          flex: isSelected,
+        })}
+      >
+        <Badge
+          variant='inverse'
+          className={cn(
+            'w-16 h-[22px] z-10 bg-accent/80 rounded-md uppercase p-0 pt-[3px] text-[12px] font-bold items-center justify-center  flex',
+          )}
+        >
+          {'Edit'}
+        </Badge>
+      </Button>
       <div
         ref={containerRef}
         className={cn('relative row-start-2 col-start-1 w-full h-[46px]', {
@@ -93,7 +123,7 @@ export const TrackWaveformCard = ({
         <div className='absolute inset-y-0 my-auto h-px w-full bg-third/40' />
         <div id={`#waveform-${track.uuid}`} />
       </div>
-      <span className='col-start-1 row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap px-2 text-[12px] text-third'>
+      <span className='col-start-1 row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap pl-1 text-[12px]'>
         <span className='font-bold'>{`${track.title} | ${track.artist} `}</span>
         <span className=''>{`(${track.duration})`}</span>
       </span>

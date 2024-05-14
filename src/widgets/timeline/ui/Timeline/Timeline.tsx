@@ -62,6 +62,8 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const timelineClientWidth = size?.width ?? 0;
   const paddingTimeSeconds = 120;
 
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+
   const tracksBuffers = useRef<{
     [key: number]: WaveSurfer;
   }>({});
@@ -143,6 +145,13 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         trackStartPosition < timelineClientWidth + shiftPixels &&
         trackEndPosition > shiftPixels;
 
+      const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setSelectedTrack(track);
+      };
+
       return (
         <TrackWaveformCardMemoized
           className='absolute'
@@ -155,10 +164,13 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             left: shiftFromLeft,
           }}
           onAddTrackBuffer={onAppendTrackBuffer}
+          isSelected={selectedTrack?.uuid === track.uuid}
+          onClick={handleClick}
+          onMouseUp={(e) => e.stopPropagation()}
         />
       );
     },
-    [pixelsPerSecond, shift, timelineClientWidth, tracks],
+    [pixelsPerSecond, selectedTrack, shift, timelineClientWidth, tracks],
   );
 
   const { evenTracks, oddTracks } = useMemo(
@@ -433,6 +445,10 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
     }
   };
 
+  const handleClickTimeline = () => {
+    setSelectedTrack(null);
+  };
+
   useEffect(() => {
     const animationId = requestAnimationFrame(animatePlayHead);
     timeAnimationFrame.current = animationId;
@@ -479,6 +495,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         onPlay={handlePlay}
         onStop={handleStop}
         clockRef={clockRef}
+        selectedTrack={selectedTrack}
       />
       <hr className='border-secondary' />
       <div className='relative flex h-full grow flex-col overflow-hidden'>
@@ -555,6 +572,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
             className='relative min-h-max w-full grow overflow-x-clip'
             ref={timelineRef}
             onMouseUp={handleClickPlayHead}
+            onClick={handleClickTimeline}
           >
             {tracks === null ? (
               <span className='flex size-full flex-col items-center justify-center'>

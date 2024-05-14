@@ -14,6 +14,10 @@ const defaultStyles: Record<BadgeVariant, string> = {
     baseStyles,
     'border border-transparent bg-accent [&_svg]:fill-primary text-primary',
   ),
+  inverse: cn(
+    baseStyles,
+    'border border-primary [&_svg]:fill-primary text-primary',
+  ),
 };
 
 export const getStyles = (variant: BadgeVariant) => {

@@ -15,6 +15,7 @@ export const TrackInfoPanel = ({
   onStop,
   playing,
   clockRef,
+  selectedTrack,
   className,
   ...props
 }: TrackInfoPanelProps) => {
@@ -49,7 +50,7 @@ export const TrackInfoPanel = ({
         <ClockMemoized ref={clockRef} />
       </Badge>
       <div className='flex w-[450px] justify-self-end'>
-        <TrackInfo className='w-full' />
+        <TrackInfo className='w-full' track={selectedTrack} />
       </div>
     </div>
   );
