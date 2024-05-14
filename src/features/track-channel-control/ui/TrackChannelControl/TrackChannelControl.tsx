@@ -15,6 +15,7 @@ export const TrackChannelControl = ({
   number,
   isAbleToRemove,
   onClickRemove,
+  isSelected,
   className,
   ...props
 }: TrackChannelControlProps) => {
@@ -28,7 +29,7 @@ export const TrackChannelControl = ({
       className={cn('flex items-center gap-[10px] w-max', className)}
       {...props}
     >
-      <Badge className='h-7 px-2'>
+      <Badge className='h-7 px-2' variant={isSelected ? 'filled' : 'default'}>
         <span className='text-[13px] uppercase italic font-fix'>
           <span>{'Channel '}</span>
           <span>{channelNumber}</span>

@@ -7,7 +7,7 @@ export const tailwindConfig: Config = {
     extend: {
       colors: {
         accent: { DEFAULT: '#FFF057', light: '#FFED24' },
-        primary: '#161616',
+        primary: { dark: '#101010', DEFAULT: '#161616' },
         error: { DEFAULT: '#D64848' },
         secondary: { DEFAULT: '#2D2D2D', light: '#494949' },
         third: { DEFAULT: '#9B9B9B', light: '#7C7C7C' },

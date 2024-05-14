@@ -51,7 +51,13 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [channels, setChannels] = useState<{ id: number }[]>([]);
+  const [channels, setChannels] = useState<{ id: number }[]>([
+    { id: 1 },
+    { id: 2 },
+  ]);
+  const [selectedChannel, setSelectedChannel] = useState<{
+    id: number;
+  } | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const playingRef = useRef(isPlaying);
@@ -114,19 +120,31 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
   const addNewChannel = () => {
     setChannels((prevState) => [
       ...prevState,
-      { id: (prevState.at(-1)?.id ?? 0) + 1 },
+      { id: (prevState.at(-1)?.id ?? 1) + 1 },
     ]);
   };
 
-  const trackNodes = useMemo(
+  const channelNodes = useMemo(
     () =>
       channels.map((channel) => (
         <TrackSidebarItemMemoized
-          key={`${channel.id}-track`}
-          className='relative'
-        />
+          key={`${channel.id}-channel`}
+          isSelected={selectedChannel?.id === channel.id}
+          onClick={() => setSelectedChannel(channel)}
+        >
+          <TrackChannelControlMemoized
+            number={channel.id}
+            isSelected={selectedChannel?.id === channel.id}
+            isAbleToRemove={channel.id > 2}
+            onClickRemove={() =>
+              setChannels((prevState) => [
+                ...prevState.slice(0, prevState.length - 1),
+              ])
+            }
+          />
+        </TrackSidebarItemMemoized>
       )),
-    [channels],
+    [channels, selectedChannel?.id],
   );
 
   const trackMapFunction = useCallback(
@@ -183,6 +201,22 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         .map(trackMapFunction),
     }),
     [playlist.tracks, trackMapFunction],
+  );
+
+  const trackNodes = useMemo(
+    () =>
+      channels.map((channel) => (
+        <TrackSidebarItemMemoized
+          key={`${channel.id}-track`}
+          className='relative'
+          translucentBackgroundWhenSelected
+          isSelected={selectedChannel?.id === channel.id}
+          onClick={() => setSelectedChannel(channel)}
+        >
+          {channel.id === 1 ? oddTracks : channel.id === 2 ? evenTracks : null}
+        </TrackSidebarItemMemoized>
+      )),
+    [channels, evenTracks, oddTracks, selectedChannel?.id],
   );
 
   const time = useRef<number>(0);
@@ -526,39 +560,7 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
         <div className='flex h-full grow overflow-y-auto overflow-x-hidden'>
           <div className='min-h-max min-w-[296px] grow'>
             <TrackSidebarMemoized className='min-h-full'>
-              <TrackSidebarItemMemoized>
-                <TrackChannelControlMemoized
-                  number={1}
-                  onClickRemove={() =>
-                    setChannels((prevState) => [
-                      ...prevState.slice(0, prevState.length - 1),
-                    ])
-                  }
-                />
-              </TrackSidebarItemMemoized>
-              <TrackSidebarItemMemoized>
-                <TrackChannelControlMemoized
-                  number={2}
-                  onClickRemove={() =>
-                    setChannels((prevState) => [
-                      ...prevState.slice(0, prevState.length - 1),
-                    ])
-                  }
-                />
-              </TrackSidebarItemMemoized>
-              {channels.map((channel, index) => (
-                <TrackSidebarItemMemoized key={`${channel.id}-channel`}>
-                  <TrackChannelControlMemoized
-                    number={index + 3}
-                    isAbleToRemove
-                    onClickRemove={() =>
-                      setChannels((prevState) => [
-                        ...prevState.slice(0, prevState.length - 1),
-                      ])
-                    }
-                  />
-                </TrackSidebarItemMemoized>
-              ))}
+              {channelNodes}
               <TrackSidebarItemMemoized
                 className='justify-center'
                 disableBorder
@@ -583,15 +585,9 @@ export const Timeline = ({ playlist, className, ...props }: TimelineProps) => {
               <>
                 <TimelineGridMemoized
                   className='absolute w-full'
-                  style={{ height: (channels.length + 2) * 96 }}
+                  style={{ height: channels.length * 96 }}
                   ref={gridRef}
                 />
-                <TrackSidebarItemMemoized className='relative p-0'>
-                  {evenTracks}
-                </TrackSidebarItemMemoized>
-                <TrackSidebarItemMemoized className='relative p-0'>
-                  {oddTracks}
-                </TrackSidebarItemMemoized>
                 {trackNodes}
               </>
             )}

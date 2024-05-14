@@ -4,7 +4,7 @@
 
 :root {
   --foreground-color: theme('textColor.white');
-  --background-color: theme('colors.primary');
+  --background-color: theme('colors.primary.DEFAULT');
 }
 
 body {

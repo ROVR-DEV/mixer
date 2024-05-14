@@ -5,4 +5,5 @@ export interface TrackChannelControlProps
   number: number;
   isAbleToRemove?: boolean;
   onClickRemove: () => void;
+  isSelected?: boolean;
 }
