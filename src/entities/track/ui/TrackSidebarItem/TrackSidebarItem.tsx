@@ -22,7 +22,7 @@ export const TrackSidebarItem = ({
     >
       {children}
       {isMuted && (
-        <div className='absolute left-0 top-0 size-full bg-third-light/10' />
+        <div className='pointer-events-none absolute left-0 top-0 size-full bg-third-light/10' />
       )}
     </div>
   );
