@@ -41,7 +41,6 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
         >
           <span className='pr-1'>{`BMP: ${track?.bpm ?? '000'}`}</span>
           <span className='px-1'>{`Key: ${track?.key?.value ?? '00001'}`}</span>
-          <span className='pl-1'>{`Volume: ${track ? '100%' : '000%'}`}</span>
         </span>
       </p>
     </div>

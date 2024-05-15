@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+// eslint-disable-next-line boundaries/element-types
+import { Playlist } from '@/entities/playlist';
+
 import { getTrack } from '../api';
-import { Playlist } from '../model';
+
+import { isTrackCachingEnabled } from './localStorage';
 
 const getBlobBoundByUuid = async (uuid: string) => [
   uuid,
-  (await getTrack(uuid)).data,
+  (await getTrack(uuid, isTrackCachingEnabled())).data,
 ];
 
 const downloadTracks = async (playlist: Playlist, onTrackLoad?: () => void) => {

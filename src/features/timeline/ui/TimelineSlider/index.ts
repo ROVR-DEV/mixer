@@ -1,2 +1,2 @@
-export { TimelineSlider, TimelineSliderMemoized } from './TimelineSlider';
+export { TimelineScroll, TimelineScrollMemoized } from './TimelineScroll';
 export type * from './interfaces';

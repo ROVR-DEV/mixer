@@ -1,28 +1,18 @@
-/* .timelineSlider::-webkit-slider-thumb {
-  @apply appearance-none h-[9px] bg-accent rounded;
-  width: var(--thumb-width);
-}
-
-.timelineSlider::-moz-range-thumb {
-  @apply h-[9px] bg-accent rounded;
-  width: var(--thumb-width);
-} */
-
-.timelineSlider::-webkit-scrollbar {
+.timelineScroll::-webkit-scrollbar {
   width: 9px;
   height: 9px;
 }
 
-.timelineSlider::-webkit-scrollbar-track {
+.timelineScroll::-webkit-scrollbar-track {
   background: rgb(67, 67, 67);
   border-radius: 9px;
 }
 
-.timelineSlider::-webkit-scrollbar-thumb {
+.timelineScroll::-webkit-scrollbar-thumb {
   background: theme(backgroundColor.accent.DEFAULT);
   border-radius: 9px;
 }
 
-.timelineSlider::-webkit-scrollbar-thumb:hover {
+.timelineScroll::-webkit-scrollbar-thumb:hover {
   background: theme(backgroundColor.accent.light);
 }

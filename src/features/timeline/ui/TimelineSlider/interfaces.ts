@@ -1,10 +1,16 @@
-import { DetailedHTMLProps, InputHTMLAttributes } from 'react';
+import { DetailedHTMLProps, HTMLAttributes, RefObject } from 'react';
 
-export interface TimelineSliderProps
-  extends DetailedHTMLProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
-  > {
+export interface TimelineScrollProps
+  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLInputElement> {
   timelineScrollWidth: number;
   xPadding?: number;
+  scrollDivProps: DetailedHTMLProps<
+    HTMLAttributes<HTMLDivElement>,
+    HTMLInputElement
+  >;
+  scrollDivRef: RefObject<TimelineScrollDivRef>;
+}
+
+export interface TimelineScrollDivRef {
+  setScroll: (value: number) => void;
 }
