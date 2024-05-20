@@ -4,11 +4,8 @@ export interface TimelineScrollProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLInputElement> {
   timelineScrollWidth: number;
   xPadding?: number;
-  scrollDivProps: DetailedHTMLProps<
-    HTMLAttributes<HTMLDivElement>,
-    HTMLInputElement
-  >;
   scrollDivRef: RefObject<TimelineScrollDivRef>;
+  onChange?: (e: React.UIEvent<HTMLDivElement>) => void;
 }
 
 export interface TimelineScrollDivRef {

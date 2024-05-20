@@ -1,5 +1,5 @@
 export const clampTime = (time: number) => {
-  if (time < 0) {
+  if (time <= 0) {
     return 0;
   }
 

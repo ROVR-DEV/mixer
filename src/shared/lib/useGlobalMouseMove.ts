@@ -1,6 +1,8 @@
+'use client';
+
 import { RefObject, useCallback, useEffect, useRef } from 'react';
 
-export const usePlayHeadMove = (
+export const useGlobalMouseMove = (
   onMove: (e: MouseEvent) => void,
   target: RefObject<HTMLElement> | string,
 ) => {

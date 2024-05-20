@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
 import { PlayHeadIcon } from '@/shared/ui/assets';
@@ -8,11 +8,15 @@ import { TimelinePlayHeadProps } from './interfaces';
 export const TimelinePlayHead = forwardRef<
   HTMLDivElement,
   TimelinePlayHeadProps
->(function TimelinePlayHead({ className, ...props }, ref) {
+>(function TimelinePlayHead(
+  { initialPosition, className, style, ...props },
+  ref,
+) {
   return (
     <div
       className={cn('absolute top-0 h-full', className)}
       ref={ref}
+      style={{ left: initialPosition, ...style }}
       {...props}
     >
       <PlayHeadIcon className='absolute left-[-9px]' width={19} height={19} />
@@ -20,3 +24,5 @@ export const TimelinePlayHead = forwardRef<
     </div>
   );
 });
+
+export const TimelinePlayHeadMemoized = memo(TimelinePlayHead);

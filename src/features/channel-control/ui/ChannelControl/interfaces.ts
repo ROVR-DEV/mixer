@@ -1,14 +1,12 @@
 import { DetailedHTMLProps, HTMLAttributes } from 'react';
 
+import { Channel } from '@/entities/channel';
+
 export interface TrackChannelControlProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+  channel: Channel;
   number: number;
-  isAbleToRemove?: boolean;
-  isMuted?: boolean;
-  isSolo?: boolean;
-  onClickMute: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onClickSolo: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onClickRemove: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onClickAutomation: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isSelected?: boolean;
+  isAbleToRemove?: boolean;
+  onClickRemove: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }

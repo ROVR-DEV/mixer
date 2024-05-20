@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite';
 import { memo } from 'react';
 
 import { cn } from '@/shared/lib';
@@ -9,15 +10,12 @@ import { TrackInfo } from '@/entities/track';
 
 import { TrackInfoPanelProps } from './interfaces';
 
-export const AudioEditorHeader = ({
+export const AudioEditorHeader = observer(function AudioEditorHeader({
   clockRef,
-  onPlay,
-  onStop,
-  playing,
-  selectedTrack,
+  audioEditorManager,
   className,
   ...props
-}: TrackInfoPanelProps) => {
+}: TrackInfoPanelProps) {
   return (
     <div
       className={cn(
@@ -28,19 +26,23 @@ export const AudioEditorHeader = ({
     >
       <div className='flex flex-1 items-center gap-4 justify-self-end'>
         <IconButton
-          disabled={!playing}
-          variant={playing ? 'primaryFilled' : 'secondaryFilled'}
+          disabled={!audioEditorManager.isPlaying}
+          variant={
+            audioEditorManager.isPlaying ? 'primaryFilled' : 'secondaryFilled'
+          }
           aria-label='Stop'
-          onClick={onStop}
+          onClick={audioEditorManager.stop}
         >
           <StopIcon />
         </IconButton>
         <IconButton
           className='pl-[2px]'
-          disabled={playing}
-          variant={playing ? 'secondaryFilled' : 'primaryFilled'}
+          disabled={audioEditorManager.isPlaying}
+          variant={
+            audioEditorManager.isPlaying ? 'secondaryFilled' : 'primaryFilled'
+          }
           aria-label='Play'
-          onClick={onPlay}
+          onClick={audioEditorManager.play}
         >
           <PlayIcon />
         </IconButton>
@@ -49,10 +51,13 @@ export const AudioEditorHeader = ({
         <ClockMemoized ref={clockRef} />
       </Badge>
       <div className='flex w-[450px] justify-self-end'>
-        <TrackInfo className='w-full' track={selectedTrack} />
+        <TrackInfo
+          className='w-full'
+          track={audioEditorManager.selectedTrack?.data ?? null}
+        />
       </div>
     </div>
   );
-};
+});
 
 export const AudioEditorHeaderMemoized = memo(AudioEditorHeader);

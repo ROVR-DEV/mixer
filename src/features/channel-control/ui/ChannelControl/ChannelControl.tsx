@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite';
 import { memo } from 'react';
 
 import { cn } from '@/shared/lib';
@@ -11,19 +12,15 @@ import {
 
 import { TrackChannelControlProps } from './interfaces';
 
-export const TrackChannelControl = ({
+export const ChannelControl = observer(function ChannelControl({
+  channel,
   number,
   isAbleToRemove,
-  isMuted,
-  isSolo,
   onClickRemove,
-  onClickSolo,
-  onClickMute,
-  onClickAutomation,
   isSelected,
   className,
   ...props
-}: TrackChannelControlProps) => {
+}: TrackChannelControlProps) {
   const channelNumber = number.toLocaleString('en-US', {
     minimumIntegerDigits: 2,
     useGrouping: false,
@@ -42,21 +39,27 @@ export const TrackChannelControl = ({
       </Badge>
       <IconButton
         className='size-7'
-        variant={isMuted ? 'primaryFilled' : 'secondary'}
+        variant={channel.isMuted ? 'primaryFilled' : 'secondary'}
         aria-label='Mute\unmute this track'
         role='switch'
-        aria-checked={isMuted}
-        onClick={onClickMute}
+        aria-checked={channel.isMuted}
+        onClick={(e) => {
+          e.stopPropagation();
+          channel.toggleMute();
+        }}
       >
         <MuteChannelIcon />
       </IconButton>
       <IconButton
         className='size-7'
-        variant={isSolo ? 'primaryFilled' : 'secondary'}
+        variant={channel.isSolo ? 'primaryFilled' : 'secondary'}
         aria-label='Solo this track'
         role='switch'
-        aria-checked={isSolo}
-        onClick={onClickSolo}
+        aria-checked={channel.isSolo}
+        onClick={(e) => {
+          e.stopPropagation();
+          channel.toggleSolo();
+        }}
       >
         <SoloChannelIcon />
       </IconButton>
@@ -64,7 +67,7 @@ export const TrackChannelControl = ({
         className='size-7'
         variant='secondary'
         aria-label='Show/hide automation'
-        onClick={onClickAutomation}
+        // onClick={}
         disabled
       >
         <AutomationChannelIcon />
@@ -81,6 +84,6 @@ export const TrackChannelControl = ({
       )}
     </div>
   );
-};
+});
 
-export const ChannelControlMemoized = memo(TrackChannelControl);
+export const ChannelControlMemoized = memo(ChannelControl);

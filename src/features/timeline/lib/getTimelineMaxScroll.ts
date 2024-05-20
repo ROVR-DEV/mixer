@@ -1,4 +1,4 @@
-export const getRightTimelineBound = (
+export const getTimelineMaxScroll = (
   timelineClientWidth: number,
   timelineScrollWidth: number,
 ) => {

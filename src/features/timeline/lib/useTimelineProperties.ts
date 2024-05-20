@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Dispatch,
   RefObject,
@@ -19,7 +21,7 @@ import { getByRanges } from './getByRanges';
 import { getDpi } from './getDpi';
 import { getTickSegmentWidthZoomed } from './getTickSegmentWidthZoomed';
 
-import { getRightTimelineBound } from '.';
+import { getTimelineMaxScroll } from '.';
 
 const setProtected = <T = number>(
   setFn: Dispatch<SetStateAction<T>>,
@@ -73,7 +75,7 @@ export const useTimelineProperties = (
 
   const shiftStepZoomed = shiftStep / zoom;
 
-  const rightBound = getRightTimelineBound(
+  const rightBound = getTimelineMaxScroll(
     timelineClientWidth,
     timelineScrollWidth,
   );

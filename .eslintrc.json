@@ -18,6 +18,7 @@
     "plugin:prettier/recommended",
     "plugin:sonarjs/recommended",
     "plugin:tailwindcss/recommended",
+    "plugin:mobx/recommended",
     "plugin:react-redux/recommended",
     "plugin:react/jsx-runtime"
   ],
@@ -47,6 +48,7 @@
     "mysticatea",
     "prefer-object-spread",
     "risxss",
+    "mobx",
     "react-hooks",
     "react-redux",
     "react"
@@ -99,7 +101,9 @@
     ],
     "react/no-array-index-key": 2,
     "react/prefer-stateless-function": 2,
-    "risxss/catch-potential-xss-react": "error"
+    "risxss/catch-potential-xss-react": "error",
+    "mobx/missing-observer": "off",
+    "mobx/missing-make-observable": "off"
   },
   "settings": {
     "import/resolver": {

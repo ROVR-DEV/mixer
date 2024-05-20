@@ -11,7 +11,7 @@ export const TimelineScroll = ({
   timelineScrollWidth,
   xPadding = 0,
   scrollDivRef,
-  scrollDivProps: { onScroll, ...scrollDivProps },
+  onChange,
   className,
   ...props
 }: TimelineScrollProps) => {
@@ -33,8 +33,7 @@ export const TimelineScroll = ({
       e.currentTarget.dataset.synthetic = '';
       return;
     }
-
-    onScroll?.(e);
+    onChange?.(e);
   };
 
   return (
@@ -47,7 +46,6 @@ export const TimelineScroll = ({
         className={cn('w-full overflow-x-scroll', styles.timelineScroll)}
         ref={scrollRef}
         onScroll={handleScroll}
-        {...scrollDivProps}
       >
         <div
           className='h-px'

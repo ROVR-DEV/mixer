@@ -16,7 +16,7 @@ import { Tick } from '../../model';
 import { TimelineGridProps, TimelineGridRef } from './interfaces';
 
 export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
-  function TimelineGrid({ ...props }, ref) {
+  function TimelineGrid({ height, style, ...props }, ref) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -93,7 +93,13 @@ export const TimelineGrid = forwardRef<TimelineGridRef, TimelineGridProps>(
       return () => window.removeEventListener('resize', recalculateDpi);
     }, []);
 
-    return <canvas ref={handleCanvasRef} {...props} />;
+    return (
+      <canvas
+        ref={handleCanvasRef}
+        style={{ height: height, ...style }}
+        {...props}
+      />
+    );
   },
 );
 
