@@ -79,9 +79,13 @@ export const TrackCardView = observer(function TrackCardView({
   //   return { leftBound, rightBound };
   // }, [channel.tracks, track.data.uuid]);
 
-  const handleClick = useCallback(() => {
-    onTrackSelect(track);
-  }, [onTrackSelect, track]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      onTrackSelect(track);
+    },
+    [onTrackSelect, track],
+  );
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
     () =>
@@ -166,7 +170,7 @@ export const TrackCardView = observer(function TrackCardView({
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      onTrackSelect(track, true);
+      onTrackSelect(track);
       removeDragGhostImage(e);
 
       e.dataTransfer.dropEffect = 'move';

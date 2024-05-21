@@ -256,6 +256,10 @@ export const AudioEditor = observer(function AudioEditor({
   );
   //#endregion
 
+  const handleClickTimeline = () => {
+    audioEditorManager.setSelectedTrack(null);
+  };
+
   //#region Horizontal scrollbar
   const updateHorizontalScrollbar = useCallback(
     (scroll: number) => {
@@ -364,6 +368,7 @@ export const AudioEditor = observer(function AudioEditor({
             className='relative min-h-max w-full grow overflow-x-clip'
             ref={timelineRef}
             onMouseUp={handleClickPlayHead}
+            onClick={handleClickTimeline}
           >
             {tracks === null ? (
               <span className='flex size-full flex-col items-center justify-center'>

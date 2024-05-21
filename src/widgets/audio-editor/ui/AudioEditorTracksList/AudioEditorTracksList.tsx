@@ -58,15 +58,7 @@ export const AudioEditorTracksList = observer(function AudioEditorTracksList({
         channel={channel}
         tracksData={tracksData}
         selectedTrack={audioEditorManager.selectedTrack}
-        onTrackSelect={(track, staySelected) => {
-          if (audioEditorManager.selectedTrack?.data.uuid === track.data.uuid) {
-            if (staySelected) {
-              return;
-            }
-
-            audioEditorManager.setSelectedTrack(null);
-            return;
-          }
+        onTrackSelect={(track) => {
           audioEditorManager.setSelectedTrack(track);
         }}
       />

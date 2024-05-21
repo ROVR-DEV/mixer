@@ -4,6 +4,6 @@ import { TrackWithMeta } from '@/entities/track';
 export interface AudioEditorTrackProps {
   channel: Channel;
   selectedTrack: TrackWithMeta | null;
-  onTrackSelect: (track: TrackWithMeta, staySelected?: boolean) => void;
+  onTrackSelect: (track: TrackWithMeta) => void;
   tracksData: Record<string, string | Blob | undefined>;
 }

@@ -5,6 +5,6 @@ export interface TrackCardViewProps
   extends Omit<TrackCardProps, 'ref' | 'track' | 'waveformComponent'> {
   channel: Channel;
   track: TrackWithMeta;
-  onTrackSelect: (track: TrackWithMeta, staySelected?: boolean) => void;
+  onTrackSelect: (track: TrackWithMeta) => void;
   trackData: string | Blob | undefined;
 }
