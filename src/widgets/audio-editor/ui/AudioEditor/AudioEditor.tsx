@@ -392,8 +392,8 @@ export const AudioEditor = observer(function AudioEditor({
                 </AudioEditorTimelineStateContext.Provider>
               </>
             )}
-            <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[40px] z-30 mx-auto flex w-max' />
           </div>
+          <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[40px] left-[296px] z-30 mx-auto flex w-max' />
         </div>
       </div>
       <div className='grid grow grid-cols-[296px_auto]'>
