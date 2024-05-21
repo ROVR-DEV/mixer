@@ -212,7 +212,7 @@ export const TrackCardView = observer(function TrackCardView({
 
       const channelIndex = globalChannelIndex - currentChannelIndex;
 
-      if (channelIndex >= 0 && channelIndex <= 1) {
+      if (globalChannelIndex >= 0 && globalChannelIndex <= 1) {
         trackRef.current.style.top = channelIndex * 96 + 6 + 'px';
       }
     },
