@@ -42,7 +42,9 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             {'Edit'}
           </Badge>
         </Button>
-        <div className='row-start-2 h-[46px]'>{waveformComponent}</div>
+        <div className='row-start-2 h-[46px] overflow-hidden'>
+          {waveformComponent}
+        </div>
         <span className='row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap pl-1 text-[12px]'>
           <span className='font-bold'>{`${track.title} | ${track.artist} `}</span>
           <span className=''>{`(${track.duration})`}</span>

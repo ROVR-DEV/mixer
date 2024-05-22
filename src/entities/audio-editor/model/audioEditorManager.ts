@@ -58,6 +58,10 @@ export class AudioEditorManager {
   };
 
   setSelectedTrack = (track: TrackWithMeta | null) => {
+    if (this.selectedTrack?.data.uuid === track?.data.uuid) {
+      return;
+    }
+
     this.selectedTrack = track;
   };
 
@@ -124,10 +128,8 @@ export class AudioEditorManager {
     const isMuted = channel.isMuted;
 
     if (!isMuted && !track.audioBuffer.isPlaying()) {
-      const trackSeekPercent =
-        (time - track.currentStartTime) /
-        (track.currentEndTime - track.currentStartTime);
-      track.audioBuffer.seekTo(trackSeekPercent);
+      const trackTime = time - track.currentStartTime + track.startTimeOffset;
+      track.audioBuffer.setTime(trackTime);
       track.audioBuffer.play();
     } else if (isMuted) {
       track.audioBuffer.pause();

@@ -1,10 +1,11 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
+import { ReactNode, useMemo } from 'react';
 
 import { ChannelListItemMemoized } from '@/entities/channel';
 
-import { AudioEditorTrackLine } from '../AudioEditorTrackLine';
+import { TrackCardViewMemoized } from '@/features/track-card-view';
 
 import { AudioEditorTracksListProps } from './interfaces';
 
@@ -12,6 +13,26 @@ export const AudioEditorTracksList = observer(function AudioEditorTracksList({
   audioEditorManager,
   tracksData,
 }: AudioEditorTracksListProps) {
+  const trackCards = useMemo(() => {
+    const components = new Map<string, ReactNode>();
+
+    audioEditorManager.channels.forEach((channel) =>
+      channel.tracks.forEach((track) => {
+        components.set(
+          track.data.uuid,
+          <TrackCardViewMemoized
+            key={`${track.data.uuid}-track`}
+            track={track}
+            trackData={tracksData[track.data.uuid]}
+            audioEditorManager={audioEditorManager}
+          />,
+        );
+      }),
+    );
+
+    return components;
+  }, [audioEditorManager, tracksData]);
+
   return [...audioEditorManager.channels.values()].map((channel) => (
     <ChannelListItemMemoized
       key={`${channel.id}-track`}
@@ -54,14 +75,9 @@ export const AudioEditorTracksList = observer(function AudioEditorTracksList({
         });
       }}
     >
-      <AudioEditorTrackLine
-        channel={channel}
-        tracksData={tracksData}
-        selectedTrack={audioEditorManager.selectedTrack}
-        onTrackSelect={(track) => {
-          audioEditorManager.setSelectedTrack(track);
-        }}
-      />
+      {[...channel.tracks.values()].map((track) =>
+        trackCards.get(track.data.uuid),
+      )}
     </ChannelListItemMemoized>
   ));
 });

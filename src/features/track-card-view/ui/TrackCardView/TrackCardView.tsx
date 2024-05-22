@@ -1,6 +1,8 @@
-import { clamp } from 'lodash-es';
+'use client';
+
+import { clamp, round } from 'lodash-es';
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 import { useAudioEditorTimelineState } from '@/entities/audio-editor';
@@ -11,6 +13,7 @@ import {
 } from '@/entities/track';
 
 import { TrackCardViewProps } from './interfaces';
+import styles from './styles.module.css';
 
 const removeDragGhostImage = (e: React.DragEvent) => {
   const canvas = document.createElement('canvas');
@@ -25,17 +28,15 @@ const getTrackCoordinates = (
 ) => {
   const trackStartXGlobal = startTime * pixelsPerSecond;
   const trackEndXGlobal = endTime * pixelsPerSecond;
-  const trackWidth = trackEndXGlobal - trackStartXGlobal;
+  const trackWidth = round(trackEndXGlobal - trackStartXGlobal, 3);
 
   return { trackStartXGlobal, trackEndXGlobal, trackWidth };
 };
 
 export const TrackCardView = observer(function TrackCardView({
   track,
-  channel,
-  onTrackSelect,
+  audioEditorManager,
   trackData,
-  isSelected,
   ...props
 }: TrackCardViewProps) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -47,6 +48,11 @@ export const TrackCardView = observer(function TrackCardView({
       track.audioBuffer = wavesurfer;
     },
     [track],
+  );
+
+  const isSelected = useMemo(
+    () => audioEditorManager.selectedTrack?.data.uuid === track.data.uuid,
+    [audioEditorManager.selectedTrack?.data.uuid, track.data.uuid],
   );
 
   const waveformComponent = useMemo(
@@ -61,30 +67,16 @@ export const TrackCardView = observer(function TrackCardView({
     [isSelected, onMount, trackData],
   );
 
-  // const trackBounds = useMemo(() => {
-  //   const tracks = [...channel.tracks];
-
-  //   let leftBound = 0;
-  //   let rightBound = Infinity;
-  //   for (let i = 0; i < tracks.length; i++) {
-  //     leftBound = i === 0 ? 0 : tracks[i - 1].data.end;
-  //     rightBound =
-  //       i + 1 === tracks.length ? Infinity : tracks[i + 1].currentStartTime;
-
-  //     if (tracks[i].data.uuid === track.data.uuid) {
-  //       break;
-  //     }
-  //   }
-
-  //   return { leftBound, rightBound };
-  // }, [channel.tracks, track.data.uuid]);
+  const selectTrack = useCallback(() => {
+    audioEditorManager.setSelectedTrack(track);
+  }, [audioEditorManager, track]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      onTrackSelect(track);
+      selectTrack();
     },
-    [onTrackSelect, track],
+    [selectTrack],
   );
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
@@ -135,16 +127,21 @@ export const TrackCardView = observer(function TrackCardView({
           timelineClientWidth + virtualScrollOffsetX + bufferViewWidth &&
         trackEndXGlobal > virtualScrollOffsetX - bufferViewWidth;
 
-      trackRef.current.dataset.channelUuid = track.channelId;
+      trackRef.current.dataset.channelUuid = track.channel.id;
       trackRef.current.dataset.trackUuid = track.data.uuid;
 
-      trackRef.current.style.display = isVisible ? '' : 'none';
+      // trackRef.current.style.display = isVisible ? '' : 'none';
+      if (isVisible) {
+        trackRef.current.classList.remove(styles.hiddenTrack);
+      } else {
+        trackRef.current.classList.add(styles.hiddenTrack);
+      }
       trackRef.current.style.width = `${trackWidth}px`;
       trackRef.current.style.left = `${shiftFromLeft}px`;
     },
     [
       globalToLocalCoordinates,
-      track.channelId,
+      track.channel.id,
       track.data.uuid,
       trackEndXGlobal,
       trackStartXGlobal,
@@ -170,7 +167,8 @@ export const TrackCardView = observer(function TrackCardView({
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      onTrackSelect(track);
+      selectTrack();
+
       removeDragGhostImage(e);
 
       e.dataTransfer.dropEffect = 'move';
@@ -179,7 +177,7 @@ export const TrackCardView = observer(function TrackCardView({
       e.currentTarget.style.cursor = 'pointer';
 
       e.dataTransfer.setData('text/trackId', track.data.uuid);
-      e.dataTransfer.setData('text/channelId', track.channelId);
+      e.dataTransfer.setData('text/channelId', track.channel.id);
 
       e.currentTarget.dataset.startX = `${e.nativeEvent.pageX}`;
       e.currentTarget.dataset.startY = `${e.nativeEvent.pageY}`;
@@ -189,7 +187,7 @@ export const TrackCardView = observer(function TrackCardView({
 
       e.currentTarget.style.zIndex = '10';
     },
-    [onTrackSelect, track],
+    [selectTrack, track.channel.id, track.currentStartTime, track.data.uuid],
   );
 
   const handleDrag = useCallback(
@@ -206,17 +204,20 @@ export const TrackCardView = observer(function TrackCardView({
       track.setNewStartTime(startTime);
 
       const globalChannelIndex = Math.floor((Number(e.pageY) - 222) / 96);
-      const currentChannelIndex = Math.floor(
-        (Number(e.currentTarget.dataset.startY) - 222) / 96,
-      );
+      if (
+        globalChannelIndex >= 0 &&
+        globalChannelIndex < audioEditorManager.channels.size
+      ) {
+        const currentChannel = Math.floor(
+          Math.floor(Number(e.currentTarget.dataset.startY) - 222) / 96,
+        );
 
-      const channelIndex = globalChannelIndex - currentChannelIndex;
+        const channelOffset = globalChannelIndex - currentChannel;
 
-      if (globalChannelIndex >= 0 && globalChannelIndex <= 1) {
-        trackRef.current.style.top = channelIndex * 96 + 6 + 'px';
+        trackRef.current.style.top = channelOffset * 96 + 6 + 'px';
       }
     },
-    [calcNewStartTime, track],
+    [audioEditorManager.channels.size, calcNewStartTime, track],
   );
 
   const handleDragEnd = useCallback(
@@ -225,35 +226,30 @@ export const TrackCardView = observer(function TrackCardView({
         return;
       }
 
-      const startTime = calcNewStartTime(e);
-      track.setNewStartTime(startTime);
+      track.setNewStartTime(calcNewStartTime(e));
 
-      const trackDuration = track.currentEndTime - track.currentStartTime;
-      const endTime = startTime + trackDuration;
-
-      channel.tracks.forEach((tr) => {
-        if (startTime > tr.currentStartTime && startTime < tr.currentEndTime) {
-          tr.setEndTime(startTime);
-        }
-
-        if (endTime > tr.currentStartTime && endTime < tr.currentEndTime) {
-          tr.setStartTime(endTime);
-        }
-      });
-
+      e.currentTarget.dataset.startX = '';
+      e.currentTarget.dataset.startY = '';
+      e.currentTarget.dataset.startTime = '';
+      e.currentTarget.dataset.leftBound = '';
+      e.currentTarget.dataset.rightBound = '';
       e.currentTarget.style.cursor = '';
       e.currentTarget.style.zIndex = '';
     },
-    [calcNewStartTime, channel.tracks, track],
+    [calcNewStartTime, track],
   );
 
   useEffect(() => {
-    updateTrackPosition(
-      audioEditorTimelineState.scroll,
-      audioEditorTimelineState.pixelsPerSecond,
-      audioEditorTimelineState.timelineLeftPadding,
-      audioEditorTimelineState.endPageX - audioEditorTimelineState.startPageX,
+    const animationId = requestAnimationFrame(() =>
+      updateTrackPosition(
+        audioEditorTimelineState.scroll,
+        audioEditorTimelineState.pixelsPerSecond,
+        audioEditorTimelineState.timelineLeftPadding,
+        audioEditorTimelineState.endPageX - audioEditorTimelineState.startPageX,
+      ),
     );
+
+    return () => cancelAnimationFrame(animationId);
   }, [
     audioEditorTimelineState.endPageX,
     audioEditorTimelineState.pixelsPerSecond,
@@ -263,24 +259,29 @@ export const TrackCardView = observer(function TrackCardView({
     updateTrackPosition,
   ]);
 
+  const onDragOver = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
   return (
     <TrackCardMemoized
       className='absolute'
-      track={track.data}
       ref={trackRef}
-      draggable
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-      onDrag={handleDrag}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      isSolo={channel?.isSolo}
+      track={track.data}
+      isSolo={track.channel?.isSolo}
       isSelected={isSelected}
       waveformComponent={waveformComponent}
       onClick={handleClick}
+      // Drag logic
+      draggable
+      onDragOver={onDragOver}
+      onDrag={handleDrag}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       {...props}
     />
   );
 });
+
+export const TrackCardViewMemoized = memo(TrackCardView);

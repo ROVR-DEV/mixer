@@ -35,10 +35,11 @@ export class Channel {
   };
 
   importTrack = (track: Track) => {
-    this.tracks.add(new TrackWithMeta(track, this.id));
+    this.tracks.add(new TrackWithMeta(track, this));
   };
 
   addTrack = (track: TrackWithMeta) => {
+    track.channel = this;
     this.tracks.add(track);
   };
 

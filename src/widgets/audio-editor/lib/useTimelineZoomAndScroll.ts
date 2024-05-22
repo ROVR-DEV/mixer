@@ -14,6 +14,7 @@ export interface TimelineZoomAndScrollProps {
   maxZoom: number;
   minScroll: number;
   maxScroll: number;
+  pixelsPerSecond: number;
   onZoomChange?: (zoom: number) => void;
   onScrollChange?: (scroll: number) => void;
   onChange?: (zoom: number, scroll: number) => void;
@@ -28,6 +29,7 @@ export const useTimelineZoomAndScroll = ({
   maxZoom,
   minScroll,
   maxScroll,
+  pixelsPerSecond,
   onZoomChange,
   onScrollChange,
   onChange,
@@ -84,15 +86,20 @@ export const useTimelineZoomAndScroll = ({
     [clampScroll, handleScrollChange],
   );
 
+  const zoomRule = useCallback(
+    (zoom: number, isForward: boolean) => {
+      return isForward ? zoom * zoomStep : zoom / zoomStep;
+    },
+    [zoomStep],
+  );
+
   const handleWheelZoom = useCallback(
     (delta: number) => {
       const isForward = delta <= 0;
 
-      setZoomProtected(
-        isForward ? zoomRef.current * zoomStep : zoomRef.current / zoomStep,
-      );
+      setZoomProtected(zoomRule(zoomRef.current, isForward));
     },
-    [setZoomProtected, zoomStep],
+    [setZoomProtected, zoomRule],
   );
 
   const handleWheelHorizontalScroll = useCallback(
@@ -105,13 +112,42 @@ export const useTimelineZoomAndScroll = ({
     [scrollStep, setHorizontalScrollProtected],
   );
 
+  const scrollToZoom = useCallback(
+    (e: WheelEvent) => {
+      if (
+        (zoomRef.current <= 1 && e.deltaY >= 0) ||
+        (zoomRef.current >= Math.pow(1.25, 33) && e.deltaY <= 0)
+      ) {
+        return;
+      }
+
+      const newZoom = zoomRule(zoomRef.current, e.deltaY <= 0);
+
+      const x = e.pageX - 296 - 5;
+
+      const getNewScroll = (scroll: number) => {
+        const virtualShift = scroll * pixelsPerSecond;
+
+        const currentVirtualX = virtualShift + x * zoomRef.current;
+        const newVirtualX = virtualShift + x * newZoom;
+
+        const newPixelsPerSeconds = newZoom * pixelsPerSecond;
+
+        return scroll + (newVirtualX - currentVirtualX) / newPixelsPerSeconds;
+      };
+
+      setHorizontalScrollProtected(getNewScroll(scrollRef.current));
+    },
+    [pixelsPerSecond, setHorizontalScrollProtected, zoomRule],
+  );
+
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
         e.stopPropagation();
         handleWheelZoom(e.deltaY);
-        // scrollToZoom(e);
+        scrollToZoom(e);
       }
 
       if (e.shiftKey) {
@@ -124,7 +160,7 @@ export const useTimelineZoomAndScroll = ({
         handleWheelHorizontalScroll(e.deltaX);
       }
     },
-    [handleWheelHorizontalScroll, handleWheelZoom],
+    [handleWheelHorizontalScroll, handleWheelZoom, scrollToZoom],
   );
 
   useEffect(() => {

@@ -64,6 +64,7 @@ export const useAudioEditorViewProperties = ({
     maxZoom,
     minScroll,
     maxScroll,
+    pixelsPerSecond,
     onScrollChange: handleScrollChange,
     onZoomChange: handleZoomChange,
     onChange: handleChange,

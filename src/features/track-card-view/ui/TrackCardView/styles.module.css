@@ -1,0 +1,11 @@
+@supports not (content-visibility: hidden) {
+  .hiddenTrack {
+    display: none;
+  }
+}
+
+@supports (content-visibility: hidden) {
+  .hiddenTrack {
+    content-visibility: hidden;
+  }
+}

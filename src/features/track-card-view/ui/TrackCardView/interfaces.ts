@@ -1,10 +1,12 @@
-import { Channel } from '@/entities/channel';
+import { AudioEditorManager } from '@/entities/audio-editor';
 import { TrackCardProps, TrackWithMeta } from '@/entities/track';
 
 export interface TrackCardViewProps
-  extends Omit<TrackCardProps, 'ref' | 'track' | 'waveformComponent'> {
-  channel: Channel;
+  extends Omit<
+    TrackCardProps,
+    'ref' | 'track' | 'isSelected' | 'onTrackSelect' | 'waveformComponent'
+  > {
+  audioEditorManager: AudioEditorManager;
   track: TrackWithMeta;
-  onTrackSelect: (track: TrackWithMeta) => void;
   trackData: string | Blob | undefined;
 }
