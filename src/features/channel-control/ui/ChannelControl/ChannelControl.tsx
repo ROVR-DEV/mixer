@@ -1,16 +1,16 @@
+'use client';
+
 import { observer } from 'mobx-react-lite';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 import { Badge, IconButton } from '@/shared/ui';
-import {
-  MuteChannelIcon,
-  SoloChannelIcon,
-  AutomationChannelIcon,
-  CrossIcon,
-} from '@/shared/ui/assets';
+import { AutomationChannelIcon, CrossIcon } from '@/shared/ui/assets';
 
-import { TrackChannelControlProps } from './interfaces';
+import { MuteButtonView } from '../MuteButtonView';
+import { SoloButtonView } from '../SoloButtonView';
+
+import { ChannelControlProps } from './interfaces';
 
 export const ChannelControl = observer(function ChannelControl({
   channel,
@@ -20,11 +20,15 @@ export const ChannelControl = observer(function ChannelControl({
   isSelected,
   className,
   ...props
-}: TrackChannelControlProps) {
-  const channelNumber = number.toLocaleString('en-US', {
-    minimumIntegerDigits: 2,
-    useGrouping: false,
-  });
+}: ChannelControlProps) {
+  const channelNumber = useMemo(
+    () =>
+      number.toLocaleString('en-US', {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
+      }),
+    [number],
+  );
 
   return (
     <div
@@ -37,32 +41,8 @@ export const ChannelControl = observer(function ChannelControl({
           <span>{channelNumber}</span>
         </span>
       </Badge>
-      <IconButton
-        className='size-7'
-        variant={channel.isMuted ? 'primaryFilled' : 'secondary'}
-        aria-label='Mute\unmute this track'
-        role='switch'
-        aria-checked={channel.isMuted}
-        onClick={(e) => {
-          e.stopPropagation();
-          channel.toggleMute();
-        }}
-      >
-        <MuteChannelIcon />
-      </IconButton>
-      <IconButton
-        className='size-7'
-        variant={channel.isSolo ? 'primaryFilled' : 'secondary'}
-        aria-label='Solo this track'
-        role='switch'
-        aria-checked={channel.isSolo}
-        onClick={(e) => {
-          e.stopPropagation();
-          channel.toggleSolo();
-        }}
-      >
-        <SoloChannelIcon />
-      </IconButton>
+      <MuteButtonView channel={channel} />
+      <SoloButtonView channel={channel} />
       <IconButton
         className='size-7'
         variant='secondary'

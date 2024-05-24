@@ -37,6 +37,12 @@ export class TrackWithMeta<T = WaveSurfer> {
     makeAutoObservable(this);
   }
 
+  setChannel = (channel: Channel) => {
+    if (this.channel !== channel) {
+      this.channel = channel;
+    }
+  };
+
   setNewStartTime = (time: number) => {
     const segmentDuration = this.currentEndTime - this.currentStartTime;
 

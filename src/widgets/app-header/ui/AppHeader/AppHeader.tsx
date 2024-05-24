@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { HEADER_LAYOUT } from '@/shared/config/sharedStyles';
 import { cn } from '@/shared/lib';
 import { Button, IconButton } from '@/shared/ui';
 import { PersonIcon, LogoImageRaw } from '@/shared/ui/assets';
@@ -9,13 +10,7 @@ import { AppHeaderProps } from './interfaces';
 
 export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
   return (
-    <header
-      className={cn(
-        'grid grid-rows-1 grid-cols-[1fr_auto_1fr] h-16 items-center justify-end border-b border-b-secondary px-6 py-4',
-        className,
-      )}
-      {...props}
-    >
+    <header className={cn(HEADER_LAYOUT, className)} {...props}>
       <Image
         className='col-start-2'
         src={LogoImageRaw}
@@ -31,7 +26,8 @@ export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
         </Button>
         <div className='flex items-center gap-5'>
           <Link className='text-accent' href='#'>
-            <span className='font-fix'>{'Hello LeFto'}</span>
+            <span className='font-fix'>{'Hello '}</span>
+            <span className='font-bold'>{'LeFto'}</span>
           </Link>
           <IconButton
             className='size-7'

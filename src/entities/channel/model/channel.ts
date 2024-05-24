@@ -1,4 +1,4 @@
-import { ObservableSet, makeAutoObservable, observable } from 'mobx';
+import { IObservableArray, makeAutoObservable, observable } from 'mobx';
 // eslint-disable-next-line import/named
 import { v4 } from 'uuid';
 
@@ -10,7 +10,7 @@ export class Channel {
   isMuted: boolean = false;
   isSolo: boolean = false;
 
-  tracks: ObservableSet<TrackWithMeta> = observable.set();
+  tracks: IObservableArray<TrackWithMeta> = observable.array();
 
   constructor(id?: string) {
     this.id = id || v4();
@@ -35,16 +35,16 @@ export class Channel {
   };
 
   importTrack = (track: Track) => {
-    this.tracks.add(new TrackWithMeta(track, this));
+    this.tracks.push(new TrackWithMeta(track, this));
   };
 
   addTrack = (track: TrackWithMeta) => {
     track.channel = this;
-    this.tracks.add(track);
+    this.tracks.push(track);
   };
 
   removeTrack = (track: TrackWithMeta) => {
-    this.tracks.delete(track);
+    return this.tracks.remove(track);
   };
 
   clearTracks = () => {

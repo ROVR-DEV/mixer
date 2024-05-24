@@ -1,4 +1,5 @@
 export * from './AudioEditor';
 export * from './AudioEditorChannelsList';
 export * from './AudioEditorTracksList';
-export * from './AudioEditorTrackLine';
+export * from './AudioEditorTracksView';
+export * from './AudioEditorChannelsListView';

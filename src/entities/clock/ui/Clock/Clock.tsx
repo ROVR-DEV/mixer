@@ -1,6 +1,7 @@
 import { forwardRef, memo, useImperativeHandle, useRef } from 'react';
 
 import { cn, parseSecondsToParts } from '@/shared/lib';
+import { Badge } from '@/shared/ui';
 
 import {
   minutesFormatter,
@@ -26,10 +27,16 @@ export const Clock = forwardRef<ClockRef, ClockProps>(function Clock(
 
     const { minutes, seconds, milliseconds } = parseSecondsToParts(time);
 
-    clock.children[0].textContent = minutesFormatter.format(minutes);
+    const minutesText = minutesFormatter.format(minutes);
+    const secondsText = secondsAndMillisecondsFormatter.format(seconds);
 
-    clock.children[2].textContent =
-      secondsAndMillisecondsFormatter.format(seconds);
+    if (clock.children[0].textContent !== minutesText) {
+      clock.children[0].textContent = minutesText;
+    }
+
+    if (clock.children[2].textContent !== secondsText) {
+      clock.children[2].textContent = secondsText;
+    }
 
     clock.children[4].textContent = secondsAndMillisecondsFormatter.format(
       Math.floor(milliseconds / 10),
@@ -37,23 +44,25 @@ export const Clock = forwardRef<ClockRef, ClockProps>(function Clock(
   };
 
   return (
-    <span
-      className={cn('flex text-[19px] font-fix', className)}
-      ref={clockRef}
+    <Badge
+      className={cn('h-[34px] w-[116px]', className)}
+      variant='filled'
       {...props}
     >
-      <span className='w-[38px] min-w-[38px] max-w-[38px] text-center'>
-        {'000'}
+      <span className={cn('flex text-[19px]  font-fix')} ref={clockRef}>
+        <span className='w-[38px] min-w-[38px] max-w-[38px] text-center'>
+          {'000'}
+        </span>
+        <span className='max-w-[4px]'>{':'}</span>
+        <span className='w-[25px] min-w-[25px] max-w-[25px] text-center'>
+          {'00'}
+        </span>
+        <span className='max-w-[4px]'>{':'}</span>
+        <span className='w-[25px] min-w-[25px] max-w-[25px] text-center'>
+          {'00'}
+        </span>
       </span>
-      <span className='max-w-[4px]'>{':'}</span>
-      <span className='w-[25px] min-w-[25px] max-w-[25px] text-center'>
-        {'00'}
-      </span>
-      <span className='max-w-[4px]'>{':'}</span>
-      <span className='w-[25px] min-w-[25px] max-w-[25px] text-center'>
-        {'00'}
-      </span>
-    </span>
+    </Badge>
   );
 });
 

@@ -1,4 +1,9 @@
-import { ObservableMap, makeObservable, observable } from 'mobx';
+import {
+  IObservableArray,
+  ObservableMap,
+  makeObservable,
+  observable,
+} from 'mobx';
 
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
@@ -6,6 +11,7 @@ import { Channel } from '@/entities/channel';
 import { TrackWithMeta } from '@/entities/track';
 
 export class AudioEditorManager {
+  channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
   selectedTrack: TrackWithMeta | null = null;
@@ -23,6 +29,7 @@ export class AudioEditorManager {
       | '_performOnTracks'
       | '_updateTrackPlayState'
     >(this, {
+      channelIds: true,
       updateAudioBuffer: true,
       _performOnTracks: false,
       _updateTrackPlayState: false,
@@ -46,11 +53,13 @@ export class AudioEditorManager {
 
   addChannel = (channel: Channel = new Channel()) => {
     this.channels.set(channel.id, channel);
+    this.channelIds.push(channel.id);
     return channel.id;
   };
 
   removeChannel = (channelId: string) => {
     this.channels.delete(channelId);
+    this.channelIds.remove(channelId);
   };
 
   setSelectedChannel = (channelId: string) => {
@@ -103,16 +112,12 @@ export class AudioEditorManager {
 
     this.channels.forEach((channel) => {
       channel.tracks.forEach((track) =>
-        this._updateTrackPlayState(track, this.time, channel),
+        this._updateTrackPlayState(track, this.time),
       );
     });
   };
 
-  private _updateTrackPlayState = (
-    track: TrackWithMeta,
-    time: number,
-    channel: Channel,
-  ) => {
+  private _updateTrackPlayState = (track: TrackWithMeta, time: number) => {
     if (!track.audioBuffer) {
       return;
     }
@@ -125,7 +130,7 @@ export class AudioEditorManager {
       return;
     }
 
-    const isMuted = channel.isMuted;
+    const isMuted = track.channel.isMuted;
 
     if (!isMuted && !track.audioBuffer.isPlaying()) {
       const trackTime = time - track.currentStartTime + track.startTimeOffset;
@@ -139,7 +144,7 @@ export class AudioEditorManager {
   private _prepareForPlay = () => {
     this.channels.forEach((channel) => {
       channel.tracks.forEach((track) =>
-        this._updateTrackPlayState(track, this.time, channel),
+        this._updateTrackPlayState(track, this.time),
       );
     });
   };

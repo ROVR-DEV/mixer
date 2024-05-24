@@ -2,7 +2,7 @@ import { DetailedHTMLProps, HTMLAttributes } from 'react';
 
 import { Channel } from '@/entities/channel';
 
-export interface TrackChannelControlProps
+export interface ChannelControlProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   channel: Channel;
   number: number;

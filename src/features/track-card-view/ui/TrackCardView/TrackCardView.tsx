@@ -1,37 +1,26 @@
 'use client';
 
-import { clamp, round } from 'lodash-es';
+import { clamp } from 'lodash-es';
 import { observer } from 'mobx-react-lite';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import WaveSurfer from 'wavesurfer.js';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useAudioEditorTimelineState } from '@/entities/audio-editor';
 import {
   TrackCardMemoized,
+  TrackWithMeta,
   WaveformMemoized,
   waveformOptions,
 } from '@/entities/track';
 
+import {
+  clearDragProperties,
+  getTrackCoordinates,
+  setDragProperties,
+  setDragSettings,
+} from '../../lib';
+
 import { TrackCardViewProps } from './interfaces';
 import styles from './styles.module.css';
-
-const removeDragGhostImage = (e: React.DragEvent) => {
-  const canvas = document.createElement('canvas');
-  e.dataTransfer.setDragImage(canvas, 0, 0);
-  canvas.remove();
-};
-
-const getTrackCoordinates = (
-  startTime: number,
-  endTime: number,
-  pixelsPerSecond: number,
-) => {
-  const trackStartXGlobal = startTime * pixelsPerSecond;
-  const trackEndXGlobal = endTime * pixelsPerSecond;
-  const trackWidth = round(trackEndXGlobal - trackStartXGlobal, 3);
-
-  return { trackStartXGlobal, trackEndXGlobal, trackWidth };
-};
 
 export const TrackCardView = observer(function TrackCardView({
   track,
@@ -42,13 +31,6 @@ export const TrackCardView = observer(function TrackCardView({
   const trackRef = useRef<HTMLDivElement>(null);
 
   const audioEditorTimelineState = useAudioEditorTimelineState();
-
-  const onMount = useCallback(
-    (wavesurfer: WaveSurfer) => {
-      track.audioBuffer = wavesurfer;
-    },
-    [track],
-  );
 
   const isSelected = useMemo(
     () => audioEditorManager.selectedTrack?.data.uuid === track.data.uuid,
@@ -61,10 +43,12 @@ export const TrackCardView = observer(function TrackCardView({
         data={trackData}
         color={isSelected ? 'primary' : 'secondary'}
         options={waveformOptions}
-        onMount={onMount}
+        onMount={(wavesurfer) => {
+          track.audioBuffer = wavesurfer;
+        }}
       />
     ),
-    [isSelected, onMount, trackData],
+    [isSelected, track, trackData],
   );
 
   const selectTrack = useCallback(() => {
@@ -103,23 +87,25 @@ export const TrackCardView = observer(function TrackCardView({
     [audioEditorTimelineState.pixelsPerSecond, audioEditorTimelineState.scroll],
   );
 
-  const updateTrackPosition = useCallback(
-    (
-      scroll: number,
-      pixelsPerSecond: number,
-      timelineLeftPadding: number,
-      timelineClientWidth: number,
-    ) => {
+  const updateTrackWidth = useCallback(() => {
+    if (!trackRef.current) {
+      return;
+    }
+
+    if (trackRef.current.style.width === `${trackWidth}px`) {
+      return;
+    }
+
+    trackRef.current.style.width = `${trackWidth}px`;
+  }, [trackWidth]);
+
+  const updateTrackVisibility = useCallback(
+    (scroll: number, pixelsPerSecond: number, timelineClientWidth: number) => {
       if (!trackRef.current) {
         return;
       }
 
       const virtualScrollOffsetX = scroll * pixelsPerSecond;
-
-      const shiftFromLeft = globalToLocalCoordinates(
-        trackStartXGlobal + timelineLeftPadding,
-      );
-
       const bufferViewWidth = 400;
 
       const isVisible =
@@ -127,26 +113,41 @@ export const TrackCardView = observer(function TrackCardView({
           timelineClientWidth + virtualScrollOffsetX + bufferViewWidth &&
         trackEndXGlobal > virtualScrollOffsetX - bufferViewWidth;
 
-      trackRef.current.dataset.channelUuid = track.channel.id;
-      trackRef.current.dataset.trackUuid = track.data.uuid;
-
-      // trackRef.current.style.display = isVisible ? '' : 'none';
       if (isVisible) {
         trackRef.current.classList.remove(styles.hiddenTrack);
       } else {
         trackRef.current.classList.add(styles.hiddenTrack);
       }
-      trackRef.current.style.width = `${trackWidth}px`;
+    },
+    [trackEndXGlobal, trackStartXGlobal],
+  );
+
+  const updateTrackShiftFromLeft = useCallback(
+    (timelineLeftPadding: number) => {
+      if (!trackRef.current) {
+        return;
+      }
+
+      const shiftFromLeft = globalToLocalCoordinates(
+        trackStartXGlobal + timelineLeftPadding,
+      );
       trackRef.current.style.left = `${shiftFromLeft}px`;
     },
-    [
-      globalToLocalCoordinates,
-      track.channel.id,
-      track.data.uuid,
-      trackEndXGlobal,
-      trackStartXGlobal,
-      trackWidth,
-    ],
+    [globalToLocalCoordinates, trackStartXGlobal],
+  );
+
+  const updateTrackPosition = useCallback(
+    (
+      scroll: number,
+      pixelsPerSecond: number,
+      timelineLeftPadding: number,
+      timelineClientWidth: number,
+    ) => {
+      updateTrackWidth();
+      updateTrackShiftFromLeft(timelineLeftPadding);
+      updateTrackVisibility(scroll, pixelsPerSecond, timelineClientWidth);
+    },
+    [updateTrackShiftFromLeft, updateTrackVisibility, updateTrackWidth],
   );
 
   const calcNewStartTime = useCallback(
@@ -165,89 +166,141 @@ export const TrackCardView = observer(function TrackCardView({
     [audioEditorTimelineState.pixelsPerSecond],
   );
 
+  const prevChannelId = useRef<string | null>(null);
+
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       selectTrack();
-
-      removeDragGhostImage(e);
-
-      e.dataTransfer.dropEffect = 'move';
-      e.dataTransfer.effectAllowed = 'move';
-
-      e.currentTarget.style.cursor = 'pointer';
+      setDragSettings(e);
 
       e.dataTransfer.setData('text/trackId', track.data.uuid);
       e.dataTransfer.setData('text/channelId', track.channel.id);
 
-      e.currentTarget.dataset.startX = `${e.nativeEvent.pageX}`;
-      e.currentTarget.dataset.startY = `${e.nativeEvent.pageY}`;
-      e.currentTarget.dataset.startTime = `${track.currentStartTime}`;
-      e.currentTarget.dataset.leftBound = `${0}`;
-      e.currentTarget.dataset.rightBound = `${Infinity}`;
+      prevChannelId.current = track.channel.id;
 
-      e.currentTarget.style.zIndex = '10';
+      setDragProperties(e, track.currentStartTime);
     },
     [selectTrack, track.channel.id, track.currentStartTime, track.data.uuid],
   );
 
   const handleDrag = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      if (!trackRef.current) {
+      const startTime = calcNewStartTime(e);
+
+      const paneOffsetY = 196;
+
+      const globalChannelIndex = Math.floor(
+        (Number(e.pageY) - paneOffsetY) / 96,
+      );
+
+      if (
+        globalChannelIndex >= 0 &&
+        globalChannelIndex < audioEditorManager.channelIds.length
+      ) {
+        const currentChannelIndex = Math.floor(
+          Math.floor(Number(e.currentTarget.dataset.startY) - paneOffsetY) / 96,
+        );
+
+        const currentChannel = audioEditorManager.channels.get(
+          audioEditorManager.channelIds[globalChannelIndex],
+        )!;
+
+        if (track.channel.id !== currentChannel.id) {
+          track.setChannel(currentChannel);
+        }
+
+        const channelOffset = globalChannelIndex - currentChannelIndex;
+
+        e.currentTarget.style.top = channelOffset * 96 + 5 + 'px';
+      }
+
+      if (track.currentStartTime === startTime) {
         return;
       }
+
+      track.setNewStartTime(startTime);
 
       if (track.audioBuffer?.isPlaying()) {
         track.audioBuffer?.pause();
       }
-
-      const startTime = calcNewStartTime(e);
-      track.setNewStartTime(startTime);
-
-      const globalChannelIndex = Math.floor((Number(e.pageY) - 222) / 96);
-      if (
-        globalChannelIndex >= 0 &&
-        globalChannelIndex < audioEditorManager.channels.size
-      ) {
-        const currentChannel = Math.floor(
-          Math.floor(Number(e.currentTarget.dataset.startY) - 222) / 96,
-        );
-
-        const channelOffset = globalChannelIndex - currentChannel;
-
-        trackRef.current.style.top = channelOffset * 96 + 6 + 'px';
-      }
     },
-    [audioEditorManager.channels.size, calcNewStartTime, track],
+    [
+      audioEditorManager.channelIds,
+      audioEditorManager.channels,
+      calcNewStartTime,
+      track,
+    ],
   );
+
+  const adjustTracksOnPaste = useCallback((track: TrackWithMeta) => {
+    track.channel.tracks.forEach((tr) => {
+      if (
+        track.currentStartTime > tr.currentStartTime &&
+        track.currentStartTime < tr.currentEndTime
+      ) {
+        tr.setEndTime(track.currentStartTime);
+      }
+      if (
+        track.currentEndTime > tr.currentStartTime &&
+        track.currentEndTime < tr.currentEndTime
+      ) {
+        tr.setStartTime(track.currentEndTime);
+      }
+    });
+  }, []);
 
   const handleDragEnd = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      if (!trackRef.current) {
-        return;
-      }
-
       track.setNewStartTime(calcNewStartTime(e));
+      clearDragProperties(e);
 
-      e.currentTarget.dataset.startX = '';
-      e.currentTarget.dataset.startY = '';
-      e.currentTarget.dataset.startTime = '';
-      e.currentTarget.dataset.leftBound = '';
-      e.currentTarget.dataset.rightBound = '';
-      e.currentTarget.style.cursor = '';
-      e.currentTarget.style.zIndex = '';
+      if (prevChannelId.current) {
+        if (prevChannelId.current !== track.channel.id) {
+          const prevChannel = audioEditorManager.channels.get(
+            prevChannelId.current,
+          );
+
+          if (prevChannel) {
+            prevChannel.removeTrack(track);
+          }
+
+          track.channel.addTrack(track);
+        }
+
+        adjustTracksOnPaste(track);
+      }
     },
-    [calcNewStartTime, track],
+    [adjustTracksOnPaste, audioEditorManager.channels, calcNewStartTime, track],
+  );
+
+  const onDragDropPrevent = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+    },
+    [],
   );
 
   useEffect(() => {
-    const animationId = requestAnimationFrame(() =>
+    if (!trackRef.current) {
+      return;
+    }
+
+    trackRef.current.dataset.channelUuid = track.channel.id;
+    trackRef.current.dataset.trackUuid = track.data.uuid;
+  }, [track.channel.id, track.data.uuid]);
+
+  useEffect(() => {
+    const updateTrack = () =>
       updateTrackPosition(
         audioEditorTimelineState.scroll,
         audioEditorTimelineState.pixelsPerSecond,
         audioEditorTimelineState.timelineLeftPadding,
         audioEditorTimelineState.endPageX - audioEditorTimelineState.startPageX,
-      ),
-    );
+      );
+
+    const animationId = requestAnimationFrame(updateTrack);
 
     return () => cancelAnimationFrame(animationId);
   }, [
@@ -259,14 +312,9 @@ export const TrackCardView = observer(function TrackCardView({
     updateTrackPosition,
   ]);
 
-  const onDragOver = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
   return (
     <TrackCardMemoized
-      className='absolute'
+      className='absolute z-0'
       ref={trackRef}
       track={track.data}
       isSolo={track.channel?.isSolo}
@@ -275,10 +323,12 @@ export const TrackCardView = observer(function TrackCardView({
       onClick={handleClick}
       // Drag logic
       draggable
-      onDragOver={onDragOver}
       onDrag={handleDrag}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      // Prevent events
+      onDragOver={onDragDropPrevent}
+      onDrop={onDragDropPrevent}
       {...props}
     />
   );

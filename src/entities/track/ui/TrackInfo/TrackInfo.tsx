@@ -6,13 +6,13 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
   return (
     <div
       className={cn(
-        'border border-secondary-light px-2 py-1 rounded-md overflow-hidden',
+        'border border-secondary-light px-[10px] py-[6px] h-12 text-[14px] leading-4 rounded-md overflow-hidden',
         className,
         { 'border-accent': !!track },
       )}
       {...props}
     >
-      <p>
+      <p className='inline-flex h-full flex-col justify-between'>
         <span
           className={cn(
             'flex text-nowrap gap-1 font-bold text-secondary-light',

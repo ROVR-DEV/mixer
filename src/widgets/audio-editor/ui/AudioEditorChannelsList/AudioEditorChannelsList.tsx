@@ -1,6 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
+import { useCallback } from 'react';
 
 import {
   AddNewChannelButtonMemoized,
@@ -8,7 +9,7 @@ import {
   ChannelListMemoized,
 } from '@/entities/channel';
 
-import { ChannelControlMemoized } from '@/features/channel-control';
+import { AudioEditorChannelsListView } from '../AudioEditorChannelsListView';
 
 import { AudioEditorChannelsListProps } from './interfaces';
 
@@ -18,37 +19,20 @@ export const AudioEditorChannelsList = observer(
     trackHeight,
     ...props
   }: AudioEditorChannelsListProps) {
+    const handleAddChannel = useCallback(
+      () => audioEditorManager.addChannel(),
+      [audioEditorManager],
+    );
+
     return (
       <ChannelListMemoized {...props}>
-        {[...audioEditorManager.channels.values()].map((channel, index) => (
-          <ChannelListItemMemoized
-            key={`${channel.id}-channel`}
-            style={{ height: trackHeight }}
-            isSelected={audioEditorManager.selectedChannelId === channel.id}
-            onClick={() => audioEditorManager.setSelectedChannel(channel.id)}
-          >
-            <ChannelControlMemoized
-              channel={channel}
-              number={index + 1}
-              isSelected={audioEditorManager.selectedChannelId === channel.id}
-              isAbleToRemove={index > 1}
-              onClickRemove={(e) => {
-                e.stopPropagation();
-                audioEditorManager.removeChannel(channel.id);
-              }}
-            />
-          </ChannelListItemMemoized>
-        ))}
+        <AudioEditorChannelsListView audioEditorManager={audioEditorManager} />
         <ChannelListItemMemoized
           className='justify-center'
           disableBorder
           style={{ height: trackHeight }}
         >
-          <AddNewChannelButtonMemoized
-            onClick={() => {
-              audioEditorManager.addChannel();
-            }}
-          />
+          <AddNewChannelButtonMemoized onClick={handleAddChannel} />
         </ChannelListItemMemoized>
       </ChannelListMemoized>
     );

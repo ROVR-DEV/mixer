@@ -4,14 +4,14 @@ import { observer } from 'mobx-react-lite';
 
 import { TrackCardView } from '@/features/track-card-view';
 
-import { AudioEditorTrackProps } from './interfaces';
+import { AudioEditorTracksViewProps } from './interfaces';
 
-export const AudioEditorTrackLine = observer(function AudioEditorTrackLine({
+export const AudioEditorTracksView = observer(function AudioEditorTracksView({
   channel,
   tracksData,
   audioEditorManager,
-}: AudioEditorTrackProps) {
-  return [...channel.tracks.values()].map((track) => {
+}: AudioEditorTracksViewProps) {
+  return channel.tracks.map((track) => {
     return !track ? null : (
       <TrackCardView
         key={`${track.data.uuid}-track`}

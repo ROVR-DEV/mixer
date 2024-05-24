@@ -10,9 +10,12 @@ import {
   AudioEditorManager,
   AudioEditorTimelineState,
   AudioEditorTimelineStateContext,
+  TRACK_HEIGHT,
+  PREDEFINED_CHANNELS,
+  START_PAGE_X,
+  TIMELINE_LEFT_PADDING,
 } from '@/entities/audio-editor';
 import {
-  Channel,
   ChannelListItemMemoized,
   ChannelListMemoized,
 } from '@/entities/channel';
@@ -43,15 +46,6 @@ import { AudioEditorTracksList } from '../AudioEditorTracksList';
 
 import { TimelineProps } from './interfaces';
 
-const trackHeight = 96;
-const rulerLeftPadding = 5;
-const sidebarWidth = 296;
-
-const timelineLeftPadding = rulerLeftPadding;
-const startPageX = sidebarWidth;
-
-const predefinedChannels = [new Channel(), new Channel()];
-
 export const AudioEditor = observer(function AudioEditor({
   playlist,
   className,
@@ -62,7 +56,7 @@ export const AudioEditor = observer(function AudioEditor({
   );
 
   const [audioEditorManager] = useState(
-    () => new AudioEditorManager(predefinedChannels),
+    () => new AudioEditorManager(PREDEFINED_CHANNELS),
   );
 
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -79,15 +73,15 @@ export const AudioEditor = observer(function AudioEditor({
   const { tracks, loadedTracksCount } = useTracks(playlist);
 
   useEffect(() => {
-    const channelIds = [...audioEditorManager.channels.values()].map(
-      (channel) => channel.id,
-    );
-
     audioEditorManager.clearTracks();
 
     playlist.tracks.forEach((track, i) =>
       audioEditorManager.channels
-        .get(i % 2 === 0 ? channelIds[0] : channelIds[1])
+        .get(
+          i % 2 === 0
+            ? audioEditorManager.channelIds[0]
+            : audioEditorManager.channelIds[1],
+        )
         ?.importTrack(track),
     );
   }, [audioEditorManager, playlist.tracks]);
@@ -125,7 +119,9 @@ export const AudioEditor = observer(function AudioEditor({
   const realToVirtualPixels = useCallback(
     (value: number) => {
       return (
-        value * pixelsPerSecond - timelineLeftPadding - (scrollRef.current ?? 0)
+        value * pixelsPerSecond -
+        TIMELINE_LEFT_PADDING -
+        (scrollRef.current ?? 0)
       );
     },
     [pixelsPerSecond, scrollRef],
@@ -134,7 +130,7 @@ export const AudioEditor = observer(function AudioEditor({
   const virtualToRealPixels = useCallback(
     (value: number) => {
       return (
-        (value - timelineLeftPadding) / pixelsPerSecond +
+        (value - TIMELINE_LEFT_PADDING) / pixelsPerSecond +
         (scrollRef.current ?? 0)
       );
     },
@@ -146,7 +142,7 @@ export const AudioEditor = observer(function AudioEditor({
       rulerRef,
       gridRef,
       timelineClientWidth,
-      timelineLeftPadding,
+      timelineLeftPadding: TIMELINE_LEFT_PADDING,
     });
 
   const updateTimelineRulerAndGrid = useCallback(
@@ -166,7 +162,7 @@ export const AudioEditor = observer(function AudioEditor({
     return (
       realToVirtualPixels(audioEditorManager.time) -
       realToVirtualPixels(scrollRef.current ?? 0) +
-      timelineLeftPadding
+      TIMELINE_LEFT_PADDING
     );
   }, [audioEditorManager.time, realToVirtualPixels, scrollRef]);
 
@@ -174,7 +170,7 @@ export const AudioEditor = observer(function AudioEditor({
     (timelineClientWidth: number, shift: number, pixelsPerSecond: number) => {
       const virtualShift = realToVirtualPixels(shift);
       const playHeadVirtualPosition =
-        realToVirtualPixels(audioEditorManager.time) + timelineLeftPadding;
+        realToVirtualPixels(audioEditorManager.time) + TIMELINE_LEFT_PADDING;
 
       if (
         playHeadVirtualPosition < virtualShift ||
@@ -234,7 +230,7 @@ export const AudioEditor = observer(function AudioEditor({
   const handleMouseMovePlayHead = useCallback(
     (e: MouseEvent) => {
       audioEditorManager.seekTo(
-        clampTime(virtualToRealPixels(e.pageX - startPageX)),
+        clampTime(virtualToRealPixels(e.pageX - START_PAGE_X)),
       );
 
       requestAnimationFrame(updateTimeDependent);
@@ -247,7 +243,7 @@ export const AudioEditor = observer(function AudioEditor({
       e.stopPropagation();
 
       audioEditorManager.seekTo(
-        clampTime(virtualToRealPixels(e.nativeEvent.pageX - startPageX)),
+        clampTime(virtualToRealPixels(e.nativeEvent.pageX - START_PAGE_X)),
       );
 
       updateTimeDependent();
@@ -300,8 +296,8 @@ export const AudioEditor = observer(function AudioEditor({
 
   //#region Setup state
   useEffect(() => {
-    audioEditorTimelineState.setBounds(startPageX, timelineClientWidth);
-    audioEditorTimelineState.setTimelineLeftPadding(timelineLeftPadding);
+    audioEditorTimelineState.setBounds(START_PAGE_X, timelineClientWidth);
+    audioEditorTimelineState.setTimelineLeftPadding(TIMELINE_LEFT_PADDING);
   }, [audioEditorTimelineState, timelineClientWidth]);
   //#endregion
 
@@ -326,7 +322,6 @@ export const AudioEditor = observer(function AudioEditor({
   return (
     <div className={cn('flex flex-col', className)} {...props}>
       <AudioEditorHeaderMemoized
-        className='border-b border-b-secondary px-6 py-3'
         clockRef={clockRef}
         audioEditorManager={audioEditorManager}
       />
@@ -335,7 +330,7 @@ export const AudioEditor = observer(function AudioEditor({
           <div className='pointer-events-none absolute left-[296px] z-20 h-full'>
             <TimelinePlayHeadMemoized
               ref={playHeadRef}
-              initialPosition={timelineLeftPadding}
+              initialPosition={TIMELINE_LEFT_PADDING}
             />
           </div>
           <ChannelListMemoized className='min-w-[296px]'>
@@ -362,7 +357,7 @@ export const AudioEditor = observer(function AudioEditor({
           <AudioEditorChannelsList
             className='min-h-max min-w-[296px] grow'
             audioEditorManager={audioEditorManager}
-            trackHeight={trackHeight}
+            trackHeight={TRACK_HEIGHT}
           />
           <div
             className='relative min-h-max w-full grow overflow-x-clip'
@@ -379,7 +374,7 @@ export const AudioEditor = observer(function AudioEditor({
               <>
                 <TimelineGridMemoized
                   className='absolute w-full'
-                  height={audioEditorManager.channels.size * trackHeight}
+                  height={audioEditorManager.channelIds.length * TRACK_HEIGHT}
                   ref={gridRef}
                 />
                 <AudioEditorTimelineStateContext.Provider
