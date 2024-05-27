@@ -7,3 +7,4 @@ export * from './useTimeLoop';
 export * from './useDpi';
 export * from './useGlobalMouseMove';
 export * from './removeDragGhostImage';
+export * from './useScrollSync';

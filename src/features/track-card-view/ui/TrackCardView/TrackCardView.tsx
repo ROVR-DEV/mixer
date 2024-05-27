@@ -42,9 +42,16 @@ export const TrackCardView = observer(function TrackCardView({
       <WaveformMemoized
         data={trackData}
         color={isSelected ? 'primary' : 'secondary'}
-        options={waveformOptions}
+        options={
+          track.audioBufferPeaks
+            ? { ...waveformOptions, peaks: track.audioBufferPeaks }
+            : waveformOptions
+        }
         onMount={(wavesurfer) => {
-          track.audioBuffer = wavesurfer;
+          track.setAudioBuffer(wavesurfer);
+          wavesurfer.once('ready', () => {
+            track.setAudioBufferPeaks(wavesurfer.exportPeaks());
+          });
         }}
       />
     ),
@@ -185,9 +192,12 @@ export const TrackCardView = observer(function TrackCardView({
 
   const handleDrag = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
+      const grid = (e.target as HTMLElement).parentElement?.parentElement
+        ?.parentElement;
+
       const startTime = calcNewStartTime(e);
 
-      const paneOffsetY = 196;
+      const paneOffsetY = 196 - (grid?.scrollTop ?? 0);
 
       const globalChannelIndex = Math.floor(
         (Number(e.pageY) - paneOffsetY) / 96,
@@ -211,7 +221,7 @@ export const TrackCardView = observer(function TrackCardView({
 
         const channelOffset = globalChannelIndex - currentChannelIndex;
 
-        e.currentTarget.style.top = channelOffset * 96 + 5 + 'px';
+        e.currentTarget.style.top = channelOffset * 96 + 6 + 'px';
       }
 
       if (track.currentStartTime === startTime) {
@@ -260,6 +270,9 @@ export const TrackCardView = observer(function TrackCardView({
           trackOnLine.data,
           trackOnLine.channel,
         );
+        if (trackOnLine.audioBufferPeaks) {
+          trackOnLineCopy.setAudioBufferPeaks(trackOnLine.audioBufferPeaks);
+        }
         trackOnLineCopy.setNewStartTime(trackOnLine.currentStartTime);
         trackOnLineCopy.setStartTime(track.currentEndTime);
         trackOnLineCopy.setEndTime(trackOnLine.currentEndTime);

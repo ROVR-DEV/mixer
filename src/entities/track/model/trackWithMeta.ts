@@ -15,6 +15,7 @@ export class TrackWithMeta<T = WaveSurfer> {
 
   data: Track;
   audioBuffer: T | null;
+  audioBufferPeaks: number[][] | null = null;
 
   duration: number;
 
@@ -42,6 +43,18 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     makeAutoObservable(this);
   }
+
+  setAudioBuffer = (audioBuffer: T) => {
+    if (this.audioBuffer === audioBuffer) {
+      return;
+    }
+
+    this.audioBuffer = audioBuffer;
+  };
+
+  setAudioBufferPeaks = (peaks: number[][]) => {
+    this.audioBufferPeaks = peaks;
+  };
 
   setChannel = (channel: Channel) => {
     if (this.channel !== channel) {

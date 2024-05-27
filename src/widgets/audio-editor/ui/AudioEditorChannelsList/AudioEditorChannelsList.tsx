@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback } from 'react';
+import { forwardRef, useCallback } from 'react';
 
 import {
   AddNewChannelButtonMemoized,
@@ -13,28 +13,30 @@ import { AudioEditorChannelsListView } from '../AudioEditorChannelsListView';
 
 import { AudioEditorChannelsListProps } from './interfaces';
 
-export const AudioEditorChannelsList = observer(
-  function AudioEditorChannelsList({
-    audioEditorManager,
-    trackHeight,
-    ...props
-  }: AudioEditorChannelsListProps) {
-    const handleAddChannel = useCallback(
-      () => audioEditorManager.addChannel(),
-      [audioEditorManager],
-    );
+const _AudioEditorChannelsList = forwardRef<
+  HTMLDivElement,
+  AudioEditorChannelsListProps
+>(function AudioEditorChannelsList(
+  { audioEditorManager, trackHeight, ...props },
+  ref,
+) {
+  const handleAddChannel = useCallback(
+    () => audioEditorManager.addChannel(),
+    [audioEditorManager],
+  );
 
-    return (
-      <ChannelListMemoized {...props}>
-        <AudioEditorChannelsListView audioEditorManager={audioEditorManager} />
-        <ChannelListItemMemoized
-          className='justify-center'
-          disableBorder
-          style={{ height: trackHeight }}
-        >
-          <AddNewChannelButtonMemoized onClick={handleAddChannel} />
-        </ChannelListItemMemoized>
-      </ChannelListMemoized>
-    );
-  },
-);
+  return (
+    <ChannelListMemoized ref={ref} {...props}>
+      <AudioEditorChannelsListView audioEditorManager={audioEditorManager} />
+      <ChannelListItemMemoized
+        className='justify-center'
+        disableBorder
+        style={{ height: trackHeight }}
+      >
+        <AddNewChannelButtonMemoized onClick={handleAddChannel} />
+      </ChannelListItemMemoized>
+    </ChannelListMemoized>
+  );
+});
+
+export const AudioEditorChannelsList = observer(_AudioEditorChannelsList);

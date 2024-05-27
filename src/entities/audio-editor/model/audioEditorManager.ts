@@ -58,6 +58,7 @@ export class AudioEditorManager {
   };
 
   removeChannel = (channelId: string) => {
+    this.channels.get(channelId)?.clearTracks();
     this.channels.delete(channelId);
     this.channelIds.remove(channelId);
   };

@@ -45,12 +45,12 @@ export const useGlobalMouseMove = (
       onMove(e);
     };
 
-    document.addEventListener('mousemove', onMoveProtected);
+    window.addEventListener('mousemove', onMoveProtected);
     document.addEventListener('mousedown', checkIsAbleToMove);
     document.addEventListener('mouseup', resetIsAbleToMove);
 
     return () => {
-      document.removeEventListener('mousemove', onMoveProtected);
+      window.removeEventListener('mousemove', onMoveProtected);
       document.removeEventListener('mousedown', checkIsAbleToMove);
       document.removeEventListener('mouseup', resetIsAbleToMove);
     };
