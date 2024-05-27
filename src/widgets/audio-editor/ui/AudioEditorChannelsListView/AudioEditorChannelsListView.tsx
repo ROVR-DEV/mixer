@@ -18,7 +18,7 @@ export const AudioEditorChannelsListView = observer(
 
       return (
         <ChannelListItemView
-          key={`${channel.id}-channel`}
+          key={`channel-${channel.id}`}
           audioEditorManager={audioEditorManager}
           channel={channel}
         >

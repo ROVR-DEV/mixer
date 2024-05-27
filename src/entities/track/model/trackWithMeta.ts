@@ -1,4 +1,6 @@
 import { makeAutoObservable } from 'mobx';
+// eslint-disable-next-line import/named
+import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
 
 // eslint-disable-next-line boundaries/element-types
@@ -8,6 +10,8 @@ import { Track } from './track';
 
 export class TrackWithMeta<T = WaveSurfer> {
   channel: Channel;
+
+  uuid: string;
 
   data: Track;
   audioBuffer: T | null;
@@ -33,6 +37,8 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.startTimeOffset = 0;
     this.endTimeOffset = 0;
+
+    this.uuid = v4();
 
     makeAutoObservable(this);
   }

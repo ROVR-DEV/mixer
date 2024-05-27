@@ -67,7 +67,7 @@ export class AudioEditorManager {
   };
 
   setSelectedTrack = (track: TrackWithMeta | null) => {
-    if (this.selectedTrack?.data.uuid === track?.data.uuid) {
+    if (this.selectedTrack?.uuid === track?.uuid) {
       return;
     }
 

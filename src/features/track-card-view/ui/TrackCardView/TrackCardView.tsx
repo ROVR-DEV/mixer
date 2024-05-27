@@ -33,8 +33,8 @@ export const TrackCardView = observer(function TrackCardView({
   const audioEditorTimelineState = useAudioEditorTimelineState();
 
   const isSelected = useMemo(
-    () => audioEditorManager.selectedTrack?.data.uuid === track.data.uuid,
-    [audioEditorManager.selectedTrack?.data.uuid, track.data.uuid],
+    () => audioEditorManager.selectedTrack?.uuid === track.uuid,
+    [audioEditorManager.selectedTrack?.uuid, track.uuid],
   );
 
   const waveformComponent = useMemo(
@@ -173,14 +173,14 @@ export const TrackCardView = observer(function TrackCardView({
       selectTrack();
       setDragSettings(e);
 
-      e.dataTransfer.setData('text/trackId', track.data.uuid);
+      e.dataTransfer.setData('text/trackId', track.uuid);
       e.dataTransfer.setData('text/channelId', track.channel.id);
 
       prevChannelId.current = track.channel.id;
 
       setDragProperties(e, track.currentStartTime);
     },
-    [selectTrack, track.channel.id, track.currentStartTime, track.data.uuid],
+    [selectTrack, track.channel.id, track.currentStartTime, track.uuid],
   );
 
   const handleDrag = useCallback(
@@ -233,18 +233,44 @@ export const TrackCardView = observer(function TrackCardView({
   );
 
   const adjustTracksOnPaste = useCallback((track: TrackWithMeta) => {
-    track.channel.tracks.forEach((tr) => {
-      if (
-        track.currentStartTime > tr.currentStartTime &&
-        track.currentStartTime < tr.currentEndTime
-      ) {
-        tr.setEndTime(track.currentStartTime);
+    track.channel.tracks.forEach((trackOnLine) => {
+      if (track.uuid === trackOnLine.uuid) {
+        return;
       }
-      if (
-        track.currentEndTime > tr.currentStartTime &&
-        track.currentEndTime < tr.currentEndTime
-      ) {
-        tr.setStartTime(track.currentEndTime);
+
+      const trackIntersectsFull =
+        track.currentStartTime <= trackOnLine.currentStartTime &&
+        track.currentEndTime >= trackOnLine.currentEndTime;
+
+      if (trackIntersectsFull) {
+        track.channel.removeTrack(trackOnLine);
+        return;
+      }
+
+      const trackIntersectsOnStart =
+        track.currentEndTime > trackOnLine.currentStartTime &&
+        track.currentEndTime < trackOnLine.currentEndTime;
+
+      const trackIntersectsOnEnd =
+        track.currentStartTime > trackOnLine.currentStartTime &&
+        track.currentStartTime < trackOnLine.currentEndTime;
+
+      if (trackIntersectsOnStart && trackIntersectsOnEnd) {
+        const trackOnLineCopy = new TrackWithMeta(
+          trackOnLine.data,
+          trackOnLine.channel,
+        );
+        trackOnLineCopy.setNewStartTime(trackOnLine.currentStartTime);
+        trackOnLineCopy.setStartTime(track.currentEndTime);
+        trackOnLineCopy.setEndTime(trackOnLine.currentEndTime);
+
+        trackOnLine.setEndTime(track.currentStartTime);
+
+        track.channel.addTrack(trackOnLineCopy);
+      } else if (trackIntersectsOnStart) {
+        trackOnLine.setStartTime(track.currentEndTime);
+      } else if (trackIntersectsOnEnd) {
+        trackOnLine.setEndTime(track.currentStartTime);
       }
     });
   }, []);
@@ -288,8 +314,8 @@ export const TrackCardView = observer(function TrackCardView({
     }
 
     trackRef.current.dataset.channelUuid = track.channel.id;
-    trackRef.current.dataset.trackUuid = track.data.uuid;
-  }, [track.channel.id, track.data.uuid]);
+    trackRef.current.dataset.trackUuid = track.uuid;
+  }, [track.channel.id, track.uuid]);
 
   useEffect(() => {
     const updateTrack = () =>

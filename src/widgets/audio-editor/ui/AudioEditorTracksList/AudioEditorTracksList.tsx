@@ -17,7 +17,7 @@ export const AudioEditorTracksList = observer(function AudioEditorTracksList({
 
     return (
       <ChannelListItemView
-        key={`${channel.id}-track-line`}
+        key={`channel-track-line-${channel.id}`}
         className='relative'
         audioEditorManager={audioEditorManager}
         channel={channel}

@@ -14,7 +14,7 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
   return channel.tracks.map((track) => {
     return !track ? null : (
       <TrackCardView
-        key={`${track.data.uuid}-track`}
+        key={`track-${track.uuid}`}
         track={track}
         trackData={tracksData[track.data.uuid]}
         audioEditorManager={audioEditorManager}
