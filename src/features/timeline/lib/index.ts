@@ -13,7 +13,6 @@ export * from './drawGridInSeconds';
 export * from './useTicks';
 export * from './getDpi';
 export * from './setupCanvas';
-export * from './clampTime';
 export * from './getTimelineMaxScroll';
 export * from './getPixelsPerSecond';
 export * from './getTicksForSeconds';

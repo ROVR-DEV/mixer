@@ -1,14 +1,19 @@
 'use client';
 
-import { clamp } from 'lodash-es';
 import { observer } from 'mobx-react-lite';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useAudioEditorTimelineState } from '@/entities/audio-editor';
+import { clamp } from '@/shared/lib';
+
+import {
+  TIMELINE_LEFT_PADDING,
+  useTimelineController,
+} from '@/entities/audio-editor';
 import {
   TrackCardMemoized,
   TrackWithMeta,
   WaveformMemoized,
+  useTracksManager,
   waveformOptions,
 } from '@/entities/track';
 
@@ -25,12 +30,17 @@ import styles from './styles.module.css';
 export const TrackCardView = observer(function TrackCardView({
   track,
   audioEditorManager,
-  trackData,
   ...props
 }: TrackCardViewProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const audioEditorTimelineState = useAudioEditorTimelineState();
+  const tracksManager = useTracksManager();
+  const trackData = useMemo(
+    () => tracksManager.tracksData.get(track.data.uuid),
+    [track.data.uuid, tracksManager.tracksData],
+  );
+
+  const audioEditorTimelineController = useTimelineController();
 
   const isSelected = useMemo(
     () => audioEditorManager.selectedTrack?.uuid === track.uuid,
@@ -40,7 +50,7 @@ export const TrackCardView = observer(function TrackCardView({
   const waveformComponent = useMemo(
     () => (
       <WaveformMemoized
-        data={trackData}
+        data={trackData?.blob}
         color={isSelected ? 'primary' : 'secondary'}
         options={
           track.audioBufferPeaks
@@ -62,12 +72,20 @@ export const TrackCardView = observer(function TrackCardView({
     audioEditorManager.setSelectedTrack(track);
   }, [audioEditorManager, track]);
 
+  const handleEdit = useCallback(() => {
+    audioEditorManager.setEditableTrack(track);
+  }, [audioEditorManager, track]);
+
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
       selectTrack();
+
+      if (e.detail === 2) {
+        handleEdit();
+      }
     },
-    [selectTrack],
+    [handleEdit, selectTrack],
   );
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
@@ -75,23 +93,26 @@ export const TrackCardView = observer(function TrackCardView({
       getTrackCoordinates(
         track.currentStartTime,
         track.currentEndTime,
-        audioEditorTimelineState.pixelsPerSecond,
+        audioEditorTimelineController.pixelsPerSecond,
       ),
     [
       track.currentStartTime,
       track.currentEndTime,
-      audioEditorTimelineState.pixelsPerSecond,
+      audioEditorTimelineController.pixelsPerSecond,
     ],
   );
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
       const virtualScrollOffsetX =
-        audioEditorTimelineState.scroll *
-        audioEditorTimelineState.pixelsPerSecond;
+        audioEditorTimelineController.scroll *
+        audioEditorTimelineController.pixelsPerSecond;
       return globalX - virtualScrollOffsetX;
     },
-    [audioEditorTimelineState.pixelsPerSecond, audioEditorTimelineState.scroll],
+    [
+      audioEditorTimelineController.pixelsPerSecond,
+      audioEditorTimelineController.scroll,
+    ],
   );
 
   const updateTrackWidth = useCallback(() => {
@@ -144,14 +165,9 @@ export const TrackCardView = observer(function TrackCardView({
   );
 
   const updateTrackPosition = useCallback(
-    (
-      scroll: number,
-      pixelsPerSecond: number,
-      timelineLeftPadding: number,
-      timelineClientWidth: number,
-    ) => {
+    (scroll: number, pixelsPerSecond: number, timelineClientWidth: number) => {
       updateTrackWidth();
-      updateTrackShiftFromLeft(timelineLeftPadding);
+      updateTrackShiftFromLeft(TIMELINE_LEFT_PADDING);
       updateTrackVisibility(scroll, pixelsPerSecond, timelineClientWidth);
     },
     [updateTrackShiftFromLeft, updateTrackVisibility, updateTrackWidth],
@@ -160,17 +176,16 @@ export const TrackCardView = observer(function TrackCardView({
   const calcNewStartTime = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       const leftTimeBound = Number(e.currentTarget.dataset.leftBound);
-      const rightTimeBound = Infinity;
 
       const startTime = Number(e.currentTarget.dataset.startTime);
 
       const startX = Number(e.currentTarget.dataset.startX);
       const timeOffset =
-        (e.pageX - startX) / audioEditorTimelineState.pixelsPerSecond;
+        (e.pageX - startX) / audioEditorTimelineController.pixelsPerSecond;
 
-      return clamp(startTime + timeOffset, leftTimeBound, rightTimeBound);
+      return clamp(startTime + timeOffset, leftTimeBound);
     },
-    [audioEditorTimelineState.pixelsPerSecond],
+    [audioEditorTimelineController.pixelsPerSecond],
   );
 
   const prevChannelId = useRef<string | null>(null);
@@ -333,21 +348,20 @@ export const TrackCardView = observer(function TrackCardView({
   useEffect(() => {
     const updateTrack = () =>
       updateTrackPosition(
-        audioEditorTimelineState.scroll,
-        audioEditorTimelineState.pixelsPerSecond,
-        audioEditorTimelineState.timelineLeftPadding,
-        audioEditorTimelineState.endPageX - audioEditorTimelineState.startPageX,
+        audioEditorTimelineController.scroll,
+        audioEditorTimelineController.pixelsPerSecond,
+        audioEditorTimelineController.endPageX -
+          audioEditorTimelineController.startPageX,
       );
 
     const animationId = requestAnimationFrame(updateTrack);
 
     return () => cancelAnimationFrame(animationId);
   }, [
-    audioEditorTimelineState.endPageX,
-    audioEditorTimelineState.pixelsPerSecond,
-    audioEditorTimelineState.scroll,
-    audioEditorTimelineState.startPageX,
-    audioEditorTimelineState.timelineLeftPadding,
+    audioEditorTimelineController.endPageX,
+    audioEditorTimelineController.pixelsPerSecond,
+    audioEditorTimelineController.scroll,
+    audioEditorTimelineController.startPageX,
     updateTrackPosition,
   ]);
 
@@ -360,6 +374,7 @@ export const TrackCardView = observer(function TrackCardView({
       isSelected={isSelected}
       waveformComponent={waveformComponent}
       onClick={handleClick}
+      onEdit={handleEdit}
       // Drag logic
       draggable
       onDrag={handleDrag}

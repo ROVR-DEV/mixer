@@ -3,3 +3,8 @@ export * from './AudioEditorChannelsList';
 export * from './AudioEditorTracksList';
 export * from './AudioEditorTracksView';
 export * from './AudioEditorChannelsListView';
+export * from './ChannelsListHeader';
+export * from './TimelineViewFooter';
+export * from './TimelineView';
+export * from './TimelineHeader';
+export * from './Timeline';

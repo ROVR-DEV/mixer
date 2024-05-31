@@ -1,67 +1,67 @@
 'use client';
 
-import { RefObject, useCallback, useRef } from 'react';
+import { RefObject, useCallback } from 'react';
 
 import {
-  Tick,
   TimelineGridRef,
   TimelineRulerRef,
-  getTicksForSeconds,
+  TimelineTicks,
+  useTicks,
 } from '@/features/timeline';
+
+import { useAudioEditorTimelineGrid } from './useAudioEditorTimelineGrid';
+import { useAudioEditorTimelineRuler } from './useAudioEditorTimelineRuler';
 
 export interface AudioEditorTimelineRulerAndGridProps {
   rulerRef: RefObject<TimelineRulerRef>;
   gridRef: RefObject<TimelineGridRef>;
   timelineClientWidth: number;
-  timelineLeftPadding: number;
 }
+
+const emptyTicks: TimelineTicks = { mainTicks: [], subTicks: [] };
 
 export const useAudioEditorTimelineRulerAndGrid = ({
   rulerRef,
   gridRef,
   timelineClientWidth,
-  timelineLeftPadding,
 }: AudioEditorTimelineRulerAndGridProps) => {
-  const ticksRef = useRef<{ mainTicks: Tick[]; subTicks: Tick[] }>();
+  const { ticksRef, updateTicks } = useTicks(timelineClientWidth);
 
-  const updateTicks = useCallback(
-    (zoom: number, scroll: number, pixelsPerSecond: number) => {
-      ticksRef.current = getTicksForSeconds(
-        timelineClientWidth,
+  const renderRuler = useAudioEditorTimelineRuler(rulerRef);
+  const renderGrid = useAudioEditorTimelineGrid(gridRef);
+
+  const renderRulerWithTicks = useCallback(
+    (
+      zoom: number,
+      scroll: number,
+      pixelsPerSecond: number,
+      timelineLeftPadding: number,
+    ) =>
+      renderRuler(
+        ticksRef.current ?? emptyTicks,
         zoom,
-        scroll * pixelsPerSecond,
-      );
-    },
-    [timelineClientWidth],
+        scroll,
+        pixelsPerSecond,
+        timelineLeftPadding,
+      ),
+    [renderRuler, ticksRef],
   );
 
-  const renderRuler = useCallback(
-    (zoom: number, scroll: number, pixelsPerSecond: number) =>
-      requestAnimationFrame(() => {
-        rulerRef.current?.render(
-          ticksRef.current ?? { mainTicks: [], subTicks: [] },
-          scroll * pixelsPerSecond,
-          timelineLeftPadding,
-          zoom,
-          '#9B9B9B',
-        );
-      }),
-    [rulerRef, timelineLeftPadding],
+  const renderGridWithTicks = useCallback(
+    (scroll: number, pixelsPerSecond: number, timelineLeftPadding: number) =>
+      renderGrid(
+        ticksRef.current ?? emptyTicks,
+        scroll,
+        pixelsPerSecond,
+        timelineLeftPadding,
+      ),
+    [renderGrid, ticksRef],
   );
 
-  const renderGrid = useCallback(
-    (scroll: number, pixelsPerSecond: number) =>
-      requestAnimationFrame(() => {
-        gridRef.current?.render(
-          ticksRef.current ?? { mainTicks: [], subTicks: [] },
-          scroll * pixelsPerSecond,
-          timelineLeftPadding,
-          '#555555',
-          '#2D2D2D',
-        );
-      }),
-    [gridRef, timelineLeftPadding],
-  );
-
-  return { renderRuler, renderGrid, updateTicks, ticksRef };
+  return {
+    renderRuler: renderRulerWithTicks,
+    renderGrid: renderGridWithTicks,
+    updateTicks,
+    ticksRef,
+  };
 };

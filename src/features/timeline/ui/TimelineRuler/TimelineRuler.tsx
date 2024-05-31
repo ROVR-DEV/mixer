@@ -10,6 +10,8 @@ import {
   useRef,
 } from 'react';
 
+import { cn } from '@/shared/lib';
+
 import {
   drawRuler,
   getDpi,
@@ -19,10 +21,20 @@ import {
 } from '../../lib';
 import { Tick } from '../../model';
 
-import { TimelineRulerProps, TimelineRulerRef } from './interfaces';
+import { TimelineRulerProps } from './interfaces';
 
-export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
-  function TimelineRuler({ ...props }, ref) {
+export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
+  function TimelineRuler(
+    {
+      controlRef,
+      canvasProps: { className: canvasClassName, ...canvasProps } = {
+        className: '',
+      },
+      className,
+      ...props
+    },
+    ref,
+  ) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
     const dpi = getDpi();
@@ -83,7 +95,7 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
     );
 
     useImperativeHandle(
-      ref,
+      controlRef,
       () => ({
         render,
       }),
@@ -114,10 +126,18 @@ export const TimelineRuler = forwardRef<TimelineRulerRef, TimelineRulerProps>(
     }, []);
 
     return (
-      <div className='pointer-events-none relative w-full'>
-        <canvas ref={handleCanvasRef} {...props} />
-        <div className='absolute bottom-[13px] w-full border-t border-t-ruler' />
-        <div className='absolute bottom-0 w-full border-b border-b-ruler' />
+      <div
+        className={cn('relative bg-transparent', className)}
+        ref={ref}
+        {...props}
+      >
+        <canvas
+          className={cn('pointer-events-none w-full', canvasClassName)}
+          ref={handleCanvasRef}
+          {...canvasProps}
+        />
+        <div className='pointer-events-none absolute bottom-[13px] w-full border-t border-t-ruler' />
+        <div className='pointer-events-none absolute bottom-0 w-full border-b border-b-ruler' />
       </div>
     );
   },

@@ -1,11 +1,9 @@
-import { DetailedHTMLProps, HTMLAttributes } from 'react';
-
 import { Track } from '../../model';
 
-export interface TrackCardProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface TrackCardProps extends React.ComponentProps<'div'> {
   track: Track;
   isSelected?: boolean;
   isSolo?: boolean;
   waveformComponent: JSX.Element;
+  onEdit: () => void;
 }

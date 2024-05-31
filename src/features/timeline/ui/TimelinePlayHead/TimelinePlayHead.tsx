@@ -14,7 +14,7 @@ export const TimelinePlayHead = forwardRef<
 ) {
   return (
     <div
-      className={cn('absolute top-0 h-full', className)}
+      className={cn('absolute top-0 h-full pointer-events-none', className)}
       ref={ref}
       style={{ left: initialPosition, ...style }}
       {...props}

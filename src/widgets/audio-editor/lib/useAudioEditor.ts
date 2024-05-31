@@ -1,27 +1,34 @@
 'use client';
 
-// import { useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
-// import { GlobalControlsEvent, useGlobalControls } from '@/entities/event';
+import { AudioEditorManager, DEFAULT_CHANNELS } from '@/entities/audio-editor';
+import { PlaylistDTO } from '@/entities/playlist';
+import { TracksManager } from '@/entities/track';
 
-// import { usePlayHeadMove } from '@/features/timeline';
+import { importTracksToChannels } from './importTracksToChannels';
+import { useAudioEditorGlobalControls } from './useAudioEditorGlobalControls';
 
-export const useAudioEditor = () => {
-  // const togglePlayPase = useCallback(() => {
-  //   if (isPlaying) {
-  //     handleStop();
-  //   } else {
-  //     handlePlay();
-  //   }
-  // }, []);
-  // const handleGlobalControls = useCallback(
-  //   (event: GlobalControlsEvent) => {
-  //     if (event.type === 'Play/Pause') {
-  //       togglePlayPase();
-  //     }
-  //   },
-  //   [togglePlayPase],
-  // );
-  // usePlayHeadMove(handleMouseMovePlayHead, containerRef);
-  // useGlobalControls(handleGlobalControls);
+export const useAudioEditor = (playlist: PlaylistDTO) => {
+  const playlistKey = JSON.stringify(
+    playlist.tracks.map((track) => track.uuid),
+  );
+
+  const [audioEditorManager] = useState(
+    () => new AudioEditorManager(DEFAULT_CHANNELS),
+  );
+  const [tracksManager] = useState(() => new TracksManager(playlist.tracks));
+
+  useAudioEditorGlobalControls(audioEditorManager);
+
+  useEffect(() => {
+    importTracksToChannels(playlist.tracks, audioEditorManager);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioEditorManager, playlistKey]);
+
+  useEffect(() => {
+    tracksManager.downloadTracks();
+  }, [tracksManager, playlistKey]);
+
+  return { audioEditorManager, tracksManager };
 };

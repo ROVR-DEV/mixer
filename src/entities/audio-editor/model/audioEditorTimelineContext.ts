@@ -2,13 +2,13 @@
 
 import { createContext, useContext } from 'react';
 
-import { AudioEditorTimelineState } from './audioEditorTimelineState';
+import { TimelineController } from './timelineController';
 
-export const AudioEditorTimelineStateContext =
-  createContext<AudioEditorTimelineState | null>(null);
+export const TimelineControllerContext =
+  createContext<TimelineController | null>(null);
 
-export const useAudioEditorTimelineState = () => {
-  const context = useContext(AudioEditorTimelineStateContext);
+export const useTimelineController = () => {
+  const context = useContext(TimelineControllerContext);
   if (context === null) {
     throw new Error(
       'You have forgotten to wrap your root component with AudioEditorTimelineStateProvider',

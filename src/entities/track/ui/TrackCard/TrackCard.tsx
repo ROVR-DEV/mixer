@@ -9,17 +9,26 @@ import { TrackCardProps } from './interfaces';
 
 export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
   function TrackCard(
-    { track, className, isSelected, isSolo, waveformComponent, ...props },
+    {
+      track,
+      className,
+      isSelected,
+      isSolo,
+      onEdit,
+      waveformComponent,
+      ...props
+    },
     ref,
   ) {
     const handleClickEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
+      onEdit();
     };
 
     return (
       <div
         className={cn(
-          'relative grid grid-rows-[1fr_auto_1fr] h-[84px] border transition-colors border-third-dark text-third rounded-md bg-primary',
+          'relative grid grid-rows-[18px_auto_18px] h-[84px] border transition-colors border-third-dark text-third rounded-md bg-primary',
           className,
           { 'bg-accent !text-primary': isSelected },
           { 'border-accent': isSolo || isSelected },
@@ -42,9 +51,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             {'Edit'}
           </Badge>
         </Button>
-        <div className='row-start-2 h-[46px] overflow-hidden'>
-          {waveformComponent}
-        </div>
+        <div className='row-start-2 overflow-hidden'>{waveformComponent}</div>
         <span className='row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap pl-1 text-[12px]'>
           <span className='font-bold'>{`${track.title} | ${track.artist} `}</span>
           <span className=''>{`(${track.duration})`}</span>

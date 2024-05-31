@@ -42,7 +42,7 @@ export const Waveform = ({
       cursorColor: 'transparent',
       progressColor: '#9B9B9B',
       waveColor: '#9B9B9B',
-      height: containerSize?.height ?? 0,
+      // height: containerSize?.height ?? 0,
       container: container,
       ...options,
     });

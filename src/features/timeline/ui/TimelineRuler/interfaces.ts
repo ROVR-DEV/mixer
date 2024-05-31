@@ -1,16 +1,12 @@
 import { Property } from 'csstype';
-import { CanvasHTMLAttributes, DetailedHTMLProps } from 'react';
+import { RefObject } from 'react';
 
 import { Tick } from '../../model';
 
-export interface TimelineRulerProps
-  extends Omit<
-    DetailedHTMLProps<
-      CanvasHTMLAttributes<HTMLCanvasElement>,
-      HTMLCanvasElement
-    >,
-    'ref'
-  > {}
+export interface TimelineRulerProps extends React.ComponentPropsWithRef<'div'> {
+  controlRef: RefObject<TimelineRulerRef>;
+  canvasProps?: React.ComponentPropsWithoutRef<'canvas'>;
+}
 
 export interface TimelineRulerRef {
   render: (

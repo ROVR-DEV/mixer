@@ -5,19 +5,34 @@ import {
   observable,
 } from 'mobx';
 
+import { clamp } from '@/shared/lib';
+
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { TrackWithMeta } from '@/entities/track';
+
+export type TimeListener = (time: number) => void;
 
 export class AudioEditorManager {
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
   selectedTrack: TrackWithMeta | null = null;
-
-  time: number = 0;
+  editableTrack: TrackWithMeta | null = null;
   isPlaying: boolean = false;
+
+  private _time: number = 0;
+  private _listeners: Set<TimeListener> = new Set();
+
+  get time(): number {
+    return this._time;
+  }
+
+  set time(time: number) {
+    this._time = time;
+    this._triggerAllListeners();
+  }
 
   constructor(channels?: Channel[]) {
     channels?.forEach((channel) => this.addChannel(channel));
@@ -28,28 +43,46 @@ export class AudioEditorManager {
       | '_prepareForStop'
       | '_performOnTracks'
       | '_updateTrackPlayState'
+      | '_time'
+      | '_listeners'
+      | '_triggerAllListeners'
     >(this, {
-      channelIds: true,
-      updateAudioBuffer: true,
+      setEditableTrack: true,
+      _listeners: false,
       _performOnTracks: false,
-      _updateTrackPlayState: false,
-      _prepareForStop: false,
       _prepareForPlay: false,
-      seekTo: true,
-      setSelectedTrack: true,
-      selectedTrack: true,
+      _prepareForStop: false,
+      _time: false,
+      _triggerAllListeners: true,
+      _updateTrackPlayState: false,
       addChannel: true,
+      addListener: true,
+      channelIds: true,
       channels: true,
       clearTracks: true,
+      editableTrack: true,
       isPlaying: true,
       play: true,
       removeChannel: true,
+      removeListener: true,
+      seekTo: true,
       selectedChannelId: true,
+      selectedTrack: true,
       setSelectedChannel: true,
+      setSelectedTrack: true,
       stop: true,
       time: false,
+      updateAudioBuffer: true,
     });
   }
+
+  addListener = (listener: TimeListener) => {
+    this._listeners.add(listener);
+  };
+
+  removeListener = (listener: TimeListener) => {
+    this._listeners.delete(listener);
+  };
 
   addChannel = (channel: Channel = new Channel()) => {
     this.channels.set(channel.id, channel);
@@ -75,6 +108,14 @@ export class AudioEditorManager {
     this.selectedTrack = track;
   };
 
+  setEditableTrack = (track: TrackWithMeta | null) => {
+    if (this.editableTrack?.uuid === track?.uuid) {
+      return;
+    }
+
+    this.editableTrack = track;
+  };
+
   clearTracks = () => {
     this.channels.forEach((channel) => channel.clearTracks());
   };
@@ -98,7 +139,7 @@ export class AudioEditorManager {
   };
 
   seekTo = (time: number) => {
-    this.time = time;
+    this.time = clamp(time, 0);
 
     if (this.isPlaying) {
       this.stop();
@@ -116,6 +157,10 @@ export class AudioEditorManager {
         this._updateTrackPlayState(track, this.time),
       );
     });
+  };
+
+  private _triggerAllListeners = () => {
+    this._listeners.forEach((listener) => listener(this._time));
   };
 
   private _updateTrackPlayState = (track: TrackWithMeta, time: number) => {

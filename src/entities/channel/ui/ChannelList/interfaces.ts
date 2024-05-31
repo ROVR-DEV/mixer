@@ -1,4 +1,1 @@
-import { DetailedHTMLProps, HTMLAttributes } from 'react';
-
-export interface ChannelListProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
+export interface ChannelListProps extends React.ComponentProps<'div'> {}

@@ -1,7 +1,4 @@
-import { DetailedHTMLProps, HTMLAttributes } from 'react';
-
-export interface ChannelListItemProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface ChannelListItemProps extends React.ComponentProps<'div'> {
   disableBorder?: boolean;
   isSelected?: boolean;
   isMuted?: boolean;

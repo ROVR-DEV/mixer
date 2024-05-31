@@ -9,4 +9,4 @@ export const SIDEBAR_WIDTH = 296;
 export const TIMELINE_LEFT_PADDING = RULER_LEFT_PADDING;
 export const START_PAGE_X = SIDEBAR_WIDTH;
 
-export const PREDEFINED_CHANNELS = [new Channel(), new Channel()];
+export const DEFAULT_CHANNELS = [new Channel(), new Channel()];

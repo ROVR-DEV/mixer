@@ -3,6 +3,11 @@ export interface Tick {
   number: number;
 }
 
+export interface TimelineTicks {
+  mainTicks: Tick[];
+  subTicks: Tick[];
+}
+
 export interface ResultRange<T = void> {
   start: number;
   end: number;

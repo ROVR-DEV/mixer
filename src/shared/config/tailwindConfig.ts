@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
+import resolveConfig from 'tailwindcss/resolveConfig';
 
 export const tailwindConfig: Config = {
   content: ['./src/**/*.{ts,tsx}'],
@@ -12,6 +13,7 @@ export const tailwindConfig: Config = {
         secondary: { DEFAULT: '#2D2D2D', light: '#494949' },
         third: { dark: '#7C7C7C', DEFAULT: '#9B9B9B', light: '#D9D9D9' },
         ruler: '#9B9B9B',
+        grid: { DEFAULT: '#2D2D2D', light: '#555555' },
       },
       fontFamily: {
         sans: ['var(--font-kern)'],
@@ -28,3 +30,5 @@ export const tailwindConfig: Config = {
     }),
   ],
 };
+
+export const resolvedTailwindConfig = resolveConfig(tailwindConfig);
