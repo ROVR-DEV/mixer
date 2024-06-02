@@ -11,6 +11,9 @@ import { AppHeaderProps } from './interfaces';
 export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
   return (
     <header className={cn(HEADER_LAYOUT, className)} {...props}>
+      <div className='col-start-1 text-third'>
+        {process.env.npm_package_version}
+      </div>
       <Image
         className='col-start-2'
         src={LogoImageRaw}

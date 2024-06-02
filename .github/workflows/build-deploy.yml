@@ -8,6 +8,26 @@ on:
     branches: ['develop']
 
 jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: actions/setup-node@v4
+
+      - name: Bump version
+        run: npm --no-git-tag-version version patch
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Bump version
+
   build:
     runs-on: ubuntu-latest
 
