@@ -8,26 +8,6 @@ on:
     branches: ['develop']
 
 jobs:
-  bump-version:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - uses: actions/setup-node@v4
-
-      - name: Bump version
-        run: npm --no-git-tag-version version patch
-
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Bump version
-
   build:
     runs-on: ubuntu-latest
 
@@ -40,6 +20,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+
+      - name: Bump version
+        run: npm --no-git-tag-version version patch
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -69,6 +54,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels  }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Bump version
 
   deploy:
     runs-on: ubuntu-latest
