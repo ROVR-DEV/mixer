@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { HEADER_LAYOUT } from '@/shared/config/sharedStyles';
 import { cn } from '@/shared/lib';
-import { Button, IconButton } from '@/shared/ui';
+import { Button, IconButton, Version } from '@/shared/ui';
 import { PersonIcon, LogoImageRaw } from '@/shared/ui/assets';
 
 import { AppHeaderProps } from './interfaces';
@@ -11,9 +11,7 @@ import { AppHeaderProps } from './interfaces';
 export const AppHeader = ({ className, ...props }: AppHeaderProps) => {
   return (
     <header className={cn(HEADER_LAYOUT, className)} {...props}>
-      <div className='col-start-1 text-third'>
-        {process.env.npm_package_version}
-      </div>
+      <Version className='col-start-1' />
       <Image
         className='col-start-2'
         src={LogoImageRaw}

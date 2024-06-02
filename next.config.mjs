@@ -1,4 +1,5 @@
-/** @type {import('next').NextConfig} */
+import pkg from './package.json' with { type: 'json' };
+
 const webpack = (config) => {
   // Grab the existing rule that handles SVG imports
   const fileLoaderRule = config.module.rules.find((rule) =>
@@ -27,9 +28,13 @@ const webpack = (config) => {
   return config;
 };
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  env: {
+    version: pkg.version,
+  },
   experimental: {
     optimizePackageImports: [
       '@/app',
