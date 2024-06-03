@@ -5,5 +5,4 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
   isSelected?: boolean;
   isSolo?: boolean;
   waveformComponent: JSX.Element;
-  onEdit: () => void;
 }

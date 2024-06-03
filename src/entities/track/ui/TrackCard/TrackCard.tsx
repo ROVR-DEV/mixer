@@ -3,28 +3,15 @@
 import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
-import { Badge, Button } from '@/shared/ui';
+import { Badge } from '@/shared/ui';
 
 import { TrackCardProps } from './interfaces';
 
 export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
   function TrackCard(
-    {
-      track,
-      className,
-      isSelected,
-      isSolo,
-      onEdit,
-      waveformComponent,
-      ...props
-    },
+    { track, className, isSelected, isSolo, waveformComponent, ...props },
     ref,
   ) {
-    const handleClickEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      onEdit();
-    };
-
     return (
       <div
         className={cn(
@@ -36,11 +23,10 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         ref={ref}
         {...props}
       >
-        <Button
+        <div
           className={cn('absolute hidden left-1.5 top-1.5 p-0', {
             flex: isSelected,
           })}
-          onClick={handleClickEdit}
         >
           <Badge
             variant='inverse'
@@ -50,7 +36,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
           >
             {'Edit'}
           </Badge>
-        </Button>
+        </div>
         <div className='row-start-2 overflow-hidden'>{waveformComponent}</div>
         <span className='row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap pl-1 text-[12px]'>
           <span className='font-bold'>{`${track.title} | ${track.artist} `}</span>

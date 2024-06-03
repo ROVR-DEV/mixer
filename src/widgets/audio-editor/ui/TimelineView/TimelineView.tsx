@@ -136,18 +136,26 @@ export const TimelineView = observer(function TimelineView({
       );
     };
 
+    const handleSizeChange = () => {
+      handleZoomChange(timelineController.zoom);
+      handleScrollChange(timelineController.scroll);
+    };
+
     timelineController.zoomController.addListener(handleZoomChange);
     timelineController.scrollController.addListener(handleScrollChange);
+    timelineController.timelineContainer.addListener(handleSizeChange);
 
     return () => {
       timelineController.zoomController.removeListener(handleZoomChange);
       timelineController.scrollController.removeListener(handleScrollChange);
+      timelineController.timelineContainer.removeListeners(handleSizeChange);
     };
   }, [
     handleZoomScrollChange,
     timelineController.pixelsPerSecond,
     timelineController.scroll,
     timelineController.scrollController,
+    timelineController.timelineContainer,
     timelineController.zoom,
     timelineController.zoomController,
   ]);
@@ -192,7 +200,7 @@ export const TimelineView = observer(function TimelineView({
             onMouseUp={handleTimelineMouseUp}
             onClick={handleClickTimeline}
           />
-          <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[40px] left-[296px] z-30 mx-auto flex w-max' />
+          <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max' />
         </div>
       </div>
       <TimelineViewFooter timelineController={timelineController} />

@@ -15,7 +15,11 @@ export const ChannelsListHeader = ({
 }: ChannelsListHeaderProps) => {
   return (
     <ChannelListMemoized className={cn('min-w-[296px]', className)} {...props}>
-      <ChannelListItemMemoized className='h-[72px] items-start' disableBorder>
+      <ChannelListItemMemoized
+        className='h-[72px] items-start'
+        disableBorder
+        leftPadding
+      >
         <PlaylistInfoMemoized
           totalPlaytime={playlist.duration_in_seconds}
           tracksCount={playlist.tracks.length}

@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { clamp } from '@/shared/lib';
+import { clamp, cn } from '@/shared/lib';
 
 import {
   TIMELINE_LEFT_PADDING,
@@ -30,6 +30,8 @@ import styles from './styles.module.css';
 export const TrackCardView = observer(function TrackCardView({
   track,
   audioEditorManager,
+  ignoreSelection,
+  className,
   ...props
 }: TrackCardViewProps) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -40,11 +42,14 @@ export const TrackCardView = observer(function TrackCardView({
     [track.data.uuid, tracksManager.tracksData],
   );
 
-  const audioEditorTimelineController = useTimelineController();
+  const timelineController = useTimelineController();
 
   const isSelected = useMemo(
-    () => audioEditorManager.selectedTrack?.uuid === track.uuid,
-    [audioEditorManager.selectedTrack?.uuid, track.uuid],
+    () =>
+      ignoreSelection
+        ? false
+        : audioEditorManager.selectedTrack?.uuid === track.uuid,
+    [audioEditorManager.selectedTrack?.uuid, ignoreSelection, track.uuid],
   );
 
   const waveformComponent = useMemo(
@@ -52,14 +57,13 @@ export const TrackCardView = observer(function TrackCardView({
       <WaveformMemoized
         data={trackData?.blob}
         color={isSelected ? 'primary' : 'secondary'}
-        options={
-          track.audioBufferPeaks
-            ? { ...waveformOptions, peaks: track.audioBufferPeaks }
-            : waveformOptions
-        }
+        peaks={track.audioBufferPeaks ?? undefined}
+        duration={track.duration}
+        options={{ ...waveformOptions, media: track.media ?? undefined }}
         onMount={(wavesurfer) => {
           track.setAudioBuffer(wavesurfer);
           wavesurfer.once('ready', () => {
+            track.setMedia(wavesurfer.getMediaElement());
             track.setAudioBufferPeaks(wavesurfer.exportPeaks());
           });
         }}
@@ -93,25 +97,25 @@ export const TrackCardView = observer(function TrackCardView({
       getTrackCoordinates(
         track.currentStartTime,
         track.currentEndTime,
-        audioEditorTimelineController.pixelsPerSecond,
+        timelineController.timelineContainer.pixelsPerSecond,
       ),
     [
       track.currentStartTime,
       track.currentEndTime,
-      audioEditorTimelineController.pixelsPerSecond,
+      timelineController.timelineContainer.pixelsPerSecond,
     ],
   );
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
       const virtualScrollOffsetX =
-        audioEditorTimelineController.scroll *
-        audioEditorTimelineController.pixelsPerSecond;
+        timelineController.scroll *
+        timelineController.timelineContainer.pixelsPerSecond;
       return globalX - virtualScrollOffsetX;
     },
     [
-      audioEditorTimelineController.pixelsPerSecond,
-      audioEditorTimelineController.scroll,
+      timelineController.timelineContainer.pixelsPerSecond,
+      timelineController.scroll,
     ],
   );
 
@@ -181,11 +185,12 @@ export const TrackCardView = observer(function TrackCardView({
 
       const startX = Number(e.currentTarget.dataset.startX);
       const timeOffset =
-        (e.pageX - startX) / audioEditorTimelineController.pixelsPerSecond;
+        (e.pageX - startX) /
+        timelineController.timelineContainer.pixelsPerSecond;
 
       return clamp(startTime + timeOffset, leftTimeBound);
     },
-    [audioEditorTimelineController.pixelsPerSecond],
+    [timelineController.timelineContainer.pixelsPerSecond],
   );
 
   const prevChannelId = useRef<string | null>(null);
@@ -348,33 +353,31 @@ export const TrackCardView = observer(function TrackCardView({
   useEffect(() => {
     const updateTrack = () =>
       updateTrackPosition(
-        audioEditorTimelineController.scroll,
-        audioEditorTimelineController.pixelsPerSecond,
-        audioEditorTimelineController.endPageX -
-          audioEditorTimelineController.startPageX,
+        timelineController.scroll,
+        timelineController.timelineContainer.pixelsPerSecond,
+        timelineController.endPageX - timelineController.startPageX,
       );
 
     const animationId = requestAnimationFrame(updateTrack);
 
     return () => cancelAnimationFrame(animationId);
   }, [
-    audioEditorTimelineController.endPageX,
-    audioEditorTimelineController.pixelsPerSecond,
-    audioEditorTimelineController.scroll,
-    audioEditorTimelineController.startPageX,
+    timelineController.endPageX,
+    timelineController.timelineContainer.pixelsPerSecond,
+    timelineController.scroll,
+    timelineController.startPageX,
     updateTrackPosition,
   ]);
 
   return (
     <TrackCardMemoized
-      className='absolute z-0'
+      className={cn('absolute z-0', className)}
       ref={trackRef}
       track={track.data}
       isSolo={track.channel?.isSolo}
       isSelected={isSelected}
       waveformComponent={waveformComponent}
       onClick={handleClick}
-      onEdit={handleEdit}
       // Drag logic
       draggable
       onDrag={handleDrag}

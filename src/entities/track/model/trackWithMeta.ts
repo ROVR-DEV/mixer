@@ -16,6 +16,7 @@ export class TrackWithMeta<T = WaveSurfer> {
   data: Track;
   audioBuffer: T | null;
   audioBufferPeaks: number[][] | null = null;
+  media: HTMLMediaElement | null = null;
 
   duration: number;
 
@@ -54,6 +55,10 @@ export class TrackWithMeta<T = WaveSurfer> {
 
   setAudioBufferPeaks = (peaks: number[][]) => {
     this.audioBufferPeaks = peaks;
+  };
+
+  setMedia = (media: HTMLMediaElement | null) => {
+    this.media = media;
   };
 
   setChannel = (channel: Channel) => {

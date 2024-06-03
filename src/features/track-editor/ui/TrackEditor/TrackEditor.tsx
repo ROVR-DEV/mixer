@@ -1,22 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 import { IconButton } from '@/shared/ui';
 import { Cross2Icon } from '@/shared/ui/assets';
 
-import {
-  AudioEditorManager,
-  TimelineControllerContext,
-} from '@/entities/audio-editor';
-import { Channel } from '@/entities/channel';
+import { TimelineControllerContext } from '@/entities/audio-editor';
 
 // eslint-disable-next-line boundaries/element-types
+import { ChannelListItemView } from '@/features/channel-control';
+// eslint-disable-next-line boundaries/element-types
 import { TimelineGridRef, TimelineRulerRef } from '@/features/timeline';
+// eslint-disable-next-line boundaries/element-types
+import { TrackCardView } from '@/features/track-card-view';
 
 import {
-  Timeline,
   TimelineHeader,
   useAudioEditorTimelineRulerAndGrid,
   useTimelineZoomScroll,
@@ -30,10 +29,6 @@ export const TrackEditor = ({
   className,
   ...props
 }: TrackEditorProps) => {
-  const [localAudioEditorManager] = useState(
-    () => new AudioEditorManager([new Channel()]),
-  );
-
   const rulerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
@@ -57,69 +52,88 @@ export const TrackEditor = ({
     audioEditorManager.setEditableTrack(null);
   }, [audioEditorManager]);
 
-  useEffect(() => {
-    if (!audioEditorManager.editableTrack) {
-      return;
-    }
-
-    const channel = localAudioEditorManager.channels.get(
-      localAudioEditorManager.channelIds[0],
-    );
-
-    localAudioEditorManager.clearTracks();
-    channel?.addTrack(audioEditorManager.editableTrack);
-    channel?.setMuted(true);
-  }, [
-    audioEditorManager.channelIds,
-    audioEditorManager.editableTrack,
-    audioEditorManager.selectedTrack,
-    localAudioEditorManager,
-  ]);
-
-  useEffect(() => {
-    if (audioEditorManager.isPlaying) {
-      localAudioEditorManager.play();
-    }
-  }, [audioEditorManager.isPlaying, localAudioEditorManager]);
-
-  useEffect(() => {
-    timelineController.zoomController.value = Math.pow(1.25, 2);
-
+  const updateTimeline = useCallback(() => {
     updateTicks(
       timelineController.zoom,
       timelineController.scroll,
-      timelineController.pixelsPerSecond,
+      timelineController.timelineContainer.pixelsPerSecond,
     );
     renderRuler(
       timelineController.zoom,
       timelineController.scroll,
-      timelineController.pixelsPerSecond,
+      timelineController.timelineContainer.pixelsPerSecond,
       timelineController.timelineLeftPadding,
     );
     renderGrid(
       timelineController.scroll,
-      timelineController.pixelsPerSecond,
+      timelineController.timelineContainer.pixelsPerSecond,
       timelineController.timelineLeftPadding,
     );
   }, [
     renderGrid,
     renderRuler,
-    timelineController.pixelsPerSecond,
     timelineController.scroll,
+    timelineController.timelineContainer.pixelsPerSecond,
     timelineController.timelineLeftPadding,
     timelineController.zoom,
-    timelineController.zoomController,
     updateTicks,
   ]);
 
   useEffect(() => {
-    timelineController.trackHeight = 385;
-  }, [timelineController]);
+    // timelineController.zoomController.value = Math.pow(1.25, 2);
+    updateTimeline();
+  }, [updateTimeline]);
+
+  useEffect(() => {
+    timelineController.zoomController.addListener(updateTimeline);
+    timelineController.scrollController.addListener(updateTimeline);
+    timelineController.timelineContainer.addListener(updateTimeline);
+
+    return () => {
+      timelineController.zoomController.removeListener(updateTimeline);
+      timelineController.scrollController.removeListener(updateTimeline);
+      timelineController.timelineContainer.removeListeners(updateTimeline);
+    };
+  }, [
+    timelineController.scrollController,
+    timelineController.timelineContainer,
+    timelineController.zoomController,
+    updateTimeline,
+  ]);
+
+  const handleClickOnTimeline = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      audioEditorManager.seekTo(
+        timelineController.realLocalPixelsToGlobal(
+          timelineController.virtualToRealPixels(
+            e.nativeEvent.pageX - timelineController.startPageX,
+          ),
+        ),
+      );
+    },
+    [audioEditorManager, timelineController],
+  );
+
+  useEffect(() => {
+    if (!audioEditorManager.editableTrack) {
+      return;
+    }
+
+    timelineController.scroll =
+      audioEditorManager.editableTrack.currentStartTime;
+    updateTimeline();
+  }, [audioEditorManager.editableTrack, timelineController, updateTimeline]);
 
   return (
     <TimelineControllerContext.Provider value={timelineController}>
-      <div className={cn('flex flex-col', className)} {...props}>
-        <div className='flex h-16 w-full border-t border-t-third'>
+      <div
+        className={cn(
+          'flex flex-col bg-primary border-b border-b-third',
+          className,
+        )}
+        {...props}
+      >
+        <div className='flex h-16 min-h-16 w-full border-t border-t-third'>
           <div className='flex min-w-[296px] items-center justify-end border-b border-b-third px-4'>
             <IconButton variant='primaryFilled' onClick={handleClose}>
               <Cross2Icon className='size-4' />
@@ -127,18 +141,36 @@ export const TrackEditor = ({
           </div>
           <TimelineHeader
             className='h-full'
-            audioEditorManager={localAudioEditorManager}
+            audioEditorManager={audioEditorManager}
             rulerRef={rulerRef}
             controlRef={rulerControlRef}
+            centerLine={false}
           />
         </div>
-        <div className='flex w-full'>
-          <div className='min-w-[296px]'></div>
-          <Timeline
-            audioEditorManager={localAudioEditorManager}
-            timelineRef={timelineRef}
-            gridRef={gridControlRef}
-          />
+        <div className='flex size-full'>
+          <div className='min-w-[296px] border-r border-r-secondary'></div>
+          <div
+            className='size-full overflow-x-clip'
+            ref={timelineRef}
+            onMouseUp={handleClickOnTimeline}
+          >
+            {!audioEditorManager.editableTrack ? null : (
+              <ChannelListItemView
+                className='relative size-full'
+                audioEditorManager={audioEditorManager}
+                channel={audioEditorManager.editableTrack?.channel}
+                ignoreSelection
+              >
+                <TrackCardView
+                  className='pointer-events-none h-[calc(100%-14px)]'
+                  key={`track-${audioEditorManager.editableTrack.uuid}-editable`}
+                  track={audioEditorManager.editableTrack}
+                  audioEditorManager={audioEditorManager}
+                  ignoreSelection
+                />
+              </ChannelListItemView>
+            )}
+          </div>
         </div>
       </div>
     </TimelineControllerContext.Provider>

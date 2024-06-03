@@ -8,4 +8,5 @@ export interface TimelineHeaderProps extends React.ComponentProps<'div'> {
   audioEditorManager: AudioEditorManager;
   rulerRef: RefObject<HTMLDivElement>;
   controlRef: RefObject<TimelineRulerRef>;
+  centerLine?: boolean;
 }

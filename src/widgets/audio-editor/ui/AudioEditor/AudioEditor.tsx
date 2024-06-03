@@ -31,7 +31,7 @@ export const AudioEditor = observer(function AudioEditor({
         />
         {!audioEditorManager.editableTrack ? null : (
           <TrackEditor
-            className='absolute bottom-28 w-full'
+            className='absolute bottom-[100px] z-10 h-[43%] max-h-[466px] min-h-[161px] w-full'
             audioEditorManager={audioEditorManager}
           />
         )}

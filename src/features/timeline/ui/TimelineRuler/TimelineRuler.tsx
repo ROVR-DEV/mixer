@@ -30,6 +30,7 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
       canvasProps: { className: canvasClassName, ...canvasProps } = {
         className: '',
       },
+      centerLine = true,
       className,
       ...props
     },
@@ -136,7 +137,11 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           ref={handleCanvasRef}
           {...canvasProps}
         />
-        <div className='pointer-events-none absolute bottom-[13px] w-full border-t border-t-ruler' />
+        {!centerLine ? null : (
+          <>
+            <div className='pointer-events-none absolute bottom-[13px] w-full border-t border-t-ruler' />
+          </>
+        )}
         <div className='pointer-events-none absolute bottom-0 w-full border-b border-b-ruler' />
       </div>
     );

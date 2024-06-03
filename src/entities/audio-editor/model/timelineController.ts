@@ -40,13 +40,13 @@ export class TimelineController {
   private _wheelListeners: Set<WheelEventListener> = new Set();
   private _wheelEventTriggerElements: Set<RefObject<HTMLElement>> = new Set();
 
-  private _trackHeight: number = 96;
+  private _trackHeight: number | string = 96;
 
-  get trackHeight(): number {
+  get trackHeight(): number | string {
     return this._trackHeight;
   }
 
-  set trackHeight(trackHeight: number) {
+  set trackHeight(trackHeight: number | string) {
     this._trackHeight = trackHeight;
   }
 
@@ -185,15 +185,19 @@ export class TimelineController {
   };
 
   virtualToRealPixels = (x: number) => {
-    return (x - this._timelineLeftPadding) / this._pixelsPerSecond;
+    return (
+      (x - this._timelineLeftPadding) / this.timelineContainer.pixelsPerSecond
+    );
   };
 
   realToVirtualPixels = (x: number) => {
-    return x * this._pixelsPerSecond - this._timelineLeftPadding;
+    return (
+      x * this.timelineContainer.pixelsPerSecond - this._timelineLeftPadding
+    );
   };
 
   timeToVirtualPixels = (time: number) => {
-    return time * this.pixelsPerSecond;
+    return time * this.timelineContainer.pixelsPerSecond;
   };
 
   private _wheelListener = (e: WheelEvent) => {

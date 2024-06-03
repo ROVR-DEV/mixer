@@ -13,4 +13,5 @@ export interface TrackCardViewProps
   > {
   audioEditorManager: AudioEditorManager;
   track: TrackWithMeta;
+  ignoreSelection?: boolean;
 }

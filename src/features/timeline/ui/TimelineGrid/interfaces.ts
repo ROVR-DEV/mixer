@@ -1,11 +1,11 @@
 import { Property } from 'csstype';
-import { RefObject } from 'react';
+import { CSSProperties, RefObject } from 'react';
 
 import { Tick } from '../../model';
 
 export interface TimelineGridProps
   extends React.ComponentPropsWithoutRef<'canvas'> {
-  height: number;
+  height: CSSProperties['height'];
   controlRef: RefObject<TimelineGridRef>;
 }
 

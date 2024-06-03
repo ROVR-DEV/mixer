@@ -49,7 +49,8 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
           timelineController.timelineClientWidth + virtualScroll
       ) {
         timelineController.scroll =
-          globalPlayHeadPosition / timelineController.pixelsPerSecond;
+          globalPlayHeadPosition /
+          timelineController.timelineContainer.pixelsPerSecond;
       }
     },
     [timelineController],
@@ -88,9 +89,29 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
     };
 
     audioEditorManager.addListener(renderPlayHead);
+    renderPlayHead(audioEditorManager.time);
 
     return () => audioEditorManager.removeListener(renderPlayHead);
   }, [audioEditorManager, updatePlayHead]);
+
+  useEffect(() => {
+    const update = () => {
+      updatePlayHead(audioEditorManager.time);
+    };
+
+    timelineController.zoomController.addListener(update);
+    timelineController.scrollController.addListener(update);
+
+    return () => {
+      timelineController.zoomController.removeListener(update);
+      timelineController.scrollController.removeListener(update);
+    };
+  }, [
+    audioEditorManager.time,
+    timelineController.scrollController,
+    timelineController.zoomController,
+    updatePlayHead,
+  ]);
 
   return (
     <TimelinePlayHeadMemoized

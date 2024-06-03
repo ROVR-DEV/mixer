@@ -10,6 +10,8 @@ import { WaveformProps } from './interfaces';
 export const Waveform = ({
   color,
   data,
+  peaks,
+  duration,
   options,
   onMount,
   className,
@@ -42,17 +44,15 @@ export const Waveform = ({
       cursorColor: 'transparent',
       progressColor: '#9B9B9B',
       waveColor: '#9B9B9B',
-      // height: containerSize?.height ?? 0,
       container: container,
+      interact: false,
       ...options,
     });
 
-    wavesurferRef.current.toggleInteraction(false);
-
     if (data instanceof Blob) {
-      wavesurferRef.current?.loadBlob(data);
+      wavesurferRef.current?.loadBlob(data, peaks, duration);
     } else {
-      wavesurferRef.current?.load(data);
+      wavesurferRef.current?.load(data, peaks, duration);
     }
 
     onMount(wavesurferRef.current);

@@ -42,8 +42,10 @@ export const Timeline = observer(function Timeline({
           <TimelineGridMemoized
             className='absolute w-full'
             height={
-              audioEditorManager.channelIds.length *
-              timelineController.trackHeight
+              typeof timelineController.trackHeight === 'string'
+                ? timelineController.trackHeight
+                : audioEditorManager.channelIds.length *
+                  timelineController.trackHeight
             }
             controlRef={gridRef}
           />

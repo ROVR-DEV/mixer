@@ -5,10 +5,7 @@ import { useCallback } from 'react';
 
 import { cn } from '@/shared/lib';
 
-import {
-  TIMELINE_LEFT_PADDING,
-  useTimelineController,
-} from '@/entities/audio-editor';
+import { useTimelineController } from '@/entities/audio-editor';
 
 import {
   TimelinePlayHeadView,
@@ -21,6 +18,7 @@ export const TimelineHeader = observer(function TimelineHeader({
   audioEditorManager,
   rulerRef,
   controlRef,
+  centerLine,
   className,
   ...props
 }: TimelineHeaderProps) {
@@ -43,17 +41,18 @@ export const TimelineHeader = observer(function TimelineHeader({
     <div
       className={cn('w-full relative flex items-end', className)}
       ref={rulerRef}
+      onClick={handleClickOnRuler}
       {...props}
     >
       <TimelinePlayHeadView
         className='absolute z-10'
-        initialPosition={TIMELINE_LEFT_PADDING}
+        initialPosition={timelineController.timelineLeftPadding}
         audioEditorManager={audioEditorManager}
       />
       <TimelineRulerMemoized
-        className='w-full'
+        className='pointer-events-none w-full'
+        centerLine={centerLine}
         canvasProps={{ className: 'h-[32px]' }}
-        onClick={handleClickOnRuler}
         controlRef={controlRef}
       />
     </div>

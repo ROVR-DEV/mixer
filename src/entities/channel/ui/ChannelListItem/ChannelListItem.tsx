@@ -8,15 +8,18 @@ export const ChannelListItem = ({
   disableBorder,
   isSelected,
   isMuted,
+  leftPadding,
+  ignoreSelection,
   className,
   children,
   ...props
 }: ChannelListItemProps) => {
   return (
     <div
-      className={cn('p-4 h-24 flex items-center relative', className, {
+      className={cn('py-1.5 h-24 flex items-center relative', className, {
         'border-b border-b-secondary': !disableBorder,
-        'bg-primary-dark': isSelected && !isMuted,
+        'bg-primary-dark': !isMuted && !ignoreSelection && isSelected,
+        'px-4': leftPadding,
       })}
       {...props}
     >

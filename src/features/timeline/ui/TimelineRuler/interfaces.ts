@@ -6,6 +6,7 @@ import { Tick } from '../../model';
 export interface TimelineRulerProps extends React.ComponentPropsWithRef<'div'> {
   controlRef: RefObject<TimelineRulerRef>;
   canvasProps?: React.ComponentPropsWithoutRef<'canvas'>;
+  centerLine?: boolean;
 }
 
 export interface TimelineRulerRef {
