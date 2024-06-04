@@ -1,5 +1,1 @@
-import { TimelineController } from '@/entities/audio-editor';
-
-export interface TimelineViewFooterProps extends React.ComponentProps<'div'> {
-  timelineController: TimelineController;
-}
+export interface TimelineViewFooterProps extends React.ComponentProps<'div'> {}

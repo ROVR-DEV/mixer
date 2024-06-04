@@ -36,10 +36,10 @@ export const TrackCardView = observer(function TrackCardView({
 }: TrackCardViewProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const tracksManager = useTracksManager();
+  const tracksManager = useTracksManager(false);
   const trackData = useMemo(
-    () => tracksManager.tracksData.get(track.data.uuid),
-    [track.data.uuid, tracksManager.tracksData],
+    () => tracksManager?.tracksData.get(track.data.uuid),
+    [track.data.uuid, tracksManager?.tracksData],
   );
 
   const timelineController = useTimelineController();
@@ -57,9 +57,12 @@ export const TrackCardView = observer(function TrackCardView({
       <WaveformMemoized
         data={trackData?.blob}
         color={isSelected ? 'primary' : 'secondary'}
-        peaks={track.audioBufferPeaks ?? undefined}
-        duration={track.duration}
-        options={{ ...waveformOptions, media: track.media ?? undefined }}
+        options={{
+          ...waveformOptions,
+          peaks: track.audioBufferPeaks ?? undefined,
+          duration: track.duration,
+          media: track.media ?? undefined,
+        }}
         onMount={(wavesurfer) => {
           track.setAudioBuffer(wavesurfer);
           wavesurfer.once('ready', () => {
@@ -170,11 +173,22 @@ export const TrackCardView = observer(function TrackCardView({
 
   const updateTrackPosition = useCallback(
     (scroll: number, pixelsPerSecond: number, timelineClientWidth: number) => {
+      if (track.audioBuffer?.options.minPxPerSec !== pixelsPerSecond) {
+        requestAnimationFrame(() => {
+          track.audioBuffer?.setOptions({ minPxPerSec: pixelsPerSecond });
+        });
+      }
+
       updateTrackWidth();
       updateTrackShiftFromLeft(TIMELINE_LEFT_PADDING);
       updateTrackVisibility(scroll, pixelsPerSecond, timelineClientWidth);
     },
-    [updateTrackShiftFromLeft, updateTrackVisibility, updateTrackWidth],
+    [
+      track.audioBuffer,
+      updateTrackShiftFromLeft,
+      updateTrackVisibility,
+      updateTrackWidth,
+    ],
   );
 
   const calcNewStartTime = useCallback(

@@ -48,7 +48,7 @@ export class ValueInRangeController {
     this._min = min;
 
     if (this._value < this._min) {
-      this.value = this._value;
+      this.value = this._min;
     }
   }
 
@@ -60,7 +60,7 @@ export class ValueInRangeController {
     this._max = max;
 
     if (this._value > this._max) {
-      this.value = this._value;
+      this.value = this._max;
     }
   }
 

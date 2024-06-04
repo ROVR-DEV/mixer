@@ -1,5 +1,6 @@
 export * from './TimelineGrid';
 export * from './TimelineRuler';
-export * from './TimelineSlider';
+export * from './TimelineScroll';
 export * from './TimelinePlayHead';
 export * from './TimelinePlayHeadView';
+export * from './TimelineScrollView';

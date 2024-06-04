@@ -46,6 +46,7 @@ export class TimelineContainerObserver {
 
   set dpi(dpi: number) {
     this._dpi = dpi;
+    this._triggerAllListeners();
   }
 
   get pixelsPerSecond(): number {
@@ -54,6 +55,7 @@ export class TimelineContainerObserver {
 
   set pixelsPerSecond(pixelsPerSecond: number) {
     this._pixelsPerSecond = pixelsPerSecond;
+    this._triggerAllListeners();
   }
 
   get timelineClientWidth(): number {
@@ -96,19 +98,23 @@ export class TimelineContainerObserver {
       this._resizeObserver = new ResizeObserver((entries) => {
         runInAction(() => {
           this._timelineSize = entries[0].contentRect;
-          this._listeners.forEach((listener) =>
-            listener(
-              this.timelineClientWidth,
-              this.timelineScrollWidth,
-              this.timelineClientHeight,
-              this.pixelsPerSecond,
-            ),
-          );
+          this._triggerAllListeners();
         });
       });
     }
 
     this._resizeObserver.observe(this._timelineRef.current);
+  };
+
+  private _triggerAllListeners = () => {
+    this._listeners.forEach((listener) =>
+      listener(
+        this.timelineClientWidth,
+        this.timelineScrollWidth,
+        this.timelineClientHeight,
+        this.pixelsPerSecond,
+      ),
+    );
   };
 
   addListener = (listener: TimelineContainerSizeListener) => {

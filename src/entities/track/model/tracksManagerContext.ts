@@ -6,12 +6,16 @@ import { TracksManager } from './tracksManager';
 
 export const TracksManagerContext = createContext<TracksManager | null>(null);
 
-export const useTracksManager = () => {
+export const useTracksManager = (
+  strict: boolean = true,
+): TracksManager | null => {
   const context = useContext(TracksManagerContext);
-  if (context === null) {
+
+  if (strict && context === null) {
     throw new Error(
       'You have forgotten to wrap your root component with AudioEditorTimelineStateProvider',
     );
   }
+
   return context;
 };

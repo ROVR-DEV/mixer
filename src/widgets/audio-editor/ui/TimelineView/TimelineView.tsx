@@ -203,7 +203,7 @@ export const TimelineView = observer(function TimelineView({
           <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max' />
         </div>
       </div>
-      <TimelineViewFooter timelineController={timelineController} />
+      <TimelineViewFooter />
     </TimelineControllerContext.Provider>
   );
 });

@@ -6,8 +6,6 @@ import { cn } from '@/shared/lib';
 
 import { TracksManagerContext } from '@/entities/track';
 
-import { TrackEditor } from '@/features/track-editor';
-
 import { useAudioEditor } from '../../lib';
 import { AudioEditorHeaderMemoized } from '../AudioEditorHeader';
 import { TimelineView } from '../TimelineView';
@@ -16,6 +14,7 @@ import { AudioEditorProps } from './interfaces';
 
 export const AudioEditor = observer(function AudioEditor({
   playlist,
+  trackEditor: TrackEditor,
   className,
   ...props
 }: AudioEditorProps) {

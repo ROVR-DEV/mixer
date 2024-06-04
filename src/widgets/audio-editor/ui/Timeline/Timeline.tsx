@@ -21,7 +21,7 @@ export const Timeline = observer(function Timeline({
   ...props
 }: TimelineProps) {
   const timelineController = useTimelineController();
-  const tracksManager = useTracksManager();
+  const tracksManager = useTracksManager()!;
 
   return (
     <div

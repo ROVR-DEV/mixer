@@ -49,7 +49,9 @@ export const TimelineScroll = ({
       >
         <div
           className='h-px'
-          style={{ width: timelineScrollWidth - xPadding * 2 }}
+          style={{
+            width: `max(${timelineScrollWidth - xPadding * 2}px, calc(100% + 0.5px))`,
+          }}
         />
       </div>
     </div>

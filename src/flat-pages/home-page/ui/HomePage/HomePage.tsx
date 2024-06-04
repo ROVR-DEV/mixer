@@ -1,6 +1,7 @@
 import { getPlaylist } from '@/entities/playlist';
 
 import { AudioEditor } from '@/widgets/audio-editor';
+import { TrackEditor } from '@/widgets/track-editor';
 
 import { HomePageProps } from './interfaces';
 
@@ -13,6 +14,7 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
         <AudioEditor
           className='h-full max-h-full overflow-hidden'
           playlist={playlist}
+          trackEditor={TrackEditor}
         />
       )}
     </main>

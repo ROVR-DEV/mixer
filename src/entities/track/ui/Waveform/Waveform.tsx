@@ -3,15 +3,21 @@
 import { memo, useEffect, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
+import { resolvedTailwindConfig } from '@/shared/config';
 import { cn, useSize } from '@/shared/lib';
 
 import { WaveformProps } from './interfaces';
+import styles from './styles.module.css';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const waveColor = (resolvedTailwindConfig.theme.colors as any).primary.DEFAULT;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const waveColorSelected = (resolvedTailwindConfig.theme.colors as any).third
+  .DEFAULT;
 
 export const Waveform = ({
   color,
   data,
-  peaks,
-  duration,
   options,
   onMount,
   className,
@@ -20,6 +26,8 @@ export const Waveform = ({
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerSize = useSize(containerRef);
+
+  const isDataExists = !!data || options?.media;
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -41,18 +49,17 @@ export const Waveform = ({
     }
 
     wavesurferRef.current = WaveSurfer.create({
-      cursorColor: 'transparent',
-      progressColor: '#9B9B9B',
-      waveColor: '#9B9B9B',
+      progressColor: waveColor,
+      waveColor: waveColorSelected,
       container: container,
       interact: false,
       ...options,
     });
 
     if (data instanceof Blob) {
-      wavesurferRef.current?.loadBlob(data, peaks, duration);
+      wavesurferRef.current?.loadBlob(data, options?.peaks, options?.duration);
     } else {
-      wavesurferRef.current?.load(data, peaks, duration);
+      wavesurferRef.current?.load(data, options?.peaks, options?.duration);
     }
 
     onMount(wavesurferRef.current);
@@ -78,13 +85,13 @@ export const Waveform = ({
   useEffect(() => {
     if (color === 'primary') {
       wavesurferRef.current?.setOptions({
-        waveColor: '#161616',
-        progressColor: '#161616',
+        waveColor: waveColor,
+        progressColor: waveColor,
       });
     } else {
       wavesurferRef.current?.setOptions({
-        waveColor: '#9B9B9B',
-        progressColor: '#9B9B9B',
+        waveColor: waveColorSelected,
+        progressColor: waveColorSelected,
       });
     }
   }, [color]);
@@ -94,6 +101,7 @@ export const Waveform = ({
       ref={containerRef}
       className={cn(
         'relative h-full',
+        styles.waveform,
         {
           'flex items-center': !data,
         },
@@ -101,8 +109,12 @@ export const Waveform = ({
       )}
       {...props}
     >
-      {!data && <span className='absolute px-2'>{'Failed to load'}</span>}
-      <div className='absolute inset-y-0 my-auto h-px w-full bg-third/40' />
+      {!isDataExists && (
+        <span className='absolute px-2'>{'Failed to load'}</span>
+      )}
+      {isDataExists && (
+        <div className='absolute inset-y-0 my-auto h-px w-full bg-third/40' />
+      )}
     </div>
   );
 };

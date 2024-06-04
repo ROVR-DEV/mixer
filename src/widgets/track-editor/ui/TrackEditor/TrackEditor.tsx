@@ -11,7 +11,11 @@ import { TimelineControllerContext } from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
 import { ChannelListItemView } from '@/features/channel-control';
 // eslint-disable-next-line boundaries/element-types
-import { TimelineGridRef, TimelineRulerRef } from '@/features/timeline';
+import {
+  TimelineGridRef,
+  TimelineRulerRef,
+  TimelineScrollView,
+} from '@/features/timeline';
 // eslint-disable-next-line boundaries/element-types
 import { TrackCardView } from '@/features/track-card-view';
 
@@ -80,7 +84,6 @@ export const TrackEditor = ({
   ]);
 
   useEffect(() => {
-    // timelineController.zoomController.value = Math.pow(1.25, 2);
     updateTimeline();
   }, [updateTimeline]);
 
@@ -134,7 +137,7 @@ export const TrackEditor = ({
         {...props}
       >
         <div className='flex h-16 min-h-16 w-full border-t border-t-third'>
-          <div className='flex min-w-[296px] items-center justify-end border-b border-b-third px-4'>
+          <div className='flex min-w-[296px] items-center justify-end border-b border-r border-b-third border-r-secondary px-4'>
             <IconButton variant='primaryFilled' onClick={handleClose}>
               <Cross2Icon className='size-4' />
             </IconButton>
@@ -149,27 +152,31 @@ export const TrackEditor = ({
         </div>
         <div className='flex size-full'>
           <div className='min-w-[296px] border-r border-r-secondary'></div>
-          <div
-            className='size-full overflow-x-clip'
-            ref={timelineRef}
-            onMouseUp={handleClickOnTimeline}
-          >
-            {!audioEditorManager.editableTrack ? null : (
-              <ChannelListItemView
-                className='relative size-full'
-                audioEditorManager={audioEditorManager}
-                channel={audioEditorManager.editableTrack?.channel}
-                ignoreSelection
-              >
-                <TrackCardView
-                  className='pointer-events-none h-[calc(100%-14px)]'
-                  key={`track-${audioEditorManager.editableTrack.uuid}-editable`}
-                  track={audioEditorManager.editableTrack}
+          <div className='flex size-full flex-col overflow-hidden'>
+            <div
+              className='size-full grow overflow-x-clip'
+              ref={timelineRef}
+              onMouseUp={handleClickOnTimeline}
+            >
+              {!audioEditorManager.editableTrack ? null : (
+                <ChannelListItemView
+                  className='relative size-full'
                   audioEditorManager={audioEditorManager}
+                  channel={audioEditorManager.editableTrack?.channel}
                   ignoreSelection
-                />
-              </ChannelListItemView>
-            )}
+                  disableBorder
+                >
+                  <TrackCardView
+                    className='pointer-events-none h-[calc(100%-14px)]'
+                    key={`track-${audioEditorManager.editableTrack.uuid}-editable`}
+                    track={audioEditorManager.editableTrack}
+                    audioEditorManager={audioEditorManager}
+                    ignoreSelection
+                  />
+                </ChannelListItemView>
+              )}
+            </div>
+            <TimelineScrollView />
           </div>
         </div>
       </div>
