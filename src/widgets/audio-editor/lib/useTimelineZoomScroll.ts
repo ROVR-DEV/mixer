@@ -1,11 +1,10 @@
 'use client';
 
-import { RefObject, useCallback, useEffect, useState } from 'react';
+import { RefObject, useCallback, useEffect, useMemo } from 'react';
 
 import { useWheel } from '@/shared/lib';
 
 import {
-  START_PAGE_X,
   TIMELINE_LEFT_PADDING,
   TimelineController,
 } from '@/entities/audio-editor';
@@ -13,7 +12,8 @@ import {
 export interface TimelineZoomScrollProps {
   timelineRef: RefObject<HTMLDivElement>;
   timelineRulerRef: RefObject<HTMLDivElement>;
-  playlistTotalTime: number;
+  startTime?: number;
+  duration: number;
   zoomStep?: number;
   scrollStep?: number;
   minZoom?: number;
@@ -45,7 +45,8 @@ const getScrollToAdjustZoomOffset = (
 export const useTimelineZoomScroll = ({
   timelineRef,
   timelineRulerRef,
-  playlistTotalTime,
+  startTime = 0,
+  duration,
   zoomStep = 1.25,
   scrollStep = 50,
   minZoom = 1,
@@ -55,7 +56,7 @@ export const useTimelineZoomScroll = ({
   onScrollChange,
   onChange,
 }: TimelineZoomScrollProps): TimelineController => {
-  const [timelineController] = useState<TimelineController>(
+  const timelineController = useMemo(
     () =>
       new TimelineController({
         timelineRef,
@@ -63,10 +64,21 @@ export const useTimelineZoomScroll = ({
         minZoom,
         maxZoom,
         scrollStep,
-        minScroll: 0,
-        totalTime: playlistTotalTime,
+        minScroll: startTime,
+        totalTime: duration,
+        startTime: startTime,
         timelineLeftPadding,
       }),
+    [
+      duration,
+      maxZoom,
+      minZoom,
+      scrollStep,
+      startTime,
+      timelineLeftPadding,
+      timelineRef,
+      zoomStep,
+    ],
   );
 
   const scrollToZoom = useCallback(
@@ -85,7 +97,7 @@ export const useTimelineZoomScroll = ({
         e.deltaY <= 0,
       );
 
-      const x = e.pageX - START_PAGE_X - 5;
+      const x = e.pageX - timelineController.startPageX - 5;
 
       timelineController.scrollController.value = getScrollToAdjustZoomOffset(
         x,
@@ -96,11 +108,7 @@ export const useTimelineZoomScroll = ({
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      timelineController.scrollController,
-      // timelineController.timelineContainer.pixelsPerSecond,
-      timelineController.zoomController,
-    ],
+    [timelineController.scrollController, timelineController.zoomController],
   );
 
   const handleWheelZoom = useCallback(
@@ -189,12 +197,7 @@ export const useTimelineZoomScroll = ({
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      onChange,
-      onScrollChange,
-      // timelineController.timelineContainer.pixelsPerSecond,
-      // timelineController.zoomController.value,
-    ],
+    [onChange, onScrollChange],
   );
 
   // Setup listeners
@@ -229,21 +232,13 @@ export const useTimelineZoomScroll = ({
       timelineController.timelineContainer.pixelsPerSecond,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    onChange,
-    onScrollChange,
-    onZoomChange,
-    // timelineController.scrollController.value,
-    // timelineController.timelineContainer,
-    // timelineController.zoomController.value,
-    timelineRef,
-  ]);
+  }, [onChange, onScrollChange, onZoomChange, timelineRef]);
 
-  useEffect(() => {
-    timelineController.addWheelListener(handleWheel);
+  // useEffect(() => {
+  //   timelineController.addWheelListener(handleWheel);
 
-    return () => timelineController.removeWheelListener(handleWheel);
-  }, [handleWheel, timelineController]);
+  //   return () => timelineController.removeWheelListener(handleWheel);
+  // }, [handleWheel, timelineController]);
 
   // Setup wheel event handlers
   useWheel(handleWheel, timelineRef);

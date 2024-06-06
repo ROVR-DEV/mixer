@@ -32,7 +32,8 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerRef,
-    playlistTotalTime: audioEditorManager.selectedTrack?.duration ?? 0,
+    startTime: audioEditorManager.editableTrack?.currentStartTime,
+    duration: audioEditorManager.editableTrack?.duration ?? 0,
   });
 
   useEffect(() => {

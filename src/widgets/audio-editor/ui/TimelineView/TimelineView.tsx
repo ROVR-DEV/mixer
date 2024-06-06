@@ -35,7 +35,7 @@ export const TimelineView = observer(function TimelineView({
   const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerWrapperRef,
-    playlistTotalTime: playlist.duration_in_seconds,
+    duration: playlist.duration_in_seconds,
   });
 
   const handleTimeSeek = useHandleTimeSeek(

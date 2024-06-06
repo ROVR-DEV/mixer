@@ -21,6 +21,7 @@ export interface TimelineControllerProps {
   minScroll: number;
   maxScroll?: number;
   totalTime: number;
+  startTime?: number;
   timelineLeftPadding?: number;
 }
 
@@ -45,6 +46,9 @@ export class TimelineController {
   private _wheelEventTriggerElements: Set<RefObject<HTMLElement>> = new Set();
 
   private _trackHeight: number | string = 96;
+
+  totalTime: number;
+  startTime: number;
 
   get trackHeight(): number | string {
     return this._trackHeight;
@@ -106,6 +110,7 @@ export class TimelineController {
     minScroll,
     maxScroll,
     totalTime,
+    startTime = 0,
     timelineLeftPadding = 0,
   }: TimelineControllerProps) {
     this.zoomController = new ZoomController(zoomStep, minZoom, maxZoom);
@@ -113,13 +118,16 @@ export class TimelineController {
     this.scrollController = new ScrollController(
       scrollStep,
       minScroll,
-      maxScroll ?? 100,
+      maxScroll ?? totalTime,
     );
 
     this.timelineContainer = new TimelineContainerObserver(
       timelineRef,
       totalTime,
     );
+
+    this.totalTime = totalTime;
+    this.startTime = startTime;
 
     this._zoom = this.zoomController.value;
     this._scroll = this.scrollController.value;
@@ -228,7 +236,8 @@ export class TimelineController {
   ) => {
     runInAction(() => {
       this.scrollController.max =
-        (timelineScrollWidth - timelineClientWidth) / pixelsPerSecond;
+        (timelineScrollWidth - timelineClientWidth) / pixelsPerSecond +
+        this.startTime;
 
       this._timelineClientHeight = timelineClientHeight;
       this._timelineClientWidth = timelineClientWidth;

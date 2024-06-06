@@ -25,22 +25,22 @@ export const TimelineScrollView = observer(function TimelineScrollView({
   const updateHorizontalScrollbar = useCallback(
     (scroll: number) => {
       horizontalScrollRef.current?.setScroll(
-        scroll * timelineController.timelineContainer.pixelsPerSecond,
+        (scroll - timelineController.startTime) *
+          timelineController.timelineContainer.pixelsPerSecond,
       );
     },
-    [timelineController.timelineContainer.pixelsPerSecond],
+    [timelineController],
   );
 
   const handleHorizontalScrollbarOnScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       timelineController.scrollController.value =
         e.currentTarget.scrollLeft /
-        timelineController.timelineContainer.pixelsPerSecond;
+          timelineController.timelineContainer.pixelsPerSecond +
+        timelineController.startTime;
     },
-    [
-      timelineController.scrollController,
-      timelineController.timelineContainer.pixelsPerSecond,
-    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timelineController.scrollController],
   );
 
   useEffect(() => {
