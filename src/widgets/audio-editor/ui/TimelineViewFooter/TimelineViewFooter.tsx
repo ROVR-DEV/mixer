@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib';
 
 import { TimelineScrollView } from '@/features/timeline';
@@ -17,3 +19,5 @@ export const TimelineViewFooter = ({
     </div>
   );
 };
+
+export const TimelineViewFooterMemoized = memo(TimelineViewFooter);

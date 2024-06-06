@@ -16,7 +16,7 @@ export const TimelinePlayHead = forwardRef<
     <div
       className={cn('absolute top-0 h-full pointer-events-none', className)}
       ref={ref}
-      style={{ left: initialPosition, ...style }}
+      style={{ left: initialPosition ?? '', ...style }}
       {...props}
     >
       <PlayHeadIcon className='absolute left-[-9px]' width={19} height={19} />

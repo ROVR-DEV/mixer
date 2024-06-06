@@ -95,9 +95,10 @@ export const useTimelineZoomScroll = ({
         timelineController.timelineContainer.pixelsPerSecond,
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       timelineController.scrollController,
-      timelineController.timelineContainer.pixelsPerSecond,
+      // timelineController.timelineContainer.pixelsPerSecond,
       timelineController.zoomController,
     ],
   );
@@ -187,11 +188,12 @@ export const useTimelineZoomScroll = ({
         timelineController.timelineContainer.pixelsPerSecond,
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       onChange,
       onScrollChange,
-      timelineController.timelineContainer.pixelsPerSecond,
-      timelineController.zoomController.value,
+      // timelineController.timelineContainer.pixelsPerSecond,
+      // timelineController.zoomController.value,
     ],
   );
 
@@ -226,13 +228,14 @@ export const useTimelineZoomScroll = ({
       timelineController.scrollController.value,
       timelineController.timelineContainer.pixelsPerSecond,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onChange,
     onScrollChange,
     onZoomChange,
-    timelineController.scrollController.value,
-    timelineController.timelineContainer,
-    timelineController.zoomController.value,
+    // timelineController.scrollController.value,
+    // timelineController.timelineContainer,
+    // timelineController.zoomController.value,
     timelineRef,
   ]);
 

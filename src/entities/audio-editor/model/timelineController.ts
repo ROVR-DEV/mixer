@@ -1,8 +1,12 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
-// eslint-disable-next-line boundaries/element-types
-import { getPixelPerSeconds } from '@/features/timeline';
+import {
+  TimelineTicks,
+  getPixelPerSeconds,
+  getTicksForSeconds,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/features/timeline';
 
 import { ScrollController } from './scrollController';
 import { TimelineContainerObserver } from './timelineContainerObserver';
@@ -148,6 +152,14 @@ export class TimelineController {
     makeAutoObservable(this);
   }
 
+  get ticks(): TimelineTicks {
+    return getTicksForSeconds(
+      this.timelineClientWidth,
+      this.zoom,
+      this.scroll * this.timelineContainer.pixelsPerSecond,
+    );
+  }
+
   addWheelListener = (listener: WheelEventListener) => {
     this._wheelListeners.add(listener);
   };
@@ -188,6 +200,10 @@ export class TimelineController {
     return (
       (x - this._timelineLeftPadding) / this.timelineContainer.pixelsPerSecond
     );
+  };
+
+  virtualToRealGlobalPixels = (x: number) => {
+    return this.realLocalPixelsToGlobal(this.virtualToRealPixels(x));
   };
 
   realToVirtualPixels = (x: number) => {

@@ -2,14 +2,15 @@
 
 import { observer } from 'mobx-react-lite';
 
-import { StopButton } from '@/entities/audio-editor';
+import { StopButton, useAudioEditorManager } from '@/entities/audio-editor';
 
 import { StopButtonViewProps } from './interfaces';
 
 export const StopButtonView = observer(function StopButtonView({
-  audioEditorManager,
   ...props
 }: StopButtonViewProps) {
+  const audioEditorManager = useAudioEditorManager();
+
   return (
     <StopButton
       isPlaying={audioEditorManager.isPlaying}

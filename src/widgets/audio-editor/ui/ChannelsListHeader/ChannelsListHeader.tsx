@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { cn } from '@/shared/lib';
 
 import {
@@ -28,3 +30,5 @@ export const ChannelsListHeader = ({
     </ChannelListMemoized>
   );
 };
+
+export const ChannelsListHeaderMemoized = memo(ChannelsListHeader);

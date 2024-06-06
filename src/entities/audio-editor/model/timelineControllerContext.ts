@@ -11,7 +11,7 @@ export const useTimelineController = () => {
   const context = useContext(TimelineControllerContext);
   if (context === null) {
     throw new Error(
-      'You have forgotten to wrap your root component with AudioEditorTimelineStateProvider',
+      'You have forgotten to wrap your root component with TimelineControllerContextProvider',
     );
   }
   return context;

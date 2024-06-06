@@ -1,41 +1,62 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
-import { useTimelineController } from '@/entities/audio-editor';
+import {
+  useTimelineController,
+  useHandleTimeSeek,
+  useAudioEditorManager,
+} from '@/entities/audio-editor';
 
 import {
   TimelinePlayHeadView,
   TimelineRulerMemoized,
+  TimelineRulerRef,
 } from '@/features/timeline';
+
+import { useAudioEditorTimelineRuler } from '../../lib';
 
 import { TimelineHeaderProps } from './interfaces';
 
 export const TimelineHeader = observer(function TimelineHeader({
-  audioEditorManager,
   rulerRef,
-  controlRef,
   centerLine,
   className,
   ...props
 }: TimelineHeaderProps) {
+  const audioEditorManager = useAudioEditorManager();
   const timelineController = useTimelineController();
 
-  const handleClickOnRuler = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      audioEditorManager.seekTo(
-        timelineController.realLocalPixelsToGlobal(
-          timelineController.virtualToRealPixels(
-            e.nativeEvent.pageX - timelineController.startPageX,
-          ),
-        ),
-      );
-    },
-    [audioEditorManager, timelineController],
+  const handleClickOnRuler = useHandleTimeSeek(
+    audioEditorManager,
+    timelineController,
   );
+
+  const rulerControlRef = useRef<TimelineRulerRef | null>(null);
+
+  const renderRuler = useAudioEditorTimelineRuler(rulerControlRef);
+
+  useEffect(() => {
+    renderRuler(
+      timelineController.ticks,
+      timelineController.zoom,
+      timelineController.scroll,
+      timelineController.timelineContainer.pixelsPerSecond,
+      timelineController.timelineLeftPadding,
+    );
+  }, [
+    renderRuler,
+    timelineController.scroll,
+    timelineController.ticks,
+    timelineController.timelineContainer.pixelsPerSecond,
+    timelineController.timelineLeftPadding,
+    timelineController.zoom,
+  ]);
+
+  const canvasProps = useMemo(() => ({ className: 'h-[32px]' }), []);
 
   return (
     <div
@@ -44,16 +65,12 @@ export const TimelineHeader = observer(function TimelineHeader({
       onClick={handleClickOnRuler}
       {...props}
     >
-      <TimelinePlayHeadView
-        className='absolute z-10'
-        initialPosition={timelineController.timelineLeftPadding}
-        audioEditorManager={audioEditorManager}
-      />
+      <TimelinePlayHeadView className='absolute z-10' />
       <TimelineRulerMemoized
         className='pointer-events-none w-full'
         centerLine={centerLine}
-        canvasProps={{ className: 'h-[32px]' }}
-        controlRef={controlRef}
+        canvasProps={canvasProps}
+        controlRef={rulerControlRef}
       />
     </div>
   );

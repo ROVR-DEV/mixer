@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 
 import { cn } from '@/shared/lib';
 
+import { AudioEditorManagerContext } from '@/entities/audio-editor';
 import { TracksManagerContext } from '@/entities/track';
 
 import { useAudioEditor } from '../../lib';
@@ -21,20 +22,16 @@ export const AudioEditor = observer(function AudioEditor({
   const { audioEditorManager, tracksManager } = useAudioEditor(playlist);
 
   return (
-    <div className={cn('flex flex-col relative', className)} {...props}>
-      <AudioEditorHeaderMemoized audioEditorManager={audioEditorManager} />
-      <TracksManagerContext.Provider value={tracksManager}>
-        <TimelineView
-          playlist={playlist}
-          audioEditorManager={audioEditorManager}
-        />
-        {!audioEditorManager.editableTrack ? null : (
-          <TrackEditor
-            className='absolute bottom-[100px] z-10 h-[43%] max-h-[466px] min-h-[161px] w-full'
-            audioEditorManager={audioEditorManager}
-          />
-        )}
-      </TracksManagerContext.Provider>
-    </div>
+    <AudioEditorManagerContext.Provider value={audioEditorManager}>
+      <div className={cn('flex flex-col relative', className)} {...props}>
+        <AudioEditorHeaderMemoized />
+        <TracksManagerContext.Provider value={tracksManager}>
+          <TimelineView playlist={playlist} />
+          {!audioEditorManager.editableTrack ? null : (
+            <TrackEditor className='absolute bottom-[100px] z-10 h-[43%] max-h-[466px] min-h-[161px] w-full' />
+          )}
+        </TracksManagerContext.Provider>
+      </div>
+    </AudioEditorManagerContext.Provider>
   );
 });

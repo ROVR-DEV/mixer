@@ -13,7 +13,7 @@ export const useTracksManager = (
 
   if (strict && context === null) {
     throw new Error(
-      'You have forgotten to wrap your root component with AudioEditorTimelineStateProvider',
+      'You have forgotten to wrap your root component with TracksManagerContextProvider',
     );
   }
 

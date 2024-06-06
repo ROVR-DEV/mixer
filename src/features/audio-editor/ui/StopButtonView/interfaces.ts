@@ -1,6 +1,4 @@
-import { AudioEditorManager, StopButtonProps } from '@/entities/audio-editor';
+import { StopButtonProps } from '@/entities/audio-editor';
 
 export interface StopButtonViewProps
-  extends Omit<StopButtonProps, 'isPlaying'> {
-  audioEditorManager: AudioEditorManager;
-}
+  extends Omit<StopButtonProps, 'isPlaying'> {}

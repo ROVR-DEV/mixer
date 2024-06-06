@@ -2,14 +2,15 @@
 
 import { observer } from 'mobx-react-lite';
 
-import { PlayButton } from '@/entities/audio-editor';
+import { PlayButton, useAudioEditorManager } from '@/entities/audio-editor';
 
 import { PlayButtonViewProps } from './interfaces';
 
 export const PlayButtonView = observer(function PlayButtonView({
-  audioEditorManager,
   ...props
 }: PlayButtonViewProps) {
+  const audioEditorManager = useAudioEditorManager();
+
   return (
     <PlayButton
       isPlaying={audioEditorManager.isPlaying}

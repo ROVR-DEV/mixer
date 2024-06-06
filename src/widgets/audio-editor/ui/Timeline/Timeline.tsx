@@ -1,27 +1,50 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
+import { useEffect, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
-import { useTimelineController } from '@/entities/audio-editor';
+import {
+  useAudioEditorManager,
+  useTimelineController,
+} from '@/entities/audio-editor';
 import { useTracksManager } from '@/entities/track';
 
-import { TimelineGridMemoized } from '@/features/timeline';
+import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
 
+import { useAudioEditorTimelineGrid } from '../../lib';
 import { AudioEditorTracksList } from '../AudioEditorTracksList';
 
 import { TimelineProps } from './interfaces';
 
 export const Timeline = observer(function Timeline({
-  audioEditorManager,
   timelineRef,
-  gridRef,
   className,
   ...props
 }: TimelineProps) {
+  const audioEditorManager = useAudioEditorManager();
   const timelineController = useTimelineController();
   const tracksManager = useTracksManager()!;
+
+  const gridControlRef = useRef<TimelineGridRef | null>(null);
+
+  const renderGrid = useAudioEditorTimelineGrid(gridControlRef);
+
+  useEffect(() => {
+    renderGrid(
+      timelineController.ticks,
+      timelineController.scroll,
+      timelineController.timelineContainer.pixelsPerSecond,
+      timelineController.timelineLeftPadding,
+    );
+  }, [
+    renderGrid,
+    timelineController.scroll,
+    timelineController.ticks,
+    timelineController.timelineContainer.pixelsPerSecond,
+    timelineController.timelineLeftPadding,
+  ]);
 
   return (
     <div
@@ -47,7 +70,7 @@ export const Timeline = observer(function Timeline({
                 : audioEditorManager.channelIds.length *
                   timelineController.trackHeight
             }
-            controlRef={gridRef}
+            controlRef={gridControlRef}
           />
           <AudioEditorTracksList audioEditorManager={audioEditorManager} />
         </>
