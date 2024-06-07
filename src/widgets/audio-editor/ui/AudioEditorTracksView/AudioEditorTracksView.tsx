@@ -2,6 +2,8 @@
 
 import { observer } from 'mobx-react-lite';
 
+import { TrackWaveform } from '@/entities/track';
+
 import { TrackCardView } from '@/features/track-card-view';
 
 import { AudioEditorTracksViewProps } from './interfaces';
@@ -17,6 +19,12 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         key={`track-${track.uuid}`}
         track={track}
         audioEditorManager={audioEditorManager}
+        waveformComponent={
+          <TrackWaveform
+            audioEditorManager={audioEditorManager}
+            track={track}
+          />
+        }
       />
     );
   });

@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
@@ -10,6 +10,7 @@ import {
   useAudioEditorManager,
   useHandleTimeSeek,
 } from '@/entities/audio-editor';
+import { FadePoint, TrackWaveform } from '@/entities/track';
 
 import { ChannelListItemView } from '@/features/channel-control';
 import { TimelineScrollView } from '@/features/timeline';
@@ -50,6 +51,20 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     timelineController,
   );
 
+  const waveformComponent = useMemo(
+    () =>
+      !audioEditorManager.editableTrack ? (
+        <></>
+      ) : (
+        <TrackWaveform
+          audioEditorManager={audioEditorManager}
+          track={audioEditorManager.editableTrack}
+          ignoreSelection
+        />
+      ),
+    [audioEditorManager],
+  );
+
   return (
     <TimelineControllerContext.Provider value={timelineController}>
       <div className={cn('flex flex-col', className)} {...props}>
@@ -73,12 +88,25 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                 disableBorder
               >
                 <TrackCardView
-                  className='pointer-events-none h-[calc(100%-14px)]'
+                  className='h-[calc(100%-14px)]'
                   key={`track-${audioEditorManager.editableTrack.uuid}-editable`}
                   track={audioEditorManager.editableTrack}
                   audioEditorManager={audioEditorManager}
-                  ignoreSelection
-                />
+                  waveformComponent={waveformComponent}
+                  disableInteractive
+                  hideTitle
+                >
+                  <FadePoint
+                    className='absolute top-0 z-10'
+                    side='left'
+                    audioEditorManager={audioEditorManager}
+                  />
+                  <FadePoint
+                    className='absolute top-0 z-10'
+                    side='right'
+                    audioEditorManager={audioEditorManager}
+                  />
+                </TrackCardView>
               </ChannelListItemView>
             )}
           </div>

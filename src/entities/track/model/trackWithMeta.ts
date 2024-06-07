@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 // eslint-disable-next-line import/named
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
@@ -7,6 +7,7 @@ import WaveSurfer from 'wavesurfer.js';
 import { Channel } from '@/entities/channel';
 
 import { Track } from './track';
+import { TrackAudioFilters } from './trackAudioFilters';
 
 export class TrackWithMeta<T = WaveSurfer> {
   channel: Channel;
@@ -17,6 +18,8 @@ export class TrackWithMeta<T = WaveSurfer> {
   audioBuffer: T | null;
   audioBufferPeaks: number[][] | null = null;
   media: HTMLMediaElement | null = null;
+
+  trackAudioFilters: TrackAudioFilters | null = null;
 
   duration: number;
 
@@ -51,14 +54,25 @@ export class TrackWithMeta<T = WaveSurfer> {
     }
 
     this.audioBuffer = audioBuffer;
-  };
 
-  setAudioBufferPeaks = (peaks: number[][]) => {
-    this.audioBufferPeaks = peaks;
-  };
+    if (audioBuffer instanceof WaveSurfer) {
+      audioBuffer.once('ready', () => {
+        runInAction(() => {
+          this.media = audioBuffer.getMediaElement();
+          this.audioBufferPeaks = audioBuffer.exportPeaks();
 
-  setMedia = (media: HTMLMediaElement | null) => {
-    this.media = media;
+          if (this.media === null || this.trackAudioFilters !== null) {
+            return;
+          }
+
+          this.trackAudioFilters = new TrackAudioFilters(this.media);
+
+          this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
+          this.trackAudioFilters.fadeOutStartTime =
+            this.duration - this.endTimeOffset;
+        });
+      });
+    }
   };
 
   setChannel = (channel: Channel) => {
@@ -72,6 +86,12 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.currentStartTime = time;
     this.currentEndTime = this.currentStartTime + segmentDuration;
+
+    if (this.trackAudioFilters) {
+      this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
+      this.trackAudioFilters.fadeOutStartTime =
+        this.duration - this.endTimeOffset;
+    }
   };
 
   setStartTime = (time: number) => {
@@ -79,6 +99,10 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.currentStartTime = time;
     this.startTimeOffset = offset;
+
+    if (this.trackAudioFilters) {
+      this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
+    }
   };
 
   setEndTime = (time: number) => {
@@ -86,5 +110,10 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.currentEndTime = time;
     this.endTimeOffset = offset;
+
+    if (this.trackAudioFilters) {
+      this.trackAudioFilters.fadeOutStartTime =
+        this.duration - this.endTimeOffset;
+    }
   };
 }

@@ -1,5 +1,7 @@
 import { cn } from '@/shared/lib';
 
+import { TrackTitle } from '../TrackTitle';
+
 import { TrackInfoProps } from './interfaces';
 
 export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
@@ -28,10 +30,7 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
           >
             {'Track Info:'}
           </span>
-          <span className='inline-block overflow-hidden text-ellipsis'>
-            {track ? `${track.title} | ${track.artist}` : 'No track selected '}
-          </span>
-          <span>{track ? `(${track.duration})` : '(00:00:00)'}</span>
+          <TrackTitle className='text-[14px]' track={track} />
         </span>
         <span
           className={cn(

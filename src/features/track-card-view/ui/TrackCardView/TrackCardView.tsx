@@ -9,13 +9,7 @@ import {
   TIMELINE_LEFT_PADDING,
   useTimelineController,
 } from '@/entities/audio-editor';
-import {
-  TrackCardMemoized,
-  TrackWithMeta,
-  WaveformMemoized,
-  useTracksManager,
-  waveformOptions,
-} from '@/entities/track';
+import { TrackCardMemoized, TrackWithMeta } from '@/entities/track';
 
 import {
   clearDragProperties,
@@ -30,49 +24,20 @@ import styles from './styles.module.css';
 export const TrackCardView = observer(function TrackCardView({
   track,
   audioEditorManager,
-  ignoreSelection,
+  disableInteractive,
   className,
   ...props
 }: TrackCardViewProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const tracksManager = useTracksManager(false);
-  const trackData = useMemo(
-    () => tracksManager?.tracksData.get(track.data.uuid),
-    [track.data.uuid, tracksManager?.tracksData],
-  );
-
   const timelineController = useTimelineController();
 
   const isSelected = useMemo(
     () =>
-      ignoreSelection
+      disableInteractive
         ? false
         : audioEditorManager.selectedTrack?.uuid === track.uuid,
-    [audioEditorManager.selectedTrack?.uuid, ignoreSelection, track.uuid],
-  );
-
-  const waveformComponent = useMemo(
-    () => (
-      <WaveformMemoized
-        data={trackData?.blob}
-        color={isSelected ? 'primary' : 'secondary'}
-        options={{
-          ...waveformOptions,
-          peaks: track.audioBufferPeaks ?? undefined,
-          duration: track.duration,
-          media: track.media ?? undefined,
-        }}
-        onMount={(wavesurfer) => {
-          track.setAudioBuffer(wavesurfer);
-          wavesurfer.once('ready', () => {
-            track.setMedia(wavesurfer.getMediaElement());
-            track.setAudioBufferPeaks(wavesurfer.exportPeaks());
-          });
-        }}
-      />
-    ),
-    [isSelected, track, trackData],
+    [audioEditorManager.selectedTrack?.uuid, disableInteractive, track.uuid],
   );
 
   const selectTrack = useCallback(() => {
@@ -304,9 +269,7 @@ export const TrackCardView = observer(function TrackCardView({
           trackOnLine.data,
           trackOnLine.channel,
         );
-        if (trackOnLine.audioBufferPeaks) {
-          trackOnLineCopy.setAudioBufferPeaks(trackOnLine.audioBufferPeaks);
-        }
+
         trackOnLineCopy.setNewStartTime(trackOnLine.currentStartTime);
         trackOnLineCopy.setStartTime(track.currentEndTime);
         trackOnLineCopy.setEndTime(trackOnLine.currentEndTime);
@@ -390,10 +353,9 @@ export const TrackCardView = observer(function TrackCardView({
       track={track.data}
       isSolo={track.channel?.isSolo}
       isSelected={isSelected}
-      waveformComponent={waveformComponent}
       onClick={handleClick}
       // Drag logic
-      draggable
+      draggable={!disableInteractive}
       onDrag={handleDrag}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}

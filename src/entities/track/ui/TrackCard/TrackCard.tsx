@@ -3,45 +3,50 @@
 import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
-import { Badge } from '@/shared/ui';
+
+import { EditBadge } from '../EditBadge';
+import { TrackTitle } from '../TrackTitle';
 
 import { TrackCardProps } from './interfaces';
 
 export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
   function TrackCard(
-    { track, className, isSelected, isSolo, waveformComponent, ...props },
+    {
+      track,
+      isSelected,
+      isSolo,
+      hideTitle = false,
+      waveformComponent,
+      className,
+      children,
+      ...props
+    },
     ref,
   ) {
     return (
       <div
         className={cn(
-          'relative grid grid-rows-[18px_auto_18px] h-[84px] border transition-colors border-third-dark text-third rounded-md bg-primary',
+          'relative grid grid-rows-[18px_auto_18px] h-[84px] border border-third-dark text-third rounded-md bg-primary',
           className,
-          { 'bg-accent !text-primary': isSelected },
-          { 'border-accent': isSolo || isSelected },
+          {
+            'bg-accent !text-primary': isSelected,
+            'border-accent': isSolo || isSelected,
+            'grid-rows-[0_auto_0]': hideTitle,
+          },
         )}
         ref={ref}
         {...props}
       >
-        <div
-          className={cn('absolute hidden left-1.5 top-1.5 p-0', {
+        <EditBadge
+          className={cn('absolute hidden left-1.5 top-1.5 z-10', {
             flex: isSelected,
           })}
-        >
-          <Badge
-            variant='inverse'
-            className={cn(
-              'w-16 h-[22px] z-10 bg-accent/80 rounded-md uppercase p-0 pt-[3px] text-[12px] font-bold items-center justify-center  flex',
-            )}
-          >
-            {'Edit'}
-          </Badge>
-        </div>
+        />
         <div className='row-start-2 overflow-hidden'>{waveformComponent}</div>
-        <span className='row-start-3 mt-auto overflow-hidden text-ellipsis text-nowrap pl-1 text-[12px]'>
-          <span className='font-bold'>{`${track.title} | ${track.artist} `}</span>
-          <span className=''>{`(${track.duration})`}</span>
-        </span>
+        {!hideTitle && (
+          <TrackTitle className='row-start-3 pl-1' track={track} />
+        )}
+        <div className='absolute z-10 row-span-full size-full'>{children}</div>
       </div>
     );
   },
