@@ -266,7 +266,7 @@ export const TrackCardView = observer(function TrackCardView({
 
       if (trackIntersectsOnStart && trackIntersectsOnEnd) {
         const trackOnLineCopy = new TrackWithMeta(
-          trackOnLine.data,
+          trackOnLine.originalTrack,
           trackOnLine.channel,
         );
 
@@ -350,7 +350,7 @@ export const TrackCardView = observer(function TrackCardView({
     <TrackCardMemoized
       className={cn('absolute z-0', className)}
       ref={trackRef}
-      track={track.data}
+      track={track.originalTrack}
       isSolo={track.channel?.isSolo}
       isSelected={isSelected}
       onClick={handleClick}

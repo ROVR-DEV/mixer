@@ -6,7 +6,7 @@ import { useTimeLoop } from '@/shared/lib';
 
 import { AudioEditorManager, DEFAULT_CHANNELS } from '@/entities/audio-editor';
 import { PlaylistDTO } from '@/entities/playlist';
-import { TracksManager } from '@/entities/track';
+import { TrackData, TracksManager } from '@/entities/track';
 
 import { importTracksToChannels } from './importTracksToChannels';
 import { useAudioEditorGlobalControls } from './useAudioEditorGlobalControls';
@@ -37,8 +37,25 @@ export const useAudioEditor = (playlist: PlaylistDTO) => {
   }, [audioEditorManager, playlistKey]);
 
   useEffect(() => {
-    tracksManager.downloadTracks();
-  }, [tracksManager, playlistKey]);
+    const handleTrackLoad = (trackData: TrackData) => {
+      if (!trackData.objectUrl) {
+        return;
+      }
+
+      audioEditorManager.channels.forEach((channel) => {
+        const currentTrack = channel.tracks.find(
+          (track) => track.originalTrack.uuid === trackData.uuid,
+        );
+        if (!currentTrack || !trackData.objectUrl) {
+          return;
+        }
+
+        currentTrack.initAudioElement(trackData.objectUrl);
+      });
+    };
+
+    tracksManager.downloadTracks(handleTrackLoad);
+  }, [tracksManager, playlistKey, audioEditorManager.channels]);
 
   useTimeLoop({
     isRunning: audioEditorManager.isPlaying,

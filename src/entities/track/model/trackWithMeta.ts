@@ -14,10 +14,10 @@ export class TrackWithMeta<T = WaveSurfer> {
 
   uuid: string;
 
-  data: Track;
+  originalTrack: Track;
   audioBuffer: T | null;
   audioBufferPeaks: number[][] | null = null;
-  media: HTMLMediaElement | null = null;
+  mediaElement: HTMLMediaElement | null = null;
 
   trackAudioFilters: TrackAudioFilters | null = null;
 
@@ -32,7 +32,7 @@ export class TrackWithMeta<T = WaveSurfer> {
   constructor(track: Track, channel: Channel, audioBuffer?: T) {
     this.channel = channel;
 
-    this.data = track;
+    this.originalTrack = track;
     this.audioBuffer = audioBuffer ?? null;
 
     this.duration = track.end - track.start;
@@ -58,21 +58,19 @@ export class TrackWithMeta<T = WaveSurfer> {
     if (audioBuffer instanceof WaveSurfer) {
       audioBuffer.once('ready', () => {
         runInAction(() => {
-          this.media = audioBuffer.getMediaElement();
           this.audioBufferPeaks = audioBuffer.exportPeaks();
-
-          if (this.media === null || this.trackAudioFilters !== null) {
-            return;
-          }
-
-          this.trackAudioFilters = new TrackAudioFilters(this.media);
-
-          this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
-          this.trackAudioFilters.fadeOutStartTime =
-            this.duration - this.endTimeOffset;
         });
       });
     }
+  };
+
+  initAudioElement = (src: HTMLMediaElement['src']) => {
+    this.mediaElement = new Audio(src);
+    this.trackAudioFilters = new TrackAudioFilters(this.mediaElement);
+
+    // this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
+    // this.trackAudioFilters.fadeOutStartTime =
+    //   this.duration - this.endTimeOffset;
   };
 
   setChannel = (channel: Channel) => {
@@ -88,9 +86,11 @@ export class TrackWithMeta<T = WaveSurfer> {
     this.currentEndTime = this.currentStartTime + segmentDuration;
 
     if (this.trackAudioFilters) {
-      this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
-      this.trackAudioFilters.fadeOutStartTime =
-        this.duration - this.endTimeOffset;
+      this.trackAudioFilters.fadeInNode.linearFadeOut(this.startTimeOffset, 0);
+      this.trackAudioFilters.fadeOutNode.linearFadeOut(
+        this.duration - this.endTimeOffset,
+        0,
+      );
     }
   };
 
@@ -101,7 +101,7 @@ export class TrackWithMeta<T = WaveSurfer> {
     this.startTimeOffset = offset;
 
     if (this.trackAudioFilters) {
-      this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
+      this.trackAudioFilters.fadeInNode.linearFadeOut(this.startTimeOffset, 0);
     }
   };
 
@@ -112,8 +112,10 @@ export class TrackWithMeta<T = WaveSurfer> {
     this.endTimeOffset = offset;
 
     if (this.trackAudioFilters) {
-      this.trackAudioFilters.fadeOutStartTime =
-        this.duration - this.endTimeOffset;
+      this.trackAudioFilters.fadeOutNode.linearFadeOut(
+        this.startTimeOffset,
+        this.duration - this.endTimeOffset,
+      );
     }
   };
 }

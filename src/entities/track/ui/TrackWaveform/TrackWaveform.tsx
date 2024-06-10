@@ -5,7 +5,6 @@ import { useCallback, useMemo } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 import { DEFAULT_WAVEFORM_OPTIONS } from '../../config';
-import { useTracksManager } from '../../model';
 import { WaveformMemoized } from '../Waveform';
 
 import { TrackWaveformProps } from './interfaces';
@@ -17,12 +16,6 @@ export const TrackWaveform = observer(function TrackWaveform({
   options,
   ...props
 }: TrackWaveformProps) {
-  const tracksManager = useTracksManager(false);
-  const trackData = useMemo(
-    () => tracksManager?.tracksData.get(track.data.uuid),
-    [track.data.uuid, tracksManager?.tracksData],
-  );
-
   const color = useMemo(() => {
     const isSelected = ignoreSelection
       ? false
@@ -30,16 +23,15 @@ export const TrackWaveform = observer(function TrackWaveform({
     return isSelected ? 'primary' : 'secondary';
   }, [audioEditorManager.selectedTrack?.uuid, ignoreSelection, track.uuid]);
 
-  const finalOptions = useMemo(
-    () => ({
+  const finalOptions = useMemo(() => {
+    return {
       ...DEFAULT_WAVEFORM_OPTIONS,
+      media: track?.mediaElement ?? undefined,
       peaks: track.audioBufferPeaks ?? undefined,
       duration: track.duration,
-      media: track.media ?? undefined,
       ...options,
-    }),
-    [options, track.audioBufferPeaks, track.duration, track.media],
-  );
+    };
+  }, [options, track.audioBufferPeaks, track.duration, track?.mediaElement]);
 
   const handleMount = useCallback(
     (wavesurfer: WaveSurfer) => {
@@ -53,7 +45,6 @@ export const TrackWaveform = observer(function TrackWaveform({
 
   return (
     <WaveformMemoized
-      data={trackData?.blob}
       color={color}
       options={finalOptions}
       onMount={handleMount}

@@ -35,7 +35,9 @@ export class Channel {
   };
 
   importTrack = (track: Track) => {
-    this.tracks.push(new TrackWithMeta(track, this));
+    const trackWithMeta = new TrackWithMeta(track, this);
+    this.tracks.push(trackWithMeta);
+    return trackWithMeta;
   };
 
   addTrack = (track: TrackWithMeta) => {

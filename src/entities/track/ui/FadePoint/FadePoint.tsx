@@ -41,19 +41,15 @@ export const FadePoint = observer(function FadePoint({
       );
 
       if (side === 'left') {
-        audioEditorManager.editableTrack.trackAudioFilters.fadeInEndTime =
-          clamp(
-            time,
-            -Infinity,
-            audioEditorManager.editableTrack.trackAudioFilters.fadeOutStartTime,
-          );
+        audioEditorManager.editableTrack.trackAudioFilters.fadeInNode.linearFadeOut(
+          0,
+          time,
+        );
       } else if (side === 'right') {
-        audioEditorManager.editableTrack.trackAudioFilters.fadeOutStartTime =
-          clamp(
-            time,
-            audioEditorManager.editableTrack.trackAudioFilters.fadeInEndTime,
-            Infinity,
-          );
+        audioEditorManager.editableTrack.trackAudioFilters.fadeOutNode.linearFadeOut(
+          time,
+          audioEditorManager.editableTrack.duration - time,
+        );
       }
     },
     [audioEditorManager.editableTrack, side, timelineController],
@@ -69,16 +65,19 @@ export const FadePoint = observer(function FadePoint({
           .state === 'suspended'
       ) {
         audioEditorManager.editableTrack?.trackAudioFilters.audioContext.resume();
-        audioEditorManager.editableTrack?.trackAudioFilters.fadeInNode.gain.linearRampToValueAtTime(
-          0,
-          0,
-        );
       }
 
       removeDragGhostImage(e);
       handleDrag(e);
     },
     [audioEditorManager.editableTrack?.trackAudioFilters, handleDrag],
+  );
+
+  const handleDragEnd = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      handleDrag(e);
+    },
+    [handleDrag],
   );
 
   const onDragDropPrevent = useCallback(
@@ -95,16 +94,16 @@ export const FadePoint = observer(function FadePoint({
       return (
         timelineController.realToVirtualPixels(
           timelineController.realGlobalPixelsToLocal(
-            audioEditorManager.editableTrack?.trackAudioFilters
-              ?.fadeInEndTime ?? 0,
+            audioEditorManager.editableTrack?.trackAudioFilters?.fadeInNode
+              .fadeFilter.endTime ?? 0,
           ),
         ) + timelineController.timelineLeftPadding
       );
     } else {
       return (
         timelineController.realToVirtualPixels(
-          audioEditorManager.editableTrack?.trackAudioFilters
-            ?.fadeOutStartTime ??
+          audioEditorManager.editableTrack?.trackAudioFilters?.fadeOutNode
+            .fadeFilter.startTime ??
             audioEditorManager.editableTrack?.duration ??
             0,
         ) +
@@ -114,8 +113,10 @@ export const FadePoint = observer(function FadePoint({
     }
   }, [
     audioEditorManager.editableTrack?.duration,
-    audioEditorManager.editableTrack?.trackAudioFilters?.fadeInEndTime,
-    audioEditorManager.editableTrack?.trackAudioFilters?.fadeOutStartTime,
+    audioEditorManager.editableTrack?.trackAudioFilters?.fadeInNode.fadeFilter
+      .endTime,
+    audioEditorManager.editableTrack?.trackAudioFilters?.fadeOutNode.fadeFilter
+      .startTime,
     side,
     timelineController,
   ]);
@@ -139,7 +140,7 @@ export const FadePoint = observer(function FadePoint({
         draggable
         onDrag={handleDrag}
         onDragStart={handleDragStart}
-        onDragEnd={onDragDropPrevent}
+        onDragEnd={handleDragEnd}
         onDragOver={onDragDropPrevent}
         onDrop={onDragDropPrevent}
       >

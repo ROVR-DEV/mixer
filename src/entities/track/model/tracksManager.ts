@@ -26,33 +26,24 @@ export class TracksManager {
     );
   }
 
-  downloadTracks = async () => {
+  downloadTracks = async (onLoad?: (trackData: TrackData) => void) => {
     this.tracks.forEach((track) => {
       const trackData = this.tracksData.get(track.uuid);
 
-      if (
-        !trackData ||
-        trackData.status === 'loading' ||
-        trackData.status === 'fulfilled'
-      ) {
+      if (!trackData || trackData.status !== 'empty') {
         return;
       }
 
       trackData.status = 'loading';
 
-      getTrack(track.uuid, isTrackCachingEnabled()).then((res) =>
-        this._onSuccessDownload(track.uuid, res.data),
-      );
+      getTrack(track.uuid, isTrackCachingEnabled()).then((res) => {
+        if (!res.data) {
+          return;
+        }
+
+        trackData.setData(res.data);
+        onLoad?.(trackData);
+      });
     });
-  };
-
-  private _onSuccessDownload = (trackUuid: string, data: Blob | undefined) => {
-    const trackData = this.tracksData.get(trackUuid);
-    if (!trackData || !data) {
-      return;
-    }
-
-    trackData.status = 'fulfilled';
-    trackData.blob = data;
   };
 }
