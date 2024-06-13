@@ -10,7 +10,7 @@ import {
   useAudioEditorManager,
   useHandleTimeSeek,
 } from '@/entities/audio-editor';
-import { FadePoint, TrackWaveform } from '@/entities/track';
+import { FadeOverlay, TrackWaveform } from '@/entities/track';
 
 import { ChannelListItemView } from '@/features/channel-control';
 import { TimelineScrollView } from '@/features/timeline';
@@ -96,12 +96,12 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   disableInteractive
                   hideTitle
                 >
-                  <FadePoint
+                  <FadeOverlay
                     className='absolute top-0 z-10'
                     side='left'
                     audioEditorManager={audioEditorManager}
                   />
-                  <FadePoint
+                  <FadeOverlay
                     className='absolute top-0 z-10'
                     side='right'
                     audioEditorManager={audioEditorManager}

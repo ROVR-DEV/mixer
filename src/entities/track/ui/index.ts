@@ -5,4 +5,6 @@ export * from './TrackInfoView';
 export * from './EditBadge';
 export * from './TrackTitle';
 export * from './TrackWaveform';
-export * from './FadePoint';
+export * from './FadeOverlay';
+export * from './FadeMarker';
+export * from './FadeTriangle';

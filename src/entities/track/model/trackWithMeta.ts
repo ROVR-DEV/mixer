@@ -56,6 +56,14 @@ export class TrackWithMeta<T = WaveSurfer> {
     this.audioBuffer = audioBuffer;
 
     if (audioBuffer instanceof WaveSurfer) {
+      this.trackAudioFilters = new TrackAudioFilters(audioBuffer);
+
+      this.trackAudioFilters.fadeInNode.linearFadeIn(this.startTimeOffset, 0);
+      this.trackAudioFilters.fadeOutNode.linearFadeOut(
+        this.duration - this.endTimeOffset,
+        0,
+      );
+
       audioBuffer.once('ready', () => {
         runInAction(() => {
           this.audioBufferPeaks = audioBuffer.exportPeaks();
@@ -66,11 +74,6 @@ export class TrackWithMeta<T = WaveSurfer> {
 
   initAudioElement = (src: HTMLMediaElement['src']) => {
     this.mediaElement = new Audio(src);
-    this.trackAudioFilters = new TrackAudioFilters(this.mediaElement);
-
-    // this.trackAudioFilters.fadeInEndTime = this.startTimeOffset;
-    // this.trackAudioFilters.fadeOutStartTime =
-    //   this.duration - this.endTimeOffset;
   };
 
   setChannel = (channel: Channel) => {
@@ -84,14 +87,6 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.currentStartTime = time;
     this.currentEndTime = this.currentStartTime + segmentDuration;
-
-    if (this.trackAudioFilters) {
-      this.trackAudioFilters.fadeInNode.linearFadeOut(this.startTimeOffset, 0);
-      this.trackAudioFilters.fadeOutNode.linearFadeOut(
-        this.duration - this.endTimeOffset,
-        0,
-      );
-    }
   };
 
   setStartTime = (time: number) => {
@@ -99,10 +94,6 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.currentStartTime = time;
     this.startTimeOffset = offset;
-
-    if (this.trackAudioFilters) {
-      this.trackAudioFilters.fadeInNode.linearFadeOut(this.startTimeOffset, 0);
-    }
   };
 
   setEndTime = (time: number) => {
@@ -110,12 +101,5 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.currentEndTime = time;
     this.endTimeOffset = offset;
-
-    if (this.trackAudioFilters) {
-      this.trackAudioFilters.fadeOutNode.linearFadeOut(
-        this.startTimeOffset,
-        this.duration - this.endTimeOffset,
-      );
-    }
   };
 }

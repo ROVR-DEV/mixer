@@ -9,3 +9,4 @@ export * from './useGlobalMouseMove';
 export * from './removeDragGhostImage';
 export * from './useScrollSync';
 export * from './clamp';
+export * from './preventAll';

@@ -1,2 +1,2 @@
-export * from './FadePoint';
+export * from './FadeMarker';
 export * from './interfaces';
