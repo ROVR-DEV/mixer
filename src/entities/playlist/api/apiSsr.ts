@@ -1,7 +1,7 @@
 import { responseToJsonData, responseErrorToData } from '@/shared/lib';
 
 import { convertPlaylistToDto } from '../lib';
-import { PlaylistDTO } from '../model';
+import { Playlist, PlaylistDTO } from '../model';
 
 export const getPlaylist = async (
   id: string,
@@ -14,7 +14,7 @@ export const getPlaylist = async (
     const jsonData = await responseToJsonData(res);
     return {
       ...jsonData,
-      data: jsonData.data ? convertPlaylistToDto(jsonData.data) : undefined,
+      data: convertPlaylistToDto(jsonData.data as Playlist),
     };
   } catch (error) {
     return responseErrorToData(error as Error);

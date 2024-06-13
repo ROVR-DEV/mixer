@@ -6,3 +6,5 @@ import { HomePage } from '@/flat-pages/home-page';
 export default function Home({ searchParams }: PageProps) {
   return <HomePage searchParams={searchParams} />;
 }
+
+export const dynamic = 'force-dynamic';
