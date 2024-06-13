@@ -12,7 +12,10 @@ export const getPlaylist = async (
     });
 
     const jsonData = await responseToJsonData(res);
-    return { ...jsonData, data: convertPlaylistToDto(jsonData.data) };
+    return {
+      ...jsonData,
+      data: jsonData.data ? convertPlaylistToDto(jsonData.data) : undefined,
+    };
   } catch (error) {
     return responseErrorToData(error as Error);
   }
