@@ -6,7 +6,8 @@ export const responseToBlobData = async (res: Response) => ({
 });
 
 export const responseToJsonData = async (res: Response) => ({
-  data: await res.json(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: (await res.json()) as unknown as any,
   error: undefined,
 });
 
