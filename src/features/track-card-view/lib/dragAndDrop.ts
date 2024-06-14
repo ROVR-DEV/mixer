@@ -2,11 +2,6 @@ import { removeDragGhostImage } from '@/shared/lib';
 
 export const setDragSettings = (e: React.DragEvent<HTMLDivElement>) => {
   removeDragGhostImage(e);
-
-  e.dataTransfer.dropEffect = 'move';
-  e.dataTransfer.effectAllowed = 'move';
-
-  e.currentTarget.style.cursor = 'pointer';
 };
 
 export const setDragProperties = (
@@ -20,6 +15,7 @@ export const setDragProperties = (
   e.currentTarget.dataset.rightBound = `${Infinity}`;
 
   e.currentTarget.style.zIndex = '10';
+  e.currentTarget.style.cursor = 'pointer';
 };
 
 export const clearDragProperties = (e: React.DragEvent<HTMLDivElement>) => {
@@ -30,4 +26,5 @@ export const clearDragProperties = (e: React.DragEvent<HTMLDivElement>) => {
   e.currentTarget.dataset.rightBound = '';
   e.currentTarget.style.zIndex = '';
   e.currentTarget.style.top = '';
+  e.currentTarget.style.cursor = '';
 };

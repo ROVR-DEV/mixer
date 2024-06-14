@@ -14,8 +14,9 @@ import { FadeTriangleMemoized } from '../FadeTriangle';
 import { FadeOverlayProps } from './interfaces';
 
 export const FadeOverlay = observer(function FadePoint({
-  audioEditorManager,
+  track,
   side,
+  hideStick,
   className,
   ...props
 }: FadeOverlayProps) {
@@ -23,7 +24,7 @@ export const FadeOverlay = observer(function FadePoint({
 
   const { position, fadeMarkerProps } = useFadeMarker({
     side,
-    audioEditorManager,
+    track,
     timelineController,
   });
 
@@ -38,8 +39,9 @@ export const FadeOverlay = observer(function FadePoint({
       {...props}
     >
       <FadeMarkerMemoized
-        className='absolute top-[-5px] z-10 '
+        className='absolute top-[-5px] z-10'
         side={side}
+        hideStick={hideStick}
         {...fadeMarkerProps}
       />
       <FadeTriangleMemoized className='absolute' side={side} />

@@ -91,12 +91,25 @@ export class AudioEditorManager {
   };
 
   removeChannel = (channelId: string) => {
-    this.channels.get(channelId)?.clearTracks();
+    const channel = this.channels.get(channelId);
+
+    channel?.clearTracks((track) => {
+      if (track.uuid === this.editableTrack?.uuid) {
+        this.setEditableTrack(null);
+      } else if (track.uuid === this.selectedTrack?.uuid) {
+        this.setSelectedTrack(null);
+      }
+    });
+
+    if (this.selectedChannelId === channelId) {
+      this.setSelectedChannel(null);
+    }
+
     this.channels.delete(channelId);
     this.channelIds.remove(channelId);
   };
 
-  setSelectedChannel = (channelId: string) => {
+  setSelectedChannel = (channelId: string | null) => {
     this.selectedChannelId = channelId;
   };
 

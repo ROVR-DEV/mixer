@@ -26,7 +26,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
     return (
       <div
         className={cn(
-          'relative grid grid-rows-[18px_auto_18px] h-[84px] border border-third-dark text-third rounded-md bg-primary',
+          'relative grid grid-rows-[18px_auto_18px] h-[84px] box-content border border-third-dark text-third rounded-md bg-primary',
           className,
           {
             'bg-accent !text-primary': isSelected,

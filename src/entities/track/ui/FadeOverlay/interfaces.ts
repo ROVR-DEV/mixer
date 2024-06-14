@@ -1,7 +1,7 @@
-// eslint-disable-next-line boundaries/element-types
-import { AudioEditorManager } from '@/entities/audio-editor';
+import { TrackWithMeta } from '../../model';
 
 export interface FadeOverlayProps extends React.ComponentProps<'div'> {
-  audioEditorManager: AudioEditorManager;
+  track: TrackWithMeta | null;
   side: 'left' | 'right';
+  hideStick?: boolean;
 }

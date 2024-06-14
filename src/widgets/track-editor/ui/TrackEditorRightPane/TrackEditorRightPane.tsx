@@ -99,12 +99,12 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   <FadeOverlay
                     className='absolute top-0 z-10'
                     side='left'
-                    audioEditorManager={audioEditorManager}
+                    track={audioEditorManager.editableTrack}
                   />
                   <FadeOverlay
                     className='absolute top-0 z-10'
                     side='right'
-                    audioEditorManager={audioEditorManager}
+                    track={audioEditorManager.editableTrack}
                   />
                 </TrackCardView>
               </ChannelListItemView>

@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { clamp, cn } from '@/shared/lib';
+import { clamp, cn, preventAll } from '@/shared/lib';
 
 import {
   TIMELINE_LEFT_PADDING,
@@ -138,22 +138,18 @@ export const TrackCardView = observer(function TrackCardView({
 
   const updateTrackPosition = useCallback(
     (scroll: number, pixelsPerSecond: number, timelineClientWidth: number) => {
-      if (track.audioBuffer?.options.minPxPerSec !== pixelsPerSecond) {
-        requestAnimationFrame(() => {
-          track.audioBuffer?.setOptions({ minPxPerSec: pixelsPerSecond });
-        });
-      }
+      // TODO: performance issue
+      // if (track.audioBuffer?.options.minPxPerSec !== pixelsPerSecond) {
+      //   requestAnimationFrame(() => {
+      //     track.audioBuffer?.setOptions({ minPxPerSec: pixelsPerSecond });
+      //   });
+      // }
 
       updateTrackWidth();
       updateTrackShiftFromLeft(TIMELINE_LEFT_PADDING);
       updateTrackVisibility(scroll, pixelsPerSecond, timelineClientWidth);
     },
-    [
-      track.audioBuffer,
-      updateTrackShiftFromLeft,
-      updateTrackVisibility,
-      updateTrackWidth,
-    ],
+    [updateTrackShiftFromLeft, updateTrackVisibility, updateTrackWidth],
   );
 
   const calcNewStartTime = useCallback(
@@ -309,15 +305,6 @@ export const TrackCardView = observer(function TrackCardView({
     [adjustTracksOnPaste, audioEditorManager.channels, calcNewStartTime, track],
   );
 
-  const onDragDropPrevent = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
-      e.nativeEvent.stopImmediatePropagation();
-    },
-    [],
-  );
-
   useEffect(() => {
     if (!trackRef.current) {
       return;
@@ -360,8 +347,10 @@ export const TrackCardView = observer(function TrackCardView({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       // Prevent events
-      onDragOver={onDragDropPrevent}
-      onDrop={onDragDropPrevent}
+      onDragEnter={preventAll}
+      onDragLeave={preventAll}
+      onDragOver={preventAll}
+      onDrop={preventAll}
       {...props}
     />
   );

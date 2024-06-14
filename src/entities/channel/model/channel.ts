@@ -49,8 +49,11 @@ export class Channel {
     return this.tracks.remove(track);
   };
 
-  clearTracks = () => {
-    this.tracks.forEach((track) => track.audioBuffer?.destroy());
+  clearTracks = (onDestroy?: (track: TrackWithMeta) => void) => {
+    this.tracks.forEach((track) => {
+      track.audioBuffer?.destroy();
+      onDestroy?.(track);
+    });
     this.tracks.clear();
   };
 }

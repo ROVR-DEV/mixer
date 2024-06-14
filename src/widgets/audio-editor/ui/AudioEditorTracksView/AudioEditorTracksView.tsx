@@ -2,7 +2,7 @@
 
 import { observer } from 'mobx-react-lite';
 
-import { TrackWaveform } from '@/entities/track';
+import { FadeOverlay, TrackWaveform } from '@/entities/track';
 
 import { TrackCardView } from '@/features/track-card-view';
 
@@ -25,7 +25,20 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
             track={track}
           />
         }
-      />
+      >
+        <FadeOverlay
+          className='absolute top-0 z-10'
+          side='left'
+          hideStick
+          track={track}
+        />
+        <FadeOverlay
+          className='absolute top-0 z-10'
+          side='right'
+          hideStick
+          track={track}
+        />
+      </TrackCardView>
     );
   });
 });
