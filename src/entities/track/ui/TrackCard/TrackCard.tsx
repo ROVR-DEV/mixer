@@ -27,7 +27,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
     return (
       <div
         className={cn(
-          'relative grid grid-rows-[18px_auto_18px] h-[84px] box-content border rounded-md bg-primary',
+          'relative grid grid-rows-[18px_auto_18px] h-[84px] box-content border rounded-lg bg-primary',
           className,
           {
             'bg-accent !text-primary': isSelected,
@@ -52,7 +52,9 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         {!hideTitle && (
           <TrackTitle className='row-start-3 pl-1' track={track} />
         )}
-        <div className='absolute z-10 row-span-full size-full'>{children}</div>
+        <div className='absolute z-10 row-span-full size-full overflow-hidden rounded-lg'>
+          {children}
+        </div>
       </div>
     );
   },

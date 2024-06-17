@@ -29,13 +29,11 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         <FadeOverlay
           className='absolute top-0 z-10'
           side='left'
-          hideStick
           track={track}
         />
         <FadeOverlay
           className='absolute top-0 z-10'
           side='right'
-          hideStick
           track={track}
         />
       </TrackCardView>

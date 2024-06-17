@@ -16,7 +16,6 @@ import { FadeOverlayProps } from './interfaces';
 export const FadeOverlay = observer(function FadePoint({
   track,
   side,
-  hideStick,
   className,
   ...props
 }: FadeOverlayProps) {
@@ -41,7 +40,6 @@ export const FadeOverlay = observer(function FadePoint({
       <FadeMarkerMemoized
         className='absolute top-[-5px] z-10'
         side={side}
-        hideStick={hideStick}
         {...fadeMarkerProps}
       />
       <FadeTriangleMemoized className='absolute' side={side} />

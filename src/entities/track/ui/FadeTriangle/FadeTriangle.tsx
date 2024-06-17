@@ -14,8 +14,8 @@ export const FadeTriangle = ({
       className={cn(
         'size-full bg-third-light/40',
         {
-          '[clip-path:polygon(0%_100%,_100%_0%,_100%_100%)]': side === 'left',
-          '[clip-path:polygon(0%_100%,_0%_0%,_100%_100%)]': side === 'right',
+          '[clip-path:polygon(100%_0%,_0%_0%,_0%_100%)]': side === 'left',
+          '[clip-path:polygon(100%_0%,_0%_0%,_100%_100%)]': side === 'right',
         },
         className,
       )}
