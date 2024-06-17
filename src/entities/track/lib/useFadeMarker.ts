@@ -89,18 +89,18 @@ export const useFadeMarker = ({
       side === 'left'
         ? 0
         : Math.max(
-            track?.currentStartTime,
+            track?.visibleStartTime,
             track?.trackAudioFilters?.fadeInNode.endTime +
-              track?.currentStartTime,
+              track?.visibleStartTime,
           );
 
     const rightBound =
       side === 'right'
-        ? track?.currentEndTime
+        ? track?.visibleEndTime
         : Math.min(
-            track?.currentEndTime,
+            track?.visibleEndTime,
             track?.trackAudioFilters.fadeOutNode.startTime +
-              track?.currentStartTime,
+              track?.visibleStartTime,
           );
 
     return { leftBound, rightBound };
@@ -155,7 +155,7 @@ export const useFadeMarker = ({
 
       const time = getNewTime(e.pageX);
 
-      const trackRelativeTime = time - track?.currentStartTime;
+      const trackRelativeTime = time - track?.visibleStartTime;
 
       setFadeTime(trackRelativeTime);
       setAriaAttributes(e.currentTarget, time);

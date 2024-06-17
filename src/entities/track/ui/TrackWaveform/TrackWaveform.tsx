@@ -46,7 +46,7 @@ export const TrackWaveform = observer(function TrackWaveform({
   return (
     <WaveformMemoized
       color={color}
-      waveColor={track.channel.color ?? undefined}
+      waveColor={track.color ?? undefined}
       options={finalOptions}
       onMount={handleMount}
       {...props}

@@ -1,6 +1,3 @@
-// eslint-disable-next-line boundaries/element-types
-import { Channel } from '@/entities/channel';
-
 export const RULER_LEFT_PADDING = 5;
 
 export const TRACK_HEIGHT = 96;
@@ -9,9 +6,7 @@ export const SIDEBAR_WIDTH = 296;
 export const TIMELINE_LEFT_PADDING = RULER_LEFT_PADDING;
 export const START_PAGE_X = SIDEBAR_WIDTH;
 
-export const DEFAULT_CHANNELS = [new Channel(), new Channel()];
-
-export const CHANNEL_COLORS = [
+export const TRACK_COLORS = [
   '#C73C1E',
   '#C75A20',
   '#C87C23',

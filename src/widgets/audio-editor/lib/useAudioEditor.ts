@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useTimeLoop } from '@/shared/lib';
 
-import { AudioEditorManager, DEFAULT_CHANNELS } from '@/entities/audio-editor';
+import { AudioEditorManager } from '@/entities/audio-editor';
+import { Channel } from '@/entities/channel';
 import { PlaylistDTO } from '@/entities/playlist';
 import { TrackData, TracksManager } from '@/entities/track';
 
@@ -17,7 +18,7 @@ export const useAudioEditor = (playlist: PlaylistDTO) => {
   );
 
   const [audioEditorManager] = useState(
-    () => new AudioEditorManager(DEFAULT_CHANNELS),
+    () => new AudioEditorManager([new Channel(), new Channel()]),
   );
   const [tracksManager] = useState(() => new TracksManager(playlist.tracks));
 

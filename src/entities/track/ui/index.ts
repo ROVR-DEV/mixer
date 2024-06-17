@@ -8,3 +8,4 @@ export * from './TrackWaveform';
 export * from './FadeOverlay';
 export * from './FadeMarker';
 export * from './FadeTriangle';
+export * from './TrimMarker';

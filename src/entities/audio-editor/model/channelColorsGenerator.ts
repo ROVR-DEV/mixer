@@ -1,4 +1,4 @@
-export function* channelColorsGenerator(
+export function* trackColorsGenerator(
   colors: string[],
 ): Generator<string, string, string> {
   let currentColorIndex = 0;

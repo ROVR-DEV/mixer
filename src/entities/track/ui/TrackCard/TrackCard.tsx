@@ -48,7 +48,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         <Popover placement='bottom-start'>
           <PopoverTrigger
             className={cn(
-              'absolute hidden left-1.5 top-1.5 cursor-pointer z-20',
+              'absolute hidden items-center left-7 top-0 bottom-0 m-auto cursor-pointer z-20',
               {
                 flex: isSelected,
               },
@@ -56,7 +56,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
           >
             <EditBadge />
           </PopoverTrigger>
-          <PopoverContent className='z-20 h-[273px] w-[213px] rounded-lg border border-accent bg-primary'>
+          <PopoverContent className='z-20 w-[213px] overflow-hidden rounded-lg border border-accent bg-primary'>
             {EditPopoverContent && <EditPopoverContent />}
           </PopoverContent>
         </Popover>

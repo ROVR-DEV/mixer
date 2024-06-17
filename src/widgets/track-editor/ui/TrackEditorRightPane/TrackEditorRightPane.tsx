@@ -10,7 +10,7 @@ import {
   useAudioEditorManager,
   useHandleTimeSeek,
 } from '@/entities/audio-editor';
-import { FadeOverlay, TrackWaveform } from '@/entities/track';
+import { FadeOverlay, TrackWaveform, TrimMarker } from '@/entities/track';
 
 import { ChannelListItemView } from '@/features/channel-control';
 import { TimelineScrollView } from '@/features/timeline';
@@ -33,7 +33,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerRef,
-    startTime: audioEditorManager.editableTrack?.currentStartTime,
+    startTime: audioEditorManager.editableTrack?.visibleStartTime,
     duration: audioEditorManager.editableTrack?.duration ?? 0,
   });
 
@@ -43,7 +43,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     }
 
     timelineController.scroll =
-      audioEditorManager.editableTrack.currentStartTime;
+      audioEditorManager.editableTrack.visibleStartTime;
   }, [audioEditorManager.editableTrack, timelineController]);
 
   const handleTimeSeek = useHandleTimeSeek(
@@ -62,7 +62,8 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
           ignoreSelection
         />
       ),
-    [audioEditorManager],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [audioEditorManager.editableTrack],
   );
 
   return (
@@ -96,13 +97,23 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   disableInteractive
                   hideTitle
                 >
+                  <TrimMarker
+                    className='absolute bottom-0 left-0 z-10'
+                    side='left'
+                    track={audioEditorManager.editableTrack}
+                  />
+                  <TrimMarker
+                    className='absolute bottom-0 right-0 z-10'
+                    side='right'
+                    track={audioEditorManager.editableTrack}
+                  />
                   <FadeOverlay
-                    className='absolute top-0 z-10'
+                    className='absolute top-0 z-20'
                     side='left'
                     track={audioEditorManager.editableTrack}
                   />
                   <FadeOverlay
-                    className='absolute top-0 z-10'
+                    className='absolute top-0 z-20'
                     side='right'
                     track={audioEditorManager.editableTrack}
                   />

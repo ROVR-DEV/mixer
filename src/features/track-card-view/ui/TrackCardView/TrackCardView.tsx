@@ -9,12 +9,13 @@ import {
   TIMELINE_LEFT_PADDING,
   useTimelineController,
 } from '@/entities/audio-editor';
-import { TrackCardMemoized, TrackWithMeta } from '@/entities/track';
+import { TrackCardMemoized } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
 import { TrackEditMenu } from '@/features/track-edit-menu';
 
 import {
+  adjustTracksOnPaste,
   clearDragProperties,
   getTrackCoordinates,
   setDragProperties,
@@ -66,13 +67,13 @@ export const TrackCardView = observer(function TrackCardView({
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
     () =>
       getTrackCoordinates(
-        track.currentStartTime,
-        track.currentEndTime,
+        track.visibleStartTime,
+        track.visibleEndTime,
         timelineController.timelineContainer.pixelsPerSecond,
       ),
     [
-      track.currentStartTime,
-      track.currentEndTime,
+      track.visibleStartTime,
+      track.visibleEndTime,
       timelineController.timelineContainer.pixelsPerSecond,
     ],
   );
@@ -183,9 +184,9 @@ export const TrackCardView = observer(function TrackCardView({
 
       prevChannelId.current = track.channel.id;
 
-      setDragProperties(e, track.currentStartTime);
+      setDragProperties(e, track.visibleStartTime);
     },
-    [selectTrack, track.channel.id, track.currentStartTime, track.uuid],
+    [selectTrack, track.channel.id, track.visibleStartTime, track.uuid],
   );
 
   const handleDrag = useCallback(
@@ -222,7 +223,7 @@ export const TrackCardView = observer(function TrackCardView({
         e.currentTarget.style.top = channelOffset * 96 + 6 + 'px';
       }
 
-      if (track.currentStartTime === startTime) {
+      if (track.visibleStartTime === startTime) {
         return;
       }
 
@@ -239,50 +240,6 @@ export const TrackCardView = observer(function TrackCardView({
       track,
     ],
   );
-
-  const adjustTracksOnPaste = useCallback((track: TrackWithMeta) => {
-    track.channel.tracks.forEach((trackOnLine) => {
-      if (track.uuid === trackOnLine.uuid) {
-        return;
-      }
-
-      const trackIntersectsFull =
-        track.currentStartTime <= trackOnLine.currentStartTime &&
-        track.currentEndTime >= trackOnLine.currentEndTime;
-
-      if (trackIntersectsFull) {
-        track.channel.removeTrack(trackOnLine);
-        return;
-      }
-
-      const trackIntersectsOnStart =
-        track.currentEndTime > trackOnLine.currentStartTime &&
-        track.currentEndTime < trackOnLine.currentEndTime;
-
-      const trackIntersectsOnEnd =
-        track.currentStartTime > trackOnLine.currentStartTime &&
-        track.currentStartTime < trackOnLine.currentEndTime;
-
-      if (trackIntersectsOnStart && trackIntersectsOnEnd) {
-        const trackOnLineCopy = new TrackWithMeta(
-          trackOnLine.originalTrack,
-          trackOnLine.channel,
-        );
-
-        trackOnLineCopy.setNewStartTime(trackOnLine.currentStartTime);
-        trackOnLineCopy.setStartTime(track.currentEndTime);
-        trackOnLineCopy.setEndTime(trackOnLine.currentEndTime);
-
-        trackOnLine.setEndTime(track.currentStartTime);
-
-        track.channel.addTrack(trackOnLineCopy);
-      } else if (trackIntersectsOnStart) {
-        trackOnLine.setStartTime(track.currentEndTime);
-      } else if (trackIntersectsOnEnd) {
-        trackOnLine.setEndTime(track.currentStartTime);
-      }
-    });
-  }, []);
 
   const handleDragEnd = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -305,7 +262,7 @@ export const TrackCardView = observer(function TrackCardView({
         adjustTracksOnPaste(track);
       }
     },
-    [adjustTracksOnPaste, audioEditorManager.channels, calcNewStartTime, track],
+    [audioEditorManager.channels, calcNewStartTime, track],
   );
 
   useEffect(() => {
@@ -340,7 +297,7 @@ export const TrackCardView = observer(function TrackCardView({
     <TrackCardMemoized
       className={cn('absolute z-0', className)}
       ref={trackRef}
-      color={track.channel.color ?? undefined}
+      color={track.color ?? undefined}
       track={track.originalTrack}
       isSolo={track.channel?.isSolo}
       isSelected={isSelected}

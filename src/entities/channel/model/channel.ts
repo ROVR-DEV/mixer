@@ -2,6 +2,11 @@ import { IObservableArray, makeAutoObservable, observable } from 'mobx';
 // eslint-disable-next-line import/named
 import { v4 } from 'uuid';
 
+import {
+  TRACK_COLORS,
+  trackColorsGenerator,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
 import { Track, TrackWithMeta } from '@/entities/track';
 
@@ -15,20 +20,15 @@ export class Channel {
   isMuted: boolean = false;
   isSolo: boolean = false;
 
-  color: string | null;
+  private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
 
   tracks: IObservableArray<TrackWithMeta> = observable.array();
 
-  constructor(props: ChannelProps) {
-    this.id = props?.id || v4();
-    this.color = props?.color ?? null;
+  constructor(id: string = v4()) {
+    this.id = id;
 
     makeAutoObservable(this);
   }
-
-  setColor = (value: string | null) => {
-    this.color = value;
-  };
 
   setMuted = (value: boolean) => {
     this.isMuted = value;
@@ -48,6 +48,7 @@ export class Channel {
 
   importTrack = (track: Track) => {
     const trackWithMeta = new TrackWithMeta(track, this);
+    trackWithMeta.color = this._colorsGenerator.next().value;
     this.tracks.push(trackWithMeta);
     return trackWithMeta;
   };

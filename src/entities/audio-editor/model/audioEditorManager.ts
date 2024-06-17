@@ -3,7 +3,6 @@ import {
   ObservableMap,
   makeObservable,
   observable,
-  runInAction,
 } from 'mobx';
 
 import { clamp } from '@/shared/lib';
@@ -13,15 +12,9 @@ import { Channel } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { TrackWithMeta } from '@/entities/track';
 
-import { CHANNEL_COLORS } from '../config';
-
-import { channelColorsGenerator } from './channelColorsGenerator';
-
 export type TimeListener = (time: number) => void;
 
 export class AudioEditorManager {
-  private _colorsGenerator = channelColorsGenerator(CHANNEL_COLORS);
-
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
@@ -94,12 +87,6 @@ export class AudioEditorManager {
   };
 
   addChannel = (channel: Channel = new Channel()) => {
-    if (!channel.color) {
-      runInAction(() => {
-        channel.setColor(this._colorsGenerator.next().value);
-      });
-    }
-
     this.channels.set(channel.id, channel);
     this.channelIds.push(channel.id);
     return channel.id;
@@ -197,7 +184,7 @@ export class AudioEditorManager {
     }
 
     const isTimeInTrackRange =
-      time >= track.currentStartTime && time < track.currentEndTime;
+      time >= track.visibleStartTime && time < track.visibleEndTime;
 
     if (!isTimeInTrackRange) {
       track.audioBuffer.pause();
@@ -207,7 +194,7 @@ export class AudioEditorManager {
     const isMuted = track.channel.isMuted;
 
     if (!isMuted && !track.audioBuffer.isPlaying()) {
-      const trackTime = time - track.currentStartTime + track.startTimeOffset;
+      const trackTime = time - track.visibleStartTime + track.startTimeOffset;
       track.audioBuffer.setTime(trackTime);
       track.audioBuffer.play();
     } else if (isMuted) {

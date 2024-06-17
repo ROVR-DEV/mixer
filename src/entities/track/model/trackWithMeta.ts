@@ -23,11 +23,23 @@ export class TrackWithMeta<T = WaveSurfer> {
 
   duration: number;
 
-  currentStartTime: number;
-  currentEndTime: number;
+  startTime: number;
+  endTime: number;
+
+  visibleStartTime: number;
+  visibleEndTime: number;
 
   startTimeOffset: number;
   endTimeOffset: number;
+
+  private _color: string | null = null;
+
+  get color(): string | null {
+    return this._color;
+  }
+  set color(value: string) {
+    this._color = value;
+  }
 
   constructor(track: Track, channel: Channel, audioBuffer?: T) {
     this.channel = channel;
@@ -37,15 +49,20 @@ export class TrackWithMeta<T = WaveSurfer> {
 
     this.duration = track.end - track.start;
 
-    this.currentStartTime = track.start;
-    this.currentEndTime = track.end;
+    this.startTime = track.start;
+    this.endTime = track.end;
+
+    this.visibleStartTime = track.start;
+    this.visibleEndTime = track.end;
 
     this.startTimeOffset = 0;
     this.endTimeOffset = 0;
 
     this.uuid = v4();
 
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      color: true,
+    });
   }
 
   setAudioBuffer = (audioBuffer: T) => {
@@ -83,23 +100,26 @@ export class TrackWithMeta<T = WaveSurfer> {
   };
 
   setNewStartTime = (time: number) => {
-    const segmentDuration = this.currentEndTime - this.currentStartTime;
+    const segmentDuration = this.visibleEndTime - this.visibleStartTime;
 
-    this.currentStartTime = time;
-    this.currentEndTime = this.currentStartTime + segmentDuration;
+    this.startTime = time - this.startTimeOffset;
+    this.endTime = this.startTime + this.duration;
+
+    this.visibleStartTime = time;
+    this.visibleEndTime = this.visibleStartTime + segmentDuration;
   };
 
   setStartTime = (time: number) => {
-    const offset = time - this.currentStartTime;
+    const offset = time - this.startTime;
 
-    this.currentStartTime = time;
+    this.visibleStartTime = time;
     this.startTimeOffset = offset;
   };
 
   setEndTime = (time: number) => {
-    const offset = this.currentEndTime - time;
+    const offset = this.endTime - time;
 
-    this.currentEndTime = time;
+    this.visibleEndTime = time;
     this.endTimeOffset = offset;
   };
 }

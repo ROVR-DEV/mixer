@@ -1,1 +1,5 @@
-export type FadeSide = 'left' | 'right';
+export type Side = 'left' | 'right';
+
+export type FadeSide = Side;
+
+export type TrimSide = Side;
