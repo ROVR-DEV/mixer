@@ -17,9 +17,9 @@ export const TrackWaveform = observer(function TrackWaveform({
   ...props
 }: TrackWaveformProps) {
   const color = useMemo(() => {
-    const isSelected = ignoreSelection
-      ? false
-      : audioEditorManager.selectedTrack?.uuid === track.uuid;
+    const isSelected =
+      !ignoreSelection && audioEditorManager.selectedTrack?.uuid === track.uuid;
+
     return isSelected ? 'primary' : 'secondary';
   }, [audioEditorManager.selectedTrack?.uuid, ignoreSelection, track.uuid]);
 
@@ -46,6 +46,7 @@ export const TrackWaveform = observer(function TrackWaveform({
   return (
     <WaveformMemoized
       color={color}
+      waveColor={track.channel.color ?? undefined}
       options={finalOptions}
       onMount={handleMount}
       {...props}

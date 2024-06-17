@@ -5,7 +5,10 @@ import { TrackWithMeta } from '../../model';
 import { WaveformProps } from '../Waveform';
 
 export interface TrackWaveformProps
-  extends Omit<WaveformProps, 'ref' | 'onMount' | 'isSelected' | 'color'> {
+  extends Omit<
+    WaveformProps,
+    'ref' | 'onMount' | 'isSelected' | 'color' | 'waveColor'
+  > {
   audioEditorManager: AudioEditorManager;
   track: TrackWithMeta;
   ignoreSelection?: boolean;

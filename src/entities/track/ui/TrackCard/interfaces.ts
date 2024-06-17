@@ -6,4 +6,5 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
   isSolo?: boolean;
   waveformComponent: JSX.Element;
   hideTitle?: boolean;
+  color?: string;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 import { cn } from '@/shared/lib';
@@ -13,6 +13,7 @@ import styles from './styles.module.css';
 export const Waveform = ({
   color,
   data,
+  waveColor,
   options,
   onMount,
   className,
@@ -23,6 +24,20 @@ export const Waveform = ({
 
   const isDataExists = !!data || options?.media;
 
+  const waveformColors = useMemo(() => {
+    if (waveColor) {
+      return {
+        ...WAVEFORM_COLORS,
+        secondary: {
+          waveColor: waveColor,
+          progressColor: waveColor,
+        },
+      };
+    }
+
+    return WAVEFORM_COLORS;
+  }, [waveColor]);
+
   useEffect(() => {
     const container = containerRef.current;
 
@@ -32,7 +47,7 @@ export const Waveform = ({
 
     wavesurferRef.current = WaveSurfer.create({
       container: container,
-      ...WAVEFORM_COLORS['secondary'],
+      ...waveformColors['secondary'],
       ...options,
     });
 
@@ -63,8 +78,8 @@ export const Waveform = ({
   }, [options]);
 
   useEffect(() => {
-    wavesurferRef.current?.setOptions(WAVEFORM_COLORS[color]);
-  }, [color]);
+    wavesurferRef.current?.setOptions(waveformColors[color]);
+  }, [color, waveformColors]);
 
   return (
     <div
@@ -83,7 +98,12 @@ export const Waveform = ({
         <span className='absolute px-2'>{'Failed to load'}</span>
       )}
       {isDataExists && (
-        <div className='absolute inset-y-0 my-auto h-px w-full bg-third/40' />
+        <div
+          className='absolute inset-y-0 my-auto h-px w-full'
+          style={{
+            backgroundColor: `${waveformColors[color].waveColor}66`,
+          }}
+        />
       )}
     </div>
   );

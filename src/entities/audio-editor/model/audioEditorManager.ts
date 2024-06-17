@@ -3,6 +3,7 @@ import {
   ObservableMap,
   makeObservable,
   observable,
+  runInAction,
 } from 'mobx';
 
 import { clamp } from '@/shared/lib';
@@ -12,9 +13,15 @@ import { Channel } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { TrackWithMeta } from '@/entities/track';
 
+import { CHANNEL_COLORS } from '../config';
+
+import { channelColorsGenerator } from './channelColorsGenerator';
+
 export type TimeListener = (time: number) => void;
 
 export class AudioEditorManager {
+  private _colorsGenerator = channelColorsGenerator(CHANNEL_COLORS);
+
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
@@ -46,14 +53,15 @@ export class AudioEditorManager {
       | '_time'
       | '_listeners'
       | '_triggerAllListeners'
+      | '_colorsGenerator'
     >(this, {
-      setEditableTrack: true,
+      _colorsGenerator: false,
       _listeners: false,
       _performOnTracks: false,
       _prepareForPlay: false,
       _prepareForStop: false,
       _time: false,
-      _triggerAllListeners: true,
+      _triggerAllListeners: false,
       _updateTrackPlayState: false,
       addChannel: true,
       addListener: true,
@@ -68,6 +76,7 @@ export class AudioEditorManager {
       seekTo: true,
       selectedChannelId: true,
       selectedTrack: true,
+      setEditableTrack: true,
       setSelectedChannel: true,
       setSelectedTrack: true,
       stop: true,
@@ -85,6 +94,12 @@ export class AudioEditorManager {
   };
 
   addChannel = (channel: Channel = new Channel()) => {
+    if (!channel.color) {
+      runInAction(() => {
+        channel.setColor(this._colorsGenerator.next().value);
+      });
+    }
+
     this.channels.set(channel.id, channel);
     this.channelIds.push(channel.id);
     return channel.id;

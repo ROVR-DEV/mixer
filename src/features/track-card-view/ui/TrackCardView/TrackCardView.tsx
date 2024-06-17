@@ -337,6 +337,7 @@ export const TrackCardView = observer(function TrackCardView({
     <TrackCardMemoized
       className={cn('absolute z-0', className)}
       ref={trackRef}
+      color={track.channel.color ?? undefined}
       track={track.originalTrack}
       isSolo={track.channel?.isSolo}
       isSelected={isSelected}

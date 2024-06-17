@@ -17,6 +17,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       isSolo,
       hideTitle = false,
       waveformComponent,
+      color,
       className,
       children,
       ...props
@@ -26,14 +27,19 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
     return (
       <div
         className={cn(
-          'relative grid grid-rows-[18px_auto_18px] h-[84px] box-content border border-third-dark text-third rounded-md bg-primary',
+          'relative grid grid-rows-[18px_auto_18px] h-[84px] box-content border rounded-md bg-primary',
           className,
           {
             'bg-accent !text-primary': isSelected,
-            'border-accent': isSolo || isSelected,
+            '!border-accent': isSolo || isSelected,
+            'border-third-dark text-third': !color,
             'grid-rows-[0_auto_0]': hideTitle,
           },
         )}
+        style={{
+          color: color ?? '',
+          borderColor: color ?? '',
+        }}
         ref={ref}
         {...props}
       >

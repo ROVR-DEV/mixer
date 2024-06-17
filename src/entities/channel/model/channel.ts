@@ -5,18 +5,30 @@ import { v4 } from 'uuid';
 // eslint-disable-next-line boundaries/element-types
 import { Track, TrackWithMeta } from '@/entities/track';
 
+export type ChannelProps = {
+  id?: string;
+  color?: string;
+} | void;
+
 export class Channel {
   id: string;
   isMuted: boolean = false;
   isSolo: boolean = false;
 
+  color: string | null;
+
   tracks: IObservableArray<TrackWithMeta> = observable.array();
 
-  constructor(id?: string) {
-    this.id = id || v4();
+  constructor(props: ChannelProps) {
+    this.id = props?.id || v4();
+    this.color = props?.color ?? null;
 
     makeAutoObservable(this);
   }
+
+  setColor = (value: string | null) => {
+    this.color = value;
+  };
 
   setMuted = (value: boolean) => {
     this.isMuted = value;
