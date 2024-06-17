@@ -11,6 +11,9 @@ import {
 } from '@/entities/audio-editor';
 import { TrackCardMemoized, TrackWithMeta } from '@/entities/track';
 
+// eslint-disable-next-line boundaries/element-types
+import { TrackEditMenu } from '@/features/track-edit-menu';
+
 import {
   clearDragProperties,
   getTrackCoordinates,
@@ -342,6 +345,7 @@ export const TrackCardView = observer(function TrackCardView({
       isSolo={track.channel?.isSolo}
       isSelected={isSelected}
       onClick={handleClick}
+      editPopoverContent={TrackEditMenu}
       // Drag logic
       draggable={!disableInteractive}
       onDrag={handleDrag}

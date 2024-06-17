@@ -3,6 +3,7 @@
 import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
 
 import { EditBadge } from '../EditBadge';
 import { TrackTitle } from '../TrackTitle';
@@ -13,11 +14,12 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
   function TrackCard(
     {
       track,
+      waveformComponent,
       isSelected,
       isSolo,
-      hideTitle = false,
-      waveformComponent,
       color,
+      hideTitle = false,
+      editPopoverContent: EditPopoverContent,
       className,
       children,
       ...props
@@ -43,11 +45,22 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         ref={ref}
         {...props}
       >
-        <EditBadge
-          className={cn('absolute hidden left-1.5 top-1.5 z-10', {
-            flex: isSelected,
-          })}
-        />
+        <Popover placement='bottom-start'>
+          <PopoverTrigger
+            className={cn(
+              'absolute hidden left-1.5 top-1.5 cursor-pointer z-20',
+              {
+                flex: isSelected,
+              },
+            )}
+          >
+            <EditBadge />
+          </PopoverTrigger>
+          <PopoverContent className='z-20 h-[273px] w-[213px] rounded-lg border border-accent bg-primary'>
+            {EditPopoverContent && <EditPopoverContent />}
+          </PopoverContent>
+        </Popover>
+
         <div className='row-start-2 overflow-hidden'>{waveformComponent}</div>
         {!hideTitle && (
           <TrackTitle className='row-start-3 pl-1' track={track} />
