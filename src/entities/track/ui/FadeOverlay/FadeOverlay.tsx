@@ -32,13 +32,14 @@ export const FadeOverlay = observer(function FadePoint({
       className={cn('relative h-full', className)}
       style={{
         width: side === 'left' ? position : `calc(100% - ${position}px)`,
-        left: side === 'left' ? '' : position,
+        left: side === 'left' ? '0' : '',
+        right: side === 'right' ? '0' : '',
       }}
       onPointerOver={preventAll}
       {...props}
     >
       <FadeMarkerMemoized
-        className='absolute z-10'
+        className='absolute z-10 border border-red-500'
         side={side}
         {...fadeMarkerProps}
       />

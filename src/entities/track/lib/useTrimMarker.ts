@@ -53,8 +53,8 @@ export const useTrimMarker = ({
 
   const getBounds = useCallback(() => {
     return {
-      leftBound: track?.startTime,
-      rightBound: track?.endTime,
+      leftBound: Math.max(track?.startTime ?? 0, 0),
+      rightBound: track?.endTime ?? 0,
     };
   }, [track]);
 
@@ -118,7 +118,9 @@ export const useTrimMarker = ({
       handleMouseMove(e);
     };
 
-    const mouseUp = () => {
+    const mouseUp = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       draggingElement.current = null;
       if (track) {
         adjustTracksOnPaste(track);

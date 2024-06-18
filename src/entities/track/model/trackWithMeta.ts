@@ -3,8 +3,12 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
 
+import { clamp } from '@/shared/lib';
+
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
+
+import { getLocalBounds } from '../lib';
 
 import { Track } from './track';
 import { TrackAudioFilters } from './trackAudioFilters';
@@ -29,8 +33,16 @@ export class TrackWithMeta<T = WaveSurfer> {
   visibleStartTime: number;
   visibleEndTime: number;
 
-  startTimeOffset: number;
-  endTimeOffset: number;
+  get visibleDuration(): number {
+    return this.visibleEndTime - this.visibleStartTime;
+  }
+
+  get startTimeOffset(): number {
+    return this.visibleStartTime - this.startTime;
+  }
+  get endTimeOffset(): number {
+    return this.endTime - this.visibleEndTime;
+  }
 
   private _color: string | null = null;
 
@@ -55,13 +67,12 @@ export class TrackWithMeta<T = WaveSurfer> {
     this.visibleStartTime = track.start;
     this.visibleEndTime = track.end;
 
-    this.startTimeOffset = 0;
-    this.endTimeOffset = 0;
-
     this.uuid = v4();
 
     makeAutoObservable(this, {
       color: true,
+      startTimeOffset: true,
+      endTimeOffset: true,
     });
   }
 
@@ -100,26 +111,78 @@ export class TrackWithMeta<T = WaveSurfer> {
   };
 
   setNewStartTime = (time: number) => {
-    const segmentDuration = this.visibleEndTime - this.visibleStartTime;
+    this._updateTimeBounds(time);
+    this._updateVisibleTimeBounds(time);
+  };
 
+  setStartTime = (time: number) => {
+    this.visibleStartTime = time;
+
+    this._updateAudioFilters();
+  };
+
+  setEndTime = (time: number) => {
+    this.visibleEndTime = time;
+
+    this._updateAudioFilters();
+  };
+
+  private _updateTimeBounds = (time: number) => {
     this.startTime = time - this.startTimeOffset;
     this.endTime = this.startTime + this.duration;
+  };
 
+  private _updateVisibleTimeBounds = (time: number) => {
+    const segmentDuration = this.visibleEndTime - this.visibleStartTime;
     this.visibleStartTime = time;
     this.visibleEndTime = this.visibleStartTime + segmentDuration;
   };
 
-  setStartTime = (time: number) => {
-    const offset = time - this.startTime;
+  private _updateAudioFilters = () => {
+    if (!this.trackAudioFilters) {
+      return;
+    }
 
-    this.visibleStartTime = time;
-    this.startTimeOffset = offset;
-  };
+    const fadeInBounds = getLocalBounds(this, 'left');
 
-  setEndTime = (time: number) => {
-    const offset = this.endTime - time;
+    const newFadeInStartTime = clamp(
+      this.startTimeOffset,
+      fadeInBounds.leftBound,
+      fadeInBounds.rightBound,
+    );
 
-    this.visibleEndTime = time;
-    this.endTimeOffset = offset;
+    const newFadeInDuration =
+      clamp(
+        newFadeInStartTime + this.trackAudioFilters.fadeInNode.duration,
+        fadeInBounds.leftBound,
+        fadeInBounds.rightBound,
+      ) - newFadeInStartTime;
+
+    this.trackAudioFilters.fadeInNode.linearFadeIn(
+      newFadeInStartTime,
+      newFadeInDuration,
+    );
+
+    const fadeOutBounds = getLocalBounds(this, 'right');
+
+    const newFadeOutStartTime = clamp(
+      this.duration -
+        this.endTimeOffset -
+        this.trackAudioFilters.fadeOutNode.duration,
+      fadeOutBounds.leftBound,
+      fadeOutBounds.rightBound,
+    );
+
+    const newFadeOutDuration =
+      clamp(
+        newFadeOutStartTime + this.trackAudioFilters.fadeOutNode.duration,
+        fadeOutBounds.leftBound,
+        fadeOutBounds.rightBound,
+      ) - newFadeOutStartTime;
+
+    this.trackAudioFilters.fadeOutNode.linearFadeOut(
+      newFadeOutStartTime,
+      newFadeOutDuration,
+    );
   };
 }

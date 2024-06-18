@@ -2,12 +2,31 @@
 
 import { makeAutoObservable } from 'mobx';
 
+import { clamp } from '@/shared/lib';
+
 export class FadeFilter {
+  private _minTime: number = -Infinity;
+  private _maxTime: number = Infinity;
+
   private _startTime: number = 0;
   private _endTime: number = 0;
 
   private _startTimeValue: number = 0;
   private _endTimeValue: number = 0;
+
+  get minTime(): number {
+    return this._minTime;
+  }
+  set minTime(value: number) {
+    this._minTime = value;
+  }
+
+  get maxTime(): number {
+    return this._maxTime;
+  }
+  set maxTime(value: number) {
+    this.maxTime = value;
+  }
 
   get startTime(): number {
     return this._startTime;
@@ -23,6 +42,10 @@ export class FadeFilter {
     this._endTime = endTime;
   }
 
+  get duration(): number {
+    return this._endTime - this._startTime;
+  }
+
   get startTimeValue(): number {
     return this._startTimeValue;
   }
@@ -32,7 +55,7 @@ export class FadeFilter {
   }
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, { startTime: true, endTime: true });
   }
 
   linearFadeIn = (start: number, duration: number) => {
@@ -49,8 +72,9 @@ export class FadeFilter {
     startTimeValue: number,
     endTimeValue: number,
   ) => {
-    this.startTime = start;
-    this.endTime = start + duration;
+    this.startTime = clamp(start, this.minTime, this.maxTime);
+    this.endTime = clamp(start + duration, this.minTime, this.maxTime);
+
     this._startTimeValue = startTimeValue;
     this._endTimeValue = endTimeValue;
   };

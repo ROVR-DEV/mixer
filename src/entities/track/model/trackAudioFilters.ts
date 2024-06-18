@@ -4,18 +4,28 @@ import WaveSurfer from 'wavesurfer.js';
 import { FadeFilter } from './fadeFilter';
 
 export class TrackAudioFilters {
-  audioBuffer: WaveSurfer;
+  readonly audioBuffer: WaveSurfer;
 
-  fadeInNode: FadeFilter = new FadeFilter();
-  fadeOutNode: FadeFilter = new FadeFilter();
+  readonly fadeInNode: FadeFilter = new FadeFilter();
+  readonly fadeOutNode: FadeFilter = new FadeFilter();
 
   constructor(audioBuffer: WaveSurfer) {
     this.audioBuffer = audioBuffer;
 
+    this.audioBuffer.on('ready', this._initFilters);
     this.audioBuffer.on('timeupdate', this._process);
 
     makeAutoObservable(this);
   }
+
+  private _initFilters = () => {
+    runInAction(() => {
+      const duration = this.audioBuffer.getDuration();
+
+      this.fadeInNode.minTime = this.fadeOutNode.minTime = 0;
+      this.fadeInNode.maxTime = this.fadeOutNode.maxTime = duration;
+    });
+  };
 
   private _processFade = (time: number, fadeFilter: FadeFilter) => {
     const timeDiff = fadeFilter.endTime - fadeFilter.startTime;
