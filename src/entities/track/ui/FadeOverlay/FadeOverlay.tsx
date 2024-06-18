@@ -29,7 +29,7 @@ export const FadeOverlay = observer(function FadePoint({
 
   return (
     <div
-      className={cn('relative h-[50%]', className)}
+      className={cn('relative h-full', className)}
       style={{
         width: side === 'left' ? position : `calc(100% - ${position}px)`,
         left: side === 'left' ? '' : position,
