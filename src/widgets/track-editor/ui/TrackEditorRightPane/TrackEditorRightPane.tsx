@@ -98,12 +98,12 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   hideTitle
                 >
                   <TrimMarker
-                    className='absolute bottom-0 left-0 z-10'
+                    className='absolute bottom-0 left-0 z-20'
                     side='left'
                     track={audioEditorManager.editableTrack}
                   />
                   <TrimMarker
-                    className='absolute bottom-0 right-0 z-10'
+                    className='absolute bottom-0 right-0 z-20'
                     side='right'
                     track={audioEditorManager.editableTrack}
                   />

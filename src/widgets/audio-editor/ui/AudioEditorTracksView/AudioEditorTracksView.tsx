@@ -27,12 +27,12 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         }
       >
         <TrimMarker
-          className='absolute bottom-0 left-0 z-10'
+          className='absolute bottom-0 left-0 z-20'
           side='left'
           track={track}
         />
         <TrimMarker
-          className='absolute bottom-0 right-0 z-10'
+          className='absolute bottom-0 right-0 z-20'
           side='right'
           track={track}
         />

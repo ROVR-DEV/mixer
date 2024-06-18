@@ -1,3 +1,4 @@
+import containerQueries from '@tailwindcss/container-queries';
 import type { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
 import resolveConfig from 'tailwindcss/resolveConfig';
@@ -21,6 +22,7 @@ export const tailwindConfig: Config = {
     },
   },
   plugins: [
+    containerQueries,
     plugin(({ addUtilities }) => {
       addUtilities({
         '.font-fix': {
