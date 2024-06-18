@@ -39,7 +39,7 @@ export const FadeOverlay = observer(function FadePoint({
       {...props}
     >
       <FadeMarkerMemoized
-        className='absolute z-10 border border-red-500'
+        className='absolute z-10'
         side={side}
         {...fadeMarkerProps}
       />
