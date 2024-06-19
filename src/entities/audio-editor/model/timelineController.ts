@@ -224,6 +224,12 @@ export class TimelineController {
     return time * this.timelineContainer.pixelsPerSecond;
   };
 
+  virtualPixelsToTime = (x: number) => {
+    return this.realLocalPixelsToGlobal(
+      this.virtualToRealPixels(x - this.startPageX),
+    );
+  };
+
   private _wheelListener = (e: WheelEvent) => {
     this._wheelListeners.forEach((listener) => listener(e));
   };

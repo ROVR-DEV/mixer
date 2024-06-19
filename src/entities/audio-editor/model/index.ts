@@ -5,4 +5,4 @@ export * from './timelineController';
 export * from './timelineControllerContext';
 export * from './valueInRangeController';
 export * from './zoomController';
-export * from './channelColorsGenerator';
+export * from './trackColorsGenerator';

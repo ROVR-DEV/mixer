@@ -33,6 +33,15 @@ export class TrackWithMeta<T = WaveSurfer> {
   visibleStartTime: number;
   visibleEndTime: number;
 
+  private _isTrimming: boolean = false;
+
+  get isTrimming() {
+    return this._isTrimming;
+  }
+  set isTrimming(value: boolean) {
+    this._isTrimming = value;
+  }
+
   get visibleDuration(): number {
     return this.visibleEndTime - this.visibleStartTime;
   }
@@ -73,6 +82,7 @@ export class TrackWithMeta<T = WaveSurfer> {
       color: true,
       startTimeOffset: true,
       endTimeOffset: true,
+      isTrimming: true,
     });
   }
 

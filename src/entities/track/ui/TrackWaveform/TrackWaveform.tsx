@@ -1,8 +1,11 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+
+// eslint-disable-next-line boundaries/element-types
+import { useTimelineController } from '@/entities/audio-editor';
 
 import { DEFAULT_WAVEFORM_OPTIONS } from '../../config';
 import { WaveformMemoized } from '../Waveform';
@@ -16,6 +19,8 @@ export const TrackWaveform = observer(function TrackWaveform({
   options,
   ...props
 }: TrackWaveformProps) {
+  const timelineController = useTimelineController();
+
   const color = useMemo(() => {
     const isSelected =
       !ignoreSelection && audioEditorManager.selectedTrack?.uuid === track.uuid;
@@ -43,13 +48,41 @@ export const TrackWaveform = observer(function TrackWaveform({
     [track],
   );
 
+  useEffect(() => {
+    const currentWidth = track.audioBuffer?.options.width;
+    const newWidth = timelineController.timeToVirtualPixels(track.duration);
+
+    if (currentWidth === newWidth) {
+      return;
+    }
+
+    track.audioBuffer?.setOptions({
+      width: newWidth,
+    });
+  }, [
+    timelineController,
+    track.audioBuffer,
+    track.startTimeOffset,
+    track.endTimeOffset,
+    track.duration,
+  ]);
+
   return (
-    <WaveformMemoized
-      color={color}
-      waveColor={track.color ?? undefined}
-      options={finalOptions}
-      onMount={handleMount}
-      {...props}
-    />
+    <div
+      className='relative size-full'
+      style={{ overflow: track.isTrimming ? '' : 'hidden' }}
+    >
+      <WaveformMemoized
+        className='absolute w-full'
+        style={{
+          left: -timelineController.timeToVirtualPixels(track.startTimeOffset),
+        }}
+        color={color}
+        waveColor={track.color ?? undefined}
+        options={finalOptions}
+        onMount={handleMount}
+        {...props}
+      />
+    </div>
   );
 });

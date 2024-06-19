@@ -3,7 +3,6 @@ import { IObservableArray, makeAutoObservable, observable } from 'mobx';
 import { v4 } from 'uuid';
 
 import {
-  TRACK_COLORS,
   trackColorsGenerator,
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
@@ -15,14 +14,24 @@ export type ChannelProps = {
   color?: string;
 } | void;
 
+type TrackColorsGenerator = ReturnType<typeof trackColorsGenerator>;
+
 export class Channel {
   id: string;
   isMuted: boolean = false;
   isSolo: boolean = false;
 
-  private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
+  private _colorsGenerator: TrackColorsGenerator | null = null;
 
-  tracks: IObservableArray<TrackWithMeta> = observable.array();
+  get colorsGenerator(): TrackColorsGenerator | null {
+    return this._colorsGenerator;
+  }
+
+  set colorsGenerator(value: TrackColorsGenerator) {
+    this._colorsGenerator = value;
+  }
+
+  readonly tracks: IObservableArray<TrackWithMeta> = observable.array();
 
   constructor(id: string = v4()) {
     this.id = id;
@@ -48,7 +57,11 @@ export class Channel {
 
   importTrack = (track: Track) => {
     const trackWithMeta = new TrackWithMeta(track, this);
-    trackWithMeta.color = this._colorsGenerator.next().value;
+
+    if (this._colorsGenerator) {
+      trackWithMeta.color = this._colorsGenerator.next().value;
+    }
+
     this.tracks.push(trackWithMeta);
     return trackWithMeta;
   };
@@ -68,5 +81,9 @@ export class Channel {
       onDestroy?.(track);
     });
     this.tracks.clear();
+
+    if (this._colorsGenerator) {
+      this._colorsGenerator.next({ reset: true });
+    }
   };
 }

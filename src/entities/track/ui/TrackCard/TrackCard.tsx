@@ -29,7 +29,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
     return (
       <div
         className={cn(
-          '@container relative grid grid-rows-[18px_auto_18px] h-[84px] box-content border rounded-lg bg-primary',
+          '@container relative grid grid-rows-[18px_auto_18px] grid-cols-1 h-[84px] box-content border rounded-lg bg-primary',
           className,
           {
             'bg-accent !text-primary': isSelected,
@@ -61,7 +61,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
           </PopoverContent>
         </Popover>
 
-        <div className='row-start-2 overflow-hidden'>{waveformComponent}</div>
+        <div className='row-start-2 w-full'>{waveformComponent}</div>
         {!hideTitle && (
           <TrackTitle className='row-start-3 pl-1' track={track} />
         )}

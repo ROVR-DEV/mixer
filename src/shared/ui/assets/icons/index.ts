@@ -23,3 +23,6 @@ export { default as Cross2Icon } from './cross2.svg';
 export { default as ArrowDownIcon } from './arrow-down.svg';
 
 export { default as PlayHeadIcon } from './play-head.svg';
+
+export { default as TrimIcon } from './trim-icon.svg';
+export { default as TrimIconUrl } from './trim-icon.svg?url';

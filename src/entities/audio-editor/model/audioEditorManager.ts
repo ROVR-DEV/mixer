@@ -8,9 +8,11 @@ import {
 import { clamp } from '@/shared/lib';
 
 // eslint-disable-next-line boundaries/element-types
-import { Channel } from '@/entities/channel';
+import { Channel, TRACK_COLORS } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { TrackWithMeta } from '@/entities/track';
+
+import { trackColorsGenerator } from './trackColorsGenerator';
 
 export type TimeListener = (time: number) => void;
 
@@ -21,6 +23,8 @@ export class AudioEditorManager {
   selectedTrack: TrackWithMeta | null = null;
   editableTrack: TrackWithMeta | null = null;
   isPlaying: boolean = false;
+
+  private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
 
   private _time: number = 0;
   private _listeners: Set<TimeListener> = new Set();
@@ -87,6 +91,7 @@ export class AudioEditorManager {
   };
 
   addChannel = (channel: Channel = new Channel()) => {
+    channel.colorsGenerator = this._colorsGenerator;
     this.channels.set(channel.id, channel);
     this.channelIds.push(channel.id);
     return channel.id;

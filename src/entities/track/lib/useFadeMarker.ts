@@ -74,36 +74,13 @@ export const useFadeMarker = ({
     [side, track],
   );
 
-  const timeToPosition = useCallback(
-    (time: number) => {
-      return (
-        timelineController.realToVirtualPixels(time) +
-        timelineController.timelineLeftPadding
-      );
-    },
-    [timelineController],
-  );
-
-  const positionToTime = useCallback(
-    (pageX: number) => {
-      const time = timelineController.realLocalPixelsToGlobal(
-        timelineController.virtualToRealPixels(
-          pageX - timelineController.startPageX,
-        ),
-      );
-
-      return clampTime(time);
-    },
-    [clampTime, timelineController],
-  );
-
   const [position, setPosition] = useState(
-    timeToPosition(getMarkerStartTime()),
+    timelineController.timeToVirtualPixels(getMarkerStartTime()),
   );
 
   const updatePosition = useCallback(() => {
-    setPosition(timeToPosition(getMarkerStartTime()));
-  }, [getMarkerStartTime, timeToPosition]);
+    setPosition(timelineController.timeToVirtualPixels(getMarkerStartTime()));
+  }, [getMarkerStartTime, timelineController]);
 
   const setFade = useCallback(
     (time: number) => {
@@ -137,11 +114,10 @@ export const useFadeMarker = ({
         return;
       }
 
-      const time = positionToTime(e.pageX);
+      const time = clampTime(timelineController.virtualPixelsToTime(e.pageX));
       setFade(time);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [positionToTime, side],
+    [clampTime, setFade, timelineController, track?.trackAudioFilters],
   );
 
   const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {

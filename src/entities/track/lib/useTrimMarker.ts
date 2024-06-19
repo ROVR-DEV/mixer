@@ -75,6 +75,10 @@ export const useTrimMarker = ({
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
+      if (track && !track.isTrimming) {
+        track.isTrimming = true;
+      }
+
       const time = getNewTime(e.pageX);
 
       if (side === 'left') {
@@ -95,9 +99,12 @@ export const useTrimMarker = ({
   }, []);
 
   const handleMouseUp = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLDivElement> | MouseEvent) => {
       preventAll(e);
       draggingElement.current = null;
+      if (track && track.isTrimming) {
+        // track.isTrimming = false;
+      }
       if (track) {
         adjustTracksOnPaste(track);
       }
@@ -119,12 +126,7 @@ export const useTrimMarker = ({
     };
 
     const mouseUp = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      draggingElement.current = null;
-      if (track) {
-        adjustTracksOnPaste(track);
-      }
+      handleMouseUp(e);
     };
 
     window.addEventListener('mousemove', mouseMove);
@@ -134,7 +136,7 @@ export const useTrimMarker = ({
       window.removeEventListener('mousemove', mouseMove);
       window.removeEventListener('mouseup', mouseUp);
     };
-  }, [handleMouseMove, markerRef, track]);
+  }, [handleMouseMove, handleMouseUp, markerRef, track]);
 
   return {
     onClick: preventAll,
