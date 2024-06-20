@@ -1,27 +1,35 @@
 'use client';
 
-import { Button } from '@/shared/ui';
+import { preventAll } from '@/shared/lib';
+
+import { TrackEditMenuButton } from '../TrackEditMenuButton';
 
 import { TrackEditMenuProps } from './interfaces';
 
-export const TrackEditMenu = ({ ...props }: TrackEditMenuProps) => {
+export const TrackEditMenu = ({
+  onRename,
+  onSnapLeft,
+  onSnapRight,
+  onAddEffect,
+  ...props
+}: TrackEditMenuProps) => {
   return (
     <div
       className='flex h-max flex-col justify-between divide-y divide-accent'
       {...props}
     >
-      <Button className='min-h-[68px] rounded-none bg-transparent text-accent outline-none hover:bg-accent hover:text-primary'>
+      <TrackEditMenuButton onClick={onRename} onMouseUp={preventAll}>
         {'Rename'}
-      </Button>
-      <Button className='min-h-[68px] rounded-none bg-transparent text-accent outline-none hover:bg-accent hover:text-primary'>
+      </TrackEditMenuButton>
+      <TrackEditMenuButton onClick={onSnapLeft} onMouseUp={preventAll}>
         {'Snap left'}
-      </Button>
-      <Button className='min-h-[68px] rounded-none bg-transparent text-accent outline-none hover:bg-accent hover:text-primary'>
+      </TrackEditMenuButton>
+      <TrackEditMenuButton onClick={onSnapRight} onMouseUp={preventAll}>
         {'Snap right'}
-      </Button>
-      <Button className='min-h-[68px] rounded-none bg-transparent text-accent outline-none hover:bg-accent hover:text-primary'>
+      </TrackEditMenuButton>
+      <TrackEditMenuButton onClick={onAddEffect} onMouseUp={preventAll}>
         {'Add an effect'}
-      </Button>
+      </TrackEditMenuButton>
     </div>
   );
 };

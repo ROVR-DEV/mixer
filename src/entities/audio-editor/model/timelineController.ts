@@ -47,8 +47,19 @@ export class TimelineController {
 
   private _trackHeight: number | string = 96;
 
+  private _disableListeners: boolean = false;
+
   totalTime: number;
   startTime: number;
+
+  get disableListeners(): boolean {
+    return this._disableListeners;
+  }
+  set disableListeners(value: boolean) {
+    this._disableListeners = value;
+    this.zoomController.disableListeners = value;
+    this.scrollController.disableListeners = value;
+  }
 
   get trackHeight(): number | string {
     return this._trackHeight;
@@ -231,6 +242,10 @@ export class TimelineController {
   };
 
   private _wheelListener = (e: WheelEvent) => {
+    if (this.disableListeners) {
+      return;
+    }
+
     this._wheelListeners.forEach((listener) => listener(e));
   };
 

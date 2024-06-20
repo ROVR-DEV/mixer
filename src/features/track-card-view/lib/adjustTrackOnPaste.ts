@@ -1,45 +1,43 @@
-import { TrackWithMeta } from '@/entities/track';
+import { AudioEditorTrack } from '@/entities/track';
 
-export const adjustTracksOnPaste = (track: TrackWithMeta) => {
-  track.channel.tracks.forEach((trackOnLine) => {
-    if (track.uuid === trackOnLine.uuid) {
+export const adjustTracksOnPaste = (currentTrack: AudioEditorTrack) => {
+  currentTrack.channel.tracks.forEach((track) => {
+    if (currentTrack.uuid === track.uuid) {
       return;
     }
 
     const trackIntersectsFull =
-      track.visibleStartTime <= trackOnLine.visibleStartTime &&
-      track.visibleEndTime >= trackOnLine.visibleEndTime;
+      currentTrack.trimStartTime <= track.trimStartTime &&
+      currentTrack.trimEndTime >= track.trimEndTime;
 
     if (trackIntersectsFull) {
-      track.channel.removeTrack(trackOnLine);
+      currentTrack.channel.removeTrack(track);
       return;
     }
 
+    const startOverlapTime = currentTrack.trimEndTime - track.startTime;
+    const endOverlapTime = track.endTime - currentTrack.trimStartTime;
+
     const trackIntersectsOnStart =
-      track.visibleEndTime > trackOnLine.visibleStartTime &&
-      track.visibleEndTime < trackOnLine.visibleEndTime;
+      currentTrack.trimEndTime > track.trimStartTime &&
+      currentTrack.trimEndTime < track.trimEndTime;
 
     const trackIntersectsOnEnd =
-      track.visibleStartTime > trackOnLine.visibleStartTime &&
-      track.visibleStartTime < trackOnLine.visibleEndTime;
+      currentTrack.trimStartTime > track.trimStartTime &&
+      currentTrack.trimStartTime < track.trimEndTime;
 
     if (trackIntersectsOnStart && trackIntersectsOnEnd) {
-      const trackOnLineCopy = new TrackWithMeta(
-        trackOnLine.originalTrack,
-        trackOnLine.channel,
-      );
+      const trackCopy = new AudioEditorTrack(track.meta, track.channel);
+      trackCopy.setStartTrimDuration(startOverlapTime);
+      trackCopy.setStartTime(currentTrack.trimEndTime);
 
-      trackOnLineCopy.setNewStartTime(trackOnLine.visibleStartTime);
-      trackOnLineCopy.setStartTime(track.visibleEndTime);
-      trackOnLineCopy.setEndTime(trackOnLine.visibleEndTime);
+      track.setEndTrimDuration(endOverlapTime);
 
-      trackOnLine.setEndTime(track.visibleStartTime);
-
-      track.channel.addTrack(trackOnLineCopy);
+      currentTrack.channel.addTrack(trackCopy);
     } else if (trackIntersectsOnStart) {
-      trackOnLine.setStartTime(track.visibleEndTime);
+      track.setStartTrimDuration(startOverlapTime);
     } else if (trackIntersectsOnEnd) {
-      trackOnLine.setEndTime(track.visibleStartTime);
+      track.setEndTrimDuration(endOverlapTime);
     }
   });
 };

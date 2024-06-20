@@ -10,7 +10,7 @@ import { clamp } from '@/shared/lib';
 // eslint-disable-next-line boundaries/element-types
 import { Channel, TRACK_COLORS } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
-import { TrackWithMeta } from '@/entities/track';
+import { AudioEditorTrack } from '@/entities/track';
 
 import { trackColorsGenerator } from './trackColorsGenerator';
 
@@ -20,8 +20,8 @@ export class AudioEditorManager {
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
-  selectedTrack: TrackWithMeta | null = null;
-  editableTrack: TrackWithMeta | null = null;
+  selectedTrack: AudioEditorTrack | null = null;
+  editableTrack: AudioEditorTrack | null = null;
   isPlaying: boolean = false;
 
   private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
@@ -51,7 +51,11 @@ export class AudioEditorManager {
       | '_listeners'
       | '_triggerAllListeners'
       | '_colorsGenerator'
+      | '_isTrackIntersectsWithTime'
+      | '_updateTracksTime'
     >(this, {
+      _isTrackIntersectsWithTime: true,
+      _updateTracksTime: true,
       _colorsGenerator: false,
       _listeners: false,
       _performOnTracks: false,
@@ -120,7 +124,7 @@ export class AudioEditorManager {
     this.selectedChannelId = channelId;
   };
 
-  setSelectedTrack = (track: TrackWithMeta | null) => {
+  setSelectedTrack = (track: AudioEditorTrack | null) => {
     if (this.selectedTrack?.uuid === track?.uuid) {
       return;
     }
@@ -128,7 +132,7 @@ export class AudioEditorManager {
     this.selectedTrack = track;
   };
 
-  setEditableTrack = (track: TrackWithMeta | null) => {
+  setEditableTrack = (track: AudioEditorTrack | null) => {
     if (this.editableTrack?.uuid === track?.uuid) {
       return;
     }
@@ -160,11 +164,7 @@ export class AudioEditorManager {
 
   seekTo = (time: number) => {
     this.time = clamp(time, 0);
-
-    if (this.isPlaying) {
-      this.stop();
-      this.play();
-    }
+    this._updateTracksTime(this.time);
   };
 
   updateAudioBuffer = () => {
@@ -179,30 +179,52 @@ export class AudioEditorManager {
     });
   };
 
+  private _isTrackIntersectsWithTime = (
+    track: AudioEditorTrack,
+    time: number,
+  ) => {
+    return time >= track.trimStartTime && time < track.trimEndTime;
+  };
+
+  private _updateTracksTime = (time: number) => {
+    this.channels.forEach((channel) => {
+      channel.tracks.forEach((track) => {
+        if (!track.audioBuffer) {
+          return;
+        }
+
+        if (this._isTrackIntersectsWithTime(track, time)) {
+          const trackTime = time - track.startTime;
+          track.audioBuffer.setTime(trackTime);
+        }
+      });
+    });
+  };
+
   private _triggerAllListeners = () => {
     this._listeners.forEach((listener) => listener(this._time));
   };
 
-  private _updateTrackPlayState = (track: TrackWithMeta, time: number) => {
+  private _updateTrackPlayState = (track: AudioEditorTrack, time: number) => {
     if (!track.audioBuffer) {
       return;
     }
 
-    const isTimeInTrackRange =
-      time >= track.visibleStartTime && time < track.visibleEndTime;
-
-    if (!isTimeInTrackRange) {
-      track.audioBuffer.pause();
+    if (!this._isTrackIntersectsWithTime(track, time)) {
+      if (track.audioBuffer.isPlaying()) {
+        track.audioBuffer.pause();
+      }
       return;
     }
 
     const isMuted = track.channel.isMuted;
+    const isPlaying = track.audioBuffer.isPlaying();
 
-    if (!isMuted && !track.audioBuffer.isPlaying()) {
-      const trackTime = time - track.visibleStartTime + track.startTimeOffset;
+    if (!isMuted && !isPlaying) {
+      const trackTime = time - track.startTime;
       track.audioBuffer.setTime(trackTime);
       track.audioBuffer.play();
-    } else if (isMuted) {
+    } else if (isMuted && isPlaying) {
       track.audioBuffer.pause();
     }
   };

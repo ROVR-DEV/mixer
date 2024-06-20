@@ -19,7 +19,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       isSolo,
       color,
       hideTitle = false,
-      editPopoverContent: EditPopoverContent,
+      editPopoverContent,
       className,
       children,
       ...props
@@ -57,7 +57,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             <EditBadge />
           </PopoverTrigger>
           <PopoverContent className='z-20 w-[213px] overflow-hidden rounded-lg border border-accent bg-primary'>
-            {EditPopoverContent && <EditPopoverContent />}
+            {editPopoverContent}
           </PopoverContent>
         </Popover>
 

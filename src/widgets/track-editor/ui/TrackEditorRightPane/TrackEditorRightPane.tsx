@@ -14,7 +14,7 @@ import { FadeOverlay, TrackWaveform, TrimMarker } from '@/entities/track';
 
 import { ChannelListItemView } from '@/features/channel-control';
 import { TimelineScrollView } from '@/features/timeline';
-import { TrackCardView } from '@/features/track-card-view';
+import { AudioEditorTrackView } from '@/features/track-card-view';
 
 // eslint-disable-next-line boundaries/element-types
 import { TimelineHeader, useTimelineZoomScroll } from '@/widgets/audio-editor';
@@ -33,23 +33,11 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerRef,
-    startTime: audioEditorManager.editableTrack?.visibleStartTime,
+    startTime: audioEditorManager.editableTrack?.isTrimming
+      ? audioEditorManager.editableTrack.startTime
+      : audioEditorManager.editableTrack?.trimStartTime,
     duration: audioEditorManager.editableTrack?.duration ?? 0,
   });
-
-  useEffect(() => {
-    if (!audioEditorManager.editableTrack) {
-      return;
-    }
-
-    timelineController.scroll =
-      audioEditorManager.editableTrack.visibleStartTime;
-  }, [audioEditorManager.editableTrack, timelineController]);
-
-  const handleTimeSeek = useHandleTimeSeek(
-    audioEditorManager,
-    timelineController,
-  );
 
   const waveformComponent = useMemo(
     () =>
@@ -65,6 +53,38 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [audioEditorManager.editableTrack],
   );
+
+  const handleTimeSeek = useHandleTimeSeek(
+    audioEditorManager,
+    timelineController,
+  );
+
+  useEffect(() => {
+    if (!audioEditorManager.editableTrack) {
+      return;
+    }
+
+    if (
+      audioEditorManager.editableTrack.isTrimming &&
+      timelineController.scroll > audioEditorManager.editableTrack.trimStartTime
+    ) {
+      timelineController.scroll =
+        audioEditorManager.editableTrack.trimStartTime;
+    }
+  }, [
+    audioEditorManager.editableTrack,
+    audioEditorManager.editableTrack?.isTrimming,
+    audioEditorManager.editableTrack?.trimStartTime,
+    timelineController,
+  ]);
+
+  useEffect(() => {
+    if (!audioEditorManager.editableTrack) {
+      return;
+    }
+
+    timelineController.scroll = audioEditorManager.editableTrack.trimStartTime;
+  }, [audioEditorManager.editableTrack, timelineController]);
 
   return (
     <TimelineControllerContext.Provider value={timelineController}>
@@ -88,7 +108,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                 ignoreSelection
                 disableBorder
               >
-                <TrackCardView
+                <AudioEditorTrackView
                   className='h-[calc(100%-14px)]'
                   key={`track-${audioEditorManager.editableTrack.uuid}-editable`}
                   track={audioEditorManager.editableTrack}
@@ -117,7 +137,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                     side='right'
                     track={audioEditorManager.editableTrack}
                   />
-                </TrackCardView>
+                </AudioEditorTrackView>
               </ChannelListItemView>
             )}
           </div>

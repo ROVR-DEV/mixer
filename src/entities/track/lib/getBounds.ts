@@ -1,42 +1,39 @@
-import { Side, TrackWithMeta } from '../model';
+import { Side, AudioEditorTrack } from '../model';
 
-export const getLeftGlobalBound = <T>(track: TrackWithMeta<T>, side: Side) => {
+export const getLeftGlobalBound = (track: AudioEditorTrack, side: Side) => {
   switch (side) {
     case 'left':
       return 0;
     case 'right':
       return Math.max(
-        track.visibleStartTime,
-        (track.trackAudioFilters?.fadeInNode.endTime ?? 0) +
-          track.visibleStartTime -
-          track.startTimeOffset,
+        track.trimStartTime,
+        (track.filters?.fadeInNode.endTime ?? 0) +
+          track.trimStartTime -
+          track.startTrimDuration,
       );
     default:
       return 0;
   }
 };
 
-export const getRightGlobalBound = <T>(track: TrackWithMeta<T>, side: Side) => {
+export const getRightGlobalBound = (track: AudioEditorTrack, side: Side) => {
   switch (side) {
     case 'left':
       return Math.min(
-        track.visibleEndTime,
-        (track.trackAudioFilters?.fadeOutNode.startTime ?? 0) +
-          track.visibleStartTime -
-          track.startTimeOffset,
+        track.trimEndTime,
+        (track.filters?.fadeOutNode.startTime ?? 0) +
+          track.trimStartTime -
+          track.startTrimDuration,
       );
     case 'right':
-      return track?.visibleEndTime;
+      return track?.trimEndTime;
     default:
       return Infinity;
   }
 };
 
-export const getGlobalBounds = <T>(
-  track: TrackWithMeta<T> | null,
-  side: Side,
-) => {
-  if (!track?.trackAudioFilters) {
+export const getGlobalBounds = (track: AudioEditorTrack | null, side: Side) => {
+  if (!track?.filters) {
     return { leftBound: 0, rightBound: 0 };
   }
 
@@ -46,8 +43,8 @@ export const getGlobalBounds = <T>(
   };
 };
 
-export const getLocalBounds = <T>(track: TrackWithMeta<T>, side: Side) => {
-  if (!track?.trackAudioFilters) {
+export const getLocalBounds = (track: AudioEditorTrack, side: Side) => {
+  if (!track?.filters) {
     return { leftBound: 0, rightBound: 0 };
   }
 

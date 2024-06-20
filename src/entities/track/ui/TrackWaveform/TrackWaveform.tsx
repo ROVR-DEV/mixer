@@ -32,11 +32,11 @@ export const TrackWaveform = observer(function TrackWaveform({
     return {
       ...DEFAULT_WAVEFORM_OPTIONS,
       media: track?.mediaElement ?? undefined,
-      peaks: track.audioBufferPeaks ?? undefined,
+      peaks: track.audioPeaks ?? undefined,
       duration: track.duration,
       ...options,
     };
-  }, [options, track.audioBufferPeaks, track.duration, track?.mediaElement]);
+  }, [options, track.audioPeaks, track.duration, track?.mediaElement]);
 
   const handleMount = useCallback(
     (wavesurfer: WaveSurfer) => {
@@ -62,8 +62,8 @@ export const TrackWaveform = observer(function TrackWaveform({
   }, [
     timelineController,
     track.audioBuffer,
-    track.startTimeOffset,
-    track.endTimeOffset,
+    track.startTrimDuration,
+    track.endTrimDuration,
     track.duration,
   ]);
 
@@ -75,7 +75,9 @@ export const TrackWaveform = observer(function TrackWaveform({
       <WaveformMemoized
         className='absolute w-full'
         style={{
-          left: -timelineController.timeToVirtualPixels(track.startTimeOffset),
+          left: -timelineController.timeToVirtualPixels(
+            track.startTrimDuration,
+          ),
         }}
         color={color}
         waveColor={track.color ?? undefined}

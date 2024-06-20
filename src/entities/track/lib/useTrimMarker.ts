@@ -1,8 +1,10 @@
 'use client';
 
-import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 
+// eslint-disable-next-line boundaries/element-types
 import { clamp, preventAll } from '@/shared/lib';
+import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
 // eslint-disable-next-line boundaries/element-types
 import { TimelineController } from '@/entities/audio-editor';
@@ -10,137 +12,88 @@ import { TimelineController } from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
 
-import { TrackWithMeta, TrimSide } from '../model';
+import { AudioEditorTrack, TrimSide } from '../model';
+
+import { getTrimMarkerAriaAttributes } from './trimMarkerAria';
 
 export interface UseTrimMarkerProps {
   side: TrimSide;
-  track: TrackWithMeta | null;
+  track: AudioEditorTrack | null;
   timelineController: TimelineController;
-  markerRef: RefObject<HTMLDivElement | null>;
 }
 
 export const useTrimMarker = ({
   side,
   track,
   timelineController,
-  markerRef,
 }: UseTrimMarkerProps) => {
-  const draggingElement = useRef<EventTarget | null>(null);
-
-  const ariaAttributes = useMemo(() => {
-    return {
-      role: 'slider',
-      'aria-label': `Fade ${side === 'left' ? 'in' : 'out'}`,
-      'aria-valuemax': track?.duration,
-      'aria-valuenow': 0,
-      'aria-valuetext': `Fade ${side === 'left' ? 'in' : 'out'} for ${0} seconds}`,
-    };
-  }, [side, track?.duration]);
-
-  // const setAriaAttributes = useCallback(
-  //   (target: HTMLElement, time: number) => {
-  //     const currentTime =
-  //       side === 'left' ? time : (track?.duration ?? 0) - time;
-
-  //     target.setAttribute('aria-valuenow', currentTime.toString());
-  //     target.setAttribute(
-  //       'aria-valuetext',
-  //       `Fade ${side === 'left' ? 'in' : 'out'} for ${currentTime} seconds}`,
-  //     );
-  //   },
-  //   [side, track?.duration],
-  // );
-
-  const getBounds = useCallback(() => {
-    return {
-      leftBound: Math.max(track?.startTime ?? 0, 0),
-      rightBound: track?.endTime ?? 0,
-    };
-  }, [track]);
-
-  const getNewTime = useCallback(
-    (pageX: number) => {
-      const { leftBound, rightBound } = getBounds();
-
-      const time = timelineController.realLocalPixelsToGlobal(
-        timelineController.virtualToRealPixels(
-          pageX - timelineController.startPageX,
-        ),
-      );
-
-      return clamp(time, leftBound, rightBound);
-    },
-    [getBounds, timelineController],
+  const ariaAttributes = useMemo(
+    () =>
+      getTrimMarkerAriaAttributes(
+        track?.duration ?? 0,
+        side,
+        track?.startTrimDuration ?? 0,
+        track?.endTrimDuration ?? 0,
+      ),
+    [side, track?.duration, track?.endTrimDuration, track?.startTrimDuration],
   );
 
-  const handleMouseMove = useCallback(
+  const updateTrim = useCallback(
     (e: MouseEvent) => {
-      if (track && !track.isTrimming) {
-        track.isTrimming = true;
-      }
-
-      const time = getNewTime(e.pageX);
-
-      if (side === 'left') {
-        track?.setStartTime(time);
-      } else if (side === 'right') {
-        track?.setEndTime(time);
-      }
-
-      // setAriaAttributes(e.currentTarget, time);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getNewTime, side],
-  );
-
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    preventAll(e);
-    draggingElement.current = e.target;
-  }, []);
-
-  const handleMouseUp = useCallback(
-    (e: React.MouseEvent<HTMLDivElement> | MouseEvent) => {
-      preventAll(e);
-      draggingElement.current = null;
-      if (track && track.isTrimming) {
-        // track.isTrimming = false;
-      }
-      if (track) {
-        adjustTracksOnPaste(track);
-      }
-    },
-    [track],
-  );
-
-  useEffect(() => {
-    if (!markerRef.current) {
-      return;
-    }
-
-    const mouseMove = (e: MouseEvent) => {
-      if (!draggingElement.current) {
+      if (!track) {
         return;
       }
 
-      handleMouseMove(e);
-    };
+      requestAnimationFrame(() => {
+        const time = clamp(
+          timelineController.virtualPixelsToTime(e.pageX),
+          Math.max(track.startTime, 0),
+          track.endTime,
+        );
 
-    const mouseUp = (e: MouseEvent) => {
-      handleMouseUp(e);
-    };
+        if (side === 'left') {
+          track.setStartTrimDuration(time - track.startTime);
+        } else if (side === 'right') {
+          track.setEndTrimDuration(track.endTime - time);
+        }
+      });
+    },
+    [side, timelineController, track],
+  );
 
-    window.addEventListener('mousemove', mouseMove);
-    window.addEventListener('mouseup', mouseUp);
+  const handleDragStart = useCallback(() => {
+    if (!track) {
+      return;
+    }
 
-    return () => {
-      window.removeEventListener('mousemove', mouseMove);
-      window.removeEventListener('mouseup', mouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp, markerRef, track]);
+    track.isTrimming = true;
+  }, [track]);
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      updateTrim(e);
+    },
+    [updateTrim],
+  );
+
+  const handleMouseUp = useCallback(() => {
+    if (!track) {
+      return;
+    }
+
+    track.isTrimming = false;
+    adjustTracksOnPaste(track);
+  }, [track]);
+
+  const { onMouseDown } = useGlobalDnD({
+    onDragStart: handleDragStart,
+    onDrag: handleMouseMove,
+    onDragEnd: handleMouseUp,
+  });
 
   return {
     onClick: preventAll,
-    onMouseDown: handleMouseDown,
+    onMouseDown: onMouseDown,
     onMouseUp: handleMouseUp,
     onDrag: preventAll,
     onDragStart: preventAll,

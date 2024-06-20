@@ -40,6 +40,10 @@ export const TimelineHeader = observer(function TimelineHeader({
   const renderRuler = useAudioEditorTimelineRuler(rulerControlRef);
 
   useEffect(() => {
+    if (timelineController.disableListeners) {
+      return;
+    }
+
     renderRuler(
       timelineController.ticks,
       timelineController.zoom,
@@ -49,6 +53,7 @@ export const TimelineHeader = observer(function TimelineHeader({
     );
   }, [
     renderRuler,
+    timelineController.disableListeners,
     timelineController.scroll,
     timelineController.ticks,
     timelineController.timelineContainer.pixelsPerSecond,

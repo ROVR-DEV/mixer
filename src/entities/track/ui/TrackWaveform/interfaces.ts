@@ -1,7 +1,7 @@
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorManager } from '@/entities/audio-editor';
 
-import { TrackWithMeta } from '../../model';
+import { AudioEditorTrack } from '../../model';
 import { WaveformProps } from '../Waveform';
 
 export interface TrackWaveformProps
@@ -10,6 +10,6 @@ export interface TrackWaveformProps
     'ref' | 'onMount' | 'isSelected' | 'color' | 'waveColor'
   > {
   audioEditorManager: AudioEditorManager;
-  track: TrackWithMeta;
+  track: AudioEditorTrack;
   ignoreSelection?: boolean;
 }

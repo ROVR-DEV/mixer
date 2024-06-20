@@ -45,13 +45,13 @@ export const useAudioEditor = (playlist: PlaylistDTO) => {
 
       audioEditorManager.channels.forEach((channel) => {
         const currentTrack = channel.tracks.find(
-          (track) => track.originalTrack.uuid === trackData.uuid,
+          (track) => track.meta.uuid === trackData.uuid,
         );
         if (!currentTrack || !trackData.objectUrl) {
           return;
         }
 
-        currentTrack.initAudioElement(trackData.objectUrl);
+        currentTrack.load(trackData.objectUrl);
       });
     };
 

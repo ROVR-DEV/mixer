@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { observer } from 'mobx-react-lite';
 
 import { cn } from '@/shared/lib';
 
@@ -11,29 +11,22 @@ import { useTrimMarker } from '../../lib';
 
 import { TrimMarkerProps } from './interfaces';
 
-export const TrimMarker = ({
-  side,
-  track,
-  className,
-  ...props
-}: TrimMarkerProps) => {
-  const trimMarkerRef = useRef<HTMLDivElement | null>(null);
+export const TrimMarker = observer(
+  ({ side, track, className, ...props }: TrimMarkerProps) => {
+    const timelineController = useTimelineController();
 
-  const timelineController = useTimelineController();
+    const trimMarkerProps = useTrimMarker({
+      side,
+      timelineController,
+      track,
+    });
 
-  const trimMarkerProps = useTrimMarker({
-    side,
-    timelineController,
-    track,
-    markerRef: trimMarkerRef,
-  });
-
-  return (
-    <div
-      className={cn('h-1/2 w-4 bg-transparent cursor-col-resize', className)}
-      ref={trimMarkerRef}
-      {...trimMarkerProps}
-      {...props}
-    />
-  );
-};
+    return (
+      <div
+        className={cn('h-1/2 w-4 bg-transparent cursor-col-resize', className)}
+        {...trimMarkerProps}
+        {...props}
+      />
+    );
+  },
+);

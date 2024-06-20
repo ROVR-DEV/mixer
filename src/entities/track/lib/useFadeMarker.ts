@@ -1,5 +1,6 @@
 'use client';
 
+import { throttle } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
@@ -14,16 +15,38 @@ import {
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
 
-import { FadeSide, TrackWithMeta } from '../model';
+import { FadeSide, AudioEditorTrack, Side } from '../model';
 
-import { getFadeMarkerStartAriaAttributes } from './fadeMarkerAria';
+import { getFadeMarkerAriaAttributes } from './fadeMarkerAria';
 import { getGlobalBounds } from './getBounds';
 
 export interface UseFadeMarkerProps {
   side: FadeSide;
-  track: TrackWithMeta | null;
+  track: AudioEditorTrack | null;
   timelineController: TimelineController;
 }
+
+const setFade = throttle(
+  (track: AudioEditorTrack, time: number, side: Side) => {
+    if (!track?.filters) {
+      throw new Error('Editable track not found');
+    }
+
+    const trackRelativeTime = time - track.startTime;
+
+    if (side === 'left') {
+      track?.filters.fadeInNode.linearFadeIn(
+        track.startTrimDuration,
+        trackRelativeTime - track.startTrimDuration,
+      );
+    } else if (side === 'right') {
+      track?.filters.fadeOutNode.linearFadeOut(
+        trackRelativeTime,
+        track.duration - track.endTrimDuration - trackRelativeTime,
+      );
+    }
+  },
+);
 
 export const useFadeMarker = ({
   side,
@@ -36,10 +59,10 @@ export const useFadeMarker = ({
   const getMarkerStartTime = useCallback(
     () =>
       side === 'left'
-        ? (track?.trackAudioFilters?.fadeInNode.endTime ?? 0) -
-          (track?.startTimeOffset ?? 0)
-        : (track?.trackAudioFilters?.fadeOutNode.startTime ?? 0) -
-          (track?.startTimeOffset ?? 0),
+        ? (track?.filters?.fadeInNode.endTime ?? 0) -
+          (track?.startTrimDuration ?? 0)
+        : (track?.filters?.fadeOutNode.startTime ?? 0) -
+          (track?.startTrimDuration ?? 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [side],
   );
@@ -49,21 +72,17 @@ export const useFadeMarker = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       getMarkerStartTime,
-      track?.trackAudioFilters?.fadeInNode.endTime,
-      track?.trackAudioFilters?.fadeOutNode.startTime,
-      track?.startTimeOffset,
-      track?.endTimeOffset,
+      track?.filters?.fadeInNode.endTime,
+      track?.filters?.fadeOutNode.startTime,
+      track?.startTrimDuration,
+      track?.endTrimDuration,
     ],
   );
 
   const ariaAttributes = useMemo(
     () =>
-      getFadeMarkerStartAriaAttributes(
-        track?.visibleDuration ?? 0,
-        side,
-        currentTime,
-      ),
-    [currentTime, side, track?.visibleDuration],
+      getFadeMarkerAriaAttributes(track?.trimDuration ?? 0, side, currentTime),
+    [currentTime, side, track?.trimDuration],
   );
 
   const clampTime = useCallback(
@@ -82,42 +101,18 @@ export const useFadeMarker = ({
     setPosition(timelineController.timeToVirtualPixels(getMarkerStartTime()));
   }, [getMarkerStartTime, timelineController]);
 
-  const setFade = useCallback(
-    (time: number) => {
-      if (!track?.trackAudioFilters) {
-        throw new Error('Editable track not found');
-      }
-
-      const trackRelativeTime = time - track.startTime;
-
-      if (side === 'left') {
-        track?.trackAudioFilters.fadeInNode.linearFadeIn(
-          track.startTimeOffset,
-          trackRelativeTime - track.startTimeOffset,
-        );
-      } else if (side === 'right') {
-        track?.trackAudioFilters.fadeOutNode.linearFadeOut(
-          trackRelativeTime,
-          track.duration - track.endTimeOffset - trackRelativeTime,
-        );
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [side],
-  );
-
   const handleDrag = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.stopPropagation();
 
-      if (!track?.trackAudioFilters) {
+      if (!track?.filters) {
         return;
       }
 
       const time = clampTime(timelineController.virtualPixelsToTime(e.pageX));
-      setFade(time);
+      setFade(track, time, side);
     },
-    [clampTime, setFade, timelineController, track?.trackAudioFilters],
+    [clampTime, side, timelineController, track],
   );
 
   const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -136,8 +131,8 @@ export const useFadeMarker = ({
   useEffect(() => {
     updatePosition();
   }, [
-    track?.trackAudioFilters?.fadeInNode.endTime,
-    track?.trackAudioFilters?.fadeOutNode.startTime,
+    track?.filters?.fadeInNode.endTime,
+    track?.filters?.fadeOutNode.startTime,
     updatePosition,
   ]);
 

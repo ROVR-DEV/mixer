@@ -7,7 +7,7 @@ import {
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
-import { Track, TrackWithMeta } from '@/entities/track';
+import { Track, AudioEditorTrack } from '@/entities/track';
 
 export type ChannelProps = {
   id?: string;
@@ -31,7 +31,7 @@ export class Channel {
     this._colorsGenerator = value;
   }
 
-  readonly tracks: IObservableArray<TrackWithMeta> = observable.array();
+  readonly tracks: IObservableArray<AudioEditorTrack> = observable.array();
 
   constructor(id: string = v4()) {
     this.id = id;
@@ -56,7 +56,7 @@ export class Channel {
   };
 
   importTrack = (track: Track) => {
-    const trackWithMeta = new TrackWithMeta(track, this);
+    const trackWithMeta = new AudioEditorTrack(track, this);
 
     if (this._colorsGenerator) {
       trackWithMeta.color = this._colorsGenerator.next().value;
@@ -66,16 +66,16 @@ export class Channel {
     return trackWithMeta;
   };
 
-  addTrack = (track: TrackWithMeta) => {
+  addTrack = (track: AudioEditorTrack) => {
     track.channel = this;
     this.tracks.push(track);
   };
 
-  removeTrack = (track: TrackWithMeta) => {
+  removeTrack = (track: AudioEditorTrack) => {
     return this.tracks.remove(track);
   };
 
-  clearTracks = (onDestroy?: (track: TrackWithMeta) => void) => {
+  clearTracks = (onDestroy?: (track: AudioEditorTrack) => void) => {
     this.tracks.forEach((track) => {
       track.audioBuffer?.destroy();
       onDestroy?.(track);

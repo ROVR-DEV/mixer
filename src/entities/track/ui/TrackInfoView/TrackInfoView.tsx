@@ -16,7 +16,7 @@ export const TrackInfoView = observer(function TrackInfoView({
 
   return (
     <TrackInfo
-      track={audioEditorManager.selectedTrack?.originalTrack ?? null}
+      track={audioEditorManager.selectedTrack?.meta ?? null}
       {...props}
     />
   );

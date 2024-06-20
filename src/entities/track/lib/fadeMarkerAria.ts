@@ -1,6 +1,6 @@
 import { Side } from '../model';
 
-export const getFadeMarkerStartAriaAttributes = (
+export const getFadeMarkerAriaAttributes = (
   trackDuration: number,
   side: Side,
   time: number,

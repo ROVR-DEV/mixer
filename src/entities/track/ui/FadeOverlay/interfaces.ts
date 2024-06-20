@@ -1,6 +1,6 @@
-import { TrackWithMeta } from '../../model';
+import { AudioEditorTrack } from '../../model';
 
 export interface FadeOverlayProps extends React.ComponentProps<'div'> {
-  track: TrackWithMeta | null;
+  track: AudioEditorTrack | null;
   side: 'left' | 'right';
 }

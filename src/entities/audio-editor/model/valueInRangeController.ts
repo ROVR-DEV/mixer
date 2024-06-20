@@ -16,6 +16,8 @@ export class ValueInRangeController {
 
   private _listeners: Set<ValueInRangeListener> = new Set();
 
+  private _disableListeners: boolean = false;
+
   constructor(
     step: number,
     min: number,
@@ -38,6 +40,13 @@ export class ValueInRangeController {
   set value(value: number) {
     this._value = this._clamp(value);
     this._triggerAllListeners();
+  }
+
+  get disableListeners(): boolean {
+    return this._disableListeners;
+  }
+  set disableListeners(value: boolean) {
+    this._disableListeners = value;
   }
 
   get min() {
@@ -93,6 +102,10 @@ export class ValueInRangeController {
   };
 
   private _triggerAllListeners = () => {
+    if (this.disableListeners) {
+      return;
+    }
+
     this._listeners.forEach((listener) => listener(this._value));
   };
 

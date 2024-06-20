@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { Track } from '../../model';
 
 export interface TrackCardProps extends React.ComponentProps<'div'> {
@@ -7,7 +9,5 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
   isSolo?: boolean;
   color?: string;
   hideTitle?: boolean;
-  editPopoverContent?: <T extends React.ComponentProps<'div'>>(
-    props: T,
-  ) => JSX.Element;
+  editPopoverContent?: ReactNode;
 }

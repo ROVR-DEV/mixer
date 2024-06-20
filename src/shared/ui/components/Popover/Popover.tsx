@@ -155,8 +155,12 @@ export const PopoverContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLProps<HTMLDivElement>
 >(function PopoverContent({ style, ...props }, propRef) {
-  const { context: floatingContext, ...context } = usePopoverContext();
+  const { context: floatingContext, setOpen, ...context } = usePopoverContext();
   const ref = useMergeRefs([context.refs.setFloating, propRef]);
+
+  const handleClick = () => {
+    setOpen(false);
+  };
 
   if (!floatingContext.open) {
     return null;
@@ -170,6 +174,7 @@ export const PopoverContent = React.forwardRef<
           style={{ ...context.floatingStyles, ...style }}
           aria-labelledby={context.labelId}
           aria-describedby={context.descriptionId}
+          onClick={handleClick}
           {...context.getFloatingProps(props)}
         >
           {props.children}

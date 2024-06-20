@@ -1,12 +1,12 @@
 import { AudioEditorManager } from '@/entities/audio-editor';
-import { TrackCardProps, TrackWithMeta } from '@/entities/track';
+import { TrackCardProps, AudioEditorTrack } from '@/entities/track';
 
-export interface TrackCardViewProps
+export interface AudioEditorTrackViewProps
   extends Omit<
     TrackCardProps,
     'ref' | 'track' | 'isSelected' | 'onTrackSelect' | 'onEdit'
   > {
   audioEditorManager: AudioEditorManager;
-  track: TrackWithMeta;
+  track: AudioEditorTrack;
   disableInteractive?: boolean;
 }

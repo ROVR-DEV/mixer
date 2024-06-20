@@ -11,3 +11,4 @@ export * from './useScrollSync';
 export * from './clamp';
 export * from './preventAll';
 export * from './useListener';
+export * from './useWindowEvent';
