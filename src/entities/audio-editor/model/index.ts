@@ -6,3 +6,4 @@ export * from './timelineControllerContext';
 export * from './valueInRangeController';
 export * from './zoomController';
 export * from './trackColorsGenerator';
+export * from './audioEditorTool';

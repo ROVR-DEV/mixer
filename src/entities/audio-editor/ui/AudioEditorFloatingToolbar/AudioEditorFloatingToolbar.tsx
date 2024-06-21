@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 import { IconButton } from '@/shared/ui';
@@ -14,14 +14,25 @@ import {
   UndoIcon,
 } from '@/shared/ui/assets';
 
+import { AUDIO_EDITOR_TOOLS } from '../../config';
 import { AudioEditorFloatingToolbarGroup } from '../AudioEditorFloatingToolbarGroup';
 
 import { AudioEditorFloatingToolbarProps } from './interfaces';
 
 export const AudioEditorFloatingToolbar = ({
+  onToolChange,
   className,
   ...props
 }: AudioEditorFloatingToolbarProps) => {
+  const handlers = useMemo(
+    () =>
+      AUDIO_EDITOR_TOOLS.reduce<Map<string, () => void>>(
+        (acc, tool) => acc.set(tool, () => onToolChange?.(tool)),
+        new Map(),
+      ),
+    [onToolChange],
+  );
+
   return (
     <div
       className={cn(
@@ -34,32 +45,36 @@ export const AudioEditorFloatingToolbar = ({
         <div className='cursor-move'>
           <MoveIcon />
         </div>
-        <IconButton variant='inverse' svgFillType='stroke'>
+        <IconButton
+          variant='inverse'
+          svgFillType='stroke'
+          onClick={handlers.get('cursor')}
+        >
           <CursorIcon />
         </IconButton>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('scissors')}>
           <ScissorsIcon />
         </IconButton>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('magnifier')}>
           <MagnifierIcon />
         </IconButton>
       </AudioEditorFloatingToolbarGroup>
       <AudioEditorFloatingToolbarGroup>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('repeat')}>
           <LoopIcon />
         </IconButton>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('fit')}>
           <FitIcon />
         </IconButton>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('magnet')}>
           <MagnetIcon />
         </IconButton>
       </AudioEditorFloatingToolbarGroup>
       <AudioEditorFloatingToolbarGroup>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('undo')}>
           <UndoIcon />
         </IconButton>
-        <IconButton variant='unstyled'>
+        <IconButton variant='unstyled' onClick={handlers.get('redo')}>
           <RedoIcon />
         </IconButton>
       </AudioEditorFloatingToolbarGroup>

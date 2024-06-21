@@ -8,6 +8,9 @@ import { clamp } from '@/shared/lib';
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
 
+// eslint-disable-next-line boundaries/element-types
+import { adjustTracksOnPaste } from '@/features/track-card-view';
+
 import { getLocalBounds } from '../lib';
 
 import { AudioFilters } from './audioFilters';
@@ -145,6 +148,35 @@ export class AudioEditorTrack {
     this.endTrimDuration = duration;
     this._updateAudioFilters();
   }
+
+  cut = (time: number) => {
+    const trackCopy = new AudioEditorTrack(this.meta, this.channel);
+    if (this.color) {
+      trackCopy.color = this.color;
+    }
+    trackCopy.load(this.mediaElement.src);
+    trackCopy.setStartTrimDuration(time - trackCopy.startTime);
+    trackCopy.setStartTime(time);
+
+    trackCopy.filters.fadeOutNode.linearFadeOut(
+      this.filters.fadeOutNode.startTime,
+      this.filters.fadeOutNode.duration,
+    );
+
+    this.filters.fadeOutNode.linearFadeOut(
+      this.duration - this.endTrimDuration,
+      0,
+    );
+
+    this.setEndTrimDuration(this.endTime - time);
+
+    this.channel.addTrack(trackCopy);
+
+    adjustTracksOnPaste(this);
+    adjustTracksOnPaste(trackCopy);
+
+    return trackCopy;
+  };
 
   private _updateAudioFilters = () => {
     if (!this.filters) {

@@ -81,7 +81,7 @@ export const Timeline = observer(function Timeline({
       ) : (
         <>
           <TimelineGridMemoized
-            className='absolute w-full'
+            className='pointer-events-none absolute w-full'
             height={gridHeight}
             controlRef={handleGridRef}
           />

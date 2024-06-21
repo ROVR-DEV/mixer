@@ -9,7 +9,27 @@ import { clamp } from './clamp';
 import { preventAll } from './preventAll';
 import { useWindowEvent } from './useWindowEvent';
 
-export type Rect = { x: number; y: number; width: number; height: number };
+export class Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+
+  get left(): number {
+    return this.x;
+  }
+
+  get right(): number {
+    return this.x + this.width;
+  }
+
+  constructor(x?: number, y?: number, width?: number, height?: number) {
+    this.x = x ?? 0;
+    this.y = y ?? 0;
+    this.width = width ?? 0;
+    this.height = height ?? 0;
+  }
+}
 
 export interface UseRectangularSelectionProps {
   ref: RefObject<HTMLDivElement>;
@@ -44,12 +64,12 @@ export const useRectangularSelection = ({
       const mouseX = clamp(x - timelineController.boundingClientRect.x, 0);
       const mouseY = clamp(y - timelineController.boundingClientRect.y, 0);
 
-      const selectionRect = {
-        x: Math.min(startX, mouseX),
-        y: Math.min(startY, mouseY),
-        width: Math.abs(startX - mouseX),
-        height: Math.abs(startY - mouseY),
-      };
+      const selectionRect = new Rect(
+        Math.min(startX, mouseX),
+        Math.min(startY, mouseY),
+        Math.abs(startX - mouseX),
+        Math.abs(startY - mouseY),
+      );
 
       requestAnimationFrame(() => {
         if (!ref.current) {
@@ -75,11 +95,16 @@ export const useRectangularSelection = ({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      preventAll(e);
-
       if (!ref.current) {
         return;
       }
+
+      if (
+        e.target !== timelineController.timelineContainer.timelineRef.current
+      ) {
+        return;
+      }
+      preventAll(e);
 
       setIsSelecting(true);
 
@@ -88,13 +113,12 @@ export const useRectangularSelection = ({
         y: e.clientY,
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ref],
   );
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      preventAll(e);
-
       if (!ref.current) {
         return;
       }
@@ -102,6 +126,7 @@ export const useRectangularSelection = ({
       if (!isSelecting) {
         return;
       }
+      preventAll(e);
 
       if (ref.current.style.display === 'none') {
         ref.current.style.display = '';
@@ -116,16 +141,20 @@ export const useRectangularSelection = ({
 
   const handleMouseUp = useCallback(
     (e: MouseEvent) => {
-      preventAll(e);
       if (!ref.current) {
         return;
       }
+      if (!isSelecting) {
+        return;
+      }
+
+      preventAll(e);
 
       setIsSelecting(false);
 
       ref.current.style.display = 'none';
     },
-    [ref],
+    [isSelecting, ref],
   );
 
   useEffect(() => {

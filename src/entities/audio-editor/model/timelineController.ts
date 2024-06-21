@@ -1,6 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
+import { Rect } from '@/shared/lib';
+
 import {
   TimelineTicks,
   getPixelPerSeconds,
@@ -49,6 +51,8 @@ export class TimelineController {
 
   private _disableListeners: boolean = false;
 
+  boundingClientRect: Rect;
+
   totalTime: number;
   startTime: number;
 
@@ -67,13 +71,6 @@ export class TimelineController {
 
   set trackHeight(trackHeight: number | string) {
     this._trackHeight = trackHeight;
-  }
-
-  get boundingClientRect(): DOMRect {
-    return (
-      this.timelineContainer.timelineRef.current?.getBoundingClientRect() ??
-      new DOMRect(0, 0, 0, 0)
-    );
   }
 
   get timelineClientWidth() {
@@ -153,6 +150,10 @@ export class TimelineController {
     this._pixelsPerSecond = this.timelineContainer.pixelsPerSecond;
 
     this._timelineLeftPadding = timelineLeftPadding;
+
+    this.boundingClientRect =
+      this.timelineContainer.timelineRef.current?.getBoundingClientRect() ??
+      new Rect(0, 0, 0, 0);
 
     this.zoomController.addListener(this._zoomListener);
     this.scrollController.addListener(this._scrollListener);
@@ -263,6 +264,10 @@ export class TimelineController {
       this._timelineClientWidth = timelineClientWidth;
       this._timelineScrollWidth = timelineScrollWidth;
       this._pixelsPerSecond = pixelsPerSecond;
+
+      this.boundingClientRect =
+        this.timelineContainer.timelineRef.current?.getBoundingClientRect() ??
+        new Rect(0, 0, 0, 0);
     });
   };
 

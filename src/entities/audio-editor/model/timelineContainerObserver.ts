@@ -1,6 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
+import { Rect } from '@/shared/lib';
+
 export type TimelineContainerSizeListener = (
   timelineClientWidth: number,
   timelineScrollWidth: number,
@@ -10,7 +12,7 @@ export type TimelineContainerSizeListener = (
 
 export class TimelineContainerObserver {
   private _timelineRef: RefObject<HTMLElement | null>;
-  private _timelineSize: DOMRect | null = null;
+  private _timelineSize: Rect | null = null;
   private _resizeObserver: ResizeObserver | null = null;
 
   private _totalTime = 0;

@@ -9,9 +9,7 @@ export const useHandleTimeSeek = (
   return useCallback(
     (e: MouseEvent | React.MouseEvent<HTMLDivElement>) =>
       audioEditorManager.seekTo(
-        timelineController.virtualPixelsToTime(
-          e.pageX - timelineController.boundingClientRect.x,
-        ),
+        timelineController.virtualPixelsToTime(e.pageX),
       ),
     [audioEditorManager, timelineController],
   );

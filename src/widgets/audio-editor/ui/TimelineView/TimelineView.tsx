@@ -12,7 +12,7 @@ import {
   useHandleTimeSeek,
 } from '@/entities/audio-editor';
 
-import { AudioEditorFloatingToolbarMemoized } from '@/features/audio-editor-floating-toolbar';
+import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
 
 import { useTimelineZoomScroll } from '../../lib';
 import { AudioEditorChannelsList } from '../AudioEditorChannelsList';
@@ -99,7 +99,10 @@ export const TimelineView = observer(function TimelineView({
               style={{ display: 'none' }}
             />
           </Timeline>
-          <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max' />
+          <AudioEditorFloatingToolbarView
+            audioEditorManager={audioEditorManager}
+            className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max'
+          />
         </div>
       </div>
       <TimelineViewFooterMemoized />

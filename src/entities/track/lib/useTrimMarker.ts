@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
 import { clamp, preventAll } from '@/shared/lib';
@@ -27,6 +27,8 @@ export const useTrimMarker = ({
   track,
   timelineController,
 }: UseTrimMarkerProps) => {
+  const trimMarkerRef = useRef<HTMLDivElement | null>(null);
+
   const ariaAttributes = useMemo(
     () =>
       getTrimMarkerAriaAttributes(
@@ -61,28 +63,51 @@ export const useTrimMarker = ({
     [side, timelineController, track],
   );
 
-  const handleDragStart = useCallback(() => {
-    if (!track) {
-      return;
-    }
+  const handleDragStart = useCallback(
+    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
+      if (!trimMarkerRef.current) {
+        return;
+      }
 
-    track.isTrimming = true;
-  }, [track]);
+      if (!track) {
+        return;
+      }
+
+      if (e.target !== trimMarkerRef.current) {
+        return;
+      }
+
+      if (!track.isTrimming) {
+        track.isTrimming = true;
+      }
+    },
+    [track],
+  );
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
+      if (!trimMarkerRef.current) {
+        return;
+      }
+
       updateTrim(e);
     },
     [updateTrim],
   );
 
   const handleMouseUp = useCallback(() => {
+    if (!trimMarkerRef.current) {
+      return;
+    }
+
     if (!track) {
       return;
     }
 
-    track.isTrimming = false;
-    adjustTracksOnPaste(track);
+    if (track.isTrimming) {
+      track.isTrimming = false;
+      adjustTracksOnPaste(track);
+    }
   }, [track]);
 
   const { onMouseDown } = useGlobalDnD({
@@ -92,6 +117,7 @@ export const useTrimMarker = ({
   });
 
   return {
+    ref: trimMarkerRef,
     onClick: preventAll,
     onMouseDown: onMouseDown,
     onMouseUp: handleMouseUp,

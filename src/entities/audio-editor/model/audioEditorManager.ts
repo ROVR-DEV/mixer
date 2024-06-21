@@ -56,16 +56,15 @@ export class AudioEditorManager {
       | '_listeners'
       | '_triggerAllListeners'
       | '_colorsGenerator'
-      | '_isTrackIntersectsWithTime'
       | '_updateTracksTime'
     >(this, {
+      isTrackIntersectsWithTime: true,
       firstSelectedTrack: true,
       isTrackSelected: true,
       unselectTrack: true,
       unselectAllTracks: true,
       selectTrack: true,
       selectedTracks: true,
-      _isTrackIntersectsWithTime: true,
       _updateTracksTime: true,
       _colorsGenerator: false,
       _listeners: false,
@@ -211,10 +210,7 @@ export class AudioEditorManager {
     });
   };
 
-  private _isTrackIntersectsWithTime = (
-    track: AudioEditorTrack,
-    time: number,
-  ) => {
+  isTrackIntersectsWithTime = (track: AudioEditorTrack, time: number) => {
     return time >= track.trimStartTime && time < track.trimEndTime;
   };
 
@@ -225,7 +221,7 @@ export class AudioEditorManager {
           return;
         }
 
-        if (this._isTrackIntersectsWithTime(track, time)) {
+        if (this.isTrackIntersectsWithTime(track, time)) {
           const trackTime = time - track.startTime;
           track.audioBuffer.setTime(trackTime);
         }
@@ -242,7 +238,7 @@ export class AudioEditorManager {
       return;
     }
 
-    if (!this._isTrackIntersectsWithTime(track, time)) {
+    if (!this.isTrackIntersectsWithTime(track, time)) {
       if (track.audioBuffer.isPlaying()) {
         track.audioBuffer.pause();
       }
