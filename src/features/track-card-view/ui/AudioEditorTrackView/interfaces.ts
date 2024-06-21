@@ -4,7 +4,7 @@ import { TrackCardProps, AudioEditorTrack } from '@/entities/track';
 export interface AudioEditorTrackViewProps
   extends Omit<
     TrackCardProps,
-    'ref' | 'track' | 'isSelected' | 'onTrackSelect' | 'onEdit'
+    'ref' | 'track' | 'isSelected' | 'onTrackSelect' | 'onEdit' | 'fullWidth'
   > {
   audioEditorManager: AudioEditorManager;
   track: AudioEditorTrack;

@@ -53,7 +53,7 @@ export const useFadeMarker = ({
   track,
   timelineController,
 }: UseFadeMarkerProps): {
-  position: number;
+  width: number;
   fadeMarkerProps: React.ComponentPropsWithoutRef<'div'>;
 } => {
   const getMarkerStartTime = useCallback(
@@ -93,13 +93,23 @@ export const useFadeMarker = ({
     [side, track],
   );
 
-  const [position, setPosition] = useState(
+  const [width, setWidth] = useState(
     timelineController.timeToVirtualPixels(getMarkerStartTime()),
   );
 
-  const updatePosition = useCallback(() => {
-    setPosition(timelineController.timeToVirtualPixels(getMarkerStartTime()));
-  }, [getMarkerStartTime, timelineController]);
+  const updateWidth = useCallback(() => {
+    if (!track) {
+      return;
+    }
+
+    const startTime = getMarkerStartTime();
+
+    setWidth(
+      timelineController.timeToVirtualPixels(
+        side === 'left' ? startTime : track.trimDuration - startTime,
+      ),
+    );
+  }, [getMarkerStartTime, side, timelineController, track]);
 
   const handleDrag = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -129,21 +139,21 @@ export const useFadeMarker = ({
   );
 
   useEffect(() => {
-    updatePosition();
+    updateWidth();
   }, [
     track?.filters?.fadeInNode.endTime,
     track?.filters?.fadeOutNode.startTime,
-    updatePosition,
+    updateWidth,
   ]);
 
   useListener(
     timelineController.zoomController.addListener,
     timelineController.zoomController.removeListener,
-    updatePosition,
+    updateWidth,
   );
 
   return {
-    position,
+    width,
     fadeMarkerProps: {
       draggable: true,
       onDrag: handleDrag,

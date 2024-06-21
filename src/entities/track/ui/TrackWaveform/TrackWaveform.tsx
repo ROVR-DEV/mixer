@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 // eslint-disable-next-line boundaries/element-types
@@ -23,6 +23,8 @@ export const TrackWaveform = observer(function TrackWaveform({
 
   const isSelectedInEditor = audioEditorManager.isTrackSelected(track);
 
+  const localAudioBufferRef = useRef<WaveSurfer | null>(null);
+
   const color = useMemo(() => {
     const isSelected = !ignoreSelection && isSelectedInEditor;
 
@@ -41,28 +43,30 @@ export const TrackWaveform = observer(function TrackWaveform({
 
   const handleMount = useCallback(
     (wavesurfer: WaveSurfer) => {
+      localAudioBufferRef.current = wavesurfer;
+
       if (track.audioBuffer) {
         return;
       }
+
       track.setAudioBuffer(wavesurfer);
     },
     [track],
   );
 
   useEffect(() => {
-    const currentWidth = track.audioBuffer?.options.width;
+    const currentWidth = localAudioBufferRef.current?.options.width;
     const newWidth = timelineController.timeToVirtualPixels(track.duration);
 
     if (currentWidth === newWidth) {
       return;
     }
 
-    track.audioBuffer?.setOptions({
+    localAudioBufferRef.current?.setOptions({
       width: newWidth,
     });
   }, [
     timelineController,
-    track.audioBuffer,
     track.startTrimDuration,
     track.endTrimDuration,
     track.duration,

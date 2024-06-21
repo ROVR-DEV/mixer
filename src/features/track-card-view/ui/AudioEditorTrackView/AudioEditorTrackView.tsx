@@ -22,6 +22,7 @@ import {
   setDragProperties,
   setDragSettings,
 } from '../../lib';
+import { TrimBackgroundView } from '../TrimBackgroundView';
 
 import { AudioEditorTrackViewProps } from './interfaces';
 import styles from './styles.module.css';
@@ -332,20 +333,9 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   }, [audioEditorManager.channels, track]);
 
   return (
-    <TrackCardMemoized
-      className={cn('absolute z-0', className)}
+    <div
       ref={trackRef}
-      color={track.color ?? undefined}
-      track={track.meta}
-      isSolo={track.channel?.isSolo}
-      isSelected={isSelected}
-      onClick={handleClick}
-      editPopoverContent={
-        <TrackEditMenu
-          onSnapLeft={handleSnapLeft}
-          onSnapRight={handleSnapRight}
-        />
-      }
+      className={cn('absolute z-0', className)}
       // Drag logic
       draggable={!disableInteractive}
       onDrag={handleDrag}
@@ -356,7 +346,23 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       onDragLeave={preventAll}
       onDragOver={preventAll}
       onDrop={preventAll}
-      {...props}
-    />
+    >
+      <TrimBackgroundView className='absolute left-0 top-0' track={track} />
+      <TrackCardMemoized
+        className='size-full'
+        color={track.color ?? undefined}
+        track={track.meta}
+        isSolo={track.channel?.isSolo}
+        isSelected={isSelected}
+        onClick={handleClick}
+        editPopoverContent={
+          <TrackEditMenu
+            onSnapLeft={handleSnapLeft}
+            onSnapRight={handleSnapRight}
+          />
+        }
+        {...props}
+      />
+    </div>
   );
 });

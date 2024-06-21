@@ -29,7 +29,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
     return (
       <div
         className={cn(
-          '@container relative grid grid-rows-[18px_auto_18px] grid-cols-1 h-[84px] box-content border rounded-lg bg-primary',
+          '@container relative grid grid-rows-[18px_auto_18px] grid-cols-1 box-content border rounded-lg bg-primary',
           className,
           {
             'bg-accent !text-primary': isSelected,
@@ -48,7 +48,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         <Popover placement='bottom-start'>
           <PopoverTrigger
             className={cn(
-              '@[128px]:left-7 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-20 transition-[left]',
+              '@[128px]:left-7 row-start-1 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-20 transition-[left]',
               {
                 '@[96px]:flex': isSelected,
               },
@@ -65,6 +65,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         {!hideTitle && (
           <TrackTitle className='row-start-3 pl-1' track={track} />
         )}
+
         <div className='absolute z-10 row-span-full size-full overflow-hidden rounded-lg'>
           {children}
         </div>

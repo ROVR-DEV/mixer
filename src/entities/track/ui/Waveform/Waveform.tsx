@@ -102,6 +102,7 @@ export const Waveform = ({
           className='absolute inset-y-0 my-auto h-px w-full'
           style={{
             backgroundColor: `${waveformColors[color].waveColor}66`,
+            width: wavesurferRef.current?.options.width,
           }}
         />
       )}

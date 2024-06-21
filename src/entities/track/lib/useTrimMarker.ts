@@ -1,5 +1,6 @@
 'use client';
 
+import { throttle } from 'lodash-es';
 import { useCallback, useMemo, useRef } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
@@ -12,7 +13,7 @@ import { TimelineController } from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
 
-import { AudioEditorTrack, TrimSide } from '../model';
+import { AudioEditorTrack, Side, TrimSide } from '../model';
 
 import { getTrimMarkerAriaAttributes } from './trimMarkerAria';
 
@@ -21,6 +22,32 @@ export interface UseTrimMarkerProps {
   track: AudioEditorTrack | null;
   timelineController: TimelineController;
 }
+
+const updateTrim = throttle(
+  (
+    e: MouseEvent,
+    track: AudioEditorTrack | null,
+    side: Side,
+    timelineController: TimelineController,
+  ) => {
+    if (!track) {
+      return;
+    }
+
+    const time = clamp(
+      timelineController.virtualPixelsToTime(e.pageX),
+      Math.max(track.startTime, 0),
+      track.endTime,
+    );
+
+    if (side === 'left') {
+      track.setStartTrimDuration(time - track.startTime);
+    } else if (side === 'right') {
+      track.setEndTrimDuration(track.endTime - time);
+    }
+  },
+  1.5,
+);
 
 export const useTrimMarker = ({
   side,
@@ -38,29 +65,6 @@ export const useTrimMarker = ({
         track?.endTrimDuration ?? 0,
       ),
     [side, track?.duration, track?.endTrimDuration, track?.startTrimDuration],
-  );
-
-  const updateTrim = useCallback(
-    (e: MouseEvent) => {
-      if (!track) {
-        return;
-      }
-
-      requestAnimationFrame(() => {
-        const time = clamp(
-          timelineController.virtualPixelsToTime(e.pageX),
-          Math.max(track.startTime, 0),
-          track.endTime,
-        );
-
-        if (side === 'left') {
-          track.setStartTrimDuration(time - track.startTime);
-        } else if (side === 'right') {
-          track.setEndTrimDuration(track.endTime - time);
-        }
-      });
-    },
-    [side, timelineController, track],
   );
 
   const handleDragStart = useCallback(
@@ -90,9 +94,9 @@ export const useTrimMarker = ({
         return;
       }
 
-      updateTrim(e);
+      updateTrim(e, track, side, timelineController);
     },
-    [updateTrim],
+    [side, timelineController, track],
   );
 
   const handleMouseUp = useCallback(() => {

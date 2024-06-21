@@ -21,7 +21,7 @@ export const FadeOverlay = observer(function FadePoint({
 }: FadeOverlayProps) {
   const timelineController = useTimelineController();
 
-  const { position, fadeMarkerProps } = useFadeMarker({
+  const { width, fadeMarkerProps } = useFadeMarker({
     side,
     track,
     timelineController,
@@ -31,7 +31,7 @@ export const FadeOverlay = observer(function FadePoint({
     <div
       className={cn('relative h-full', className)}
       style={{
-        width: side === 'left' ? position : `calc(100% - ${position}px)`,
+        width: width,
         left: side === 'left' ? '0' : '',
         right: side === 'right' ? '0' : '',
       }}
