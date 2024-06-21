@@ -69,8 +69,12 @@ export class TimelineController {
     this._trackHeight = trackHeight;
   }
 
-  startPageX: number;
-  endPageX: number;
+  get boundingClientRect(): DOMRect {
+    return (
+      this.timelineContainer.timelineRef.current?.getBoundingClientRect() ??
+      new DOMRect(0, 0, 0, 0)
+    );
+  }
 
   get timelineClientWidth() {
     return this._timelineClientWidth;
@@ -149,11 +153,6 @@ export class TimelineController {
     this._pixelsPerSecond = this.timelineContainer.pixelsPerSecond;
 
     this._timelineLeftPadding = timelineLeftPadding;
-
-    this.startPageX =
-      this.timelineContainer.timelineRef.current?.getBoundingClientRect().x ??
-      0;
-    this.endPageX = this.timelineContainer.timelineClientWidth;
 
     this.zoomController.addListener(this._zoomListener);
     this.scrollController.addListener(this._scrollListener);
@@ -237,7 +236,7 @@ export class TimelineController {
 
   virtualPixelsToTime = (x: number) => {
     return this.realLocalPixelsToGlobal(
-      this.virtualToRealPixels(x - this.startPageX),
+      this.virtualToRealPixels(x - this.boundingClientRect.x),
     );
   };
 
@@ -264,11 +263,6 @@ export class TimelineController {
       this._timelineClientWidth = timelineClientWidth;
       this._timelineScrollWidth = timelineScrollWidth;
       this._pixelsPerSecond = pixelsPerSecond;
-
-      this.startPageX =
-        this.timelineContainer.timelineRef.current?.getBoundingClientRect().x ??
-        0;
-      this.endPageX = this.timelineContainer.timelineClientWidth;
     });
   };
 

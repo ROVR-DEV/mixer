@@ -12,7 +12,7 @@ import {
 import { drawGrid, getDpi, setupCanvasAndCtx } from '../../lib';
 import { Tick } from '../../model';
 
-import { TimelineGridProps } from './interfaces';
+import { TimelineGridProps, TimelineGridRef } from './interfaces';
 
 export const TimelineGrid = ({
   height,
@@ -67,13 +67,21 @@ export const TimelineGrid = ({
     [],
   );
 
+  const finalControlRef = useRef<TimelineGridRef | null>(null);
+
   useImperativeHandle(
-    controlRef,
+    typeof controlRef === 'function' ? finalControlRef : controlRef,
     () => ({
       render,
     }),
     [render],
   );
+
+  useEffect(() => {
+    if (typeof controlRef === 'function') {
+      controlRef(finalControlRef.current);
+    }
+  }, [controlRef]);
 
   useEffect(() => {
     const recalculateDpi = () => {

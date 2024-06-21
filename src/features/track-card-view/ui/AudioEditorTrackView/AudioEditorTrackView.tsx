@@ -37,17 +37,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const timelineController = useTimelineController();
 
-  const isSelected = useMemo(
-    () =>
-      disableInteractive
-        ? false
-        : audioEditorManager.selectedTrack?.uuid === track.uuid,
-    [audioEditorManager.selectedTrack?.uuid, disableInteractive, track.uuid],
-  );
+  const isSelectedInEditor = audioEditorManager.isTrackSelected(track);
 
-  const selectTrack = useCallback(() => {
-    audioEditorManager.setSelectedTrack(track);
-  }, [audioEditorManager, track]);
+  const isSelected = useMemo(
+    () => !disableInteractive && isSelectedInEditor,
+    [disableInteractive, isSelectedInEditor],
+  );
 
   const handleEdit = useCallback(() => {
     audioEditorManager.setEditableTrack(track);
@@ -56,13 +51,14 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       preventAll(e);
-      selectTrack();
+
+      audioEditorManager.selectTrack(track, e.shiftKey);
 
       if (e.detail === 2) {
         handleEdit();
       }
     },
-    [handleEdit, selectTrack],
+    [audioEditorManager, handleEdit, track],
   );
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
@@ -177,7 +173,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      selectTrack();
+      audioEditorManager.selectTrack(track);
       setDragSettings(e);
 
       e.dataTransfer.setData('text/trackId', track.uuid);
@@ -189,7 +185,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
       track.isDragging = true;
     },
-    [selectTrack, track],
+    [audioEditorManager, track],
   );
 
   const handleDrag = useCallback(
@@ -286,18 +282,19 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       updateTrackPosition(
         timelineController.scroll,
         timelineController.timelineContainer.pixelsPerSecond,
-        timelineController.endPageX - timelineController.startPageX,
+        timelineController.boundingClientRect.right -
+          timelineController.boundingClientRect.x,
       );
 
     const animationId = requestAnimationFrame(updateTrack);
 
     return () => cancelAnimationFrame(animationId);
   }, [
-    timelineController.endPageX,
     timelineController.timelineContainer.pixelsPerSecond,
     timelineController.scroll,
-    timelineController.startPageX,
     updateTrackPosition,
+    timelineController.boundingClientRect.right,
+    timelineController.boundingClientRect.x,
   ]);
 
   const handleSnapLeft = useCallback(() => {

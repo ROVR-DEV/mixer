@@ -3,7 +3,8 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback, useRef } from 'react';
 
-import { cn, useGlobalMouseMove } from '@/shared/lib';
+import { cn, useGlobalMouseMove, useRectangularSelection } from '@/shared/lib';
+import { RectangularSelection } from '@/shared/ui';
 
 import {
   TimelineControllerContext,
@@ -32,19 +33,41 @@ export const TimelineView = observer(function TimelineView({
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
+  const rectangularSelectionRef = useRef<HTMLDivElement | null>(null);
+
   const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerWrapperRef,
     duration: playlist.duration_in_seconds,
   });
 
+  // TODO
+  // const handleSelectionChange = useCallback((rect: Rect) => {
+  //   // console.log(rect);
+  // }, []);
+
+  const { isSelecting, onMouseDown } = useRectangularSelection({
+    ref: rectangularSelectionRef,
+    timelineController,
+    // onChange: handleSelectionChange,
+  });
   const handleTimeSeek = useHandleTimeSeek(
     audioEditorManager,
     timelineController,
   );
 
+  const handleMouseUp = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isSelecting) {
+        return;
+      }
+      handleTimeSeek(e);
+    },
+    [handleTimeSeek, isSelecting],
+  );
+
   const handleClickTimeline = useCallback(() => {
-    audioEditorManager.setSelectedTrack(null);
+    audioEditorManager.unselectAllTracks();
   }, [audioEditorManager]);
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
@@ -66,9 +89,16 @@ export const TimelineView = observer(function TimelineView({
           <AudioEditorChannelsList className='min-h-max min-w-[296px] grow' />
           <Timeline
             timelineRef={timelineRef}
-            onMouseUp={handleTimeSeek}
+            onMouseUp={handleMouseUp}
+            onMouseDown={onMouseDown}
             onClick={handleClickTimeline}
-          />
+          >
+            <RectangularSelection
+              className='absolute'
+              ref={rectangularSelectionRef}
+              style={{ display: 'none' }}
+            />
+          </Timeline>
           <AudioEditorFloatingToolbarMemoized className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max' />
         </div>
       </div>

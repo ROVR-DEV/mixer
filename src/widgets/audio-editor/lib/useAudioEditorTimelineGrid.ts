@@ -8,6 +8,26 @@ import { TimelineGridRef, TimelineTicks } from '@/features/timeline';
 
 const emptyTicks = { mainTicks: [], subTicks: [] };
 
+export const renderDefaultTimelineGrid = (
+  gridRef: RefObject<TimelineGridRef>,
+  ticks: TimelineTicks | null,
+  scroll: number,
+  pixelsPerSecond: number,
+  timelineLeftPadding: number,
+) => {
+  requestAnimationFrame(() => {
+    gridRef.current?.render(
+      ticks ?? emptyTicks,
+      scroll * pixelsPerSecond,
+      timelineLeftPadding,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (resolvedTailwindConfig.theme.colors as any).grid.light,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (resolvedTailwindConfig.theme.colors as any).grid.DEFAULT,
+    );
+  });
+};
+
 export const useAudioEditorTimelineGrid = (
   gridRef: RefObject<TimelineGridRef>,
 ) => {
@@ -17,18 +37,15 @@ export const useAudioEditorTimelineGrid = (
       scroll: number,
       pixelsPerSecond: number,
       timelineLeftPadding: number,
-    ) =>
-      requestAnimationFrame(() => {
-        gridRef.current?.render(
-          ticks ?? emptyTicks,
-          scroll * pixelsPerSecond,
-          timelineLeftPadding,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (resolvedTailwindConfig.theme.colors as any).grid.light,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (resolvedTailwindConfig.theme.colors as any).grid.DEFAULT,
-        );
-      }),
+    ) => {
+      renderDefaultTimelineGrid(
+        gridRef,
+        ticks,
+        scroll,
+        pixelsPerSecond,
+        timelineLeftPadding,
+      );
+    },
     [gridRef],
   );
 };

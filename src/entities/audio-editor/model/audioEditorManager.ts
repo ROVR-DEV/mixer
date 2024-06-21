@@ -3,6 +3,7 @@ import {
   ObservableMap,
   makeObservable,
   observable,
+  values,
 } from 'mobx';
 
 import { clamp } from '@/shared/lib';
@@ -20,7 +21,7 @@ export class AudioEditorManager {
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
-  selectedTrack: AudioEditorTrack | null = null;
+  selectedTracks: ObservableMap<string, AudioEditorTrack> = observable.map();
   editableTrack: AudioEditorTrack | null = null;
   isPlaying: boolean = false;
 
@@ -36,6 +37,10 @@ export class AudioEditorManager {
   set time(time: number) {
     this._time = time;
     this._triggerAllListeners();
+  }
+
+  get firstSelectedTrack(): AudioEditorTrack | null {
+    return values(this.selectedTracks)[0];
   }
 
   constructor(channels?: Channel[]) {
@@ -54,6 +59,12 @@ export class AudioEditorManager {
       | '_isTrackIntersectsWithTime'
       | '_updateTracksTime'
     >(this, {
+      firstSelectedTrack: true,
+      isTrackSelected: true,
+      unselectTrack: true,
+      unselectAllTracks: true,
+      selectTrack: true,
+      selectedTracks: true,
       _isTrackIntersectsWithTime: true,
       _updateTracksTime: true,
       _colorsGenerator: false,
@@ -76,10 +87,8 @@ export class AudioEditorManager {
       removeListener: true,
       seekTo: true,
       selectedChannelId: true,
-      selectedTrack: true,
       setEditableTrack: true,
       setSelectedChannel: true,
-      setSelectedTrack: true,
       stop: true,
       time: false,
       updateAudioBuffer: true,
@@ -107,8 +116,8 @@ export class AudioEditorManager {
     channel?.clearTracks((track) => {
       if (track.uuid === this.editableTrack?.uuid) {
         this.setEditableTrack(null);
-      } else if (track.uuid === this.selectedTrack?.uuid) {
-        this.setSelectedTrack(null);
+      } else if (this.isTrackSelected(track)) {
+        this.unselectTrack(track);
       }
     });
 
@@ -124,12 +133,35 @@ export class AudioEditorManager {
     this.selectedChannelId = channelId;
   };
 
-  setSelectedTrack = (track: AudioEditorTrack | null) => {
-    if (this.selectedTrack?.uuid === track?.uuid) {
+  selectTrack = (track: AudioEditorTrack, multiple: boolean = false) => {
+    if (this.isTrackSelected(track)) {
+      if (multiple) {
+        this.unselectTrack(track);
+      }
       return;
     }
 
-    this.selectedTrack = track;
+    if (!multiple) {
+      this.unselectAllTracks();
+    }
+
+    this.selectedTracks.set(track.uuid, track);
+  };
+
+  unselectTrack = (track: AudioEditorTrack) => {
+    this.selectedTracks.delete(track.uuid);
+  };
+
+  unselectAllTracks = () => {
+    if (this.selectedTracks.size === 0) {
+      return;
+    }
+
+    this.selectedTracks.clear();
+  };
+
+  isTrackSelected = (track: AudioEditorTrack) => {
+    return this.selectedTracks.has(track.uuid);
   };
 
   setEditableTrack = (track: AudioEditorTrack | null) => {

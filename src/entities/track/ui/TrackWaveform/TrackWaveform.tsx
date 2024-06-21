@@ -21,12 +21,13 @@ export const TrackWaveform = observer(function TrackWaveform({
 }: TrackWaveformProps) {
   const timelineController = useTimelineController();
 
+  const isSelectedInEditor = audioEditorManager.isTrackSelected(track);
+
   const color = useMemo(() => {
-    const isSelected =
-      !ignoreSelection && audioEditorManager.selectedTrack?.uuid === track.uuid;
+    const isSelected = !ignoreSelection && isSelectedInEditor;
 
     return isSelected ? 'primary' : 'secondary';
-  }, [audioEditorManager.selectedTrack?.uuid, ignoreSelection, track.uuid]);
+  }, [ignoreSelection, isSelectedInEditor]);
 
   const finalOptions = useMemo(() => {
     return {

@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
@@ -13,13 +13,14 @@ import { useTracksManager } from '@/entities/track';
 
 import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
 
-import { useAudioEditorTimelineGrid } from '../../lib';
+import { renderDefaultTimelineGrid } from '../../lib';
 import { AudioEditorTracksList } from '../AudioEditorTracksList';
 
 import { TimelineProps } from './interfaces';
 
 export const Timeline = observer(function Timeline({
   timelineRef,
+  children,
   className,
   ...props
 }: TimelineProps) {
@@ -29,22 +30,39 @@ export const Timeline = observer(function Timeline({
 
   const gridControlRef = useRef<TimelineGridRef | null>(null);
 
-  const renderGrid = useAudioEditorTimelineGrid(gridControlRef);
+  const handleGridRef = useCallback((ref: TimelineGridRef | null) => {
+    gridControlRef.current = ref;
+    renderGrid();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  useEffect(() => {
-    renderGrid(
+  const renderGrid = useCallback(() => {
+    renderDefaultTimelineGrid(
+      gridControlRef,
       timelineController.ticks,
       timelineController.scroll,
       timelineController.timelineContainer.pixelsPerSecond,
       timelineController.timelineLeftPadding,
     );
-  }, [
-    renderGrid,
-    timelineController.scroll,
-    timelineController.ticks,
-    timelineController.timelineContainer.pixelsPerSecond,
-    timelineController.timelineLeftPadding,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const gridHeight = useMemo(
+    () =>
+      typeof timelineController.trackHeight === 'string'
+        ? timelineController.trackHeight
+        : audioEditorManager.channelIds.length * timelineController.trackHeight,
+    [audioEditorManager.channelIds.length, timelineController.trackHeight],
+  );
+
+  useEffect(() => {
+    timelineController.scrollController.addListener(renderGrid);
+    timelineController.zoomController.addListener(renderGrid);
+    return () => {
+      timelineController.scrollController.removeListener(renderGrid);
+      timelineController.zoomController.removeListener(renderGrid);
+    };
+  }, [renderGrid, timelineController]);
 
   return (
     <div
@@ -64,15 +82,11 @@ export const Timeline = observer(function Timeline({
         <>
           <TimelineGridMemoized
             className='absolute w-full'
-            height={
-              typeof timelineController.trackHeight === 'string'
-                ? timelineController.trackHeight
-                : audioEditorManager.channelIds.length *
-                  timelineController.trackHeight
-            }
-            controlRef={gridControlRef}
+            height={gridHeight}
+            controlRef={handleGridRef}
           />
           <AudioEditorTracksList audioEditorManager={audioEditorManager} />
+          {children}
         </>
       )}
     </div>

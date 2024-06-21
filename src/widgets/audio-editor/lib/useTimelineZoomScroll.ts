@@ -97,7 +97,10 @@ export const useTimelineZoomScroll = ({
         e.deltaY <= 0,
       );
 
-      const x = e.pageX - timelineController.startPageX - 5;
+      const x =
+        e.pageX -
+        timelineController.boundingClientRect.x -
+        timelineController.timelineLeftPadding;
 
       timelineController.scrollController.value = getScrollToAdjustZoomOffset(
         x,

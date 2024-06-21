@@ -12,3 +12,4 @@ export * from './clamp';
 export * from './preventAll';
 export * from './useListener';
 export * from './useWindowEvent';
+export * from './useRectangularSelection';

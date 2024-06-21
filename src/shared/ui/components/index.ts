@@ -3,3 +3,4 @@ export * from './IconButton';
 export * from './Badge';
 export * from './Version';
 export * from './Popover';
+export * from './RectangularSelection';
