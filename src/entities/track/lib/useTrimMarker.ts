@@ -1,7 +1,7 @@
 'use client';
 
 import { throttle } from 'lodash-es';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
 import { clamp, preventAll } from '@/shared/lib';
@@ -29,6 +29,7 @@ const updateTrim = throttle(
     track: AudioEditorTrack | null,
     side: Side,
     timelineController: TimelineController,
+    bounds: { left: number; right: number },
   ) => {
     if (!track) {
       return;
@@ -36,8 +37,8 @@ const updateTrim = throttle(
 
     const time = clamp(
       timelineController.virtualPixelsToTime(e.pageX),
-      Math.max(track.startTime, 0),
-      track.endTime,
+      Math.max(0, track.startTime, bounds.left),
+      Math.min(track.endTime, bounds.right),
     );
 
     if (side === 'left') {
@@ -67,6 +68,11 @@ export const useTrimMarker = ({
     [side, track?.duration, track?.endTrimDuration, track?.startTrimDuration],
   );
 
+  const [bounds, setBounds] = useState<{ left: number; right: number }>({
+    left: 0,
+    right: Infinity,
+  });
+
   const handleDragStart = useCallback(
     (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
       if (!trimMarkerRef.current) {
@@ -84,6 +90,18 @@ export const useTrimMarker = ({
       if (!track.isTrimming) {
         track.isTrimming = true;
       }
+
+      const leftTrack = track.channel.tracks.findLast(
+        (channelTrack) => channelTrack.trimEndTime < track.trimStartTime,
+      );
+      const rightTrack = track.channel.tracks.find(
+        (channelTrack) => channelTrack.trimStartTime > track.trimEndTime,
+      );
+
+      setBounds({
+        left: leftTrack?.trimEndTime ?? 0,
+        right: rightTrack?.trimStartTime ?? Infinity,
+      });
     },
     [track],
   );
@@ -94,9 +112,9 @@ export const useTrimMarker = ({
         return;
       }
 
-      updateTrim(e, track, side, timelineController);
+      updateTrim(e, track, side, timelineController, bounds);
     },
-    [side, timelineController, track],
+    [bounds, side, timelineController, track],
   );
 
   const handleMouseUp = useCallback(() => {
