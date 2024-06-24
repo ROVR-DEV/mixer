@@ -8,22 +8,22 @@ import { ChannelControlMemoized } from '..';
 import { ChannelControlViewProps } from './interfaces';
 
 export const ChannelControlView = observer(function ChannelControlView({
-  audioEditorManager,
+  player,
   channel,
   ...props
 }: ChannelControlViewProps) {
   const handleRemove = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      audioEditorManager.removeChannel(channel.id);
+      player.removeChannel(channel.id);
     },
-    [audioEditorManager, channel.id],
+    [player, channel.id],
   );
 
   return (
     <ChannelControlMemoized
       channel={channel}
-      isSelected={audioEditorManager.selectedChannelId === channel.id}
+      isSelected={player.selectedChannelId === channel.id}
       onClickRemove={handleRemove}
       {...props}
     />

@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib';
 
 import {
   TimelineControllerContext,
-  useAudioEditorManager,
+  usePlayer,
   useHandleTimeSeek,
 } from '@/entities/audio-editor';
 import { FadeOverlay, TrackWaveform, TrimMarker } from '@/entities/track';
@@ -25,7 +25,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   className,
   ...props
 }: TrackEditorRightPaneProps) {
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
 
   const rulerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -33,58 +33,54 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerRef,
-    startTime: audioEditorManager.editableTrack?.isTrimming
-      ? audioEditorManager.editableTrack.startTime
-      : audioEditorManager.editableTrack?.trimStartTime,
-    duration: audioEditorManager.editableTrack?.duration ?? 0,
+    startTime: player.editableTrack?.isTrimming
+      ? player.editableTrack.startTime
+      : player.editableTrack?.trimStartTime,
+    duration: player.editableTrack?.duration ?? 0,
   });
 
   const waveformComponent = useMemo(
     () =>
-      !audioEditorManager.editableTrack ? (
+      !player.editableTrack ? (
         <></>
       ) : (
         <TrackWaveform
-          audioEditorManager={audioEditorManager}
-          track={audioEditorManager.editableTrack}
+          player={player}
+          track={player.editableTrack}
           ignoreSelection
         />
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [audioEditorManager.editableTrack],
+    [player.editableTrack],
   );
 
-  const handleTimeSeek = useHandleTimeSeek(
-    audioEditorManager,
-    timelineController,
-  );
+  const handleTimeSeek = useHandleTimeSeek(player, timelineController);
 
   useEffect(() => {
-    if (!audioEditorManager.editableTrack) {
+    if (!player.editableTrack) {
       return;
     }
 
     if (
-      audioEditorManager.editableTrack.isTrimming &&
-      timelineController.scroll > audioEditorManager.editableTrack.trimStartTime
+      player.editableTrack.isTrimming &&
+      timelineController.scroll > player.editableTrack.trimStartTime
     ) {
-      timelineController.scroll =
-        audioEditorManager.editableTrack.trimStartTime;
+      timelineController.scroll = player.editableTrack.trimStartTime;
     }
   }, [
-    audioEditorManager.editableTrack,
-    audioEditorManager.editableTrack?.isTrimming,
-    audioEditorManager.editableTrack?.trimStartTime,
+    player.editableTrack,
+    player.editableTrack?.isTrimming,
+    player.editableTrack?.trimStartTime,
     timelineController,
   ]);
 
   useEffect(() => {
-    if (!audioEditorManager.editableTrack) {
+    if (!player.editableTrack) {
       return;
     }
 
-    timelineController.scroll = audioEditorManager.editableTrack.trimStartTime;
-  }, [audioEditorManager.editableTrack, timelineController]);
+    timelineController.scroll = player.editableTrack.trimStartTime;
+  }, [player.editableTrack, timelineController]);
 
   return (
     <TimelineControllerContext.Provider value={timelineController}>
@@ -100,19 +96,19 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
             ref={timelineRef}
             onMouseUp={handleTimeSeek}
           >
-            {!audioEditorManager.editableTrack ? null : (
+            {!player.editableTrack ? null : (
               <ChannelListItemView
                 className='relative size-full'
-                audioEditorManager={audioEditorManager}
-                channel={audioEditorManager.editableTrack?.channel}
+                player={player}
+                channel={player.editableTrack?.channel}
                 ignoreSelection
                 disableBorder
               >
                 <AudioEditorTrackView
                   className='h-[calc(100%-14px)]'
-                  key={`track-${audioEditorManager.editableTrack.uuid}-editable`}
-                  track={audioEditorManager.editableTrack}
-                  audioEditorManager={audioEditorManager}
+                  key={`track-${player.editableTrack.uuid}-editable`}
+                  track={player.editableTrack}
+                  player={player}
                   waveformComponent={waveformComponent}
                   disableInteractive
                   hideTitle
@@ -120,22 +116,22 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   <TrimMarker
                     className='absolute bottom-0 left-0 z-20'
                     side='left'
-                    track={audioEditorManager.editableTrack}
+                    track={player.editableTrack}
                   />
                   <TrimMarker
                     className='absolute bottom-0 right-0 z-20'
                     side='right'
-                    track={audioEditorManager.editableTrack}
+                    track={player.editableTrack}
                   />
                   <FadeOverlay
                     className='absolute top-0 z-20'
                     side='left'
-                    track={audioEditorManager.editableTrack}
+                    track={player.editableTrack}
                   />
                   <FadeOverlay
                     className='absolute top-0 z-20'
                     side='right'
-                    track={audioEditorManager.editableTrack}
+                    track={player.editableTrack}
                   />
                 </AudioEditorTrackView>
               </ChannelListItemView>

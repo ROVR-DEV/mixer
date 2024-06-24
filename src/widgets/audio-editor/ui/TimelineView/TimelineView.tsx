@@ -1,15 +1,17 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { cn, useGlobalMouseMove, useRectangularSelection } from '@/shared/lib';
 import { RectangularSelection } from '@/shared/ui';
 
 import {
   TimelineControllerContext,
-  useAudioEditorManager,
+  usePlayer,
   useHandleTimeSeek,
+  AudioEditorTool,
+  useAudioEditor,
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
@@ -23,12 +25,24 @@ import { TimelineViewFooterMemoized } from '../TimelineViewFooter';
 
 import { TimelineViewProps } from './interfaces';
 
+const CURSORS: Record<AudioEditorTool, string> = {
+  cursor: '',
+  scissors: 'url(scissors-up.svg) 16 16, auto',
+  magnifier: '',
+  repeat: '',
+  fit: '',
+  magnet: '',
+  undo: '',
+  redo: '',
+};
+
 export const TimelineView = observer(function TimelineView({
   playlist,
   className,
   ...props
 }: TimelineViewProps) {
-  const audioEditorManager = useAudioEditorManager();
+  const audioEditor = useAudioEditor();
+  const player = usePlayer();
 
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -41,6 +55,8 @@ export const TimelineView = observer(function TimelineView({
     duration: playlist.duration_in_seconds,
   });
 
+  const cursor = useMemo(() => CURSORS[audioEditor.tool], [audioEditor.tool]);
+
   // TODO
   // const handleSelectionChange = useCallback((rect: Rect) => {
   //   // console.log(rect);
@@ -51,10 +67,7 @@ export const TimelineView = observer(function TimelineView({
     timelineController,
     // onChange: handleSelectionChange,
   });
-  const handleTimeSeek = useHandleTimeSeek(
-    audioEditorManager,
-    timelineController,
-  );
+  const handleTimeSeek = useHandleTimeSeek(player, timelineController);
 
   const handleMouseUp = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -67,8 +80,8 @@ export const TimelineView = observer(function TimelineView({
   );
 
   const handleClickTimeline = useCallback(() => {
-    audioEditorManager.unselectAllTracks();
-  }, [audioEditorManager]);
+    player.unselectAllTracks();
+  }, [player]);
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
 
@@ -92,6 +105,7 @@ export const TimelineView = observer(function TimelineView({
             onMouseUp={handleMouseUp}
             onMouseDown={onMouseDown}
             onClick={handleClickTimeline}
+            style={{ cursor }}
           >
             <RectangularSelection
               className='absolute'
@@ -99,10 +113,7 @@ export const TimelineView = observer(function TimelineView({
               style={{ display: 'none' }}
             />
           </Timeline>
-          <AudioEditorFloatingToolbarView
-            audioEditorManager={audioEditorManager}
-            className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max'
-          />
+          <AudioEditorFloatingToolbarView className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max' />
         </div>
       </div>
       <TimelineViewFooterMemoized />

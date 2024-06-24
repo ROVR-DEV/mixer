@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 
 // eslint-disable-next-line boundaries/element-types
-import { useAudioEditorManager } from '@/entities/audio-editor';
+import { usePlayer } from '@/entities/audio-editor';
 
 import { TrackInfo } from '..';
 
@@ -12,12 +12,9 @@ import { TrackInfoViewProps } from './interfaces';
 export const TrackInfoView = observer(function TrackInfoView({
   ...props
 }: TrackInfoViewProps) {
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
 
   return (
-    <TrackInfo
-      track={audioEditorManager.firstSelectedTrack?.meta ?? null}
-      {...props}
-    />
+    <TrackInfo track={player.firstSelectedTrack?.meta ?? null} {...props} />
   );
 });

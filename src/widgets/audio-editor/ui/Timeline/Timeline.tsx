@@ -5,10 +5,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
-import {
-  useAudioEditorManager,
-  useTimelineController,
-} from '@/entities/audio-editor';
+import { usePlayer, useTimelineController } from '@/entities/audio-editor';
 import { useTracksManager } from '@/entities/track';
 
 import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
@@ -24,7 +21,7 @@ export const Timeline = observer(function Timeline({
   className,
   ...props
 }: TimelineProps) {
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
   const timelineController = useTimelineController();
   const tracksManager = useTracksManager()!;
 
@@ -51,8 +48,8 @@ export const Timeline = observer(function Timeline({
     () =>
       typeof timelineController.trackHeight === 'string'
         ? timelineController.trackHeight
-        : audioEditorManager.channelIds.length * timelineController.trackHeight,
-    [audioEditorManager.channelIds.length, timelineController.trackHeight],
+        : player.channelIds.length * timelineController.trackHeight,
+    [player.channelIds.length, timelineController.trackHeight],
   );
 
   useEffect(() => {
@@ -85,7 +82,7 @@ export const Timeline = observer(function Timeline({
             height={gridHeight}
             controlRef={handleGridRef}
           />
-          <AudioEditorTracksList audioEditorManager={audioEditorManager} />
+          <AudioEditorTracksList player={player} />
           {children}
         </>
       )}

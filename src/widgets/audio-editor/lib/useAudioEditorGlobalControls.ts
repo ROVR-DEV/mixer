@@ -2,23 +2,21 @@
 
 import { useCallback } from 'react';
 
-import { AudioEditorManager } from '@/entities/audio-editor';
+import { Player } from '@/entities/audio-editor';
 import { GlobalControlsEvent, useGlobalControls } from '@/entities/event';
 
-export const useAudioEditorGlobalControls = (
-  audioEditorManager: AudioEditorManager,
-) => {
+export const useAudioEditorGlobalControls = (player: Player) => {
   const handleGlobalControls = useCallback(
     (event: GlobalControlsEvent) => {
       if (event.type === 'Play/Pause') {
-        if (audioEditorManager.isPlaying) {
-          audioEditorManager.stop();
+        if (player.isPlaying) {
+          player.stop();
         } else {
-          audioEditorManager.play();
+          player.play();
         }
       }
     },
-    [audioEditorManager],
+    [player],
   );
 
   useGlobalControls(handleGlobalControls);

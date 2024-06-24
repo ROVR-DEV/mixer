@@ -1,4 +1,4 @@
-import { AudioEditorManager } from '@/entities/audio-editor';
+import { Player } from '@/entities/audio-editor';
 import { TrackCardProps, AudioEditorTrack } from '@/entities/track';
 
 export interface AudioEditorTrackViewProps
@@ -6,7 +6,7 @@ export interface AudioEditorTrackViewProps
     TrackCardProps,
     'ref' | 'track' | 'isSelected' | 'onTrackSelect' | 'onEdit' | 'fullWidth'
   > {
-  audioEditorManager: AudioEditorManager;
+  player: Player;
   track: AudioEditorTrack;
   disableInteractive?: boolean;
 }

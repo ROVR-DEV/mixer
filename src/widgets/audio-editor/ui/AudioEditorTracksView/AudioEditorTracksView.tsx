@@ -10,7 +10,7 @@ import { AudioEditorTracksViewProps } from './interfaces';
 
 export const AudioEditorTracksView = observer(function AudioEditorTracksView({
   channel,
-  audioEditorManager,
+  player,
 }: AudioEditorTracksViewProps) {
   return channel.tracks.map((track) => {
     return !track ? null : (
@@ -18,13 +18,8 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         className='h-[calc(100%-14px)]'
         key={`track-${track.uuid}`}
         track={track}
-        audioEditorManager={audioEditorManager}
-        waveformComponent={
-          <TrackWaveform
-            audioEditorManager={audioEditorManager}
-            track={track}
-          />
-        }
+        player={player}
+        waveformComponent={<TrackWaveform player={player} track={track} />}
       >
         <TrimMarker
           className='absolute bottom-0 left-0 z-20'

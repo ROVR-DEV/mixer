@@ -1,19 +1,12 @@
-import { AudioEditorManager } from '@/entities/audio-editor';
+import { Player } from '@/entities/audio-editor';
 import { Track } from '@/entities/track';
 
-export const importTracksToChannels = (
-  tracks: Track[],
-  audioEditorManager: AudioEditorManager,
-) => {
-  audioEditorManager.clearTracks();
+export const importTracksToChannels = (tracks: Track[], player: Player) => {
+  player.clearTracks();
 
   tracks.forEach((track, i) =>
-    audioEditorManager.channels
-      .get(
-        i % 2 === 0
-          ? audioEditorManager.channelIds[0]
-          : audioEditorManager.channelIds[1],
-      )
+    player.channels
+      .get(i % 2 === 0 ? player.channelIds[0] : player.channelIds[1])
       ?.importTrack(track),
   );
 };

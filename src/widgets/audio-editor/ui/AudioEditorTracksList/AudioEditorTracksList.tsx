@@ -11,25 +11,22 @@ import { AudioEditorTracksView } from '../AudioEditorTracksView';
 import { AudioEditorTracksListProps } from './interfaces';
 
 export const AudioEditorTracksList = observer(function AudioEditorTracksList({
-  audioEditorManager,
+  player,
 }: AudioEditorTracksListProps) {
   const timelineController = useTimelineController();
 
-  return audioEditorManager.channelIds.map((channelId) => {
-    const channel = audioEditorManager.channels.get(channelId)!;
+  return player.channelIds.map((channelId) => {
+    const channel = player.channels.get(channelId)!;
 
     return (
       <ChannelListItemView
         key={`channel-track-line-${channel.id}`}
         className='relative'
-        audioEditorManager={audioEditorManager}
+        player={player}
         channel={channel}
         style={{ height: timelineController.trackHeight }}
       >
-        <AudioEditorTracksView
-          channel={channel}
-          audioEditorManager={audioEditorManager}
-        />
+        <AudioEditorTracksView channel={channel} player={player} />
       </ChannelListItemView>
     );
   });

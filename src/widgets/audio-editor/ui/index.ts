@@ -1,4 +1,4 @@
-export * from './AudioEditor';
+export * from './AudioEditorView';
 export * from './AudioEditorTracksList';
 export * from './AudioEditorTracksView';
 export * from './AudioEditorChannelsListView';

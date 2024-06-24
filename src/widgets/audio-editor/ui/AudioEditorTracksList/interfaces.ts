@@ -1,5 +1,5 @@
-import { AudioEditorManager } from '@/entities/audio-editor';
+import { Player } from '@/entities/audio-editor';
 
 export interface AudioEditorTracksListProps {
-  audioEditorManager: AudioEditorManager;
+  player: Player;
 }

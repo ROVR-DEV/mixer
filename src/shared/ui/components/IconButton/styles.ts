@@ -19,23 +19,23 @@ const defaultFillStyles: Record<
   Record<Exclude<IconButtonSvgFillType, 'both'>, string>
 > = {
   primary: {
-    stroke: '[&_svg]:stroke-accent',
+    stroke: '[&_svg_*]:stroke-accent',
     fill: '[&_svg]:fill-accent',
   },
   primaryFilled: {
-    stroke: '[&_svg]:stroke-primary',
+    stroke: '[&_svg_*]:stroke-primary',
     fill: '[&_svg]:fill-primary',
   },
   secondary: {
-    stroke: '[&_svg]:stroke-third',
+    stroke: '[&_svg_*]:stroke-third',
     fill: '[&_svg]:fill-third',
   },
   secondaryFilled: {
-    stroke: '[&_svg]:stroke-primary',
+    stroke: '[&_svg_*]:stroke-primary',
     fill: '[&_svg]:fill-primary',
   },
   inverse: {
-    stroke: '[&_svg]:stroke-accent',
+    stroke: '[&_svg_*]:stroke-accent',
     fill: '[&_svg]:fill-accent',
   },
   unstyled: { stroke: '', fill: '' },

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
-  useAudioEditorManager,
+  usePlayer,
   usePlayHead,
   useTimelineController,
 } from '@/entities/audio-editor';
@@ -19,7 +19,7 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
 }: TimelinePlayHeadViewProps) {
   const playHeadRef = useRef<HTMLDivElement | null>(null);
 
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
   const timelineController = useTimelineController();
 
   const { playHeadHeight, updatePlayHead } = usePlayHead(
@@ -29,22 +29,20 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
 
   const renderPlayHead = useCallback(
     (time: number) =>
-      requestAnimationFrame(() =>
-        updatePlayHead(time, audioEditorManager.isPlaying),
-      ),
+      requestAnimationFrame(() => updatePlayHead(time, player.isPlaying)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [updatePlayHead],
   );
 
   useEffect(() => {
-    renderPlayHead(audioEditorManager.time);
-    audioEditorManager.addListener(renderPlayHead);
-    return () => audioEditorManager.removeListener(renderPlayHead);
-  }, [audioEditorManager, renderPlayHead]);
+    renderPlayHead(player.time);
+    player.addListener(renderPlayHead);
+    return () => player.removeListener(renderPlayHead);
+  }, [player, renderPlayHead]);
 
   useEffect(() => {
     const update = () => {
-      renderPlayHead(audioEditorManager.time);
+      renderPlayHead(player.time);
     };
     update();
 

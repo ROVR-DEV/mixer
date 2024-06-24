@@ -1,8 +1,8 @@
-import { AudioEditorManager } from '@/entities/audio-editor';
+import { Player } from '@/entities/audio-editor';
 import { Channel, ChannelListItemProps } from '@/entities/channel';
 
 export interface ChannelListItemViewProps
   extends Omit<ChannelListItemProps, 'ref'> {
-  audioEditorManager: AudioEditorManager;
+  player: Player;
   channel: Channel;
 }

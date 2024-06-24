@@ -8,6 +8,7 @@ import { clamp, cn, preventAll } from '@/shared/lib';
 
 import {
   TIMELINE_LEFT_PADDING,
+  useAudioEditor,
   useTimelineController,
 } from '@/entities/audio-editor';
 import { TrackCardMemoized } from '@/entities/track';
@@ -29,16 +30,17 @@ import styles from './styles.module.css';
 
 export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   track,
-  audioEditorManager,
+  player,
   disableInteractive,
   className,
   ...props
 }: AudioEditorTrackViewProps) {
+  const audioEditor = useAudioEditor();
   const trackRef = useRef<HTMLDivElement>(null);
 
   const timelineController = useTimelineController();
 
-  const isSelectedInEditor = audioEditorManager.isTrackSelected(track);
+  const isSelectedInEditor = player.isTrackSelected(track);
 
   const isSelected = useMemo(
     () => !disableInteractive && isSelectedInEditor,
@@ -46,20 +48,28 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   );
 
   const handleEdit = useCallback(() => {
-    audioEditorManager.setEditableTrack(track);
-  }, [audioEditorManager, track]);
+    player.setEditableTrack(track);
+  }, [player, track]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       preventAll(e);
 
-      audioEditorManager.selectTrack(track, e.shiftKey);
+      if (audioEditor.tool === 'scissors') {
+        const copiedTrack = track.cut(
+          timelineController.virtualPixelsToTime(e.pageX),
+        );
+        player.selectTrack(copiedTrack);
+        return;
+      }
+
+      player.selectTrack(track, e.shiftKey);
 
       if (e.detail === 2) {
         handleEdit();
       }
     },
-    [audioEditorManager, handleEdit, track],
+    [audioEditor.tool, player, track, timelineController, handleEdit],
   );
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
@@ -174,7 +184,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      audioEditorManager.selectTrack(track);
+      player.selectTrack(track);
       setDragSettings(e);
 
       e.dataTransfer.setData('text/trackId', track.uuid);
@@ -186,7 +196,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
       track.isDragging = true;
     },
-    [audioEditorManager, track],
+    [player, track],
   );
 
   const handleDrag = useCallback(
@@ -208,14 +218,14 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
       if (
         globalChannelIndex >= 0 &&
-        globalChannelIndex < audioEditorManager.channelIds.length
+        globalChannelIndex < player.channelIds.length
       ) {
         const currentChannelIndex = Math.floor(
           Math.floor(Number(e.currentTarget.dataset.startY) - paneOffsetY) / 96,
         );
 
-        const currentChannel = audioEditorManager.channels.get(
-          audioEditorManager.channelIds[globalChannelIndex],
+        const currentChannel = player.channels.get(
+          player.channelIds[globalChannelIndex],
         )!;
 
         if (track.channel.id !== currentChannel.id) {
@@ -232,15 +242,9 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       }
 
       track.setStartTime(startTime);
-      track.audioBuffer?.setTime(audioEditorManager.time - track.startTime);
+      track.audioBuffer?.setTime(player.time - track.startTime);
     },
-    [
-      audioEditorManager.channelIds,
-      audioEditorManager.channels,
-      audioEditorManager.time,
-      calcNewStartTime,
-      track,
-    ],
+    [player.channelIds, player.channels, player.time, calcNewStartTime, track],
   );
 
   const handleDragEnd = useCallback(
@@ -252,9 +256,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
       if (prevChannelId.current) {
         if (prevChannelId.current !== track.channel.id) {
-          const prevChannel = audioEditorManager.channels.get(
-            prevChannelId.current,
-          );
+          const prevChannel = player.channels.get(prevChannelId.current);
 
           if (prevChannel) {
             prevChannel.removeTrack(track);
@@ -266,7 +268,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         adjustTracksOnPaste(track);
       }
     },
-    [audioEditorManager.channels, calcNewStartTime, track],
+    [player.channels, calcNewStartTime, track],
   );
 
   useEffect(() => {
@@ -299,7 +301,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   ]);
 
   const handleSnapLeft = useCallback(() => {
-    const tracks = values(audioEditorManager.channels)
+    const tracks = values(player.channels)
       .flatMap((channel) => channel.tracks)
       .filter(
         (channelTrack) =>
@@ -311,10 +313,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     const foundTrack = tracks.at(-1);
 
     track.setStartTime(foundTrack?.trimEndTime ?? 0);
-  }, [audioEditorManager.channels, track]);
+  }, [player.channels, track]);
 
   const handleSnapRight = useCallback(() => {
-    const tracks = values(audioEditorManager.channels)
+    const tracks = values(player.channels)
       .flatMap((channel) => channel.tracks)
       .filter(
         (channelTrack) =>
@@ -330,7 +332,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     }
 
     track.setStartTime(foundTrack.trimStartTime - track.trimDuration);
-  }, [audioEditorManager.channels, track]);
+  }, [player.channels, track]);
 
   return (
     <div

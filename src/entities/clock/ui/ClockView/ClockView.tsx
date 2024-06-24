@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
-import { useAudioEditorManager } from '@/entities/audio-editor';
+import { usePlayer } from '@/entities/audio-editor';
 
 import { ClockMemoized, ClockRef } from '../Clock';
 
@@ -9,16 +9,16 @@ import { ClockViewProps } from './interfaces';
 
 export const ClockView = ({ ...props }: ClockViewProps) => {
   const clockRef = useRef<ClockRef | null>(null);
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
 
   useEffect(() => {
     const updateClock = (time: number) =>
       requestAnimationFrame(() => clockRef.current?.updateTime(time));
-    updateClock(audioEditorManager.time);
+    updateClock(player.time);
 
-    audioEditorManager.addListener(updateClock);
-    return () => audioEditorManager.removeListener(updateClock);
-  }, [audioEditorManager]);
+    player.addListener(updateClock);
+    return () => player.removeListener(updateClock);
+  }, [player]);
 
   return <ClockMemoized ref={clockRef} {...props} />;
 };

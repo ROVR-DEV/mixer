@@ -3,10 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useCallback } from 'react';
 
-import {
-  useAudioEditorManager,
-  useTimelineController,
-} from '@/entities/audio-editor';
+import { usePlayer, useTimelineController } from '@/entities/audio-editor';
 import {
   AddNewChannelButtonMemoized,
   ChannelListItemMemoized,
@@ -21,17 +18,14 @@ const _AudioEditorChannelsList = forwardRef<
   HTMLDivElement,
   AudioEditorChannelsListProps
 >(function AudioEditorChannelsList({ ...props }, ref) {
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
   const timelineController = useTimelineController();
 
-  const handleAddChannel = useCallback(
-    () => audioEditorManager.addChannel(),
-    [audioEditorManager],
-  );
+  const handleAddChannel = useCallback(() => player.addChannel(), [player]);
 
   return (
     <ChannelListMemoized ref={ref} {...props}>
-      <AudioEditorChannelsListView audioEditorManager={audioEditorManager} />
+      <AudioEditorChannelsListView player={player} />
       <ChannelListItemMemoized
         className='justify-center'
         disableBorder

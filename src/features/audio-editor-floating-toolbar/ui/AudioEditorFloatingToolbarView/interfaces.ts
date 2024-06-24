@@ -1,9 +1,7 @@
-import {
-  AudioEditorFloatingToolbarProps,
-  AudioEditorManager,
-} from '@/entities/audio-editor';
+import { AudioEditorFloatingToolbarProps } from '@/entities/audio-editor';
 
 export interface AudioEditorFloatingToolbarViewProps
-  extends Omit<AudioEditorFloatingToolbarProps, 'ref' | 'onToolChange'> {
-  audioEditorManager: AudioEditorManager;
-}
+  extends Omit<
+    AudioEditorFloatingToolbarProps,
+    'ref' | 'currentTool' | 'tools' | 'onToolChange'
+  > {}

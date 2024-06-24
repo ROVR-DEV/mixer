@@ -60,7 +60,7 @@ export class AudioEditorTrack {
   get color(): string | null {
     return this._color;
   }
-  set color(value: string) {
+  set color(value: string | null) {
     this._color = value;
   }
 
@@ -150,12 +150,10 @@ export class AudioEditorTrack {
   }
 
   cut = (time: number) => {
-    const trackCopy = new AudioEditorTrack(this.meta, this.channel);
-    if (this.color) {
-      trackCopy.color = this.color;
-    }
-    trackCopy.load(this.mediaElement.src);
+    const trackCopy = this.clone();
+
     trackCopy.setStartTrimDuration(time - trackCopy.startTime);
+    trackCopy.setEndTrimDuration(this.endTrimDuration);
     trackCopy.setStartTime(time);
 
     trackCopy.filters.fadeOutNode.linearFadeOut(
@@ -176,6 +174,14 @@ export class AudioEditorTrack {
     adjustTracksOnPaste(trackCopy);
 
     return trackCopy;
+  };
+
+  clone = () => {
+    const clonedTrack = new AudioEditorTrack(this.meta, this.channel);
+    clonedTrack.color = this.color;
+    clonedTrack.load(this.mediaElement.src);
+    clonedTrack.setStartTime(this.startTime);
+    return clonedTrack;
   };
 
   private _updateAudioFilters = () => {

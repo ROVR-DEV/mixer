@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib';
 import { IconButton } from '@/shared/ui';
 import { Cross2Icon } from '@/shared/ui/assets';
 
-import { useAudioEditorManager } from '@/entities/audio-editor';
+import { usePlayer } from '@/entities/audio-editor';
 
 import { TrackEditorLeftPaneProps } from './interfaces';
 
@@ -12,11 +12,11 @@ export const TrackEditorLeftPane = ({
   className,
   ...props
 }: TrackEditorLeftPaneProps) => {
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
 
   const handleClose = useCallback(() => {
-    audioEditorManager.setEditableTrack(null);
-  }, [audioEditorManager]);
+    player.setEditableTrack(null);
+  }, [player]);
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>

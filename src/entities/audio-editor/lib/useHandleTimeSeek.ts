@@ -1,16 +1,14 @@
 import { useCallback } from 'react';
 
-import { AudioEditorManager, TimelineController } from '../model';
+import { Player, TimelineController } from '../model';
 
 export const useHandleTimeSeek = (
-  audioEditorManager: AudioEditorManager,
+  player: Player,
   timelineController: TimelineController,
 ) => {
   return useCallback(
     (e: MouseEvent | React.MouseEvent<HTMLDivElement>) =>
-      audioEditorManager.seekTo(
-        timelineController.virtualPixelsToTime(e.pageX),
-      ),
-    [audioEditorManager, timelineController],
+      player.seekTo(timelineController.virtualPixelsToTime(e.pageX)),
+    [player, timelineController],
   );
 };

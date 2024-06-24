@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib';
 import {
   useTimelineController,
   useHandleTimeSeek,
-  useAudioEditorManager,
+  usePlayer,
 } from '@/entities/audio-editor';
 
 import {
@@ -27,13 +27,10 @@ export const TimelineHeader = observer(function TimelineHeader({
   className,
   ...props
 }: TimelineHeaderProps) {
-  const audioEditorManager = useAudioEditorManager();
+  const player = usePlayer();
   const timelineController = useTimelineController();
 
-  const handleClickOnRuler = useHandleTimeSeek(
-    audioEditorManager,
-    timelineController,
-  );
+  const handleClickOnRuler = useHandleTimeSeek(player, timelineController);
 
   const rulerControlRef = useRef<TimelineRulerRef | null>(null);
 

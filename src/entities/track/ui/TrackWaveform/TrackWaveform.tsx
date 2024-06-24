@@ -13,7 +13,7 @@ import { WaveformMemoized } from '../Waveform';
 import { TrackWaveformProps } from './interfaces';
 
 export const TrackWaveform = observer(function TrackWaveform({
-  audioEditorManager,
+  player,
   track,
   ignoreSelection,
   options,
@@ -21,7 +21,7 @@ export const TrackWaveform = observer(function TrackWaveform({
 }: TrackWaveformProps) {
   const timelineController = useTimelineController();
 
-  const isSelectedInEditor = audioEditorManager.isTrackSelected(track);
+  const isSelectedInEditor = player.isTrackSelected(track);
 
   const localAudioBufferRef = useRef<WaveSurfer | null>(null);
 

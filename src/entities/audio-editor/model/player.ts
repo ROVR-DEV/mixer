@@ -17,7 +17,7 @@ import { trackColorsGenerator } from './trackColorsGenerator';
 
 export type TimeListener = (time: number) => void;
 
-export class AudioEditorManager {
+export class Player {
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
   selectedChannelId: string | null = null;
@@ -47,7 +47,7 @@ export class AudioEditorManager {
     channels?.forEach((channel) => this.addChannel(channel));
 
     makeObservable<
-      AudioEditorManager,
+      Player,
       | '_prepareForPlay'
       | '_prepareForStop'
       | '_performOnTracks'

@@ -11,22 +11,22 @@ import { AudioEditorChannelsListViewProps } from './interfaces';
 
 export const AudioEditorChannelsListView = observer(
   function AudioEditorChannelsListView({
-    audioEditorManager,
+    player,
   }: AudioEditorChannelsListViewProps) {
-    return audioEditorManager.channelIds.map((channelId, index) => {
-      const channel = audioEditorManager.channels.get(channelId)!;
+    return player.channelIds.map((channelId, index) => {
+      const channel = player.channels.get(channelId)!;
 
       return (
         <ChannelListItemView
           key={`channel-${channel.id}`}
-          audioEditorManager={audioEditorManager}
+          player={player}
           channel={channel}
           leftPadding
         >
           <ChannelControlView
             number={index + 1}
             isAbleToRemove={index > 1}
-            audioEditorManager={audioEditorManager}
+            player={player}
             channel={channel}
           />
         </ChannelListItemView>
