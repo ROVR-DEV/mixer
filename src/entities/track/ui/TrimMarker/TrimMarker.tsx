@@ -23,7 +23,10 @@ export const TrimMarker = observer(
 
     return (
       <div
-        className={cn('h-1/2 w-4 bg-transparent cursor-col-resize', className)}
+        className={cn('h-1/2 w-4 bg-transparent', className)}
+        style={{
+          cursor: 'url(trim-icon.svg), col-resize',
+        }}
         {...trimMarkerProps}
         {...props}
       />
