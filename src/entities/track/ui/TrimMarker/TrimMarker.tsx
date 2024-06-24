@@ -1,6 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
+import { useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 
@@ -21,11 +22,15 @@ export const TrimMarker = observer(
       track,
     });
 
+    const cursor = useMemo(() => {
+      return `url(${side === 'left' ? 'trim-icon-left.svg' : 'trim-icon-right.svg'}) 11 11.5, col-resize`;
+    }, [side]);
+
     return (
       <div
         className={cn('h-1/2 w-4 bg-transparent', className)}
         style={{
-          cursor: 'url(trim-icon.svg), col-resize',
+          cursor,
         }}
         {...trimMarkerProps}
         {...props}
