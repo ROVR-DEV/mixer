@@ -23,7 +23,8 @@ export const TrimMarker = observer(
     });
 
     const cursor = useMemo(() => {
-      return `url(${side === 'left' ? 'trim-icon-left.svg' : 'trim-icon-right.svg'}) 16 16, col-resize`;
+      const iconName = side === 'left' ? 'trim-icon-left' : 'trim-icon-right';
+      return `url(icons/${iconName}.svg) 16 16, url(icons/${iconName}.png) 16 16, col-resize`;
     }, [side]);
 
     return (

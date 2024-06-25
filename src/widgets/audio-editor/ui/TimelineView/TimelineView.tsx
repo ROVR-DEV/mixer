@@ -32,7 +32,8 @@ import { TimelineViewProps } from './interfaces';
 
 const CURSORS: Record<AudioEditorTool, string> = {
   cursor: '',
-  scissors: 'url(scissors-up.svg) 16 16, auto',
+  scissors:
+    'url(icons/scissors-up.svg) 16 16, url(icons/scissors-up.png) 16 16, auto',
   magnifier: '',
   repeat: '',
   fit: '',
