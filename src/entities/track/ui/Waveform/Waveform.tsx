@@ -74,11 +74,15 @@ export const Waveform = ({
       return;
     }
 
-    wavesurferRef.current?.setOptions(options);
+    requestAnimationFrame(() => {
+      wavesurferRef.current?.setOptions(options);
+    });
   }, [options]);
 
   useEffect(() => {
-    wavesurferRef.current?.setOptions(waveformColors[color]);
+    requestAnimationFrame(() => {
+      wavesurferRef.current?.setOptions(waveformColors[color]);
+    });
   }, [color, waveformColors]);
 
   return (

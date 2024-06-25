@@ -5,3 +5,4 @@ export * from './useAudioEditorTimelineRuler';
 export * from './importTracksToChannels';
 export * from './useAudioEditorGlobalControls';
 export * from './useAudioEditor';
+export * from './selectTracksInSelection';

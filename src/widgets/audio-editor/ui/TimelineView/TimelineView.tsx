@@ -3,7 +3,12 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback, useMemo, useRef } from 'react';
 
-import { cn, useGlobalMouseMove, useRectangularSelection } from '@/shared/lib';
+import {
+  Rect,
+  cn,
+  useGlobalMouseMove,
+  useRectangularSelection,
+} from '@/shared/lib';
 import { RectangularSelection } from '@/shared/ui';
 
 import {
@@ -16,7 +21,7 @@ import {
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
 
-import { useTimelineZoomScroll } from '../../lib';
+import { selectTracksInSelection, useTimelineZoomScroll } from '../../lib';
 import { AudioEditorChannelsList } from '../AudioEditorChannelsList';
 import { ChannelsListHeaderMemoized } from '../ChannelsListHeader';
 import { Timeline } from '../Timeline';
@@ -57,16 +62,23 @@ export const TimelineView = observer(function TimelineView({
 
   const cursor = useMemo(() => CURSORS[audioEditor.tool], [audioEditor.tool]);
 
-  // TODO
-  // const handleSelectionChange = useCallback((rect: Rect) => {
-  //   // console.log(rect);
-  // }, []);
+  const handleSelectionChange = useCallback(
+    (rect: Rect, e?: MouseEvent) =>
+      selectTracksInSelection(
+        player,
+        timelineController,
+        rect,
+        e?.shiftKey ?? true,
+      ),
+    [player, timelineController],
+  );
 
   const { isSelecting, onMouseDown } = useRectangularSelection({
     ref: rectangularSelectionRef,
     timelineController,
-    // onChange: handleSelectionChange,
+    onChange: handleSelectionChange,
   });
+
   const handleTimeSeek = useHandleTimeSeek(player, timelineController);
 
   const handleMouseUp = useCallback(
@@ -74,14 +86,13 @@ export const TimelineView = observer(function TimelineView({
       if (isSelecting) {
         return;
       }
-      handleTimeSeek(e);
-    },
-    [handleTimeSeek, isSelecting],
-  );
 
-  const handleClickTimeline = useCallback(() => {
-    player.unselectAllTracks();
-  }, [player]);
+      handleTimeSeek(e);
+
+      player.unselectAllTracks();
+    },
+    [handleTimeSeek, isSelecting, player],
+  );
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
 
@@ -104,7 +115,6 @@ export const TimelineView = observer(function TimelineView({
             timelineRef={timelineRef}
             onMouseUp={handleMouseUp}
             onMouseDown={onMouseDown}
-            onClick={handleClickTimeline}
             style={{ cursor }}
           >
             <RectangularSelection

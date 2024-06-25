@@ -4,7 +4,7 @@ import { values } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { clamp, cn, preventAll } from '@/shared/lib';
+import { clamp, cn, preventAll, stopPropagation } from '@/shared/lib';
 
 import {
   TIMELINE_LEFT_PADDING,
@@ -187,9 +187,6 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       player.selectTrack(track);
       setDragSettings(e);
 
-      e.dataTransfer.setData('text/trackId', track.uuid);
-      e.dataTransfer.setData('text/channelId', track.channel.id);
-
       prevChannelId.current = track.channel.id;
 
       setDragProperties(e, track.trimStartTime);
@@ -202,10 +199,6 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const handleDrag = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       const startTime = calcNewStartTime(e);
-
-      if (track.startTime === startTime) {
-        return;
-      }
 
       const grid = (e.target as HTMLElement).parentElement?.parentElement
         ?.parentElement;
@@ -348,6 +341,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       onDragLeave={preventAll}
       onDragOver={preventAll}
       onDrop={preventAll}
+      onMouseDown={stopPropagation}
     >
       <TrimBackgroundView className='absolute left-0 top-0' track={track} />
       <TrackCardMemoized

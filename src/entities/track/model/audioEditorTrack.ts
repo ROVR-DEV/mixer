@@ -119,7 +119,7 @@ export class AudioEditorTrack {
     this._audioBuffer = audioBuffer;
     this._filters.audioBuffer = audioBuffer;
 
-    this._audioBuffer.once('ready', () => {
+    this._audioBuffer.once('decode', () => {
       runInAction(() => {
         if (!this._audioBuffer) {
           return;
