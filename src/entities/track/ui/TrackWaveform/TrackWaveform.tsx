@@ -19,6 +19,8 @@ export const TrackWaveform = observer(function TrackWaveform({
   options,
   ...props
 }: TrackWaveformProps) {
+  const waveformRef = useRef<HTMLDivElement | null>(null);
+
   const timelineController = useTimelineController();
 
   const isSelectedInEditor = player.isTrackSelected(track);
@@ -54,23 +56,30 @@ export const TrackWaveform = observer(function TrackWaveform({
     [track],
   );
 
+  const updateWidth = useCallback(
+    (trackDuration: number) => {
+      if (!waveformRef.current) {
+        return;
+      }
+
+      waveformRef.current.style.width = `${timelineController.timeToVirtualPixels(trackDuration)}px`;
+    },
+    [timelineController],
+  );
+
   useEffect(() => {
-    const currentWidth = localAudioBufferRef.current?.options.width;
-    const newWidth = timelineController.timeToVirtualPixels(track.duration);
+    updateWidth(track.duration);
+  }, [track.duration, updateWidth]);
 
-    if (currentWidth === newWidth) {
-      return;
-    }
+  useEffect(() => {
+    const update = () => {
+      updateWidth(track.duration);
+    };
 
-    localAudioBufferRef.current?.setOptions({
-      width: newWidth,
-    });
-  }, [
-    timelineController,
-    track.startTrimDuration,
-    track.endTrimDuration,
-    track.duration,
-  ]);
+    timelineController.zoomController.addListener(update);
+    return () => timelineController.zoomController.removeListener(update);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelineController.zoomController, updateWidth]);
 
   return (
     <div
@@ -78,6 +87,7 @@ export const TrackWaveform = observer(function TrackWaveform({
       style={{ overflow: track.isTrimming ? '' : 'hidden' }}
     >
       <WaveformMemoized
+        ref={waveformRef}
         className='absolute w-full'
         style={{
           left: -timelineController.timeToVirtualPixels(
