@@ -1,4 +1,4 @@
-export const preventAll = (e: React.MouseEvent<HTMLElement> | MouseEvent) => {
+export const preventAll = (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
   e.preventDefault();
   e.stopPropagation();
   if ('nativeEvent' in e) {

@@ -1,14 +1,14 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { preventAll } from './preventAll';
 import { useWindowEvent } from './useWindowEvent';
 
 export interface UseGlobalDnDProps {
-  onDragStart?: (e: React.MouseEvent<HTMLElement> | MouseEvent) => void;
+  onDragStart?: (e: MouseEvent | React.MouseEvent<HTMLElement>) => void;
   onDrag?: (e: MouseEvent) => void;
-  onDragEnd?: (e: MouseEvent) => void;
+  onDragEnd?: (e: MouseEvent | React.MouseEvent<HTMLElement>) => void;
 }
 
 export const useGlobalDnD = ({
@@ -16,43 +16,62 @@ export const useGlobalDnD = ({
   onDrag,
   onDragEnd,
 }: UseGlobalDnDProps) => {
+  const isPressedRef = useRef(false);
+  const isDraggingRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleDragStart = useCallback(
-    (e: React.MouseEvent<HTMLElement> | MouseEvent) => {
+  const onMouseDown = useCallback(
+    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
+      isPressedRef.current = true;
       preventAll(e);
-      setIsDragging(true);
-      onDragStart?.(e);
     },
-    [onDragStart],
+    [],
   );
 
-  const handleDrag = useCallback(
+  const onMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!isDragging) {
+      if (isPressedRef.current && !isDraggingRef.current) {
+        onDragStart?.(e);
+
+        setIsDragging(true);
+        isDraggingRef.current = true;
+      }
+
+      if (!isDraggingRef.current) {
         return;
       }
 
       preventAll(e);
+
       onDrag?.(e);
     },
-    [isDragging, onDrag],
+    [onDrag, onDragStart],
   );
 
-  const handleDragEnd = useCallback(
-    (e: MouseEvent) => {
+  const onMouseUp = useCallback(
+    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
+      isPressedRef.current = false;
+
+      if (!isDraggingRef.current) {
+        return;
+      }
+
       preventAll(e);
-      setIsDragging(false);
+
       onDragEnd?.(e);
+
+      setIsDragging(false);
+      isDraggingRef.current = false;
     },
     [onDragEnd],
   );
 
-  useWindowEvent('mousemove', handleDrag);
-  useWindowEvent('mouseup', handleDragEnd);
+  useWindowEvent('mousemove', onMouseMove);
+  useWindowEvent('mouseup', onMouseUp);
 
   return {
     isDragging,
-    onMouseDown: handleDragStart,
+    onMouseUp: onMouseUp,
+    onMouseDown: onMouseDown,
   };
 };

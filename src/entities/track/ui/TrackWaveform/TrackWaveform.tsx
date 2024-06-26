@@ -23,15 +23,15 @@ export const TrackWaveform = observer(function TrackWaveform({
 
   const timelineController = useTimelineController();
 
-  const isSelectedInEditor = player.isTrackSelected(track);
+  const isSelectedInPlayer = player.isTrackSelected(track);
 
   const localAudioBufferRef = useRef<WaveSurfer | null>(null);
 
   const color = useMemo(() => {
-    const isSelected = !ignoreSelection && isSelectedInEditor;
+    const isSelected = !ignoreSelection && isSelectedInPlayer;
 
     return isSelected ? 'primary' : 'secondary';
-  }, [ignoreSelection, isSelectedInEditor]);
+  }, [ignoreSelection, isSelectedInPlayer]);
 
   const finalOptions = useMemo(() => {
     return {

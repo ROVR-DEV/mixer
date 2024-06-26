@@ -226,9 +226,7 @@ export class TimelineController {
   };
 
   realToVirtualPixels = (x: number) => {
-    return (
-      x * this.timelineContainer.pixelsPerSecond - this._timelineLeftPadding
-    );
+    return x * this.timelineContainer.pixelsPerSecond;
   };
 
   timeToVirtualPixels = (time: number) => {

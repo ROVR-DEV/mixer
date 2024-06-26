@@ -12,6 +12,7 @@ import {
 } from '@/entities/audio-editor';
 import { FadeOverlay, TrackWaveform, TrimMarker } from '@/entities/track';
 
+// eslint-disable-next-line boundaries/element-types
 import { ChannelListItemView } from '@/features/channel-control';
 import { TimelineScrollView } from '@/features/timeline';
 import { AudioEditorTrackView } from '@/features/track-card-view';

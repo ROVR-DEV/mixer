@@ -35,10 +35,10 @@ const selectTrackInSelection = (
 
   const isIntersects = checkCollision(
     new Rect(
-      timelineController.timeToVirtualPixels(track.startTime) +
+      timelineController.timeToVirtualPixels(track.trimStartTime) +
         timelineController.timelineLeftPadding,
       channelStartY + 7,
-      timelineController.timeToVirtualPixels(track.endTime),
+      timelineController.timeToVirtualPixels(track.trimDuration),
       timelineController.trackHeight - 14,
     ),
     rect,
@@ -64,14 +64,22 @@ export const selectTracksInSelection = (
       return;
     }
 
+    const virtualRect = new Rect(
+      rect.x +
+        timelineController.realToVirtualPixels(timelineController.scroll),
+      rect.y,
+      rect.width,
+      rect.height,
+    );
+
     const { startY: channelStartY, endY: channelEndY } =
       getChannelVerticalBound(i, timelineController);
 
     const isChannelIntersects = checkVerticalCollision(
       channelStartY,
       channelEndY,
-      rect.y,
-      rect.bottom,
+      virtualRect.y,
+      virtualRect.bottom,
     );
 
     const channel = player.channels.get(channelId);
@@ -93,7 +101,7 @@ export const selectTracksInSelection = (
         player,
         timelineController,
         channelStartY,
-        rect,
+        virtualRect,
         addToSelection,
       ),
     );

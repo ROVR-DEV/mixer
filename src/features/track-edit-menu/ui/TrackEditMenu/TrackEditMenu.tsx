@@ -1,7 +1,5 @@
 'use client';
 
-import { preventAll } from '@/shared/lib';
-
 import { TrackEditMenuButton } from '../TrackEditMenuButton';
 
 import { TrackEditMenuProps } from './interfaces';
@@ -18,16 +16,14 @@ export const TrackEditMenu = ({
       className='flex h-max flex-col justify-between divide-y divide-accent'
       {...props}
     >
-      <TrackEditMenuButton onClick={onRename} onMouseUp={preventAll}>
-        {'Rename'}
-      </TrackEditMenuButton>
-      <TrackEditMenuButton onClick={onSnapLeft} onMouseUp={preventAll}>
+      <TrackEditMenuButton onClick={onRename}>{'Rename'}</TrackEditMenuButton>
+      <TrackEditMenuButton onClick={onSnapLeft}>
         {'Snap left'}
       </TrackEditMenuButton>
-      <TrackEditMenuButton onClick={onSnapRight} onMouseUp={preventAll}>
+      <TrackEditMenuButton onClick={onSnapRight}>
         {'Snap right'}
       </TrackEditMenuButton>
-      <TrackEditMenuButton onClick={onAddEffect} onMouseUp={preventAll}>
+      <TrackEditMenuButton onClick={onAddEffect}>
         {'Add an effect'}
       </TrackEditMenuButton>
     </div>

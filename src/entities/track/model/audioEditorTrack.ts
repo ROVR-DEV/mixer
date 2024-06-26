@@ -14,6 +14,7 @@ import { adjustTracksOnPaste } from '@/features/track-card-view';
 import { getLocalBounds } from '../lib';
 
 import { AudioFilters } from './audioFilters';
+import { TrackDnDInfo } from './dndInfo';
 import { Track } from './track';
 
 export class AudioEditorTrack {
@@ -40,7 +41,13 @@ export class AudioEditorTrack {
   private _color: string | null = null;
 
   private _isTrimming: boolean = false;
-  private _isDragging: boolean = false;
+
+  private _dndInfo: TrackDnDInfo = {
+    isDragging: false,
+    startTime: 0,
+    startX: 0,
+    startY: 0,
+  };
 
   get channel(): Channel {
     return this._channel;
@@ -71,13 +78,6 @@ export class AudioEditorTrack {
     this._isTrimming = value;
   }
 
-  get isDragging() {
-    return this._isDragging;
-  }
-  set isDragging(value: boolean) {
-    this._isDragging = value;
-  }
-
   get trimStartTime(): number {
     return this.startTime + this.startTrimDuration;
   }
@@ -92,6 +92,13 @@ export class AudioEditorTrack {
 
   get trimDuration(): number {
     return this.trimEndTime - this.trimStartTime;
+  }
+
+  get dndInfo(): TrackDnDInfo {
+    return this._dndInfo;
+  }
+  set dndInfo(value: TrackDnDInfo) {
+    this._dndInfo = value;
   }
 
   constructor(track: Track, channel: Channel) {

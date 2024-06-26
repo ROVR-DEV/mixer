@@ -21,10 +21,17 @@ export const tailwindConfig: Config = {
       },
     },
   },
+  safelist: ['content-auto', 'content-hidden'],
   plugins: [
     containerQueries,
     plugin(({ addUtilities }) => {
       addUtilities({
+        'content-auto': {
+          contentVisibility: 'auto',
+        },
+        'content-hidden': {
+          contentVisibility: 'hidden',
+        },
         '.font-fix': {
           paddingTop: '4px',
         },

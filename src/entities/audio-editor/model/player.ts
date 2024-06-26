@@ -1,6 +1,7 @@
 import {
   IObservableArray,
   ObservableMap,
+  computed,
   makeObservable,
   observable,
   values,
@@ -43,6 +44,32 @@ export class Player {
     return values(this.selectedTracks)[0];
   }
 
+  get allTracks(): AudioEditorTrack[] {
+    return values(this.channels).flatMap((channel) => channel.tracks);
+  }
+
+  get selectedTracksMinStartTime(): number {
+    return values(this.selectedTracks).reduce(
+      (minStartTime, tr) =>
+        minStartTime < tr.startTime ? minStartTime : tr.startTime,
+      Infinity,
+    );
+  }
+
+  get selectedTracksMinChannel(): number {
+    return values(this.selectedTracks).reduce((minChannel, tr) => {
+      const channelIndex = this.channelIds.indexOf(tr.channel.id);
+      return minChannel < channelIndex ? minChannel : channelIndex;
+    }, Infinity);
+  }
+
+  get selectedTracksMaxChannel(): number {
+    return values(this.selectedTracks).reduce((minChannel, tr) => {
+      const channelIndex = this.channelIds.indexOf(tr.channel.id);
+      return minChannel > channelIndex ? minChannel : channelIndex;
+    }, 0);
+  }
+
   constructor(channels?: Channel[]) {
     channels?.forEach((channel) => this.addChannel(channel));
 
@@ -58,6 +85,10 @@ export class Player {
       | '_colorsGenerator'
       | '_updateTracksTime'
     >(this, {
+      selectedTracksMaxChannel: computed,
+      selectedTracksMinChannel: computed,
+      selectedTracksMinStartTime: computed,
+      allTracks: computed,
       isTrackIntersectsWithTime: true,
       firstSelectedTrack: true,
       isTrackSelected: true,

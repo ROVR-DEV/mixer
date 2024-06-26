@@ -18,7 +18,8 @@ export const usePlayHead = (
     (time: number) => {
       return (
         timelineController.timeToVirtualPixels(time) -
-        timelineController.realToVirtualPixels(timelineController.scroll)
+        timelineController.realToVirtualPixels(timelineController.scroll) +
+        timelineController.timelineLeftPadding
       );
     },
     [timelineController],

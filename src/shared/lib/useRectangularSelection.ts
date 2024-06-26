@@ -60,6 +60,9 @@ export const useRectangularSelection = ({
   const startPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  const grid =
+    timelineController.timelineContainer.timelineRef.current?.parentElement;
+
   const updateSelection = useCallback(
     (x: number, y: number, e?: MouseEvent) => {
       if (!isSelecting) {
@@ -107,11 +110,14 @@ export const useRectangularSelection = ({
 
       startPositionRef.current = {
         x: e.pageX - timelineController.boundingClientRect.x,
-        y: e.pageY - timelineController.boundingClientRect.y,
+        y:
+          e.pageY -
+          timelineController.boundingClientRect.y +
+          (grid?.scrollTop ?? 0),
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ref],
+    [ref, grid?.scrollTop],
   );
 
   const handleMouseMove = useCallback(
@@ -138,7 +144,10 @@ export const useRectangularSelection = ({
 
       mousePositionRef.current = {
         x: e.pageX - timelineController.boundingClientRect.x,
-        y: e.pageY - timelineController.boundingClientRect.y,
+        y:
+          e.pageY -
+          timelineController.boundingClientRect.y +
+          (grid?.scrollTop ?? 0),
       };
 
       updateSelection(
@@ -148,7 +157,7 @@ export const useRectangularSelection = ({
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isSelecting, ref, updateSelection],
+    [isSelecting, ref, updateSelection, grid?.scrollTop],
   );
 
   const handleMouseUp = useCallback(

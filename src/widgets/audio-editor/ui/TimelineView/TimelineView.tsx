@@ -88,11 +88,15 @@ export const TimelineView = observer(function TimelineView({
         return;
       }
 
+      if (audioEditor.tool !== 'cursor') {
+        return;
+      }
+
       handleTimeSeek(e);
 
       player.unselectAllTracks();
     },
-    [handleTimeSeek, isSelecting, player],
+    [audioEditor.tool, handleTimeSeek, isSelecting, player],
   );
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
