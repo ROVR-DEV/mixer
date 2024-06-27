@@ -26,6 +26,8 @@ export class Player {
   editableTrack: AudioEditorTrack | null = null;
   isPlaying: boolean = false;
 
+  draggingTracks: ObservableMap<string, AudioEditorTrack> = observable.map();
+
   private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
 
   private _time: number = 0;
@@ -48,24 +50,34 @@ export class Player {
     return values(this.channels).flatMap((channel) => channel.tracks);
   }
 
-  get selectedTracksMinStartTime(): number {
-    return values(this.selectedTracks).reduce(
+  get draggingTracksMinStartTime(): number {
+    return values(this.draggingTracks).reduce(
       (minStartTime, tr) =>
-        minStartTime < tr.startTime ? minStartTime : tr.startTime,
+        minStartTime < tr.dndInfo.startTime
+          ? minStartTime
+          : tr.dndInfo.startTime,
       Infinity,
     );
   }
 
-  get selectedTracksMinChannel(): number {
-    return values(this.selectedTracks).reduce((minChannel, tr) => {
-      const channelIndex = this.channelIds.indexOf(tr.channel.id);
+  get draggingTracksMinChannel(): number {
+    return values(this.draggingTracks).reduce((minChannel, tr) => {
+      if (!tr.dndInfo.startChannelId) {
+        return minChannel;
+      }
+
+      const channelIndex = this.channelIds.indexOf(tr.dndInfo.startChannelId);
       return minChannel < channelIndex ? minChannel : channelIndex;
     }, Infinity);
   }
 
-  get selectedTracksMaxChannel(): number {
-    return values(this.selectedTracks).reduce((minChannel, tr) => {
-      const channelIndex = this.channelIds.indexOf(tr.channel.id);
+  get draggingTracksMaxChannel(): number {
+    return values(this.draggingTracks).reduce((minChannel, tr) => {
+      if (!tr.dndInfo.startChannelId) {
+        return minChannel;
+      }
+
+      const channelIndex = this.channelIds.indexOf(tr.dndInfo.startChannelId);
       return minChannel > channelIndex ? minChannel : channelIndex;
     }, 0);
   }
@@ -85,9 +97,10 @@ export class Player {
       | '_colorsGenerator'
       | '_updateTracksTime'
     >(this, {
-      selectedTracksMaxChannel: computed,
-      selectedTracksMinChannel: computed,
-      selectedTracksMinStartTime: computed,
+      draggingTracksMinStartTime: computed,
+      draggingTracksMinChannel: computed,
+      draggingTracksMaxChannel: computed,
+      draggingTracks: true,
       allTracks: computed,
       isTrackIntersectsWithTime: true,
       firstSelectedTrack: true,

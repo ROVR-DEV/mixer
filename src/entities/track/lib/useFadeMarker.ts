@@ -7,6 +7,7 @@ import {
   clamp,
   preventAll,
   removeDragGhostImage,
+  stopPropagation,
   useListener,
 } from '@/shared/lib';
 
@@ -161,6 +162,8 @@ export const useFadeMarker = ({
       onDragEnd: handleDragEnd,
       onDragOver: preventAll,
       onDrop: preventAll,
+      onMouseDown: stopPropagation,
+      onMouseUp: stopPropagation,
       ...ariaAttributes,
     },
   };

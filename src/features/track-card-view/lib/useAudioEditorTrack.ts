@@ -1,5 +1,7 @@
 'use client';
 
+import { throttle } from 'lodash-es';
+import { runInAction } from 'mobx';
 import React, { RefObject, useCallback, useEffect, useMemo } from 'react';
 
 import { clamp } from '@/shared/lib';
@@ -7,6 +9,8 @@ import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
 import { Player, TimelineController } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
+
+import { getNewChannelIndex } from './getNewChannelIndex';
 
 import {
   adjustTracksOnPaste,
@@ -84,7 +88,6 @@ export const useAudioEditorTrack = (
     }
 
     if (!track.dndInfo.isDragging) {
-      trackRef.current.style.top = '';
       return;
     }
 
@@ -92,26 +95,21 @@ export const useAudioEditorTrack = (
       return;
     }
 
-    if (!track.dndInfo.prevChannelId) {
+    if (!track.dndInfo.startChannelId) {
       return;
     }
 
     const prevChannelIndex = player.channelIds.indexOf(
-      track.dndInfo.prevChannelId,
+      track.dndInfo.startChannelId,
     );
     const currentChannelIndex = player.channelIds.indexOf(track.channel.id);
 
     const channelOffset = currentChannelIndex - prevChannelIndex;
 
-    if (channelOffset == 0) {
-      trackRef.current.style.top = '';
-      return;
-    }
-
     trackRef.current.style.top =
       channelOffset * timelineController.trackHeight + 7 + 'px';
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackRef, track.dndInfo.isDragging]);
+  }, [trackRef]);
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
@@ -177,53 +175,67 @@ export const useAudioEditorTrack = (
     [timelineController.timelineContainer.pixelsPerSecond],
   );
 
-  const setVerticalPosition = useCallback(
-    (
-      e: MouseEvent,
-      track: AudioEditorTrack,
-      minChannel: number = 0,
-      maxChannel: number = Infinity,
-    ) => {
-      if (!trackRef.current) {
-        return;
-      }
-
-      if (typeof timelineController.trackHeight !== 'number') {
-        return;
-      }
-
-      const paneStartY =
-        timelineController.boundingClientRect.y - (grid?.scrollTop ?? 0);
-
-      const globalChannelIndex = Math.floor(
-        (e.pageY - paneStartY) / timelineController.trackHeight,
-      );
-
-      if (
-        globalChannelIndex >= minChannel &&
-        globalChannelIndex < Math.min(maxChannel, player.channelIds.length)
-      ) {
-        const currentChannel = player.channels.get(
-          player.channelIds[globalChannelIndex] ?? player.channelIds.at(-1),
-        );
-
-        if (!currentChannel) {
+  const setVerticalPosition = throttle(
+    useCallback(
+      (
+        e: MouseEvent,
+        track: AudioEditorTrack,
+        minChannelIndex: number = 0,
+        maxChannelIndex: number = player.channelIds.length - 1,
+      ) => {
+        if (!trackRef.current) {
           return;
         }
 
-        if (track.channel.id !== currentChannel.id) {
-          track.channel = currentChannel;
+        if (!track.dndInfo.startChannelId) {
+          return;
         }
-      }
-    },
-    [
-      grid?.scrollTop,
-      player.channelIds,
-      player.channels,
-      timelineController.boundingClientRect.y,
-      timelineController.trackHeight,
-      trackRef,
-    ],
+
+        if (typeof timelineController.trackHeight !== 'number') {
+          return;
+        }
+
+        const startChannelIndex = player.channelIds.indexOf(
+          track.dndInfo.startChannelId,
+        );
+
+        const currentChannelIndex = player.channelIds.indexOf(track.channel.id);
+
+        const offsetY =
+          timelineController.boundingClientRect.y - (grid?.scrollTop ?? 0);
+
+        const newChannelIndex = getNewChannelIndex(
+          e.pageY - offsetY,
+          track.dndInfo.startY - offsetY,
+          timelineController.trackHeight,
+          startChannelIndex,
+          minChannelIndex,
+          maxChannelIndex,
+        );
+
+        if (newChannelIndex === currentChannelIndex) {
+          return;
+        }
+
+        const newChannel = player.channels.get(
+          player.channelIds[newChannelIndex],
+        );
+
+        if (!newChannel || track.channel.id === newChannel.id) {
+          return;
+        }
+
+        track.channel = newChannel;
+      },
+      [
+        grid?.scrollTop,
+        player.channelIds,
+        player.channels,
+        timelineController.boundingClientRect.y,
+        timelineController.trackHeight,
+        trackRef,
+      ],
+    ),
   );
 
   const setTime = useCallback(
@@ -240,36 +252,39 @@ export const useAudioEditorTrack = (
     [calcNewStartTime, player.time],
   );
 
-  const dragStart = useCallback(
-    (e: MouseEvent, track: AudioEditorTrack) => {
-      track.dndInfo = {
-        startX: e.pageX,
-        startY: e.pageY,
-        startTime: track.startTime,
-        prevChannelId: track.channel.id,
-        isDragging: true,
-      };
-
-      if (!isSelectedInPlayer) {
-        player.selectTrack(track);
-      }
-    },
-    [isSelectedInPlayer, player],
-  );
-
   const handleDragStart = useCallback(
-    (e: MouseEvent) => {
-      if (player.selectedTracks.size > 1) {
-        player.selectedTracks.forEach((selectedTrack) =>
-          dragStart(e, selectedTrack),
-        );
-        return;
-      }
-
-      dragStart(e, track);
+    (e: MouseEvent, track: AudioEditorTrack) => {
+      runInAction(() => {
+        track.dndInfo.startX = e.pageX;
+        track.dndInfo.startY = e.pageY;
+        track.dndInfo.startTime = track.startTime;
+        track.dndInfo.startChannelId = track.channel.id;
+        track.dndInfo.isDragging = true;
+      });
     },
-    [dragStart, player.selectedTracks, track],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
+
+  const setupBounds = useCallback((track: AudioEditorTrack) => {
+    runInAction(() => {
+      track.dndInfo.leftBound =
+        track.dndInfo.startTime - player.draggingTracksMinStartTime;
+
+      const startChannelIndex = player.channelIds.indexOf(
+        track.dndInfo.startChannelId ?? track.channel.id,
+      );
+
+      track.dndInfo.minChannel =
+        startChannelIndex - player.draggingTracksMinChannel;
+      track.dndInfo.maxChannel =
+        startChannelIndex +
+        player.channelIds.length -
+        1 -
+        player.draggingTracksMaxChannel;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const drag = useCallback(
     (
@@ -287,55 +302,39 @@ export const useAudioEditorTrack = (
 
   const handleDrag = useCallback(
     (e: MouseEvent) => {
-      if (player.selectedTracks.size > 1) {
-        player.selectedTracks.forEach((selectedTrack) => {
-          if (!selectedTrack.dndInfo.prevChannelId) {
-            return;
-          }
-
-          const channelIndex = player.channelIds.indexOf(
-            selectedTrack.dndInfo.prevChannelId,
-          );
-
-          drag(
-            e,
-            selectedTrack,
-            selectedTrack.dndInfo.startTime - player.selectedTracksMinStartTime,
-            channelIndex - player.selectedTracksMinChannel,
-            channelIndex +
-              (player.channelIds.length - player.selectedTracksMaxChannel) +
-              1,
-          );
-        });
-        return;
-      }
-
-      drag(e, track);
+      player.draggingTracks.forEach((selectedTrack) => {
+        setupBounds(selectedTrack);
+        drag(
+          e,
+          selectedTrack,
+          selectedTrack.dndInfo.leftBound,
+          selectedTrack.dndInfo.minChannel,
+          selectedTrack.dndInfo.maxChannel,
+        );
+      });
     },
-    [
-      drag,
-      player.channelIds,
-      player.selectedTracks,
-      player.selectedTracksMaxChannel,
-      player.selectedTracksMinChannel,
-      player.selectedTracksMinStartTime,
-      track,
-    ],
+    [drag, player.draggingTracks, setupBounds],
   );
 
-  const dragEnd = useCallback(
+  const handleDragEnd = useCallback(
     (
       e: MouseEvent | React.MouseEvent<HTMLElement>,
       track: AudioEditorTrack,
     ) => {
-      track.setStartTime(calcNewStartTime(e, track));
+      handleDrag(e as MouseEvent);
 
-      if (track.dndInfo.prevChannelId) {
-        if (track.dndInfo.prevChannelId !== track.channel.id) {
-          const prevChannel = player.channels.get(track.dndInfo.prevChannelId);
+      runInAction(() => {
+        track.dndInfo.isDragging = false;
+      });
 
-          if (prevChannel) {
-            prevChannel.removeTrack(track);
+      if (track.dndInfo.startChannelId) {
+        if (track.dndInfo.startChannelId !== track.channel.id) {
+          const startChannel = player.channels.get(
+            track.dndInfo.startChannelId,
+          );
+
+          if (startChannel) {
+            startChannel.removeTrack(track);
           }
 
           track.channel.addTrack(track);
@@ -343,30 +342,8 @@ export const useAudioEditorTrack = (
 
         adjustTracksOnPaste(track);
       }
-
-      track.dndInfo = {
-        startX: e.pageX,
-        startY: e.pageY,
-        startTime: track.startTime,
-        prevChannelId: undefined,
-        isDragging: false,
-      };
     },
-    [calcNewStartTime, player.channels],
-  );
-
-  const handleDragEnd = useCallback(
-    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
-      if (player.selectedTracks.size > 1) {
-        player.selectedTracks.forEach((selectedTrack) =>
-          dragEnd(e, selectedTrack),
-        );
-        return;
-      }
-
-      dragEnd(e, track);
-    },
-    [dragEnd, player.selectedTracks, track],
+    [handleDrag, player.channels],
   );
 
   const onDragStart = useCallback(
@@ -379,10 +356,27 @@ export const useAudioEditorTrack = (
         return;
       }
 
+      if (!isSelectedInPlayer) {
+        player.selectTrack(track);
+      }
+
+      runInAction(() => {
+        player.draggingTracks.replace(player.selectedTracks);
+      });
+
       setDragProperties(trackRef.current);
-      handleDragStart(e as MouseEvent);
+      player.draggingTracks.forEach((selectedTrack) => {
+        handleDragStart(e as MouseEvent, selectedTrack);
+      });
     },
-    [disableInteractive, handleDragStart, trackRef],
+    [
+      disableInteractive,
+      handleDragStart,
+      isSelectedInPlayer,
+      player,
+      track,
+      trackRef,
+    ],
   );
 
   const onDrag = useCallback(
@@ -407,15 +401,30 @@ export const useAudioEditorTrack = (
       }
 
       clearDragProperties(trackRef.current);
-      handleDragEnd(e);
+
+      player.draggingTracks.forEach((selectedTrack) =>
+        handleDragEnd(e, selectedTrack),
+      );
     },
-    [disableInteractive, handleDragEnd, trackRef],
+    [disableInteractive, handleDragEnd, player.draggingTracks, trackRef],
   );
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({
     onDragStart,
     onDrag,
     onDragEnd,
+  });
+
+  useEffect(() => {
+    if (!trackRef.current) {
+      return;
+    }
+
+    if (track.dndInfo.isDragging) {
+      setDragProperties(trackRef.current);
+    } else {
+      clearDragProperties(trackRef.current);
+    }
   });
 
   useEffect(() => {
@@ -431,7 +440,6 @@ export const useAudioEditorTrack = (
   }, [
     track.startTrimDuration,
     track.endTrimDuration,
-    track.dndInfo.isDragging,
     track.channel,
     track.startTime,
     timelineController.scrollController,

@@ -24,6 +24,8 @@ export class AudioEditorTrack {
 
   readonly mediaElement: HTMLMediaElement = new Audio();
 
+  readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
+
   audioPeaks: number[][] | null = null;
 
   startTime: number;
@@ -41,13 +43,6 @@ export class AudioEditorTrack {
   private _color: string | null = null;
 
   private _isTrimming: boolean = false;
-
-  private _dndInfo: TrackDnDInfo = {
-    isDragging: false,
-    startTime: 0,
-    startX: 0,
-    startY: 0,
-  };
 
   get channel(): Channel {
     return this._channel;
@@ -92,13 +87,6 @@ export class AudioEditorTrack {
 
   get trimDuration(): number {
     return this.trimEndTime - this.trimStartTime;
-  }
-
-  get dndInfo(): TrackDnDInfo {
-    return this._dndInfo;
-  }
-  set dndInfo(value: TrackDnDInfo) {
-    this._dndInfo = value;
   }
 
   constructor(track: Track, channel: Channel) {
