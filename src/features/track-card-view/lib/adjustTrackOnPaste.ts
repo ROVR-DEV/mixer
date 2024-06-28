@@ -27,7 +27,7 @@ export const adjustTracksOnPaste = (currentTrack: AudioEditorTrack) => {
       currentTrack.trimStartTime < track.trimEndTime;
 
     if (trackIntersectsOnStart && trackIntersectsOnEnd) {
-      const trackCopy = new AudioEditorTrack(track.meta, track.channel);
+      const trackCopy = track.clone();
       trackCopy.setStartTrimDuration(startOverlapTime);
       trackCopy.setStartTime(currentTrack.trimEndTime);
 
