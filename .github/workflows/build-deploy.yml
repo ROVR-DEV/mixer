@@ -90,11 +90,11 @@ jobs:
           script: |
             cd mixerdev
 
-            docker compose down
-
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
 
             docker compose pull
-            docker compose up -d
 
             docker logout
+
+            docker compose down
+            docker compose up -d
