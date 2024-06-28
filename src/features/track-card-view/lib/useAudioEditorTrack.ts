@@ -257,7 +257,7 @@ export const useAudioEditorTrack = (
       runInAction(() => {
         track.dndInfo.startX = e.pageX;
         track.dndInfo.startY = e.pageY;
-        track.dndInfo.startTime = track.startTime;
+        track.dndInfo.startTime = track.trimStartTime;
         track.dndInfo.startChannelId = track.channel.id;
         track.dndInfo.isDragging = true;
       });
@@ -327,21 +327,19 @@ export const useAudioEditorTrack = (
         track.dndInfo.isDragging = false;
       });
 
-      if (track.dndInfo.startChannelId) {
-        if (track.dndInfo.startChannelId !== track.channel.id) {
-          const startChannel = player.channels.get(
-            track.dndInfo.startChannelId,
-          );
-
-          if (startChannel) {
-            startChannel.removeTrack(track);
-          }
-
-          track.channel.addTrack(track);
-        }
-
-        adjustTracksOnPaste(track);
+      if (
+        !track.dndInfo.startChannelId ||
+        track.dndInfo.startChannelId === track.channel.id
+      ) {
+        return;
       }
+      const startChannel = player.channels.get(track.dndInfo.startChannelId);
+
+      if (startChannel) {
+        startChannel.removeTrack(track);
+      }
+
+      track.channel.addTrack(track);
     },
     [handleDrag, player.channels],
   );
@@ -365,8 +363,11 @@ export const useAudioEditorTrack = (
       });
 
       setDragProperties(trackRef.current);
-      player.draggingTracks.forEach((selectedTrack) => {
-        handleDragStart(e as MouseEvent, selectedTrack);
+
+      runInAction(() => {
+        player.draggingTracks.forEach((selectedTrack) => {
+          handleDragStart(e as MouseEvent, selectedTrack);
+        });
       });
     },
     [
@@ -402,9 +403,13 @@ export const useAudioEditorTrack = (
 
       clearDragProperties(trackRef.current);
 
-      player.draggingTracks.forEach((selectedTrack) =>
-        handleDragEnd(e, selectedTrack),
-      );
+      runInAction(() => {
+        player.draggingTracks.forEach((selectedTrack) =>
+          handleDragEnd(e, selectedTrack),
+        );
+
+        player.draggingTracks.forEach(adjustTracksOnPaste);
+      });
     },
     [disableInteractive, handleDragEnd, player.draggingTracks, trackRef],
   );

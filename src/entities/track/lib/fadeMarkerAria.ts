@@ -1,3 +1,5 @@
+import { roundTo } from '@/shared/lib';
+
 import { Side } from '../model';
 
 export const getFadeMarkerAriaAttributes = (
@@ -5,13 +7,12 @@ export const getFadeMarkerAriaAttributes = (
   side: Side,
   time: number,
 ) => {
-  const currentTime =
-    Math.round((side === 'left' ? time : trackDuration - time) * 100) / 100;
+  const currentTime = roundTo(side === 'left' ? time : trackDuration - time, 2);
 
   return {
     role: 'slider',
     'aria-label': `Fade ${side === 'left' ? 'in' : 'out'}`,
-    'aria-valuemax': trackDuration,
+    'aria-valuemax': roundTo(trackDuration, 2),
     'aria-valuenow': currentTime,
     'aria-valuetext': `Fade ${side === 'left' ? 'in' : 'out'} for ${currentTime} seconds}`,
   };

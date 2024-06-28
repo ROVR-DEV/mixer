@@ -1,3 +1,5 @@
+import { roundTo } from '@/shared/lib';
+
 import { Side } from '../model';
 
 export const getTrimMarkerAriaAttributes = (
@@ -6,12 +8,12 @@ export const getTrimMarkerAriaAttributes = (
   startTimeOffset: number,
   endTimeOffset: number,
 ) => {
-  const time = side === 'left' ? startTimeOffset : endTimeOffset;
+  const time = roundTo(side === 'left' ? startTimeOffset : endTimeOffset, 2);
 
   return {
     role: 'slider',
     'aria-label': `Trim ${side === 'left' ? 'start' : 'end'}`,
-    'aria-valuemax': trackDuration,
+    'aria-valuemax': roundTo(trackDuration, 2),
     'aria-valuenow': time,
     'aria-valuetext': `Trim ${side === 'left' ? 'start' : 'end'} for ${time} seconds}`,
   };

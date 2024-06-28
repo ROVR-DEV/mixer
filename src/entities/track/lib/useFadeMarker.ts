@@ -107,7 +107,7 @@ export const useFadeMarker = ({
 
     setWidth(
       timelineController.timeToVirtualPixels(
-        side === 'left' ? startTime : track.trimDuration - startTime,
+        clamp(side === 'left' ? startTime : track.trimDuration - startTime, 0),
       ),
     );
   }, [getMarkerStartTime, side, timelineController, track]);
