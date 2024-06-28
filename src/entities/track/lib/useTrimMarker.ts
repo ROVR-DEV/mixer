@@ -143,9 +143,6 @@ export const useTrimMarker = ({
     onClick: preventAll,
     onMouseDown: onMouseDown,
     onMouseUp: handleMouseUp,
-    onDrag: preventAll,
-    onDragStart: preventAll,
-    onDragEnd: preventAll,
     ...ariaAttributes,
   };
 };

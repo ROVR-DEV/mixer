@@ -16,6 +16,7 @@ import { FadeOverlayProps } from './interfaces';
 export const FadeOverlay = observer(function FadePoint({
   track,
   side,
+  isTrackSelected,
   className,
   ...props
 }: FadeOverlayProps) {
@@ -43,7 +44,11 @@ export const FadeOverlay = observer(function FadePoint({
         side={side}
         {...fadeMarkerProps}
       />
-      <FadeTriangleMemoized className='absolute' side={side} />
+      <FadeTriangleMemoized
+        className='absolute'
+        variant={isTrackSelected ? 'dark' : 'light'}
+        side={side}
+      />
     </div>
   );
 });

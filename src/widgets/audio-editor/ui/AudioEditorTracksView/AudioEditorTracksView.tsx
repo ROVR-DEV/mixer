@@ -2,7 +2,7 @@
 
 import { observer } from 'mobx-react-lite';
 
-import { FadeOverlay, TrackWaveform, TrimMarker } from '@/entities/track';
+import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
 
 import { AudioEditorTrackView } from '@/features/track-card-view';
 import { TrackEditMenu } from '@/features/track-edit-menu';
@@ -23,26 +23,7 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         waveformComponent={<TrackWaveform player={player} track={track} />}
         editMenu={TrackEditMenu}
       >
-        <TrimMarker
-          className='absolute bottom-0 left-0 z-20'
-          side='left'
-          track={track}
-        />
-        <TrimMarker
-          className='absolute bottom-0 right-0 z-20'
-          side='right'
-          track={track}
-        />
-        <FadeOverlay
-          className='absolute top-0 z-10'
-          side='left'
-          track={track}
-        />
-        <FadeOverlay
-          className='absolute top-0 z-10'
-          side='right'
-          track={track}
-        />
+        <TrackModifyOverlay track={track} />
       </AudioEditorTrackView>
     );
   });

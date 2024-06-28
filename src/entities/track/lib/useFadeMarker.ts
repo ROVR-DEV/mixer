@@ -3,13 +3,8 @@
 import { throttle } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  clamp,
-  preventAll,
-  removeDragGhostImage,
-  stopPropagation,
-  useListener,
-} from '@/shared/lib';
+import { clamp, preventAll, useListener } from '@/shared/lib';
+import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
 import {
   TimelineController,
@@ -106,16 +101,17 @@ export const useFadeMarker = ({
     const startTime = getMarkerStartTime();
 
     setWidth(
-      timelineController.timeToVirtualPixels(
-        clamp(side === 'left' ? startTime : track.trimDuration - startTime, 0),
+      clamp(
+        timelineController.timeToVirtualPixels(
+          side === 'left' ? startTime : track.trimDuration - startTime,
+        ),
+        0,
       ),
     );
   }, [getMarkerStartTime, side, timelineController, track]);
 
   const handleDrag = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-
+    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
       if (!track?.filters) {
         return;
       }
@@ -126,18 +122,9 @@ export const useFadeMarker = ({
     [clampTime, side, timelineController, track],
   );
 
-  const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    removeDragGhostImage(e);
-  }, []);
-
-  const handleDragEnd = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-      handleDrag(e);
-    },
-    [handleDrag],
-  );
+  const { onMouseUp, onMouseDown } = useGlobalDnD({
+    onDrag: handleDrag,
+  });
 
   useEffect(() => {
     updateWidth();
@@ -156,14 +143,9 @@ export const useFadeMarker = ({
   return {
     width,
     fadeMarkerProps: {
-      draggable: true,
-      onDrag: handleDrag,
-      onDragStart: handleDragStart,
-      onDragEnd: handleDragEnd,
-      onDragOver: preventAll,
-      onDrop: preventAll,
-      onMouseDown: stopPropagation,
-      onMouseUp: stopPropagation,
+      onClick: preventAll,
+      onMouseUp: onMouseUp,
+      onMouseDown: onMouseDown,
       ...ariaAttributes,
     },
   };

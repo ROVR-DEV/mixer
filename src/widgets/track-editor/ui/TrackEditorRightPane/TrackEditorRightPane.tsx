@@ -10,7 +10,7 @@ import {
   usePlayer,
   useHandleTimeSeek,
 } from '@/entities/audio-editor';
-import { FadeOverlay, TrackWaveform, TrimMarker } from '@/entities/track';
+import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
 import { ChannelListItemView } from '@/features/channel-control';
@@ -114,25 +114,9 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   disableInteractive
                   hideTitle
                 >
-                  <TrimMarker
-                    className='absolute bottom-0 left-0 z-20'
-                    side='left'
+                  <TrackModifyOverlay
                     track={player.editableTrack}
-                  />
-                  <TrimMarker
-                    className='absolute bottom-0 right-0 z-20'
-                    side='right'
-                    track={player.editableTrack}
-                  />
-                  <FadeOverlay
-                    className='absolute top-0 z-20'
-                    side='left'
-                    track={player.editableTrack}
-                  />
-                  <FadeOverlay
-                    className='absolute top-0 z-20'
-                    side='right'
-                    track={player.editableTrack}
+                    ignoreSelection
                   />
                 </AudioEditorTrackView>
               </ChannelListItemView>
