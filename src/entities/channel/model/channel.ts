@@ -41,18 +41,22 @@ export class Channel {
 
   setMuted = (value: boolean) => {
     this.isMuted = value;
+    this._updateSolo();
   };
 
   toggleMute = () => {
     this.isMuted = !this.isMuted;
+    this._updateSolo();
   };
 
   setSolo = (value: boolean) => {
     this.isSolo = value;
+    this._updateMuted();
   };
 
   toggleSolo = () => {
     this.isSolo = !this.isSolo;
+    this._updateMuted();
   };
 
   importTrack = (track: Track) => {
@@ -84,6 +88,18 @@ export class Channel {
 
     if (this._colorsGenerator) {
       this._colorsGenerator.next({ reset: true });
+    }
+  };
+
+  private _updateMuted = () => {
+    if (this.isSolo && this.isMuted) {
+      this.isMuted = false;
+    }
+  };
+
+  private _updateSolo = () => {
+    if (this.isMuted && this.isSolo) {
+      this.isSolo = false;
     }
   };
 }

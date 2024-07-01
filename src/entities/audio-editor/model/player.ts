@@ -82,6 +82,12 @@ export class Player {
     }, 0);
   }
 
+  get soloChannelIds(): string[] {
+    return values(this.channels)
+      .filter((channel) => channel.isSolo)
+      .map((channel) => channel.id);
+  }
+
   constructor(channels?: Channel[]) {
     channels?.forEach((channel) => this.addChannel(channel));
 
@@ -97,6 +103,8 @@ export class Player {
       | '_colorsGenerator'
       | '_updateTracksTime'
     >(this, {
+      isChannelMuted: true,
+      soloChannelIds: true,
       draggingTracksMinStartTime: computed,
       draggingTracksMinChannel: computed,
       draggingTracksMaxChannel: computed,
@@ -137,6 +145,12 @@ export class Player {
       updateAudioBuffer: true,
     });
   }
+
+  isChannelMuted = (channel: Channel) => {
+    return (
+      (this.soloChannelIds.length > 0 && !channel.isSolo) || channel.isMuted
+    );
+  };
 
   addListener = (listener: TimeListener) => {
     this._listeners.add(listener);
@@ -289,7 +303,7 @@ export class Player {
       return;
     }
 
-    const isMuted = track.channel.isMuted;
+    const isMuted = this.isChannelMuted(track.channel);
     const isPlaying = track.audioBuffer.isPlaying();
 
     if (!isMuted && !isPlaying) {

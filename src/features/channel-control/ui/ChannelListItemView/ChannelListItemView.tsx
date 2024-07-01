@@ -12,6 +12,7 @@ export const ChannelListItemView = observer(function ChannelListItemView({
   player,
   channel,
   ignoreSelection,
+  ignoreMuted,
   ...props
 }: ChannelListItemViewProps) {
   const audioEditor = useAudioEditor();
@@ -33,6 +34,7 @@ export const ChannelListItemView = observer(function ChannelListItemView({
       isSelected={player.selectedChannelId === channel.id}
       onClick={handleClick}
       ignoreSelection={ignoreSelection}
+      isMuted={!ignoreMuted && player.isChannelMuted(channel)}
       {...props}
     />
   );

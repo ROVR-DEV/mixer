@@ -5,4 +5,5 @@ export interface ChannelListItemViewProps
   extends Omit<ChannelListItemProps, 'ref'> {
   player: Player;
   channel: Channel;
+  ignoreMuted?: boolean;
 }

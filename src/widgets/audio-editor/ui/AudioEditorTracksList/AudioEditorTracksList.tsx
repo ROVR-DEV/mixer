@@ -24,7 +24,6 @@ export const AudioEditorTracksList = observer(function AudioEditorTracksList({
         className='relative'
         player={player}
         channel={channel}
-        isMuted={channel.isMuted}
         style={{ height: timelineController.trackHeight }}
       >
         <AudioEditorTracksView channel={channel} player={player} />

@@ -22,6 +22,7 @@ export const AudioEditorChannelsListView = observer(
           player={player}
           channel={channel}
           leftPadding
+          ignoreMuted
         >
           <ChannelControlView
             number={index + 1}
