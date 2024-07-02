@@ -43,7 +43,7 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
     >
       <RegionMarker
         ref={regionRef}
-        className='absolute left-0 top-0'
+        className='absolute left-0 top-0 h-full max-h-3'
         style={{
           left:
             timelineController.timeToVirtualPixels(player.region.start) -

@@ -5,16 +5,15 @@ import { cn } from '@/shared/lib';
 import { RegionProps } from './interfaces';
 
 export const RegionMarker = forwardRef<HTMLDivElement, RegionProps>(
-  function RegionMarker({ markerHeight = 12, isActive, ...props }, ref) {
+  function RegionMarker({ isActive, ...props }, ref) {
     return (
       <div ref={ref} {...props}>
         <div
-          className={cn('bg-third-darker/70', {
+          className={cn('bg-third-darker/70 h-full min-h-full', {
             'bg-[#FF6B00B2]': isActive,
           })}
-          style={{ height: markerHeight }}
         />
-        <div className='h-screen bg-white/5' />
+        <div className='pointer-events-none h-screen bg-white/5' />
       </div>
     );
   },
