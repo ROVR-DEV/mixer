@@ -1,3 +1,6 @@
+'use client';
+
+import { observer } from 'mobx-react-lite';
 import { memo, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
@@ -14,7 +17,7 @@ import {
   UndoIcon,
 } from '@/shared/ui/assets';
 
-import { AudioEditorTool } from '../../model';
+import { AudioEditorTool, usePlayer } from '../../model';
 import { AudioEditorFloatingToolbarGroup } from '../AudioEditorFloatingToolbarGroup';
 
 import { AudioEditorFloatingToolbarProps } from './interfaces';
@@ -30,43 +33,67 @@ const TOOL_ICONS: Record<AudioEditorTool, JSX.Element> = {
   redo: <RedoIcon />,
 };
 
-export const AudioEditorFloatingToolbar = ({
-  currentTool,
-  tools,
-  onToolChange,
-  className,
-  ...props
-}: AudioEditorFloatingToolbarProps) => {
-  const groups = useMemo(() => {
-    return tools.map((toolGroup) => (
-      <AudioEditorFloatingToolbarGroup key={`group[${toolGroup.join(',')}]`}>
-        {toolGroup.map((tool) => (
-          <IconButton
-            key={tool}
-            disabled={!(tool === 'cursor' || tool === 'scissors')}
-            variant={currentTool === tool ? 'inverse' : 'primaryFilled'}
-            svgFillType={tool !== 'fit' ? 'stroke' : 'fill'}
-            onClick={() => onToolChange?.(tool)}
-          >
-            {TOOL_ICONS[tool]}
-          </IconButton>
-        ))}
-      </AudioEditorFloatingToolbarGroup>
-    ));
-  }, [currentTool, onToolChange, tools]);
+export const AudioEditorFloatingToolbar = observer(
+  function AudioEditorFloatingToolbar({
+    currentTool,
+    tools,
+    onToolChange,
+    className,
+    ...props
+  }: AudioEditorFloatingToolbarProps) {
+    const player = usePlayer();
 
-  return (
-    <div
-      className={cn('flex items-center rounded-lg bg-accent', className)}
-      {...props}
-    >
-      <div className='cursor-move pl-4'>
-        <MoveIcon />
+    const groups = useMemo(() => {
+      return tools.map((toolGroup) => (
+        <AudioEditorFloatingToolbarGroup key={`group[${toolGroup.join(',')}]`}>
+          {toolGroup.map((tool) => {
+            const isActive = (() => {
+              switch (tool) {
+                case 'repeat':
+                  return player.isRegionLoopEnabled;
+                case 'cursor':
+                case 'scissors':
+                  return currentTool === tool;
+              }
+            })();
+
+            return (
+              <IconButton
+                key={tool}
+                disabled={
+                  !(
+                    tool === 'cursor' ||
+                    tool === 'scissors' ||
+                    tool === 'repeat'
+                  )
+                }
+                variant={isActive ? 'inverse' : 'primaryFilled'}
+                svgFillType={tool !== 'fit' ? 'stroke' : 'fill'}
+                onClick={() => onToolChange?.(tool)}
+              >
+                {TOOL_ICONS[tool]}
+              </IconButton>
+            );
+          })}
+        </AudioEditorFloatingToolbarGroup>
+      ));
+    }, [currentTool, onToolChange, player.isRegionLoopEnabled, tools]);
+
+    return (
+      <div
+        className={cn('flex items-center rounded-lg bg-accent', className)}
+        {...props}
+      >
+        <div className='cursor-move pl-4'>
+          <MoveIcon />
+        </div>
+        <div className='flex items-center divide-x divide-primary'>
+          {groups}
+        </div>
       </div>
-      <div className='flex items-center divide-x divide-primary'>{groups}</div>
-    </div>
-  );
-};
+    );
+  },
+);
 
 export const AudioEditorFloatingToolbarMemoized = memo(
   AudioEditorFloatingToolbar,

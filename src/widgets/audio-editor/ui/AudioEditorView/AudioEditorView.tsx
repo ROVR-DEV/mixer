@@ -24,9 +24,9 @@ export const AudioEditorView = observer(function AudioEditorView({
   className,
   ...props
 }: AudioEditorViewProps) {
-  const [audioEditor] = useState(() => new AudioEditor());
-
   const { player, tracksManager } = usePlayerSetup(playlist);
+
+  const [audioEditor] = useState(() => new AudioEditor(player));
 
   useAudioEditorGlobalControls(player);
 
