@@ -2,6 +2,7 @@ import {
   IObservableArray,
   ObservableMap,
   computed,
+  makeAutoObservable,
   makeObservable,
   observable,
   values,
@@ -18,6 +19,40 @@ import { trackColorsGenerator } from './trackColorsGenerator';
 
 export type TimeListener = (time: number) => void;
 
+export interface Region {
+  start: number;
+  end: number;
+
+  get duration(): number;
+}
+
+export class RegionImpl implements Region {
+  private _from: number = 0;
+  private _to: number = 0;
+
+  get duration(): number {
+    return this.end - this.start;
+  }
+
+  get start(): number {
+    return this._from;
+  }
+  set start(value: number) {
+    this._from = value;
+  }
+
+  get end(): number {
+    return this._to;
+  }
+  set end(value: number) {
+    this._to = value;
+  }
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+}
+
 export class Player {
   channelIds: IObservableArray<string> = observable.array();
   channels: ObservableMap<string, Channel> = observable.map();
@@ -27,6 +62,14 @@ export class Player {
   isPlaying: boolean = false;
 
   draggingTracks: ObservableMap<string, AudioEditorTrack> = observable.map();
+
+  region: Region = new RegionImpl();
+
+  private _isRegionLoopEnabled: boolean = false;
+
+  get isRegionLoopEnabled(): boolean {
+    return this._isRegionLoopEnabled;
+  }
 
   private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
 
@@ -102,7 +145,12 @@ export class Player {
       | '_triggerAllListeners'
       | '_colorsGenerator'
       | '_updateTracksTime'
+      | '_isRegionLoopEnabled'
     >(this, {
+      isRegionLoopEnabled: true,
+      region: true,
+      _isRegionLoopEnabled: true,
+      toggleRegionLoop: true,
       isChannelMuted: true,
       soloChannelIds: true,
       draggingTracksMinStartTime: computed,
@@ -145,6 +193,10 @@ export class Player {
       updateAudioBuffer: true,
     });
   }
+
+  toggleRegionLoop = () => {
+    this._isRegionLoopEnabled = !this._isRegionLoopEnabled;
+  };
 
   isChannelMuted = (channel: Channel) => {
     return (
@@ -259,6 +311,13 @@ export class Player {
   updateAudioBuffer = () => {
     if (!this.isPlaying) {
       return;
+    }
+
+    if (
+      this._isRegionLoopEnabled &&
+      (this.time > this.region.end || this.time < this.region.start)
+    ) {
+      this.seekTo(this.region.start);
     }
 
     this.channels.forEach((channel) => {

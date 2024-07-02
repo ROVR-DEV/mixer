@@ -12,7 +12,7 @@ import {
 } from '@/entities/audio-editor';
 import { TracksManagerContext } from '@/entities/track';
 
-import { useAudioEditorGlobalControls, usePlayer } from '../../lib';
+import { useAudioEditorGlobalControls, usePlayerSetup } from '../../lib';
 import { AudioEditorHeaderMemoized } from '../AudioEditorHeader';
 import { TimelineView } from '../TimelineView';
 
@@ -26,7 +26,7 @@ export const AudioEditorView = observer(function AudioEditorView({
 }: AudioEditorViewProps) {
   const [audioEditor] = useState(() => new AudioEditor());
 
-  const { player, tracksManager } = usePlayer(playlist);
+  const { player, tracksManager } = usePlayerSetup(playlist);
 
   useAudioEditorGlobalControls(player);
 

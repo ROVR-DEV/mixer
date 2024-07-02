@@ -11,7 +11,7 @@ import { TrackData, TracksManager } from '@/entities/track';
 
 import { importTracksToChannels } from './importTracksToChannels';
 
-export const usePlayer = (playlist: PlaylistDTO) => {
+export const usePlayerSetup = (playlist: PlaylistDTO) => {
   const playlistKey = JSON.stringify(
     playlist.tracks.map((track) => track.uuid),
   );

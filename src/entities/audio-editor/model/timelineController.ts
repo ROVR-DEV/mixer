@@ -207,6 +207,31 @@ export class TimelineController {
     this._wheelEventTriggerElements.delete(element);
   };
 
+  mapPixelsFromGlobal = (x: number) => {
+    return x + this.scroll;
+  };
+
+  mapPixelsToGlobal = (x: number) => {
+    return x - this.scroll;
+  };
+
+  timeToPixels = (time: number) => {
+    return (
+      time * this.pixelsPerSecond +
+      this.timelineLeftPadding +
+      this.timelineContainer.pixelsPerSecond
+    );
+  };
+
+  pixelsToTime = (x: number, relativeToContainer = true) => {
+    return (
+      (x -
+        (relativeToContainer ? this.boundingClientRect.x : 0) -
+        this.timelineLeftPadding) /
+      this.timelineContainer.pixelsPerSecond
+    );
+  };
+
   realGlobalPixelsToLocal = (x: number) => {
     return x - this._scroll;
   };
@@ -279,6 +304,8 @@ export class TimelineController {
     runInAction(() => {
       this.timelineContainer.pixelsPerSecond = getPixelPerSeconds(zoom);
       this.zoom = zoom;
+
+      this.scrollController.step = 50 / this.zoom;
     });
   };
 }

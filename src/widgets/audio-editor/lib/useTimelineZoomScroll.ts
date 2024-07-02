@@ -48,7 +48,7 @@ export const useTimelineZoomScroll = ({
   startTime = 0,
   duration,
   zoomStep = 1.25,
-  scrollStep = 50,
+  scrollStep = 1,
   minZoom = 1,
   maxZoom = Math.pow(1.25, 33),
   timelineLeftPadding = TIMELINE_LEFT_PADDING,

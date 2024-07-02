@@ -11,6 +11,7 @@ import {
   usePlayer,
 } from '@/entities/audio-editor';
 
+import { AudioEditorRegion } from '@/features/audio-editor-region';
 import {
   TimelinePlayHeadView,
   TimelineRulerMemoized,
@@ -67,7 +68,8 @@ export const TimelineHeader = observer(function TimelineHeader({
       onClick={handleClickOnRuler}
       {...props}
     >
-      <TimelinePlayHeadView className='absolute z-10' />
+      <TimelinePlayHeadView className='absolute z-30' />
+      <AudioEditorRegion className='absolute top-[50px] z-20 h-[12px] w-full overflow-x-clip' />
       <TimelineRulerMemoized
         className='pointer-events-none w-full'
         centerLine={centerLine}
