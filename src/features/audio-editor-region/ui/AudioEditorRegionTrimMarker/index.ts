@@ -1,2 +1,2 @@
-export * from './AudioEditorRegion';
 export * from './AudioEditorRegionTrimMarker';
+export * from './interfaces';

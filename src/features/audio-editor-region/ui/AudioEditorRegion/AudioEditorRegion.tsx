@@ -10,6 +10,7 @@ import {
 } from '@/entities/audio-editor';
 
 import { useAudioEditorRegion } from '../../lib';
+import { AudioEditorRegionTrimMarker } from '../AudioEditorRegionTrimMarker';
 
 import { AudioEditorRegionProps } from './interfaces';
 
@@ -39,9 +40,10 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
       ref={wrapperRef}
       className={cn(className)}
       onMouseDown={onMouseDown}
+      onClick={preventAll}
       {...props}
     >
-      <RegionMarker
+      <div
         ref={regionRef}
         className='absolute left-0 top-0 h-full max-h-3'
         style={{
@@ -51,9 +53,21 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
             timelineController.timelineLeftPadding,
           width: timelineController.timeToVirtualPixels(player.region.duration),
         }}
-        isActive={player.isRegionLoopEnabled}
-        onClick={handleClick}
-      />
+      >
+        <RegionMarker
+          className='h-full'
+          isActive={player.isRegionLoopEnabled}
+          onClick={handleClick}
+        />
+        <AudioEditorRegionTrimMarker
+          className='absolute left-0 top-0 h-full'
+          trimSide='left'
+        />
+        <AudioEditorRegionTrimMarker
+          className='absolute right-0 top-0 h-full'
+          trimSide='right'
+        />
+      </div>
     </div>
   );
 });

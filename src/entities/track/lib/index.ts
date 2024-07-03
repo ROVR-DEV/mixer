@@ -1,5 +1,5 @@
 export * from './localStorage';
 export * from './useFadeMarker';
-export * from './useTrimMarker';
+export * from './useTrackTrimMarker';
 export * from './getBounds';
 export * from './fadeMarkerAria';

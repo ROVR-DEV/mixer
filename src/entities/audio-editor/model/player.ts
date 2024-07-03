@@ -26,7 +26,7 @@ export interface Region {
   get duration(): number;
 }
 
-export class RegionImpl implements Region {
+export class MobxRegion implements Region {
   private _from: number = 0;
   private _to: number = 0;
 
@@ -63,7 +63,7 @@ export class Player {
 
   draggingTracks: ObservableMap<string, AudioEditorTrack> = observable.map();
 
-  region: Region = new RegionImpl();
+  region: Region = new MobxRegion();
 
   private _isRegionLoopEnabled: boolean = false;
 

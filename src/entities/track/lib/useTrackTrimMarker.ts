@@ -3,9 +3,9 @@
 import { throttle } from 'lodash-es';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-// eslint-disable-next-line boundaries/element-types
 import { clamp, preventAll } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
+import { TrimSide } from '@/shared/ui';
 
 // eslint-disable-next-line boundaries/element-types
 import { TimelineController } from '@/entities/audio-editor';
@@ -13,12 +13,12 @@ import { TimelineController } from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
 
-import { AudioEditorTrack, Side, TrimSide } from '../model';
+import { AudioEditorTrack, Side } from '../model';
 
 import { getTrimMarkerAriaAttributes } from './trimMarkerAria';
 
 export interface UseTrimMarkerProps {
-  side: TrimSide;
+  trimSide: TrimSide;
   track: AudioEditorTrack | null;
   timelineController: TimelineController;
 }
@@ -51,9 +51,9 @@ const updateTrim = throttle(
 );
 
 export const useTrimMarker = ({
-  side,
   track,
   timelineController,
+  trimSide,
 }: UseTrimMarkerProps) => {
   const trimMarkerRef = useRef<HTMLDivElement | null>(null);
 
@@ -61,11 +61,16 @@ export const useTrimMarker = ({
     () =>
       getTrimMarkerAriaAttributes(
         track?.duration ?? 0,
-        side,
+        trimSide,
         track?.startTrimDuration ?? 0,
         track?.endTrimDuration ?? 0,
       ),
-    [side, track?.duration, track?.endTrimDuration, track?.startTrimDuration],
+    [
+      trimSide,
+      track?.duration,
+      track?.endTrimDuration,
+      track?.startTrimDuration,
+    ],
   );
 
   const [bounds, setBounds] = useState<{ left: number; right: number }>({
@@ -112,9 +117,9 @@ export const useTrimMarker = ({
         return;
       }
 
-      updateTrim(e, track, side, timelineController, bounds);
+      updateTrim(e, track, trimSide, timelineController, bounds);
     },
-    [bounds, side, timelineController, track],
+    [bounds, trimSide, timelineController, track],
   );
 
   const handleMouseUp = useCallback(() => {

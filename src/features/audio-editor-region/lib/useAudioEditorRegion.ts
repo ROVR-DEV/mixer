@@ -3,11 +3,17 @@ import { useSelection } from '@/shared/lib/useSelection';
 
 import { Player, TimelineController } from '@/entities/audio-editor';
 
+import { checkAndToggleRegionLoop } from './checkAndToggleRegionLoop';
+
 export const useAudioEditorRegion = (
   player: Player,
   timelineController: TimelineController,
 ) => {
   const handleChange = (rect: Rect) => {
+    if (!player.isRegionLoopEnabled) {
+      player.toggleRegionLoop();
+    }
+
     requestAnimationFrame(() => {
       player.region.start = clamp(
         timelineController.pixelsToTime(rect.left),
@@ -18,6 +24,8 @@ export const useAudioEditorRegion = (
         timelineController.pixelsToTime(rect.right),
         player.region.start,
       );
+
+      checkAndToggleRegionLoop(player);
     });
   };
 

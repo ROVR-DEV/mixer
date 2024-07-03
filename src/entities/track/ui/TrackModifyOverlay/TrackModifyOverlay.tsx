@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { usePlayer } from '@/entities/audio-editor';
 
 import { FadeOverlay } from '../FadeOverlay';
-import { TrimMarker } from '../TrimMarker';
+import { TrackTrimMarker } from '../TrackTrimMarker';
 
 import { TrackModifyOverlayProps } from './interfaces';
 
@@ -32,14 +32,14 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
         track={track}
         isTrackSelected={isSelectedInEditor}
       />
-      <TrimMarker
+      <TrackTrimMarker
         className='absolute bottom-0 left-0 z-20'
-        side='left'
+        trimSide='left'
         track={track}
       />
-      <TrimMarker
+      <TrackTrimMarker
         className='absolute bottom-0 right-0 z-20'
-        side='right'
+        trimSide='right'
         track={track}
       />
     </>

@@ -21,6 +21,16 @@ export const tailwindConfig: Config = {
         ruler: '#9B9B9B',
         grid: { DEFAULT: '#2D2D2D', light: '#555555' },
       },
+      cursor: {
+        'trim-left':
+          'url(/icons/trim-icon-left.svg) 16 16,\
+           url(/icons/trim-icon-left.png) 16 16,\
+           col-resize',
+        'trim-right':
+          'url(/icons/trim-icon-right.svg) 16 16,\
+          url(/icons/trim-icon-right.png) 16 16,\
+          col-resize',
+      },
       fontFamily: {
         sans: ['var(--font-kern)'],
       },
