@@ -4,6 +4,8 @@ export type IconButtonVariant =
   | 'primaryFilled'
   | 'secondary'
   | 'secondaryFilled'
-  | 'inverse';
+  | 'accent'
+  | 'inverse'
+  | 'inverseFilled';
 
 export type IconButtonSvgFillType = 'fill' | 'stroke' | 'both';

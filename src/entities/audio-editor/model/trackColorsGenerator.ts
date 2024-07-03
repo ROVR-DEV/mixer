@@ -8,7 +8,7 @@ export function* trackColorsGenerator(
     const color = yield colors[currentColorIndex];
 
     if (typeof color === 'object' && color.reset === true) {
-      currentColorIndex = 0;
+      currentColorIndex = -1;
       continue;
     }
 

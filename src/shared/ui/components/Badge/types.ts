@@ -1,1 +1,1 @@
-export type BadgeVariant = 'default' | 'filled' | 'inverse';
+export type BadgeVariant = 'default' | 'filled' | 'accent';

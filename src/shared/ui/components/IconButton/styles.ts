@@ -11,7 +11,9 @@ const defaultStyles: Record<IconButtonVariant, string> = {
   primaryFilled: cn(baseStyles, 'border border-transparent bg-accent'),
   secondary: cn(baseStyles, 'border border-third'),
   secondaryFilled: cn(baseStyles, 'border border-transparent bg-third'),
+  accent: cn(baseStyles, 'border border-transparent bg-primary'),
   inverse: cn(baseStyles, 'border border-transparent bg-primary'),
+  inverseFilled: cn(baseStyles, 'border border-transparent bg-accent-inverse'),
 };
 
 const defaultFillStyles: Record<
@@ -31,12 +33,20 @@ const defaultFillStyles: Record<
     fill: '[&_svg]:fill-third',
   },
   secondaryFilled: {
-    stroke: '[&_svg_*]:stroke-primary',
-    fill: '[&_svg]:fill-primary',
+    stroke: '[&_svg_*]:stroke-secondary',
+    fill: '[&_svg]:fill-secondary',
   },
-  inverse: {
+  accent: {
     stroke: '[&_svg_*]:stroke-accent',
     fill: '[&_svg]:fill-accent',
+  },
+  inverse: {
+    stroke: '[&_svg_*]:stroke-accent-inverse',
+    fill: '[&_svg]:fill-accent-inverse',
+  },
+  inverseFilled: {
+    stroke: '[&_svg_*]:stroke-primary',
+    fill: '[&_svg]:fill-primary',
   },
   unstyled: { stroke: '', fill: '' },
 };

@@ -10,7 +10,7 @@ export const MuteButton = ({ isMuted, ...props }: MuteButtonProps) => {
       role='switch'
       aria-label='Mute\unmute this track'
       aria-checked={isMuted}
-      variant={isMuted ? 'primaryFilled' : 'secondary'}
+      variant={isMuted ? 'inverseFilled' : 'secondary'}
       {...props}
     >
       <MuteChannelIcon />

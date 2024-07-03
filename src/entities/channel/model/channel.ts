@@ -60,14 +60,14 @@ export class Channel {
   };
 
   importTrack = (track: Track) => {
-    const trackWithMeta = new AudioEditorTrack(track, this);
+    const audioEditorTrack = new AudioEditorTrack(track, this);
 
     if (this._colorsGenerator) {
-      trackWithMeta.color = this._colorsGenerator.next().value;
+      audioEditorTrack.color = this._colorsGenerator.next().value;
     }
 
-    this.tracks.push(trackWithMeta);
-    return trackWithMeta;
+    this.tracks.push(audioEditorTrack);
+    return audioEditorTrack;
   };
 
   addTrack = (track: AudioEditorTrack) => {

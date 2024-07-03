@@ -8,9 +8,8 @@ export const tailwindConfig: Config = {
   theme: {
     extend: {
       colors: {
-        accent: { DEFAULT: '#FFF057', light: '#FFED24' },
+        accent: { DEFAULT: '#FFF057', light: '#FFED24', inverse: '#3E5DAB' },
         primary: { dark: '#101010', DEFAULT: '#161616' },
-        error: { DEFAULT: '#D64848' },
         secondary: { DEFAULT: '#2D2D2D', light: '#494949' },
         third: {
           darker: '#646464',
@@ -18,6 +17,7 @@ export const tailwindConfig: Config = {
           DEFAULT: '#9B9B9B',
           light: '#D9D9D9',
         },
+        error: { DEFAULT: '#D64848' },
         ruler: '#9B9B9B',
         grid: { DEFAULT: '#2D2D2D', light: '#555555' },
       },

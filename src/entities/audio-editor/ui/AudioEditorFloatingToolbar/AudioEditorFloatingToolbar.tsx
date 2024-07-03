@@ -67,7 +67,7 @@ export const AudioEditorFloatingToolbar = observer(
                     tool === 'repeat'
                   )
                 }
-                variant={isActive ? 'inverse' : 'primaryFilled'}
+                variant={isActive ? 'accent' : 'primaryFilled'}
                 svgFillType={tool !== 'fit' ? 'stroke' : 'fill'}
                 onClick={() => onToolChange?.(tool)}
               >
