@@ -15,7 +15,6 @@ import { AudioEditorRegionTrimMarker } from '../AudioEditorRegionTrimMarker';
 import { AudioEditorRegionProps } from './interfaces';
 
 export const AudioEditorRegion = observer(function AudioEditorRegion({
-  className,
   ...props
 }: AudioEditorRegionProps) {
   const player = usePlayer();
@@ -23,7 +22,6 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const regionRef = useRef<HTMLDivElement | null>(null);
-  3;
 
   const { onMouseDown } = useAudioEditorRegion(player, timelineController);
 
@@ -38,14 +36,15 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
   return (
     <div
       ref={wrapperRef}
-      className={cn(className)}
       onMouseDown={onMouseDown}
       onClick={preventAll}
       {...props}
     >
       <div
         ref={regionRef}
-        className='absolute left-0 top-0 h-full max-h-3'
+        className={cn('absolute left-0 top-0 h-full max-h-3', {
+          hidden: player.region.duration === 0,
+        })}
         style={{
           left:
             timelineController.timeToVirtualPixels(player.region.start) -

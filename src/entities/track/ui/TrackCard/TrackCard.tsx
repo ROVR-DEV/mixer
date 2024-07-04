@@ -2,7 +2,7 @@
 
 import { forwardRef, memo } from 'react';
 
-import { cn } from '@/shared/lib';
+import { cn, stopPropagation } from '@/shared/lib';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
 
 import { EditBadge } from '../EditBadge';
@@ -53,6 +53,8 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
                 '@[96px]:flex': isSelected,
               },
             )}
+            onMouseDown={stopPropagation}
+            onMouseUp={stopPropagation}
           >
             <EditBadge />
           </PopoverTrigger>

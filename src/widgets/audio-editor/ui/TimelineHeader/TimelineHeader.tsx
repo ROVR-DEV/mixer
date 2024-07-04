@@ -68,7 +68,7 @@ export const TimelineHeader = observer(function TimelineHeader({
       onClick={handleClickOnRuler}
       {...props}
     >
-      <TimelinePlayHeadView className='absolute z-30' />
+      <TimelinePlayHeadView className='absolute z-20' />
       <AudioEditorRegion className='absolute top-[50px] z-20 h-[12px] w-full overflow-x-clip' />
       <TimelineRulerMemoized
         className='pointer-events-none w-full'

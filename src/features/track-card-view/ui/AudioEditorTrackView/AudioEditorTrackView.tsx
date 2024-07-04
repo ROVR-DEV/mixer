@@ -94,6 +94,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       className={cn('absolute z-0', className)}
       onMouseDown={handleMouseDown}
       onMouseUp={onMouseUp}
+      onClick={handleClick}
     >
       <TrimBackgroundView className='absolute left-0 top-0' track={track} />
       <TrackCardMemoized
@@ -102,7 +103,6 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         track={track.meta}
         isSolo={track.channel?.isSolo}
         isSelected={isSelected}
-        onClick={handleClick}
         editPopoverContent={
           EditMenu ? (
             <EditMenu
