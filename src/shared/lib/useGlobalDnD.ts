@@ -7,23 +7,25 @@ import { DnDData, Point } from '../model';
 import { preventAll } from './preventAll';
 import { useWindowEvent } from './useWindowEvent';
 
-export interface UseGlobalDnDProps {
+export interface UseGlobalDnDProps<T extends Record<string, unknown>> {
   onDragStart?: (
     e: MouseEvent | React.MouseEvent<HTMLElement>,
-    dndData: DnDData,
+    dndData: DnDData<T>,
   ) => void;
-  onDrag?: (e: MouseEvent, dndData: DnDData) => void;
+  onDrag?: (e: MouseEvent, dndData: DnDData<T>) => void;
   onDragEnd?: (
     e: MouseEvent | React.MouseEvent<HTMLElement>,
-    dndData: DnDData,
+    dndData: DnDData<T>,
   ) => void;
 }
 
-export const useGlobalDnD = ({
+export const useGlobalDnD = <
+  T extends Record<string, unknown> = Record<string, unknown>,
+>({
   onDragStart,
   onDrag,
   onDragEnd,
-}: UseGlobalDnDProps) => {
+}: UseGlobalDnDProps<T>) => {
   const isPressedRef = useRef(false);
   const isDraggingRef = useRef(false);
 
@@ -31,7 +33,7 @@ export const useGlobalDnD = ({
 
   const [isDragging, setIsDragging] = useState(false);
 
-  const dndDataRef = useRef<DnDData>({
+  const dndDataRef = useRef<DnDData<T>>({
     isDragging: false,
     startPosition: { x: 0, y: 0 },
     currentPosition: { x: 0, y: 0 },

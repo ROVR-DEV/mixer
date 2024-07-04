@@ -10,8 +10,8 @@ export const FadeMarker = ({ side, className, ...props }: FadeMarkerProps) => {
       className={cn(
         'flex h-[50%] w-[61px] flex-col items-center cursor-ew-resize group',
         {
-          'left-[-30px]': side === 'right',
-          'right-[-30px]': side === 'left',
+          'left-[-20px]': side === 'right',
+          'right-[-20px]': side === 'left',
         },
         className,
       )}

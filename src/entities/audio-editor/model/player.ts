@@ -2,7 +2,6 @@ import {
   IObservableArray,
   ObservableMap,
   computed,
-  makeAutoObservable,
   makeObservable,
   observable,
   values,
@@ -15,43 +14,10 @@ import { Channel, TRACK_COLORS } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrack } from '@/entities/track';
 
+import { MobxRegion, Region } from './region';
 import { trackColorsGenerator } from './trackColorsGenerator';
 
 export type TimeListener = (time: number) => void;
-
-export interface Region {
-  start: number;
-  end: number;
-
-  get duration(): number;
-}
-
-export class MobxRegion implements Region {
-  private _from: number = 0;
-  private _to: number = 0;
-
-  get duration(): number {
-    return this.end - this.start;
-  }
-
-  get start(): number {
-    return this._from;
-  }
-  set start(value: number) {
-    this._from = value;
-  }
-
-  get end(): number {
-    return this._to;
-  }
-  set end(value: number) {
-    this._to = value;
-  }
-
-  constructor() {
-    makeAutoObservable(this);
-  }
-}
 
 export class Player {
   channelIds: IObservableArray<string> = observable.array();

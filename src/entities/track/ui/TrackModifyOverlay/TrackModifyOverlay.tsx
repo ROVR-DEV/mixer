@@ -20,18 +20,21 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
 
   return (
     <>
-      <FadeOverlay
-        className='absolute top-0 z-10'
-        side='left'
-        track={track}
-        isTrackSelected={isSelectedInEditor}
-      />
-      <FadeOverlay
-        className='absolute top-0 z-10'
-        side='right'
-        track={track}
-        isTrackSelected={isSelectedInEditor}
-      />
+      <div className='absolute top-0 z-10 flex size-full'>
+        <FadeOverlay
+          className='h-full'
+          side='left'
+          track={track}
+          isTrackSelected={isSelectedInEditor}
+        />
+        <div className='grow' />
+        <FadeOverlay
+          className='h-full'
+          side='right'
+          track={track}
+          isTrackSelected={isSelectedInEditor}
+        />
+      </div>
       <TrackTrimMarker
         className='absolute bottom-0 left-0 z-20'
         trimSide='left'

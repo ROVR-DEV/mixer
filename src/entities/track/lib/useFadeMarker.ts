@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { clamp, preventAll, useListener } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
+import { DnDData } from '@/shared/model';
 
 import {
   TimelineController,
@@ -14,7 +15,6 @@ import {
 import { FadeSide, AudioEditorTrack, Side } from '../model';
 
 import { getFadeMarkerAriaAttributes } from './fadeMarkerAria';
-import { getGlobalBounds } from './getBounds';
 
 export interface UseFadeMarkerProps {
   side: FadeSide;
@@ -35,14 +35,28 @@ const setFade = throttle(
         track.startTrimDuration,
         trackRelativeTime - track.startTrimDuration,
       );
+
+      if (
+        track.filters.fadeInNode.endTime > track.filters.fadeOutNode.startTime
+      ) {
+        setFade(track, track.filters.fadeInNode.endTime, 'right');
+      }
     } else if (side === 'right') {
       track?.filters.fadeOutNode.linearFadeOut(
         trackRelativeTime,
         track.duration - track.endTrimDuration - trackRelativeTime,
       );
+
+      if (
+        track.filters.fadeOutNode.startTime < track.filters.fadeInNode.endTime
+      ) {
+        setFade(track, track.filters.fadeOutNode.startTime, 'left');
+      }
     }
   },
 );
+
+interface FadeMarkerDnDData extends DnDData<{ startTime: number }> {}
 
 export const useFadeMarker = ({
   side,
@@ -83,10 +97,9 @@ export const useFadeMarker = ({
 
   const clampTime = useCallback(
     (time: number) => {
-      const { leftBound, rightBound } = getGlobalBounds(track, side);
-      return clamp(time, leftBound, rightBound);
+      return clamp(time, track?.trimStartTime, track?.trimEndTime);
     },
-    [side, track],
+    [track],
   );
 
   const [width, setWidth] = useState(
@@ -110,19 +123,48 @@ export const useFadeMarker = ({
     );
   }, [getMarkerStartTime, side, timelineController, track]);
 
-  const handleDrag = useCallback(
-    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
+  const handleDragStart = useCallback(
+    (
+      e: MouseEvent | React.MouseEvent<HTMLElement>,
+      dndData: FadeMarkerDnDData,
+    ) => {
       if (!track?.filters) {
         return;
       }
 
-      const time = clampTime(timelineController.virtualPixelsToTime(e.pageX));
+      dndData.customProperties.startTime =
+        side === 'left'
+          ? track?.filters.fadeInNode.endTime
+          : track?.filters.fadeOutNode.startTime;
+    },
+    [side, track?.filters],
+  );
+
+  const handleDrag = useCallback(
+    (
+      e: MouseEvent | React.MouseEvent<HTMLElement>,
+      dndData: FadeMarkerDnDData,
+    ) => {
+      if (!track?.filters) {
+        return;
+      }
+
+      if (dndData.customProperties?.startTime === undefined) {
+        return;
+      }
+
+      const timeOffset =
+        timelineController.pixelsToTime(dndData.currentPosition.x) -
+        timelineController.pixelsToTime(dndData.startPosition.x);
+
+      const time = clampTime(dndData.customProperties.startTime + timeOffset);
       setFade(track, time, side);
     },
     [clampTime, side, timelineController, track],
   );
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({
+    onDragStart: handleDragStart,
     onDrag: handleDrag,
   });
 
