@@ -7,3 +7,4 @@ export * from './TimelineViewFooter';
 export * from './TimelineView';
 export * from './TimelineHeader';
 export * from './Timeline';
+export * from './TimelineChannelsList';

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 
 import { useTimelineController } from '@/entities/audio-editor';
 
-import { ChannelListItemView } from '@/features/channel-control';
+import { ChannelListItemClickView } from '@/features/channel-control';
 
 import { AudioEditorTracksView } from '../AudioEditorTracksView';
 
@@ -19,15 +19,14 @@ export const AudioEditorTracksList = observer(function AudioEditorTracksList({
     const channel = player.channels.get(channelId)!;
 
     return (
-      <ChannelListItemView
-        key={`channel-track-line-${channel.id}`}
-        className='relative'
-        player={player}
+      <ChannelListItemClickView
+        key={`channel-${channel.id}-track-line`}
+        className='relative py-1.5'
         channel={channel}
         style={{ height: timelineController.trackHeight }}
       >
         <AudioEditorTracksView channel={channel} player={player} />
-      </ChannelListItemView>
+      </ChannelListItemClickView>
     );
   });
 });

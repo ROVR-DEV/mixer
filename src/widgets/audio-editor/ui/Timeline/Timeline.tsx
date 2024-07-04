@@ -12,6 +12,7 @@ import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
 
 import { renderDefaultTimelineGrid } from '../../lib';
 import { AudioEditorTracksList } from '../AudioEditorTracksList';
+import { TimelineChannelsList } from '../TimelineChannelsList';
 
 import { TimelineProps } from './interfaces';
 
@@ -55,6 +56,8 @@ export const Timeline = observer(function Timeline({
   useEffect(() => {
     timelineController.scrollController.addListener(renderGrid);
     timelineController.zoomController.addListener(renderGrid);
+
+    renderGrid();
     return () => {
       timelineController.scrollController.removeListener(renderGrid);
       timelineController.zoomController.removeListener(renderGrid);
@@ -77,6 +80,9 @@ export const Timeline = observer(function Timeline({
         </span>
       ) : (
         <>
+          <div className='absolute size-full'>
+            <TimelineChannelsList />
+          </div>
           <TimelineGridMemoized
             className='pointer-events-none absolute w-full'
             height={gridHeight}
