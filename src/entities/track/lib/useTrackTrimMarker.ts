@@ -8,7 +8,7 @@ import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 import { TrimSide } from '@/shared/ui';
 
 // eslint-disable-next-line boundaries/element-types
-import { TimelineController } from '@/entities/audio-editor';
+import { TimelineController, useAudioEditor } from '@/entities/audio-editor';
 
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
@@ -55,6 +55,8 @@ export const useTrimMarker = ({
   timelineController,
   trimSide,
 }: UseTrimMarkerProps) => {
+  const audioEditor = useAudioEditor();
+
   const trimMarkerRef = useRef<HTMLDivElement | null>(null);
 
   const ariaAttributes = useMemo(
@@ -96,6 +98,8 @@ export const useTrimMarker = ({
         track.isTrimming = true;
       }
 
+      audioEditor.player.saveState();
+
       const leftTrack = track.channel.tracks.findLast(
         (channelTrack) => channelTrack.trimEndTime <= track.trimStartTime,
       );
@@ -108,7 +112,7 @@ export const useTrimMarker = ({
         right: rightTrack?.trimStartTime ?? Infinity,
       });
     },
-    [track],
+    [audioEditor.player, track],
   );
 
   const handleMouseMove = useCallback(

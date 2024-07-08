@@ -80,13 +80,17 @@ export const AudioEditorFloatingToolbarView = observer(
                 name: 'undo',
                 icon: <UndoIcon />,
                 isActive: false,
-                onClick: () => {},
+                onClick: () => {
+                  audioEditor.player.undo();
+                },
               },
               {
                 name: 'redo',
                 icon: <RedoIcon />,
                 isActive: false,
-                onClick: () => {},
+                onClick: () => {
+                  audioEditor.player.redo();
+                },
               },
             ],
           },

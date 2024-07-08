@@ -364,6 +364,8 @@ export const useAudioEditorTrack = (
       }
 
       runInAction(() => {
+        audioEditor.player.saveState();
+
         audioEditor.draggingTracks = [...audioEditor.selectedTracks];
       });
 
@@ -416,7 +418,7 @@ export const useAudioEditorTrack = (
         audioEditor.draggingTracks.forEach(adjustTracksOnPaste);
       });
     },
-    [disableInteractive, handleDragEnd, audioEditor.draggingTracks, trackRef],
+    [disableInteractive, trackRef, audioEditor.draggingTracks, handleDragEnd],
   );
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({

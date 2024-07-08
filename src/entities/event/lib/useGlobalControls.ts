@@ -24,6 +24,14 @@ export const useGlobalControls = (
       if (e.code === 'Space') {
         handler({ type: 'Play/Pause' });
       }
+
+      if (e.ctrlKey && e.code === 'Z') {
+        handler({ type: 'Undo' });
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.code === 'Z') {
+        handler({ type: 'Redo' });
+      }
     };
 
     document.addEventListener('keydown', processKeyDown);
