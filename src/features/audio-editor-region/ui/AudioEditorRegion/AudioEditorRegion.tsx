@@ -28,7 +28,7 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       preventAll(e);
-      player.toggleRegionLoop();
+      player.region.toggle();
     },
     [player],
   );
@@ -55,7 +55,7 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
       >
         <RegionMarker
           className='h-full'
-          isActive={player.isRegionLoopEnabled}
+          isActive={player.region.isEnabled}
           onClick={handleClick}
         />
         <AudioEditorRegionTrimMarker

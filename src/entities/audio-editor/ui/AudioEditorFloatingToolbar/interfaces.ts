@@ -1,8 +1,19 @@
-import { AudioEditorTool } from '../../model';
+import { IconButtonProps } from '@/shared/ui';
+
+export interface ToolButton {
+  name: string;
+  icon: JSX.Element;
+  isActive: boolean;
+  onClick: () => void;
+  fillType?: IconButtonProps['svgFillType'];
+}
+
+export interface ToolGroup {
+  name: string;
+  buttons: ToolButton[];
+}
 
 export interface AudioEditorFloatingToolbarProps
   extends React.ComponentProps<'div'> {
-  currentTool: AudioEditorTool;
-  tools: AudioEditorTool[][];
-  onToolChange?: (tool: AudioEditorTool) => void;
+  tools: ToolGroup[];
 }

@@ -9,11 +9,6 @@ import {
 // eslint-disable-next-line boundaries/element-types
 import { Track, AudioEditorTrack } from '@/entities/track';
 
-export type ChannelProps = {
-  id?: string;
-  color?: string;
-} | void;
-
 type TrackColorsGenerator = ReturnType<typeof trackColorsGenerator>;
 
 export class Channel {
@@ -21,17 +16,16 @@ export class Channel {
   isMuted: boolean = false;
   isSolo: boolean = false;
 
+  readonly tracks: IObservableArray<AudioEditorTrack> = observable.array();
+
   private _colorsGenerator: TrackColorsGenerator | null = null;
 
   get colorsGenerator(): TrackColorsGenerator | null {
     return this._colorsGenerator;
   }
-
   set colorsGenerator(value: TrackColorsGenerator) {
     this._colorsGenerator = value;
   }
-
-  readonly tracks: IObservableArray<AudioEditorTrack> = observable.array();
 
   constructor(id: string = v4()) {
     this.id = id;
@@ -79,16 +73,17 @@ export class Channel {
     return this.tracks.remove(track);
   };
 
-  clearTracks = (onDestroy?: (track: AudioEditorTrack) => void) => {
-    this.tracks.forEach((track) => {
-      track.audioBuffer?.destroy();
-      onDestroy?.(track);
-    });
+  clearTracks = () => {
     this.tracks.clear();
 
     if (this._colorsGenerator) {
       this._colorsGenerator.next({ reset: true });
     }
+  };
+
+  dispose = () => {
+    this.tracks.forEach((track) => track.dispose());
+    this.clearTracks();
   };
 
   private _updateMuted = () => {

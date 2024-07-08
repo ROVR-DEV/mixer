@@ -1,14 +1,33 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
+import { useMemo } from 'react';
 
 import {
-  AUDIO_EDITOR_TOOL_GROUPS,
+  CursorIcon,
+  FitIcon,
+  LoopIcon,
+  MagnetIcon,
+  MagnifierIcon,
+  RedoIcon,
+  ScissorsIcon,
+  UndoIcon,
+} from '@/shared/ui/assets';
+
+import {
   AudioEditorFloatingToolbarMemoized,
+  AudioEditorTool,
+  ToolGroup,
   useAudioEditor,
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarViewProps } from './interfaces';
+
+const TOOL_ICONS: Record<AudioEditorTool, JSX.Element> = {
+  cursor: <CursorIcon />,
+  scissors: <ScissorsIcon />,
+  magnifier: <MagnifierIcon />,
+};
 
 export const AudioEditorFloatingToolbarView = observer(
   function AudioEditorFloatingToolbarView({
@@ -16,39 +35,66 @@ export const AudioEditorFloatingToolbarView = observer(
   }: AudioEditorFloatingToolbarViewProps) {
     const audioEditor = useAudioEditor();
 
-    return (
-      <AudioEditorFloatingToolbarMemoized
-        tools={AUDIO_EDITOR_TOOL_GROUPS}
-        currentTool={audioEditor.tool}
-        onToolChange={audioEditor.useTool}
-        {...props}
-      />
+    const tools = useMemo(
+      () =>
+        [
+          {
+            name: 'Tools',
+            buttons: audioEditor.options.availableTools.map((tool) => ({
+              name: tool,
+              icon: TOOL_ICONS[tool],
+              isActive: tool == audioEditor.tool,
+              onClick: () => {
+                audioEditor.tool = tool;
+              },
+            })),
+          },
+          {
+            name: 'Actions',
+            buttons: [
+              {
+                name: 'loop',
+                icon: <LoopIcon />,
+                isActive: audioEditor.player.region.isEnabled,
+                onClick: () => audioEditor.player.region.toggle(),
+              },
+              {
+                name: 'fit',
+                icon: <FitIcon />,
+                isActive: false,
+                onClick: () => {},
+                fillType: 'fill',
+              },
+              {
+                name: 'magnet',
+                icon: <MagnetIcon />,
+                isActive: false,
+                onClick: () => {},
+              },
+            ],
+          },
+          {
+            name: 'Undo/Redo',
+            buttons: [
+              {
+                name: 'undo',
+                icon: <UndoIcon />,
+                isActive: false,
+                onClick: () => {},
+              },
+              {
+                name: 'redo',
+                icon: <RedoIcon />,
+                isActive: false,
+                onClick: () => {},
+              },
+            ],
+          },
+        ] satisfies ToolGroup[],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [audioEditor, audioEditor.player.region.isEnabled],
     );
+
+    return <AudioEditorFloatingToolbarMemoized tools={tools} {...props} />;
   },
 );
-
-// switch (tool) {
-//   case 'cursor':
-//     break;
-//   case 'scissors':
-//     player.selectedTracks.forEach((track: AudioEditorTrack) => {
-//       if (player.isTrackIntersectsWithTime(track, player.time)) {
-//         track.cut(player.time);
-//       }
-//     });
-//     break;
-//   // case 'magnifier':
-//   // break;
-//   // case 'repeat':
-//   // break;
-//   // case 'fit':
-//   // break;
-//   // case 'magnet':
-//   // break;
-//   // case 'undo':
-//   // break;
-//   // case 'redo':
-//   // break;
-//   default:
-//     break;
-// }

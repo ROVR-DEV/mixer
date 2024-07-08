@@ -97,10 +97,10 @@ export const useTrimMarker = ({
       }
 
       const leftTrack = track.channel.tracks.findLast(
-        (channelTrack) => channelTrack.trimEndTime < track.trimStartTime,
+        (channelTrack) => channelTrack.trimEndTime <= track.trimStartTime,
       );
       const rightTrack = track.channel.tracks.find(
-        (channelTrack) => channelTrack.trimStartTime > track.trimEndTime,
+        (channelTrack) => channelTrack.trimStartTime >= track.trimEndTime,
       );
 
       setBounds({

@@ -35,11 +35,6 @@ const CURSORS: Record<AudioEditorTool, string> = {
   scissors:
     'url(icons/scissors-up.svg) 16 16, url(icons/scissors-up.png) 16 16, auto',
   magnifier: '',
-  repeat: '',
-  fit: '',
-  magnet: '',
-  undo: '',
-  redo: '',
 };
 
 export const TimelineView = observer(function TimelineView({
@@ -66,12 +61,12 @@ export const TimelineView = observer(function TimelineView({
   const handleSelectionChange = useCallback(
     (rect: Rect, e?: MouseEvent) =>
       selectTracksInSelection(
-        player,
+        audioEditor,
         timelineController,
         rect,
         e?.shiftKey ?? true,
       ),
-    [player, timelineController],
+    [audioEditor, timelineController],
   );
 
   const { isSelecting, onMouseDown } = useRectangularSelection({
@@ -94,9 +89,9 @@ export const TimelineView = observer(function TimelineView({
 
       handleTimeSeek(e);
 
-      player.unselectAllTracks();
+      audioEditor.unselectTracks();
     },
-    [audioEditor.tool, handleTimeSeek, isSelecting, player],
+    [audioEditor, handleTimeSeek, isSelecting],
   );
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);

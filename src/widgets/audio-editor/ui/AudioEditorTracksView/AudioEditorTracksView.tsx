@@ -11,7 +11,6 @@ import { AudioEditorTracksViewProps } from './interfaces';
 
 export const AudioEditorTracksView = observer(function AudioEditorTracksView({
   channel,
-  player,
 }: AudioEditorTracksViewProps) {
   return channel.tracks.map((track) => {
     return !track ? null : (
@@ -19,8 +18,7 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         className='h-[calc(100%-14px)]'
         key={`track-${track.uuid}`}
         track={track}
-        player={player}
-        waveformComponent={<TrackWaveform player={player} track={track} />}
+        waveformComponent={<TrackWaveform track={track} />}
         editMenu={TrackEditMenu}
       >
         <TrackModifyOverlay track={track} />

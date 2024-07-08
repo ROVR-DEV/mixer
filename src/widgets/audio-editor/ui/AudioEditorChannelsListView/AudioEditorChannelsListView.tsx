@@ -2,36 +2,30 @@
 
 import { observer } from 'mobx-react-lite';
 
+import { useAudioEditor } from '@/entities/audio-editor';
+
 import {
   ChannelControlView,
   ChannelListItemView,
 } from '@/features/channel-control';
 
-import { AudioEditorChannelsListViewProps } from './interfaces';
-
 export const AudioEditorChannelsListView = observer(
-  function AudioEditorChannelsListView({
-    player,
-  }: AudioEditorChannelsListViewProps) {
-    return player.channelIds.map((channelId, index) => {
-      const channel = player.channels.get(channelId)!;
+  function AudioEditorChannelsListView() {
+    const audioEditor = useAudioEditor();
 
-      return (
-        <ChannelListItemView
-          key={`channel-${channel.id}`}
-          player={player}
+    return audioEditor.player.channels.map((channel, index) => (
+      <ChannelListItemView
+        key={`channel-${channel.id}`}
+        channel={channel}
+        leftPadding
+        ignoreMuted
+      >
+        <ChannelControlView
+          number={index + 1}
+          isAbleToRemove={index > 1}
           channel={channel}
-          leftPadding
-          ignoreMuted
-        >
-          <ChannelControlView
-            number={index + 1}
-            isAbleToRemove={index > 1}
-            player={player}
-            channel={channel}
-          />
-        </ChannelListItemView>
-      );
-    });
+        />
+      </ChannelListItemView>
+    ));
   },
 );

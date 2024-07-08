@@ -13,11 +13,13 @@ export const ClockView = ({ ...props }: ClockViewProps) => {
 
   useEffect(() => {
     const updateClock = (time: number) =>
-      requestAnimationFrame(() => clockRef.current?.updateTime(time));
+      requestAnimationFrame(() => {
+        return clockRef.current?.updateTime(time);
+      });
     updateClock(player.time);
 
-    player.addListener(updateClock);
-    return () => player.removeListener(updateClock);
+    player.on('timeupdate', updateClock);
+    return () => player.off('timeupdate', updateClock);
   }, [player]);
 
   return <ClockMemoized ref={clockRef} {...props} />;

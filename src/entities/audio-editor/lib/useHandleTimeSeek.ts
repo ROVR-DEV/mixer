@@ -8,7 +8,7 @@ export const useHandleTimeSeek = (
 ) => {
   return useCallback(
     (e: MouseEvent | React.MouseEvent<HTMLDivElement>) =>
-      player.seekTo(timelineController.virtualPixelsToTime(e.pageX)),
+      player.setTime(timelineController.virtualPixelsToTime(e.pageX)),
     [player, timelineController],
   );
 };

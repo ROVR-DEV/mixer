@@ -7,7 +7,7 @@ export class TrackDnDInfo implements DnDInfo {
   startX: number = 0;
   startY: number = 0;
   startTime: number = 0;
-  startChannelId?: string = undefined;
+  startChannelIndex?: number = undefined;
   leftBound: number = 0;
 
   minChannel: number = 0;

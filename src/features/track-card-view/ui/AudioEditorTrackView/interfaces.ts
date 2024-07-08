@@ -1,4 +1,3 @@
-import { Player } from '@/entities/audio-editor';
 import { TrackCardProps, AudioEditorTrack } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
@@ -9,7 +8,6 @@ export interface AudioEditorTrackViewProps
     TrackCardProps,
     'ref' | 'track' | 'isSelected' | 'onTrackSelect' | 'onEdit' | 'fullWidth'
   > {
-  player: Player;
   track: AudioEditorTrack;
   disableInteractive?: boolean;
   editMenu?: typeof TrackEditMenu;

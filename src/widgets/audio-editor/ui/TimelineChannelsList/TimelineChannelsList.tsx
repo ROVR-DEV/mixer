@@ -12,19 +12,14 @@ export const TimelineChannelsList = observer(function TimelineChannelsList() {
   const player = usePlayer();
   const timelineController = useTimelineController();
 
-  return player.channelIds.map((channelId) => {
-    const channel = player.channels.get(channelId)!;
-
-    return (
-      <ChannelListItemView
-        key={`channel-${channel.id}-track-line-background`}
-        className={cn('relative pointer-events-none', {
-          'z-10': player.isChannelMuted(channel),
-        })}
-        player={player}
-        channel={channel}
-        style={{ height: timelineController.trackHeight }}
-      />
-    );
-  });
+  return player.channels.map((channel) => (
+    <ChannelListItemView
+      key={`channel-${channel.id}-track-line-background`}
+      className={cn('relative pointer-events-none', {
+        'z-10': player.isChannelMuted(channel),
+      })}
+      channel={channel}
+      style={{ height: timelineController.trackHeight }}
+    />
+  ));
 });

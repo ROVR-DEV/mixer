@@ -25,7 +25,7 @@ const _AudioEditorChannelsList = forwardRef<
 
   return (
     <ChannelListMemoized ref={ref} {...props}>
-      <AudioEditorChannelsListView player={player} />
+      <AudioEditorChannelsListView />
       <ChannelListItemMemoized
         className='justify-center'
         disableBorder

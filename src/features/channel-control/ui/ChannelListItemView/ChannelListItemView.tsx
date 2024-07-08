@@ -9,7 +9,6 @@ import { ChannelListItemMemoized } from '@/entities/channel';
 import { ChannelListItemViewProps } from './interfaces';
 
 export const ChannelListItemView = observer(function ChannelListItemView({
-  player,
   channel,
   ignoreSelection,
   ignoreMuted,
@@ -26,15 +25,15 @@ export const ChannelListItemView = observer(function ChannelListItemView({
       return;
     }
 
-    player.setSelectedChannel(channel.id);
-  }, [ignoreSelection, audioEditor.tool, player, channel.id]);
+    audioEditor.selectedChannel = channel;
+  }, [ignoreSelection, audioEditor, channel]);
 
   return (
     <ChannelListItemMemoized
-      isSelected={player.selectedChannelId === channel.id}
+      isSelected={audioEditor.selectedChannel === channel}
       onClick={handleClick}
       ignoreSelection={ignoreSelection}
-      isMuted={!ignoreMuted && player.isChannelMuted(channel)}
+      isMuted={!ignoreMuted && audioEditor.player.isChannelMuted(channel)}
       {...props}
     />
   );

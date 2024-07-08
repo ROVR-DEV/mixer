@@ -7,7 +7,7 @@ import React, { RefObject, useCallback, useEffect, useMemo } from 'react';
 import { clamp } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
-import { Player, TimelineController } from '@/entities/audio-editor';
+import { AudioEditor, TimelineController } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
 
 import { getNewChannelIndex } from './getNewChannelIndex';
@@ -22,11 +22,11 @@ import {
 export const useAudioEditorTrack = (
   trackRef: RefObject<HTMLDivElement>,
   track: AudioEditorTrack,
-  player: Player,
+  audioEditor: AudioEditor,
   timelineController: TimelineController,
   disableInteractive?: boolean,
 ) => {
-  const isSelectedInPlayer = player.isTrackSelected(track);
+  const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
   const grid = (
     timelineController.timelineContainer.timelineRef.current as HTMLElement
@@ -95,14 +95,15 @@ export const useAudioEditorTrack = (
       return;
     }
 
-    if (!track.dndInfo.startChannelId) {
+    if (track.dndInfo.startChannelIndex === undefined) {
       return;
     }
 
-    const prevChannelIndex = player.channelIds.indexOf(
-      track.dndInfo.startChannelId,
+    const prevChannelIndex = track.dndInfo.startChannelIndex;
+
+    const currentChannelIndex = audioEditor.player.channels.indexOf(
+      track.channel,
     );
-    const currentChannelIndex = player.channelIds.indexOf(track.channel.id);
 
     const channelOffset = currentChannelIndex - prevChannelIndex;
 
@@ -181,13 +182,13 @@ export const useAudioEditorTrack = (
         e: MouseEvent,
         track: AudioEditorTrack,
         minChannelIndex: number = 0,
-        maxChannelIndex: number = player.channelIds.length - 1,
+        maxChannelIndex: number = audioEditor.player.channels.length - 1,
       ) => {
         if (!trackRef.current) {
           return;
         }
 
-        if (!track.dndInfo.startChannelId) {
+        if (track.dndInfo.startChannelIndex === undefined) {
           return;
         }
 
@@ -195,11 +196,11 @@ export const useAudioEditorTrack = (
           return;
         }
 
-        const startChannelIndex = player.channelIds.indexOf(
-          track.dndInfo.startChannelId,
-        );
+        const startChannelIndex = track.dndInfo.startChannelIndex;
 
-        const currentChannelIndex = player.channelIds.indexOf(track.channel.id);
+        const currentChannelIndex = audioEditor.player.channels.indexOf(
+          track.channel,
+        );
 
         const offsetY =
           timelineController.boundingClientRect.y - (grid?.scrollTop ?? 0);
@@ -217,9 +218,7 @@ export const useAudioEditorTrack = (
           return;
         }
 
-        const newChannel = player.channels.get(
-          player.channelIds[newChannelIndex],
-        );
+        const newChannel = audioEditor.player.channels[newChannelIndex];
 
         if (!newChannel || track.channel.id === newChannel.id) {
           return;
@@ -228,12 +227,11 @@ export const useAudioEditorTrack = (
         track.channel = newChannel;
       },
       [
-        grid?.scrollTop,
-        player.channelIds,
-        player.channels,
-        timelineController.boundingClientRect.y,
-        timelineController.trackHeight,
+        audioEditor.player.channels,
         trackRef,
+        timelineController.trackHeight,
+        timelineController.boundingClientRect.y,
+        grid?.scrollTop,
       ],
     ),
   );
@@ -247,9 +245,9 @@ export const useAudioEditorTrack = (
       }
 
       track.setStartTime(startTime);
-      track.audioBuffer?.setTime(player.time - track.startTime);
+      track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
     },
-    [calcNewStartTime, player.time],
+    [calcNewStartTime, audioEditor.player.time],
   );
 
   const handleDragStart = useCallback(
@@ -258,7 +256,9 @@ export const useAudioEditorTrack = (
         track.dndInfo.startX = e.pageX;
         track.dndInfo.startY = e.pageY;
         track.dndInfo.startTime = track.trimStartTime;
-        track.dndInfo.startChannelId = track.channel.id;
+        track.dndInfo.startChannelIndex = audioEditor.player.channels.indexOf(
+          track.channel,
+        );
         track.dndInfo.isDragging = true;
       });
     },
@@ -269,19 +269,19 @@ export const useAudioEditorTrack = (
   const setupBounds = useCallback((track: AudioEditorTrack) => {
     runInAction(() => {
       track.dndInfo.leftBound =
-        track.dndInfo.startTime - player.draggingTracksMinStartTime;
+        track.dndInfo.startTime - audioEditor.draggingTracksMinStartTime;
 
-      const startChannelIndex = player.channelIds.indexOf(
-        track.dndInfo.startChannelId ?? track.channel.id,
-      );
+      const startChannelIndex =
+        track.dndInfo.startChannelIndex ??
+        audioEditor.player.channels.indexOf(track.channel);
 
       track.dndInfo.minChannel =
-        startChannelIndex - player.draggingTracksMinChannel;
+        startChannelIndex - audioEditor.draggingTracksMinChannelIndex;
       track.dndInfo.maxChannel =
         startChannelIndex +
-        player.channelIds.length -
+        audioEditor.player.channels.length -
         1 -
-        player.draggingTracksMaxChannel;
+        audioEditor.draggingTracksMaxChannelIndex;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -302,7 +302,7 @@ export const useAudioEditorTrack = (
 
   const handleDrag = useCallback(
     (e: MouseEvent) => {
-      player.draggingTracks.forEach((selectedTrack) => {
+      audioEditor.draggingTracks.forEach((selectedTrack) => {
         setupBounds(selectedTrack);
         drag(
           e,
@@ -313,7 +313,7 @@ export const useAudioEditorTrack = (
         );
       });
     },
-    [drag, player.draggingTracks, setupBounds],
+    [drag, audioEditor.draggingTracks, setupBounds],
   );
 
   const handleDragEnd = useCallback(
@@ -327,13 +327,18 @@ export const useAudioEditorTrack = (
         track.dndInfo.isDragging = false;
       });
 
+      const dropChannelIndex = audioEditor.player.channels.indexOf(
+        track.channel,
+      );
+
       if (
-        !track.dndInfo.startChannelId ||
-        track.dndInfo.startChannelId === track.channel.id
+        track.dndInfo.startChannelIndex === undefined ||
+        track.dndInfo.startChannelIndex === dropChannelIndex
       ) {
         return;
       }
-      const startChannel = player.channels.get(track.dndInfo.startChannelId);
+      const startChannel =
+        audioEditor.player.channels[track.dndInfo.startChannelIndex];
 
       if (startChannel) {
         startChannel.removeTrack(track);
@@ -341,7 +346,7 @@ export const useAudioEditorTrack = (
 
       track.channel.addTrack(track);
     },
-    [handleDrag, player.channels],
+    [handleDrag, audioEditor.player.channels],
   );
 
   const onDragStart = useCallback(
@@ -355,17 +360,17 @@ export const useAudioEditorTrack = (
       }
 
       if (!isSelectedInPlayer) {
-        player.selectTrack(track);
+        audioEditor.selectTrack(track);
       }
 
       runInAction(() => {
-        player.draggingTracks.replace(player.selectedTracks);
+        audioEditor.draggingTracks = [...audioEditor.selectedTracks];
       });
 
       setDragProperties(trackRef.current);
 
       runInAction(() => {
-        player.draggingTracks.forEach((selectedTrack) => {
+        audioEditor.draggingTracks.forEach((selectedTrack) => {
           handleDragStart(e as MouseEvent, selectedTrack);
         });
       });
@@ -374,7 +379,7 @@ export const useAudioEditorTrack = (
       disableInteractive,
       handleDragStart,
       isSelectedInPlayer,
-      player,
+      audioEditor,
       track,
       trackRef,
     ],
@@ -404,14 +409,14 @@ export const useAudioEditorTrack = (
       clearDragProperties(trackRef.current);
 
       runInAction(() => {
-        player.draggingTracks.forEach((selectedTrack) =>
+        audioEditor.draggingTracks.forEach((selectedTrack) =>
           handleDragEnd(e, selectedTrack),
         );
 
-        player.draggingTracks.forEach(adjustTracksOnPaste);
+        audioEditor.draggingTracks.forEach(adjustTracksOnPaste);
       });
     },
-    [disableInteractive, handleDragEnd, player.draggingTracks, trackRef],
+    [disableInteractive, handleDragEnd, audioEditor.draggingTracks, trackRef],
   );
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({

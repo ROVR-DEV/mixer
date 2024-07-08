@@ -49,8 +49,8 @@ export const Timeline = observer(function Timeline({
     () =>
       typeof timelineController.trackHeight === 'string'
         ? timelineController.trackHeight
-        : player.channelIds.length * timelineController.trackHeight,
-    [player.channelIds.length, timelineController.trackHeight],
+        : player.channels.length * timelineController.trackHeight,
+    [player.channels.length, timelineController.trackHeight],
   );
 
   useEffect(() => {

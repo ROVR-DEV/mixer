@@ -4,7 +4,7 @@ import {
   checkVerticalCollision,
 } from '@/shared/lib/checkCollision';
 
-import { Player, TimelineController } from '@/entities/audio-editor';
+import { AudioEditor, TimelineController } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
 
 const getChannelVerticalBound = (
@@ -23,7 +23,7 @@ const getChannelVerticalBound = (
 
 const selectTrackInSelection = (
   track: AudioEditorTrack,
-  player: Player,
+  audioEditor: AudioEditor,
   timelineController: TimelineController,
   channelStartY: number,
   rect: Rect,
@@ -44,22 +44,22 @@ const selectTrackInSelection = (
     rect,
   );
 
-  const isSelected = player.isTrackSelected(track);
+  const isSelected = audioEditor.isTrackSelected(track);
 
   if (isIntersects && !isSelected) {
-    player.selectTrack(track, true);
+    audioEditor.selectTrack(track, true);
   } else if (!isIntersects && isSelected && !addToSelection) {
-    player.unselectTrack(track);
+    audioEditor.unselectTrack(track);
   }
 };
 
 export const selectTracksInSelection = (
-  player: Player,
+  audioEditor: AudioEditor,
   timelineController: TimelineController,
   rect: Rect,
   addToSelection: boolean = false,
 ) => {
-  player.channelIds.forEach((channelId, i) => {
+  audioEditor.player.channels.forEach((channel, i) => {
     if (typeof timelineController.trackHeight !== 'number') {
       return;
     }
@@ -82,15 +82,9 @@ export const selectTracksInSelection = (
       virtualRect.bottom,
     );
 
-    const channel = player.channels.get(channelId);
-
-    if (!channel) {
-      return;
-    }
-
     if (!isChannelIntersects) {
       if (!addToSelection) {
-        channel.tracks.forEach((track) => player.unselectTrack(track));
+        channel.tracks.forEach((track) => audioEditor.unselectTrack(track));
       }
       return;
     }
@@ -98,7 +92,7 @@ export const selectTracksInSelection = (
     channel.tracks.forEach((track) =>
       selectTrackInSelection(
         track,
-        player,
+        audioEditor,
         timelineController,
         channelStartY,
         virtualRect,

@@ -17,3 +17,4 @@ export * from './useSize';
 export * from './useTimeLoop';
 export * from './useWheel';
 export * from './useWindowEvent';
+export * from './timer';

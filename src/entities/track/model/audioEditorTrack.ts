@@ -179,6 +179,10 @@ export class AudioEditorTrack {
     return clonedTrack;
   };
 
+  dispose = () => {
+    this.audioBuffer?.destroy();
+  };
+
   private _updateAudioFilters = () => {
     if (!this.filters) {
       return;

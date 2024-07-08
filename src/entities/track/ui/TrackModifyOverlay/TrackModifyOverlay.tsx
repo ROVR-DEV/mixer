@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 
 // eslint-disable-next-line boundaries/element-types
-import { usePlayer } from '@/entities/audio-editor';
+import { useAudioEditor } from '@/entities/audio-editor';
 
 import { FadeOverlay } from '../FadeOverlay';
 import { TrackTrimMarker } from '../TrackTrimMarker';
@@ -14,9 +14,10 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
   track,
   ignoreSelection,
 }: TrackModifyOverlayProps) {
-  const player = usePlayer();
+  const audioEditor = useAudioEditor();
 
-  const isSelectedInEditor = !ignoreSelection && player.isTrackSelected(track);
+  const isSelectedInEditor =
+    !ignoreSelection && audioEditor.isTrackSelected(track);
 
   return (
     <>

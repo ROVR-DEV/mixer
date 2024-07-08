@@ -15,7 +15,6 @@ import { AudioEditorTrackViewProps } from './interfaces';
 
 export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   track,
-  player,
   disableInteractive,
   editMenu: EditMenu,
   className,
@@ -27,12 +26,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const timelineController = useTimelineController();
 
-  const isSelectedInPlayer = player.isTrackSelected(track);
+  const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
   const { onMouseUp, onMouseDown } = useAudioEditorTrack(
     trackRef,
     track,
-    player,
+    audioEditor,
     timelineController,
     disableInteractive,
   );
@@ -54,8 +53,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   );
 
   const handleEdit = useCallback(() => {
-    player.setEditableTrack(track);
-  }, [player, track]);
+    audioEditor.editableTrack = track;
+  }, [audioEditor, track]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -65,27 +64,30 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         const copiedTrack = track.cut(
           timelineController.virtualPixelsToTime(e.pageX),
         );
-        player.selectTrack(copiedTrack);
+
+        audioEditor.editableTrack = copiedTrack;
         return;
       }
 
-      player.selectTrack(track, e.shiftKey);
+      audioEditor.selectTrack(track, e.shiftKey);
 
       if (e.detail === 2) {
         handleEdit();
       }
     },
-    [audioEditor.tool, player, track, timelineController, handleEdit],
+    [audioEditor, track, timelineController, handleEdit],
   );
 
   const handleSnapLeft = useCallback(
-    () => snapTo(track, 'left', player.allTracks),
-    [player.allTracks, track],
+    () => snapTo(track, 'left', audioEditor.player.tracks),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   const handleSnapRight = useCallback(
-    () => snapTo(track, 'right', player.allTracks),
-    [player.allTracks, track],
+    () => snapTo(track, 'right', audioEditor.player.tracks),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   return (

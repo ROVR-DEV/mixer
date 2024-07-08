@@ -1,11 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useTimeLoop } from '@/shared/lib';
-
-import { Player } from '@/entities/audio-editor';
-import { Channel } from '@/entities/channel';
+import { ObservablePlayer } from '@/entities/audio-editor';
 import { PlaylistDTO } from '@/entities/playlist';
 import { TrackData, TracksManager } from '@/entities/track';
 
@@ -16,16 +13,8 @@ export const usePlayerSetup = (playlist: PlaylistDTO) => {
     playlist.tracks.map((track) => track.uuid),
   );
 
-  const [player] = useState(() => new Player([new Channel(), new Channel()]));
+  const [player] = useState(() => new ObservablePlayer());
   const [tracksManager] = useState(() => new TracksManager(playlist.tracks));
-
-  const onTimeUpdate = useCallback(
-    (delta: number) => {
-      player.time += delta / 1000;
-      player.updateAudioBuffer();
-    },
-    [player],
-  );
 
   useEffect(() => {
     importTracksToChannels(playlist.tracks, player);
@@ -52,11 +41,6 @@ export const usePlayerSetup = (playlist: PlaylistDTO) => {
 
     tracksManager.downloadTracks(handleTrackLoad);
   }, [tracksManager, playlistKey, player.channels]);
-
-  useTimeLoop({
-    isRunning: player.isPlaying,
-    onUpdate: onTimeUpdate,
-  });
 
   return { player, tracksManager };
 };

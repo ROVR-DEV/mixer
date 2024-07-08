@@ -10,8 +10,8 @@ export const useAudioEditorRegion = (
   timelineController: TimelineController,
 ) => {
   const handleChange = (rect: Rect) => {
-    if (!player.isRegionLoopEnabled) {
-      player.toggleRegionLoop();
+    if (!player.region.isEnabled) {
+      player.region.toggle();
     }
 
     requestAnimationFrame(() => {
