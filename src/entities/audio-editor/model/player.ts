@@ -7,30 +7,15 @@ import { HistoryManager } from '@/shared/model';
 // eslint-disable-next-line boundaries/element-types
 import { Channel, TRACK_COLORS } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
-import { AudioEditorTrack } from '@/entities/track';
+import { AudioEditorTrack, AudioEditorTrackState } from '@/entities/track';
 
 import { ObservableRegion, Region } from './region';
 import { trackColorsGenerator } from './trackColorsGenerator';
 
 export type TimeListener = (time: number) => void;
 
-interface AudioEditorTrackState {
-  uuid: string;
-  channelId: string;
-
-  startTime: number;
-  endTime: number;
-
-  startTrimDuration: number;
-  endTrimDuration: number;
-}
-
-export interface ChannelState {
-  tracks: AudioEditorTrackState[];
-}
-
 export interface PlayerState {
-  channels: ChannelState[];
+  tracks: AudioEditorTrackState[];
 }
 
 export interface PlayerEvents {
@@ -75,7 +60,6 @@ export class ObservablePlayer implements Player {
   readonly region: Region = new ObservableRegion();
 
   private _history = new HistoryManager<PlayerState>();
-
   private _emitter = new EventEmitter<PlayerEvents>();
 
   private _timer: Timer | null = null;
@@ -255,16 +239,9 @@ export class ObservablePlayer implements Player {
 
   saveState(): void {
     this._history.addState({
-      channels: this.channels.map<ChannelState>((channel) => ({
-        tracks: channel.tracks.map<AudioEditorTrackState>((track) => ({
-          uuid: track.uuid,
-          channelId: track.channel.id,
-          startTime: track.startTime,
-          endTime: track.endTime,
-          startTrimDuration: track.startTrimDuration,
-          endTrimDuration: track.endTrimDuration,
-        })),
-      })),
+      tracks: this.tracks.map<AudioEditorTrackState>((track) =>
+        track.getState(),
+      ),
     });
   }
 
@@ -275,35 +252,7 @@ export class ObservablePlayer implements Player {
       return;
     }
 
-    state.channels.forEach((channel) =>
-      channel.tracks.forEach((track) => {
-        runInAction(() => {
-          const foundTrack = this.tracks.find((tr) => tr.uuid === track.uuid);
-
-          if (!foundTrack) {
-            return;
-          }
-
-          // @ts-expect-error private
-          foundTrack.uuid = track.uuid;
-          foundTrack.channel = this.channels.find(
-            (ch) => ch.id === track.channelId,
-          )!;
-          foundTrack.startTime = track.startTime;
-          foundTrack.endTime = track.endTime;
-          foundTrack.startTrimDuration = track.startTrimDuration;
-          foundTrack.endTrimDuration = track.endTrimDuration;
-        });
-      }),
-    );
-
-    const tracks = [...this.tracks];
-
-    this.channels.forEach((channel) => channel.clearTracks());
-
-    tracks.forEach((track) => {
-      track.channel.addTrack(track);
-    });
+    this._restoreState(state);
   };
 
   redo = () => {
@@ -313,25 +262,25 @@ export class ObservablePlayer implements Player {
       return;
     }
 
-    state.channels.forEach((channel) =>
-      channel.tracks.forEach((track) => {
-        runInAction(() => {
-          const foundTrack = this.tracks.find((tr) => tr.uuid === track.uuid);
+    this._restoreState(state);
+  };
 
-          if (!foundTrack) {
-            return;
-          }
+  private _restoreState = (state: PlayerState) => {
+    state.tracks.forEach((trackState) =>
+      runInAction(() => {
+        const foundTrack = this.tracks.find(
+          (track) => track.uuid === trackState.uuid,
+        );
 
-          // @ts-expect-error private
-          foundTrack.uuid = track.uuid;
-          foundTrack.channel = this.channels.find(
-            (ch) => ch.id === track.channelId,
-          )!;
-          foundTrack.startTime = track.startTime;
-          foundTrack.endTime = track.endTime;
-          foundTrack.startTrimDuration = track.startTrimDuration;
-          foundTrack.endTrimDuration = track.endTrimDuration;
-        });
+        if (!foundTrack) {
+          return;
+        }
+
+        foundTrack.channel = this.channels.find(
+          (channel) => channel.id === trackState.channelId,
+        )!;
+
+        foundTrack.restoreState(trackState);
       }),
     );
 

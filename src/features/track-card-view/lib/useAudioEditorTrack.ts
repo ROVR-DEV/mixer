@@ -364,8 +364,6 @@ export const useAudioEditorTrack = (
       }
 
       runInAction(() => {
-        audioEditor.player.saveState();
-
         audioEditor.draggingTracks = [...audioEditor.selectedTracks];
       });
 
@@ -416,9 +414,17 @@ export const useAudioEditorTrack = (
         );
 
         audioEditor.draggingTracks.forEach(adjustTracksOnPaste);
+
+        audioEditor.player.saveState();
       });
     },
-    [disableInteractive, trackRef, audioEditor.draggingTracks, handleDragEnd],
+    [
+      disableInteractive,
+      trackRef,
+      audioEditor.draggingTracks,
+      audioEditor.player,
+      handleDragEnd,
+    ],
   );
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({

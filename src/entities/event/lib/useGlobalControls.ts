@@ -25,7 +25,7 @@ export const useGlobalControls = (
         handler({ type: 'Play/Pause' });
       }
 
-      if (e.ctrlKey && e.code === 'KeyZ') {
+      if (e.ctrlKey && !e.shiftKey && e.code === 'KeyZ') {
         handler({ type: 'Undo' });
       }
 

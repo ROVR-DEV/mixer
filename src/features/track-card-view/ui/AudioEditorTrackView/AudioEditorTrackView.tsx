@@ -79,13 +79,19 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   );
 
   const handleSnapLeft = useCallback(
-    () => snapTo(track, 'left', audioEditor.player.tracks),
+    () => {
+      snapTo(track, 'left', audioEditor.player.tracks);
+      audioEditor.player.saveState();
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
   const handleSnapRight = useCallback(
-    () => snapTo(track, 'right', audioEditor.player.tracks),
+    () => {
+      snapTo(track, 'right', audioEditor.player.tracks);
+      audioEditor.player.saveState();
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );

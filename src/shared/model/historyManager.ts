@@ -1,31 +1,43 @@
 export class HistoryManager<T> {
-  private stack: T[] = [];
+  private _stack: T[] = [];
+
+  private _pointer: number = -1;
 
   addState(state: T) {
-    this.stack.push(state);
+    this._pointer += 1;
+    if (this._pointer < this._stack.length) {
+      this._stack = this._stack.slice(0, this._pointer);
+    }
+
+    this._stack.push(state);
   }
 
   undo(): T | null {
-    if (this.stack.length > 1) {
-      return this.stack.pop() ?? null;
+    if (this._pointer > 0) {
+      this._pointer -= 1;
+
+      return this._stack[this._pointer];
     }
+
     return null;
   }
 
   redo(): T | null {
-    if (this.stack.length > 0) {
-      const state = this.stack[this.stack.length - 1];
-      this.stack.push(this.currentState);
-      return state;
+    if (this._pointer < this._stack.length - 1) {
+      this._pointer += 1;
+
+      return this._stack[this._pointer];
     }
+
     return null;
   }
 
   clear() {
-    this.stack = [];
+    this._pointer = -1;
+    this._stack = [];
   }
 
   get currentState(): T {
-    return this.stack[this.stack.length - 1];
+    return this._stack[this._pointer];
   }
 }

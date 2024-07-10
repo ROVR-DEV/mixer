@@ -1,6 +1,6 @@
 'use client';
 
-import { makeAutoObservable } from 'mobx';
+import { computed, makeAutoObservable } from 'mobx';
 
 import { clamp } from '@/shared/lib';
 
@@ -55,7 +55,14 @@ export class FadeFilter {
   }
 
   constructor() {
-    makeAutoObservable(this, { startTime: true, endTime: true });
+    makeAutoObservable(this, {
+      minTime: computed,
+      maxTime: computed,
+      startTime: computed,
+      endTime: computed,
+      duration: computed,
+      startTimeValue: computed,
+    });
   }
 
   linearFadeIn = (start: number, duration: number) => {

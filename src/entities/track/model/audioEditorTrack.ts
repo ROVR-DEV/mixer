@@ -17,6 +17,28 @@ import { AudioFilters } from './audioFilters';
 import { TrackDnDInfo } from './dndInfo';
 import { Track } from './track';
 
+export interface AudioEditorTrackState {
+  uuid: string;
+  channelId: string;
+
+  startTime: number;
+  endTime: number;
+
+  startTrimDuration: number;
+  endTrimDuration: number;
+
+  filters: {
+    fadeIn: {
+      startTime: number;
+      duration: number;
+    };
+    fadeOut: {
+      startTime: number;
+      duration: number;
+    };
+  };
+}
+
 export class AudioEditorTrack {
   readonly uuid: string = v4();
 
@@ -223,6 +245,43 @@ export class AudioEditorTrack {
     this.filters.fadeOutNode.linearFadeOut(
       newFadeOutStartTime,
       newFadeOutDuration,
+    );
+  };
+
+  getState = (): AudioEditorTrackState => {
+    return {
+      uuid: this.uuid,
+      channelId: this.channel.id,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      startTrimDuration: this.startTrimDuration,
+      endTrimDuration: this.endTrimDuration,
+      filters: {
+        fadeIn: {
+          startTime: this.filters.fadeInNode.startTime,
+          duration: this.filters.fadeInNode.duration,
+        },
+        fadeOut: {
+          startTime: this.filters.fadeOutNode.startTime,
+          duration: this.filters.fadeOutNode.duration,
+        },
+      },
+    } as AudioEditorTrackState;
+  };
+
+  restoreState = (state: AudioEditorTrackState) => {
+    this.startTime = state.startTime;
+    this.endTime = state.endTime;
+    this.startTrimDuration = state.startTrimDuration;
+    this.endTrimDuration = state.endTrimDuration;
+
+    this.filters.fadeInNode.linearFadeIn(
+      state.filters.fadeIn.startTime,
+      state.filters.fadeIn.duration,
+    );
+    this.filters.fadeOutNode.linearFadeOut(
+      state.filters.fadeOut.startTime,
+      state.filters.fadeOut.duration,
     );
   };
 }

@@ -9,6 +9,7 @@ import { DnDData } from '@/shared/model';
 
 import {
   TimelineController,
+  useAudioEditor,
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
 
@@ -66,6 +67,8 @@ export const useFadeMarker = ({
   width: number;
   fadeMarkerProps: React.ComponentPropsWithoutRef<'div'>;
 } => {
+  const audioEditor = useAudioEditor();
+
   const getMarkerStartTime = useCallback(
     () =>
       side === 'left'
@@ -163,9 +166,14 @@ export const useFadeMarker = ({
     [clampTime, side, timelineController, track],
   );
 
+  const handleDragEnd = useCallback(() => {
+    audioEditor.player.saveState();
+  }, [audioEditor.player]);
+
   const { onMouseUp, onMouseDown } = useGlobalDnD({
     onDragStart: handleDragStart,
     onDrag: handleDrag,
+    onDragEnd: handleDragEnd,
   });
 
   useEffect(() => {
