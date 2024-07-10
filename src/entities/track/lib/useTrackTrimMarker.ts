@@ -98,8 +98,6 @@ export const useTrimMarker = ({
         track.isTrimming = true;
       }
 
-      audioEditor.player.saveState();
-
       const leftTrack = track.channel.tracks.findLast(
         (channelTrack) => channelTrack.trimEndTime <= track.trimStartTime,
       );
@@ -112,7 +110,7 @@ export const useTrimMarker = ({
         right: rightTrack?.trimStartTime ?? Infinity,
       });
     },
-    [audioEditor.player, track],
+    [track],
   );
 
   const handleMouseMove = useCallback(
@@ -138,8 +136,9 @@ export const useTrimMarker = ({
     if (track.isTrimming) {
       track.isTrimming = false;
       adjustTracksOnPaste(track);
+      audioEditor.player.saveState();
     }
-  }, [track]);
+  }, [audioEditor.player, track]);
 
   const { onMouseDown } = useGlobalDnD({
     onDragStart: handleDragStart,

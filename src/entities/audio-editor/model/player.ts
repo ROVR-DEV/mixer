@@ -150,7 +150,10 @@ export class ObservablePlayer implements Player {
   };
 
   isChannelMuted(channel: Channel): boolean {
-    return channel.isMuted || this._soloChannels.includes(channel);
+    return (
+      channel.isMuted ||
+      (this._soloChannels.length > 0 && !this._soloChannels.includes(channel))
+    );
   }
 
   isChannelSolo(channel: Channel): boolean {
@@ -266,25 +269,36 @@ export class ObservablePlayer implements Player {
   };
 
   private _restoreState = (state: PlayerState) => {
+    const stateTracksIds = state.tracks.map((track) => track.uuid);
+
+    const tracks = [...this.tracks].filter((track) =>
+      stateTracksIds.includes(track.uuid),
+    );
+
     state.tracks.forEach((trackState) =>
       runInAction(() => {
         const foundTrack = this.tracks.find(
           (track) => track.uuid === trackState.uuid,
         );
 
+        const foundChannel = this.channels.find(
+          (channel) => channel.id === trackState.channelId,
+        )!;
+
         if (!foundTrack) {
+          const newTrack = new AudioEditorTrack(trackState.meta, foundChannel);
+
+          newTrack.restoreState(trackState);
+
+          tracks.push(newTrack);
           return;
         }
 
-        foundTrack.channel = this.channels.find(
-          (channel) => channel.id === trackState.channelId,
-        )!;
+        foundTrack.channel = foundChannel;
 
         foundTrack.restoreState(trackState);
       }),
     );
-
-    const tracks = [...this.tracks];
 
     this.channels.forEach((channel) => channel.clearTracks());
 

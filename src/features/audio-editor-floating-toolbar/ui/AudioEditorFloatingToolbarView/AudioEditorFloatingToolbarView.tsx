@@ -96,7 +96,7 @@ export const AudioEditorFloatingToolbarView = observer(
           },
         ] satisfies ToolGroup[],
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [audioEditor, audioEditor.player.region.isEnabled],
+      [audioEditor.tool, audioEditor.player.region.isEnabled],
     );
 
     return <AudioEditorFloatingToolbarMemoized tools={tools} {...props} />;

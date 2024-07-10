@@ -29,12 +29,10 @@ const setFade = throttle(
       throw new Error('Editable track not found');
     }
 
-    const trackRelativeTime = time - track.startTime;
-
     if (side === 'left') {
       track?.filters.fadeInNode.linearFadeIn(
         track.startTrimDuration,
-        trackRelativeTime - track.startTrimDuration,
+        time - track.startTrimDuration,
       );
 
       if (
@@ -44,8 +42,8 @@ const setFade = throttle(
       }
     } else if (side === 'right') {
       track?.filters.fadeOutNode.linearFadeOut(
-        trackRelativeTime,
-        track.duration - track.endTrimDuration - trackRelativeTime,
+        time,
+        track.duration - track.endTrimDuration - time,
       );
 
       if (
@@ -100,7 +98,7 @@ export const useFadeMarker = ({
 
   const clampTime = useCallback(
     (time: number) => {
-      return clamp(time, track?.trimStartTime, track?.trimEndTime);
+      return clamp(time, 0, track?.duration);
     },
     [track],
   );
@@ -161,6 +159,7 @@ export const useFadeMarker = ({
         timelineController.pixelsToTime(dndData.startPosition.x);
 
       const time = clampTime(dndData.customProperties.startTime + timeOffset);
+
       setFade(track, time, side);
     },
     [clampTime, side, timelineController, track],

@@ -27,6 +27,12 @@ export interface AudioEditorTrackState {
   startTrimDuration: number;
   endTrimDuration: number;
 
+  meta: Track;
+
+  src: HTMLMediaElement['src'];
+
+  color: string | null;
+
   filters: {
     fadeIn: {
       startTime: number;
@@ -42,8 +48,6 @@ export interface AudioEditorTrackState {
 export class AudioEditorTrack {
   readonly uuid: string = v4();
 
-  readonly meta: Track;
-
   readonly mediaElement: HTMLMediaElement = new Audio();
 
   readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
@@ -56,6 +60,8 @@ export class AudioEditorTrack {
   startTrimDuration: number = 0;
   endTrimDuration: number = 0;
 
+  private _meta: Track;
+
   private _channel: Channel;
 
   private _audioBuffer: WaveSurfer | null = null;
@@ -65,6 +71,13 @@ export class AudioEditorTrack {
   private _color: string | null = null;
 
   private _isTrimming: boolean = false;
+
+  get meta() {
+    return this._meta;
+  }
+  private set meta(value: Track) {
+    this._meta = value;
+  }
 
   get channel(): Channel {
     return this._channel;
@@ -112,7 +125,7 @@ export class AudioEditorTrack {
   }
 
   constructor(track: Track, channel: Channel) {
-    this.meta = track;
+    this._meta = track;
 
     this._channel = channel;
 
@@ -256,6 +269,9 @@ export class AudioEditorTrack {
       endTime: this.endTime,
       startTrimDuration: this.startTrimDuration,
       endTrimDuration: this.endTrimDuration,
+      src: this.mediaElement.src,
+      color: this.color,
+      meta: this.meta,
       filters: {
         fadeIn: {
           startTime: this.filters.fadeInNode.startTime,
@@ -266,7 +282,7 @@ export class AudioEditorTrack {
           duration: this.filters.fadeOutNode.duration,
         },
       },
-    } as AudioEditorTrackState;
+    } satisfies AudioEditorTrackState;
   };
 
   restoreState = (state: AudioEditorTrackState) => {
@@ -274,6 +290,12 @@ export class AudioEditorTrack {
     this.endTime = state.endTime;
     this.startTrimDuration = state.startTrimDuration;
     this.endTrimDuration = state.endTrimDuration;
+
+    this.meta = state.meta;
+    if (!this.mediaElement.src) {
+      this.load(state.src);
+    }
+    this.color = state.color;
 
     this.filters.fadeInNode.linearFadeIn(
       state.filters.fadeIn.startTime,

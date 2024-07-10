@@ -83,6 +83,10 @@ export const useAudioEditorTrack = (
   }, [trackEndXGlobal, trackRef, trackStartXGlobal]);
 
   const updateTrackVerticalPosition = useCallback(() => {
+    if (disableInteractive) {
+      return;
+    }
+
     if (!trackRef.current) {
       return;
     }

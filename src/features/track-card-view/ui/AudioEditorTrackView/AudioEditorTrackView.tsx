@@ -65,7 +65,9 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
           timelineController.virtualPixelsToTime(e.pageX),
         );
 
-        audioEditor.editableTrack = copiedTrack;
+        audioEditor.selectTrack(copiedTrack);
+
+        audioEditor.player.saveState();
         return;
       }
 
