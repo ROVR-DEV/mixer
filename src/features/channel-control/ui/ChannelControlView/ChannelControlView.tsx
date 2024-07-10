@@ -19,6 +19,8 @@ export const ChannelControlView = observer(function ChannelControlView({
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       audioEditor.player.removeChannel(channel);
+
+      audioEditor.player.saveState();
     },
     [audioEditor.player, channel],
   );

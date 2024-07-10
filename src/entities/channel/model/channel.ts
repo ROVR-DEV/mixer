@@ -11,6 +11,12 @@ import { Track, AudioEditorTrack } from '@/entities/track';
 
 type TrackColorsGenerator = ReturnType<typeof trackColorsGenerator>;
 
+export interface AudioEditorChannelState {
+  id: string;
+  isMuted: boolean;
+  isSolo: boolean;
+}
+
 export class Channel {
   id: string;
   isMuted: boolean = false;
@@ -84,6 +90,20 @@ export class Channel {
   dispose = () => {
     this.tracks.forEach((track) => track.dispose());
     this.clearTracks();
+  };
+
+  getState = (): AudioEditorChannelState => {
+    return {
+      id: this.id,
+      isMuted: this.isMuted,
+      isSolo: this.isSolo,
+    };
+  };
+
+  restoreState = (state: AudioEditorChannelState) => {
+    this.id = state.id;
+    this.isMuted = state.isMuted;
+    this.isSolo = state.isSolo;
   };
 
   private _updateMuted = () => {

@@ -21,7 +21,10 @@ const _AudioEditorChannelsList = forwardRef<
   const player = usePlayer();
   const timelineController = useTimelineController();
 
-  const handleAddChannel = useCallback(() => player.addChannel(), [player]);
+  const handleAddChannel = useCallback(() => {
+    player.addChannel();
+    player.saveState();
+  }, [player]);
 
   return (
     <ChannelListMemoized ref={ref} {...props}>

@@ -4,8 +4,12 @@ import { computed, makeAutoObservable, observable, runInAction } from 'mobx';
 import { clamp, Timer } from '@/shared/lib';
 import { HistoryManager } from '@/shared/model';
 
-// eslint-disable-next-line boundaries/element-types
-import { Channel, TRACK_COLORS } from '@/entities/channel';
+import {
+  AudioEditorChannelState,
+  Channel,
+  TRACK_COLORS,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrack, AudioEditorTrackState } from '@/entities/track';
 
@@ -15,6 +19,7 @@ import { trackColorsGenerator } from './trackColorsGenerator';
 export type TimeListener = (time: number) => void;
 
 export interface PlayerState {
+  channels: AudioEditorChannelState[];
   tracks: AudioEditorTrackState[];
 }
 
@@ -242,6 +247,9 @@ export class ObservablePlayer implements Player {
 
   saveState(): void {
     this._history.addState({
+      channels: this.channels.map<AudioEditorChannelState>((channel) =>
+        channel.getState(),
+      ),
       tracks: this.tracks.map<AudioEditorTrackState>((track) =>
         track.getState(),
       ),
@@ -269,6 +277,29 @@ export class ObservablePlayer implements Player {
   };
 
   private _restoreState = (state: PlayerState) => {
+    const stateChannelIds = state.channels.map((channel) => channel.id);
+
+    const channels = [...this.channels].filter((channel) =>
+      stateChannelIds.includes(channel.id),
+    );
+
+    state.channels.forEach((channelState) => {
+      const foundChannel = this.channels.find(
+        (channel) => channel.id === channelState.id,
+      );
+
+      if (foundChannel === undefined) {
+        const newChannel = new Channel(channelState.id);
+        newChannel.restoreState(channelState);
+        channels.push(newChannel);
+        return;
+      }
+
+      foundChannel.restoreState(channelState);
+    });
+
+    this.channels.replace(channels);
+
     const stateTracksIds = state.tracks.map((track) => track.uuid);
 
     const tracks = [...this.tracks].filter((track) =>
@@ -277,7 +308,7 @@ export class ObservablePlayer implements Player {
 
     state.tracks.forEach((trackState) =>
       runInAction(() => {
-        const foundTrack = this.tracks.find(
+        const foundTrack = tracks.find(
           (track) => track.uuid === trackState.uuid,
         );
 
