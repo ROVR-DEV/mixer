@@ -29,6 +29,7 @@ export interface AudioEditorTrackState {
 
   meta: Track;
 
+  audioPeaks: number[][] | null;
   src: HTMLMediaElement['src'];
 
   color: string | null;
@@ -272,6 +273,7 @@ export class AudioEditorTrack {
       src: this.mediaElement.src,
       color: this.color,
       meta: this.meta,
+      audioPeaks: this.audioPeaks,
       filters: {
         fadeIn: {
           startTime: this.filters.fadeInNode.startTime,
@@ -296,6 +298,8 @@ export class AudioEditorTrack {
       this.load(state.src);
     }
     this.color = state.color;
+
+    this.audioPeaks = state.audioPeaks;
 
     this.filters.fadeInNode.linearFadeIn(
       state.filters.fadeIn.startTime,

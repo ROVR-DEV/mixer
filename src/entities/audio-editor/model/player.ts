@@ -277,34 +277,19 @@ export class ObservablePlayer implements Player {
   };
 
   private _restoreState = (state: PlayerState) => {
-    const stateChannelIds = state.channels.map((channel) => channel.id);
-
-    const channels = [...this.channels].filter((channel) =>
-      stateChannelIds.includes(channel.id),
-    );
-
-    state.channels.forEach((channelState) => {
-      const foundChannel = this.channels.find(
-        (channel) => channel.id === channelState.id,
-      );
-
-      if (foundChannel === undefined) {
-        const newChannel = new Channel(channelState.id);
-        newChannel.restoreState(channelState);
-        channels.push(newChannel);
-        return;
-      }
-
-      foundChannel.restoreState(channelState);
-    });
-
-    this.channels.replace(channels);
-
     const stateTracksIds = state.tracks.map((track) => track.uuid);
 
     const tracks = [...this.tracks].filter((track) =>
       stateTracksIds.includes(track.uuid),
     );
+
+    const channels = state.channels.map((channelState) => {
+      const newChannel = new Channel(channelState.id);
+      newChannel.restoreState(channelState);
+      return newChannel;
+    });
+
+    this.channels.replace(channels);
 
     state.tracks.forEach((trackState) =>
       runInAction(() => {
@@ -330,8 +315,6 @@ export class ObservablePlayer implements Player {
         foundTrack.restoreState(trackState);
       }),
     );
-
-    this.channels.forEach((channel) => channel.clearTracks());
 
     tracks.forEach((track) => {
       track.channel.addTrack(track);
