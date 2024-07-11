@@ -19,14 +19,19 @@ export const useGlobalControls = (
         console.info(
           `Track caching is ${isTrackCachingEnabled() ? 'enabled' : 'disabled'}`,
         );
+        return;
       }
 
       if (e.code === 'Space') {
+        e.preventDefault();
+        e.stopPropagation();
         handler({ type: 'Play/Pause' });
+        return;
       }
 
       if (e.ctrlKey && !e.shiftKey && e.code === 'KeyZ') {
         handler({ type: 'Undo' });
+        return;
       }
 
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyZ') {

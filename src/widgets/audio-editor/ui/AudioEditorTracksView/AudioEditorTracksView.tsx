@@ -16,7 +16,7 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
     return !track ? null : (
       <AudioEditorTrackView
         className='h-[calc(100%-14px)]'
-        key={`track-${track.uuid}`}
+        key={`track-${track.id}`}
         track={track}
         waveformComponent={<TrackWaveform track={track} />}
         editMenu={TrackEditMenu}

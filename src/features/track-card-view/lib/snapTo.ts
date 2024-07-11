@@ -4,7 +4,7 @@ const snapToLeftFilterFun = (
   track: AudioEditorTrack,
   channelTrack: AudioEditorTrack,
 ) =>
-  channelTrack.uuid !== track.uuid &&
+  channelTrack.id !== track.id &&
   channelTrack.trimEndTime <= track.trimStartTime;
 
 const snapToLeftSortFun = (a: AudioEditorTrack, b: AudioEditorTrack) =>
@@ -14,7 +14,7 @@ const snapToRightFilterFun = (
   track: AudioEditorTrack,
   channelTrack: AudioEditorTrack,
 ) =>
-  channelTrack.uuid !== track.uuid &&
+  channelTrack.id !== track.id &&
   channelTrack.trimStartTime >= track.trimEndTime;
 
 const snapToRightSortFun = (a: AudioEditorTrack, b: AudioEditorTrack) =>

@@ -81,7 +81,7 @@ export const AudioEditorFloatingToolbarView = observer(
                 icon: <UndoIcon />,
                 isActive: false,
                 onClick: () => {
-                  audioEditor.player.undo();
+                  audioEditor.undo();
                 },
               },
               {
@@ -89,7 +89,7 @@ export const AudioEditorFloatingToolbarView = observer(
                 icon: <RedoIcon />,
                 isActive: false,
                 onClick: () => {
-                  audioEditor.player.redo();
+                  audioEditor.redo();
                 },
               },
             ],

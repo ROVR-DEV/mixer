@@ -2,7 +2,6 @@ import { EventEmitter } from 'eventemitter3';
 import { computed, makeAutoObservable, observable, runInAction } from 'mobx';
 
 import { clamp, Timer } from '@/shared/lib';
-import { HistoryManager } from '@/shared/model';
 
 import {
   AudioEditorChannelState,
@@ -10,6 +9,8 @@ import {
   TRACK_COLORS,
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/channel';
+// eslint-disable-next-line boundaries/element-types
+import { PlaylistDTO } from '@/entities/playlist';
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrack, AudioEditorTrackState } from '@/entities/track';
 
@@ -51,11 +52,8 @@ export interface Player {
   on(event: keyof PlayerEvents, listener: TimeListener): void;
   off(event: keyof PlayerEvents, listener: TimeListener): void;
 
-  undo: () => void;
-  redo: () => void;
-
-  clearState(): void;
-  saveState(): void;
+  getState(): PlayerState;
+  restoreState(state: PlayerState): void;
 }
 
 export class ObservablePlayer implements Player {
@@ -64,7 +62,6 @@ export class ObservablePlayer implements Player {
   readonly channels = observable.array<Channel>();
   readonly region: Region = new ObservableRegion();
 
-  private _history = new HistoryManager<PlayerState>();
   private _emitter = new EventEmitter<PlayerEvents>();
 
   private _timer: Timer | null = null;
@@ -90,14 +87,27 @@ export class ObservablePlayer implements Player {
     return this.channels.filter((channel) => channel.isSolo);
   }
 
-  constructor() {
+  constructor(playlist?: PlaylistDTO) {
     this._timer = new Timer((time: number) => this._onTimeUpdate(time / 1000));
+
+    if (playlist) {
+      this.importPlaylist(playlist);
+    }
 
     makeAutoObservable<ObservablePlayer, '_soloChannels'>(this, {
       _soloChannels: computed,
       time: computed,
       isPlaying: computed,
     });
+  }
+
+  importPlaylist(playlist: PlaylistDTO) {
+    this.addChannel();
+    this.addChannel();
+
+    playlist.tracks.forEach((track, i) =>
+      this.channels[i % 2]?.importTrack(track),
+    );
   }
 
   //#region Player actions
@@ -241,46 +251,22 @@ export class ObservablePlayer implements Player {
     return time >= track.trimStartTime && time < track.trimEndTime;
   };
 
-  clearState(): void {
-    this._history.clear();
-  }
-
-  saveState(): void {
-    this._history.addState({
+  getState(): PlayerState {
+    return {
       channels: this.channels.map<AudioEditorChannelState>((channel) =>
         channel.getState(),
       ),
       tracks: this.tracks.map<AudioEditorTrackState>((track) =>
         track.getState(),
       ),
-    });
+    };
   }
 
-  undo = () => {
-    const state = this._history.undo();
-
-    if (!state) {
-      return;
-    }
-
-    this._restoreState(state);
-  };
-
-  redo = () => {
-    const state = this._history.redo();
-
-    if (!state) {
-      return;
-    }
-
-    this._restoreState(state);
-  };
-
-  private _restoreState = (state: PlayerState) => {
+  restoreState = (state: PlayerState) => {
     const stateTracksIds = state.tracks.map((track) => track.uuid);
 
     const tracks = [...this.tracks].filter((track) =>
-      stateTracksIds.includes(track.uuid),
+      stateTracksIds.includes(track.id),
     );
 
     const channels = state.channels.map((channelState) => {
@@ -293,9 +279,7 @@ export class ObservablePlayer implements Player {
 
     state.tracks.forEach((trackState) =>
       runInAction(() => {
-        const foundTrack = tracks.find(
-          (track) => track.uuid === trackState.uuid,
-        );
+        const foundTrack = tracks.find((track) => track.id === trackState.uuid);
 
         const foundChannel = this.channels.find(
           (channel) => channel.id === trackState.channelId,

@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useCallback } from 'react';
 
-import { usePlayer, useTimelineController } from '@/entities/audio-editor';
+import { useAudioEditor, useTimelineController } from '@/entities/audio-editor';
 import {
   AddNewChannelButtonMemoized,
   ChannelListItemMemoized,
@@ -18,13 +18,13 @@ const _AudioEditorChannelsList = forwardRef<
   HTMLDivElement,
   AudioEditorChannelsListProps
 >(function AudioEditorChannelsList({ ...props }, ref) {
-  const player = usePlayer();
+  const audioEditor = useAudioEditor();
   const timelineController = useTimelineController();
 
   const handleAddChannel = useCallback(() => {
-    player.addChannel();
-    player.saveState();
-  }, [player]);
+    audioEditor.player.addChannel();
+    audioEditor.saveState();
+  }, [audioEditor]);
 
   return (
     <ChannelListMemoized ref={ref} {...props}>

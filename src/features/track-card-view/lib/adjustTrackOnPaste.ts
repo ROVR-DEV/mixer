@@ -2,7 +2,7 @@ import { AudioEditorTrack } from '@/entities/track';
 
 export const adjustTracksOnPaste = (currentTrack: AudioEditorTrack) => {
   currentTrack.channel.tracks.forEach((track) => {
-    if (currentTrack.uuid === track.uuid) {
+    if (currentTrack.id === track.id) {
       return;
     }
 

@@ -67,7 +67,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
         audioEditor.selectTrack(copiedTrack);
 
-        audioEditor.player.saveState();
+        audioEditor.saveState();
         return;
       }
 
@@ -83,7 +83,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const handleSnapLeft = useCallback(
     () => {
       snapTo(track, 'left', audioEditor.player.tracks);
-      audioEditor.player.saveState();
+      audioEditor.saveState();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -92,7 +92,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const handleSnapRight = useCallback(
     () => {
       snapTo(track, 'right', audioEditor.player.tracks);
-      audioEditor.player.saveState();
+      audioEditor.saveState();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],

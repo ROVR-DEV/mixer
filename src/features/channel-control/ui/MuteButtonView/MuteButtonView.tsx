@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback } from 'react';
 
-import { usePlayer } from '@/entities/audio-editor';
+import { useAudioEditor } from '@/entities/audio-editor';
 import { MuteButton } from '@/entities/channel';
 
 import { MuteButtonViewProps } from './interfaces';
@@ -12,19 +12,20 @@ export const MuteButtonView = observer(function MuteButtonView({
   channel,
   ...props
 }: MuteButtonViewProps) {
-  const player = usePlayer();
+  const audioEditor = useAudioEditor();
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       channel.toggleMute();
+      audioEditor.saveState();
     },
-    [channel],
+    [audioEditor, channel],
   );
 
   return (
     <MuteButton
-      isMuted={player.isChannelMuted(channel)}
+      isMuted={audioEditor.player.isChannelMuted(channel)}
       onClick={handleClick}
       {...props}
     />

@@ -166,8 +166,8 @@ export const useFadeMarker = ({
   );
 
   const handleDragEnd = useCallback(() => {
-    audioEditor.player.saveState();
-  }, [audioEditor.player]);
+    audioEditor.saveState();
+  }, [audioEditor]);
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({
     onDragStart: handleDragStart,

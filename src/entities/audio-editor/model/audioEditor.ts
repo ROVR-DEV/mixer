@@ -1,12 +1,15 @@
 import { computed, makeAutoObservable, observable } from 'mobx';
 
 // eslint-disable-next-line boundaries/element-types
+import { HistoryManager } from '@/shared/model';
+
+// eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrack } from '@/entities/track';
 
 import { ALL_AUDIO_EDITOR_TOOLS, AudioEditorTool } from './audioEditorTool';
-import { Player } from './player';
+import { Player, PlayerState } from './player';
 
 const AUDIO_EDITOR_DEFAULT_OPTIONS: AudioEditorOptions = {
   availableTools: ALL_AUDIO_EDITOR_TOOLS,
@@ -40,12 +43,22 @@ export interface AudioEditor {
   unselectTracks: () => void;
 
   isTrackSelected: (track: AudioEditorTrack) => boolean;
+
+  saveState(): void;
+  undo: () => void;
+  redo: () => void;
+}
+
+export interface AudioEditorState {
+  player: PlayerState;
 }
 
 export class ObservableAudioEditor implements AudioEditor {
   readonly options: AudioEditorOptions;
 
   readonly selectedTracks = observable.set<AudioEditorTrack>();
+
+  private _history = new HistoryManager<AudioEditorState>();
 
   private _player: Player;
   private _tool: AudioEditorTool;
@@ -124,6 +137,8 @@ export class ObservableAudioEditor implements AudioEditor {
 
     this._player = player;
 
+    this.saveState();
+
     makeAutoObservable(this, {
       tool: computed,
     });
@@ -158,5 +173,39 @@ export class ObservableAudioEditor implements AudioEditor {
 
   isTrackSelected = (track: AudioEditorTrack) => {
     return this.selectedTracks.has(track);
+  };
+
+  clearState(): void {
+    this._history.clear();
+  }
+
+  saveState(): void {
+    this._history.addState({ player: this._player.getState() });
+  }
+
+  undo = () => {
+    const state = this._history.undo();
+
+    if (!state) {
+      return;
+    }
+
+    this._restoreState(state);
+  };
+
+  redo = () => {
+    const state = this._history.redo();
+
+    if (!state) {
+      return;
+    }
+
+    this._restoreState(state);
+  };
+
+  private _restoreState = (state: AudioEditorState) => {
+    this._draggingTracks.clear();
+
+    this.player.restoreState(state.player);
   };
 }

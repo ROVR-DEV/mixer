@@ -18,11 +18,11 @@ export const ChannelControlView = observer(function ChannelControlView({
   const handleRemove = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
+      channel.tracks.forEach((track) => audioEditor.unselectTrack(track));
       audioEditor.player.removeChannel(channel);
-
-      audioEditor.player.saveState();
+      audioEditor.saveState();
     },
-    [audioEditor.player, channel],
+    [audioEditor, channel],
   );
 
   return (

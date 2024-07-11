@@ -47,7 +47,7 @@ export interface AudioEditorTrackState {
 }
 
 export class AudioEditorTrack {
-  readonly uuid: string = v4();
+  readonly id: string = v4();
 
   readonly mediaElement: HTMLMediaElement = new Audio();
 
@@ -264,7 +264,7 @@ export class AudioEditorTrack {
 
   getState = (): AudioEditorTrackState => {
     return {
-      uuid: this.uuid,
+      uuid: this.id,
       channelId: this.channel.id,
       startTime: this.startTime,
       endTime: this.endTime,

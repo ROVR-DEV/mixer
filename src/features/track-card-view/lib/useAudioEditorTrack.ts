@@ -418,17 +418,12 @@ export const useAudioEditorTrack = (
         );
 
         audioEditor.draggingTracks.forEach(adjustTracksOnPaste);
+        audioEditor.draggingTracks = [];
 
-        audioEditor.player.saveState();
+        audioEditor.saveState();
       });
     },
-    [
-      disableInteractive,
-      trackRef,
-      audioEditor.draggingTracks,
-      audioEditor.player,
-      handleDragEnd,
-    ],
+    [disableInteractive, trackRef, audioEditor, handleDragEnd],
   );
 
   const { onMouseUp, onMouseDown } = useGlobalDnD({

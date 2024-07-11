@@ -104,7 +104,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
               >
                 <AudioEditorTrackView
                   className='h-[calc(100%-14px)]'
-                  key={`track-${audioEditor.editableTrack.uuid}-editable`}
+                  key={`track-${audioEditor.editableTrack.id}-editable`}
                   track={audioEditor.editableTrack}
                   waveformComponent={waveformComponent}
                   disableInteractive

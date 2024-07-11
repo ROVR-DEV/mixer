@@ -136,7 +136,7 @@ export const useTrimMarker = ({
     if (track.isTrimming) {
       track.isTrimming = false;
       adjustTracksOnPaste(track);
-      audioEditor.player.saveState();
+      audioEditor.saveState();
     }
   }, [audioEditor.player, track]);
 

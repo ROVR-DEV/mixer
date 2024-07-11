@@ -9,6 +9,7 @@ import {
   ObservableAudioEditor,
   AudioEditorContext,
   PlayerContext,
+  ObservablePlayer,
 } from '@/entities/audio-editor';
 import { TracksManagerContext } from '@/entities/track';
 
@@ -24,11 +25,12 @@ export const AudioEditorView = observer(function AudioEditorView({
   className,
   ...props
 }: AudioEditorViewProps) {
-  const { player, tracksManager } = usePlayerSetup(playlist);
-
+  const [player] = useState(() => new ObservablePlayer(playlist));
   const [audioEditor] = useState(() => new ObservableAudioEditor(player));
 
-  useAudioEditorGlobalControls(player);
+  const { tracksManager } = usePlayerSetup(playlist, audioEditor.player);
+
+  useAudioEditorGlobalControls(audioEditor);
 
   return (
     <AudioEditorContext.Provider value={audioEditor}>
