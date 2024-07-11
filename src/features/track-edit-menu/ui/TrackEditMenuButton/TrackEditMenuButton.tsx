@@ -10,7 +10,7 @@ export const TrackEditMenuButton = ({
   return (
     <Button
       className={cn(
-        'min-h-[68px] rounded-none bg-transparent text-accent outline-none hover:bg-accent hover:text-primary',
+        'min-h-[68px] rounded-none bg-transparent text-accent focus:bg-accent focus:text-primary outline-none hover:bg-accent hover:text-primary',
         className,
       )}
       {...props}

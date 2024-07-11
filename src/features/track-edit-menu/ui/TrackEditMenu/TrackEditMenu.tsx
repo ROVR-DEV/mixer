@@ -13,6 +13,7 @@ export const TrackEditMenu = ({
 }: TrackEditMenuProps) => {
   return (
     <div
+      tabIndex={0}
       className='flex h-max flex-col justify-between divide-y divide-accent'
       {...props}
     >

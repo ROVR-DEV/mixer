@@ -25,6 +25,15 @@ export function usePopover({
   modal,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
+  middleware = [
+    offset(5),
+    flip({
+      crossAxis: placement.includes('-'),
+      fallbackAxisSideDirection: 'end',
+      padding: 5,
+    }),
+    shift({ padding: 5 }),
+  ],
 }: PopoverProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(initialOpen);
   const [labelId, setLabelId] = React.useState<string | undefined>();
@@ -38,17 +47,14 @@ export function usePopover({
   const data = useFloating({
     placement,
     open,
+    transform: false,
     onOpenChange: setOpen,
-    whileElementsMounted: autoUpdate,
-    middleware: [
-      offset(5),
-      flip({
-        crossAxis: placement.includes('-'),
-        fallbackAxisSideDirection: 'end',
-        padding: 5,
-      }),
-      shift({ padding: 5 }),
-    ],
+    whileElementsMounted: (referenceEl, floatingEl, update) => {
+      return autoUpdate(referenceEl, floatingEl, update, {
+        animationFrame: true,
+      });
+    },
+    middleware: middleware,
   });
 
   const context = data.context;
@@ -153,8 +159,8 @@ export const PopoverTrigger = React.forwardRef<
 
 export const PopoverContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLProps<HTMLDivElement>
->(function PopoverContent({ style, ...props }, propRef) {
+  React.HTMLProps<HTMLDivElement> & { renderInBody?: boolean }
+>(function PopoverContent({ renderInBody = true, style, ...props }, propRef) {
   const { context: floatingContext, setOpen, ...context } = usePopoverContext();
   const ref = useMergeRefs([context.refs.setFloating, propRef]);
 
@@ -167,7 +173,13 @@ export const PopoverContent = React.forwardRef<
   }
 
   return (
-    <FloatingPortal>
+    <FloatingPortal
+      root={
+        renderInBody
+          ? undefined
+          : (floatingContext.refs.reference.current as HTMLDivElement)
+      }
+    >
       <FloatingFocusManager context={floatingContext} modal={context.modal}>
         <div
           ref={ref}

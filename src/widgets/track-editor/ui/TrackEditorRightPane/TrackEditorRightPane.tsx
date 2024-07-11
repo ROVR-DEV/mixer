@@ -33,7 +33,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const rulerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
-  const timeline = useTimelineZoomScroll({
+  const timelineController = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerRef,
     startTime: audioEditor.editableTrack?.isTrimming
@@ -53,7 +53,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     [audioEditor.editableTrack],
   );
 
-  const handleTimeSeek = useHandleTimeSeek(player, timeline);
+  const handleTimeSeek = useHandleTimeSeek(player, timelineController);
 
   useEffect(() => {
     if (!audioEditor.editableTrack) {
@@ -62,15 +62,15 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
 
     if (
       audioEditor.editableTrack.isTrimming &&
-      timeline.scroll > audioEditor.editableTrack.trimStartTime
+      timelineController.scroll > audioEditor.editableTrack.trimStartTime
     ) {
-      timeline.scroll = audioEditor.editableTrack.trimStartTime;
+      timelineController.scroll = audioEditor.editableTrack.trimStartTime;
     }
   }, [
     audioEditor.editableTrack,
     audioEditor.editableTrack?.isTrimming,
     audioEditor.editableTrack?.trimStartTime,
-    timeline,
+    timelineController,
   ]);
 
   useEffect(() => {
@@ -78,11 +78,11 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
       return;
     }
 
-    timeline.scroll = audioEditor.editableTrack.trimStartTime;
-  }, [audioEditor.editableTrack, timeline]);
+    timelineController.scroll = audioEditor.editableTrack.trimStartTime;
+  }, [audioEditor.editableTrack, timelineController]);
 
   return (
-    <TimelineControllerContext.Provider value={timeline}>
+    <TimelineControllerContext.Provider value={timelineController}>
       <div className={cn('flex flex-col', className)} {...props}>
         <TimelineHeader
           className='h-16 min-h-16'

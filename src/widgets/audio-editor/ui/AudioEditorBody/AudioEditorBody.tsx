@@ -104,8 +104,8 @@ export const AudioEditorBody = observer(function AudioEditorBody({
           <ChannelsListHeaderMemoized playlist={playlist} />
           <TimelineHeader className='pb-[9px]' rulerRef={rulerWrapperRef} />
         </div>
-        <div className='flex h-full grow overflow-y-auto overflow-x-hidden'>
-          <AudioEditorChannelsList className='min-h-max min-w-[296px] grow' />
+        <div className='flex h-full grow overflow-y-auto overflow-x-clip'>
+          <AudioEditorChannelsList className='z-30 min-h-max min-w-[296px] grow bg-primary' />
           <TimelineView
             timelineRef={timelineRef}
             onMouseUp={handleMouseUp}

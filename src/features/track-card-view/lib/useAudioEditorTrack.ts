@@ -146,10 +146,12 @@ export const useAudioEditorTrack = (
     //   });
     // }
 
-    updateTrackVerticalPosition();
-    updateTrackHorizontalPosition();
-    updateTrackWidth();
-    updateTrackVisibility();
+    requestAnimationFrame(() => {
+      updateTrackVerticalPosition();
+      updateTrackHorizontalPosition();
+      updateTrackWidth();
+      updateTrackVisibility();
+    });
   }, [
     updateTrackHorizontalPosition,
     updateTrackVerticalPosition,

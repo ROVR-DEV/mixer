@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { computed, makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
 import { Rect } from '@/shared/lib';
@@ -84,7 +84,7 @@ export class TimelineContainerObserver {
     this._totalTime = totalTime;
 
     this._setupResizeObserver();
-    makeAutoObservable(this);
+    makeAutoObservable(this, { totalTime: computed });
   }
 
   private _setupResizeObserver = () => {

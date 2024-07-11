@@ -1,5 +1,6 @@
 'use client';
 
+import { offset } from '@floating-ui/react';
 import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
@@ -29,7 +30,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
     return (
       <div
         className={cn(
-          '@container relative grid grid-rows-[18px_auto_18px] grid-cols-1 box-content border rounded-lg bg-primary',
+          '@container relative grid grid-rows-[18px_auto_18px] grid-cols-1 border rounded-lg bg-primary',
           className,
           {
             'bg-accent !text-primary': isSelected,
@@ -45,10 +46,10 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         ref={ref}
         {...props}
       >
-        <Popover placement='bottom-start'>
+        <Popover placement='bottom-start' middleware={[offset(5)]}>
           <PopoverTrigger
             className={cn(
-              '@[128px]:left-7 row-start-1 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-20 transition-[left]',
+              '@[128px]:left-7 row-start-1 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-50 transition-[left] rounded-md',
               {
                 '@[96px]:flex': isSelected,
               },

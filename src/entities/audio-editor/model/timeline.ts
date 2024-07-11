@@ -110,7 +110,7 @@ export class Timeline {
   }
 
   set scroll(scroll: number) {
-    this._scroll = scroll;
+    this.scrollController.value = scroll;
   }
 
   constructor({
@@ -296,14 +296,14 @@ export class Timeline {
 
   private _scrollListener = (scroll: number) => {
     runInAction(() => {
-      this.scroll = scroll;
+      this._scroll = scroll;
     });
   };
 
   private _zoomListener = (zoom: number) => {
     runInAction(() => {
       this.timelineContainer.pixelsPerSecond = getPixelPerSeconds(zoom);
-      this.zoom = zoom;
+      this._zoom = zoom;
 
       this.scrollController.step = 50 / this.zoom;
     });

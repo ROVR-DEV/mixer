@@ -40,7 +40,7 @@ export const AudioEditorView = observer(function AudioEditorView({
           <TracksManagerContext.Provider value={tracksManager}>
             <AudioEditorBody playlist={playlist} />
             {!audioEditor.editableTrack ? null : (
-              <TrackEditor className='absolute bottom-[100px] z-10 h-[43%] max-h-[466px] min-h-[161px] w-full' />
+              <TrackEditor className='absolute bottom-[100px] z-50 h-[43%] max-h-[466px] min-h-[161px] w-full' />
             )}
           </TracksManagerContext.Provider>
         </div>

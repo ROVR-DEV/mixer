@@ -1,4 +1,4 @@
-import { Placement } from '@floating-ui/react';
+import { Middleware, Placement } from '@floating-ui/react';
 
 export interface PopoverProps {
   initialOpen?: boolean;
@@ -6,4 +6,5 @@ export interface PopoverProps {
   modal?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  middleware?: Middleware[];
 }

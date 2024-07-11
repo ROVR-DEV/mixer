@@ -30,12 +30,7 @@ export const useAudioEditorRegion = (player: Player, timeline: Timeline) => {
       0,
       0,
     ),
-    boundsRect: new Rect(
-      timeline.boundingClientRect.x,
-      timeline.boundingClientRect.y,
-      timeline.timelineScrollWidth,
-      timeline.timelineClientHeight,
-    ),
+
     onChange: handleChange,
   });
 };

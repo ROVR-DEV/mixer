@@ -47,7 +47,7 @@ const updateTrim = throttle(
       track.setEndTrimDuration(track.endTime - time);
     }
   },
-  1.5,
+  3,
 );
 
 export const useTrimMarker = ({
@@ -138,7 +138,7 @@ export const useTrimMarker = ({
       adjustTracksOnPaste(track);
       audioEditor.saveState();
     }
-  }, [audioEditor.player, track]);
+  }, [audioEditor, track]);
 
   const { onMouseDown } = useGlobalDnD({
     onDragStart: handleDragStart,

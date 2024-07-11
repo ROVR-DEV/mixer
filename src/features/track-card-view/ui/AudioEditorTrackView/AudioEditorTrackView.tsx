@@ -96,6 +96,14 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [],
   );
 
+  const editMenu = useMemo(
+    () =>
+      EditMenu ? (
+        <EditMenu onSnapLeft={handleSnapLeft} onSnapRight={handleSnapRight} />
+      ) : null,
+    [EditMenu, handleSnapLeft, handleSnapRight],
+  );
+
   return (
     <div
       ref={trackRef}
@@ -111,14 +119,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         track={track.meta}
         isSolo={track.channel?.isSolo}
         isSelected={isSelected}
-        editPopoverContent={
-          EditMenu ? (
-            <EditMenu
-              onSnapLeft={handleSnapLeft}
-              onSnapRight={handleSnapRight}
-            />
-          ) : null
-        }
+        editPopoverContent={editMenu}
         {...props}
       />
     </div>

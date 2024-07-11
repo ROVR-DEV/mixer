@@ -7,6 +7,10 @@
   --background-color: theme('colors.primary.DEFAULT');
 }
 
+html {
+  overflow: clip;
+}
+
 body {
   color: var(--foreground-color);
   background: var(--background-color);
