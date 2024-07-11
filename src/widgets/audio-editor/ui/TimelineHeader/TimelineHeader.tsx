@@ -29,34 +29,34 @@ export const TimelineHeader = observer(function TimelineHeader({
   ...props
 }: TimelineHeaderProps) {
   const player = usePlayer();
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
-  const handleClickOnRuler = useHandleTimeSeek(player, timelineController);
+  const handleClickOnRuler = useHandleTimeSeek(player, timeline);
 
   const rulerControlRef = useRef<TimelineRulerRef | null>(null);
 
   const renderRuler = useAudioEditorTimelineRuler(rulerControlRef);
 
   useEffect(() => {
-    if (timelineController.disableListeners) {
+    if (timeline.disableListeners) {
       return;
     }
 
     renderRuler(
-      timelineController.ticks,
-      timelineController.zoom,
-      timelineController.scroll,
-      timelineController.timelineContainer.pixelsPerSecond,
-      timelineController.timelineLeftPadding,
+      timeline.ticks,
+      timeline.zoom,
+      timeline.scroll,
+      timeline.timelineContainer.pixelsPerSecond,
+      timeline.timelineLeftPadding,
     );
   }, [
     renderRuler,
-    timelineController.disableListeners,
-    timelineController.scroll,
-    timelineController.ticks,
-    timelineController.timelineContainer.pixelsPerSecond,
-    timelineController.timelineLeftPadding,
-    timelineController.zoom,
+    timeline.disableListeners,
+    timeline.scroll,
+    timeline.ticks,
+    timeline.timelineContainer.pixelsPerSecond,
+    timeline.timelineLeftPadding,
+    timeline.zoom,
   ]);
 
   const canvasProps = useMemo(() => ({ className: 'h-[32px]' }), []);

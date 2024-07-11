@@ -8,7 +8,7 @@ import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 import { TrimSide } from '@/shared/ui';
 
 // eslint-disable-next-line boundaries/element-types
-import { TimelineController, useAudioEditor } from '@/entities/audio-editor';
+import { Timeline, useAudioEditor } from '@/entities/audio-editor';
 
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
@@ -20,7 +20,7 @@ import { getTrimMarkerAriaAttributes } from './trimMarkerAria';
 export interface UseTrimMarkerProps {
   trimSide: TrimSide;
   track: AudioEditorTrack | null;
-  timelineController: TimelineController;
+  timeline: Timeline;
 }
 
 const updateTrim = throttle(
@@ -28,7 +28,7 @@ const updateTrim = throttle(
     e: MouseEvent,
     track: AudioEditorTrack | null,
     side: Side,
-    timelineController: TimelineController,
+    timeline: Timeline,
     bounds: { left: number; right: number },
   ) => {
     if (!track) {
@@ -36,7 +36,7 @@ const updateTrim = throttle(
     }
 
     const time = clamp(
-      timelineController.virtualPixelsToTime(e.pageX),
+      timeline.virtualPixelsToTime(e.pageX),
       Math.max(0, track.startTime, bounds.left),
       Math.min(track.endTime, bounds.right),
     );
@@ -52,7 +52,7 @@ const updateTrim = throttle(
 
 export const useTrimMarker = ({
   track,
-  timelineController,
+  timeline,
   trimSide,
 }: UseTrimMarkerProps) => {
   const audioEditor = useAudioEditor();
@@ -119,9 +119,9 @@ export const useTrimMarker = ({
         return;
       }
 
-      updateTrim(e, track, trimSide, timelineController, bounds);
+      updateTrim(e, track, trimSide, timeline, bounds);
     },
-    [bounds, trimSide, timelineController, track],
+    [bounds, trimSide, timeline, track],
   );
 
   const handleMouseUp = useCallback(() => {

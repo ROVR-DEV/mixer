@@ -13,7 +13,7 @@ export const TrimBackgroundView = observer(function TrimBackgroundView({
   className,
   ...props
 }: TrimBackgroundViewProps) {
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   return (
     track.isTrimming && (
@@ -23,10 +23,8 @@ export const TrimBackgroundView = observer(function TrimBackgroundView({
           className,
         )}
         style={{
-          width: timelineController.timeToVirtualPixels(track.duration),
-          left: -timelineController.timeToVirtualPixels(
-            track.startTrimDuration,
-          ),
+          width: timeline.timeToVirtualPixels(track.duration),
+          left: -timeline.timeToVirtualPixels(track.startTrimDuration),
         }}
         {...props}
       />

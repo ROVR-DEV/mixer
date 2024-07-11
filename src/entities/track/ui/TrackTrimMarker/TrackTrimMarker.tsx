@@ -13,11 +13,11 @@ import { TrackTrimMarkerProps } from './interfaces';
 
 export const TrackTrimMarker = observer(
   ({ track, trimSide, ...props }: TrackTrimMarkerProps) => {
-    const timelineController = useTimelineController();
+    const timeline = useTimelineController();
 
     const trimMarkerProps = useTrackTrimMarker({
       track,
-      timelineController,
+      timeline,
       trimSide,
     });
 

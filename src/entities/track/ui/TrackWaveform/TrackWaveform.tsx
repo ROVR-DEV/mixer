@@ -22,7 +22,7 @@ export const TrackWaveform = observer(function TrackWaveform({
 
   const waveformRef = useRef<HTMLDivElement | null>(null);
 
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
@@ -63,9 +63,9 @@ export const TrackWaveform = observer(function TrackWaveform({
         return;
       }
 
-      waveformRef.current.style.width = `${timelineController.timeToVirtualPixels(trackDuration)}px`;
+      waveformRef.current.style.width = `${timeline.timeToVirtualPixels(trackDuration)}px`;
     },
-    [timelineController],
+    [timeline],
   );
 
   useEffect(() => {
@@ -77,10 +77,10 @@ export const TrackWaveform = observer(function TrackWaveform({
       updateWidth(track.duration);
     };
 
-    timelineController.zoomController.addListener(update);
-    return () => timelineController.zoomController.removeListener(update);
+    timeline.zoomController.addListener(update);
+    return () => timeline.zoomController.removeListener(update);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timelineController.zoomController, updateWidth]);
+  }, [timeline.zoomController, updateWidth]);
 
   return (
     <div
@@ -91,9 +91,7 @@ export const TrackWaveform = observer(function TrackWaveform({
         ref={waveformRef}
         className='absolute w-full'
         style={{
-          left: -timelineController.timeToVirtualPixels(
-            track.startTrimDuration,
-          ),
+          left: -timeline.timeToVirtualPixels(track.startTrimDuration),
         }}
         color={color}
         waveColor={track.color ?? undefined}

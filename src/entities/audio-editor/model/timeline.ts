@@ -14,7 +14,7 @@ import { ScrollController } from './scrollController';
 import { TimelineContainerObserver } from './timelineContainerObserver';
 import { ZoomController } from './zoomController';
 
-export interface TimelineControllerProps {
+export interface TimelineProps {
   timelineRef: RefObject<HTMLElement>;
   zoomStep: number;
   scrollStep: number;
@@ -29,7 +29,7 @@ export interface TimelineControllerProps {
 
 export type WheelEventListener = (e: WheelEvent) => void;
 
-export class TimelineController {
+export class Timeline {
   readonly zoomController: ZoomController;
   readonly scrollController: ScrollController;
   readonly timelineContainer: TimelineContainerObserver;
@@ -124,7 +124,7 @@ export class TimelineController {
     totalTime,
     startTime = 0,
     timelineLeftPadding = 0,
-  }: TimelineControllerProps) {
+  }: TimelineProps) {
     this.zoomController = new ZoomController(zoomStep, minZoom, maxZoom);
 
     this.scrollController = new ScrollController(

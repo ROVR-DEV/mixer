@@ -13,14 +13,14 @@ import { AudioEditorTracksListProps } from './interfaces';
 export const AudioEditorTracksList = observer(function AudioEditorTracksList({
   player,
 }: AudioEditorTracksListProps) {
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   return player.channels.map((channel) => (
     <ChannelListItemClickView
       key={`channel-${channel.id}-track-line`}
       className='relative py-1.5'
       channel={channel}
-      style={{ height: timelineController.trackHeight }}
+      style={{ height: timeline.trackHeight }}
     >
       <AudioEditorTracksView channel={channel} player={player} />
     </ChannelListItemClickView>

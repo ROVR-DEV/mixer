@@ -20,45 +20,41 @@ export const TimelineScrollView = observer(function TimelineScrollView({
 }: TimelineScrollViewProps) {
   const horizontalScrollRef = useRef<TimelineScrollDivRef>(null);
 
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   const updateHorizontalScrollbar = useCallback(
     (scroll: number) => {
       horizontalScrollRef.current?.setScroll(
-        (scroll - timelineController.startTime) *
-          timelineController.timelineContainer.pixelsPerSecond,
+        (scroll - timeline.startTime) *
+          timeline.timelineContainer.pixelsPerSecond,
       );
     },
-    [timelineController],
+    [timeline],
   );
 
   const handleHorizontalScrollbarOnScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
-      timelineController.scrollController.value =
+      timeline.scrollController.value =
         e.currentTarget.scrollLeft /
-          timelineController.timelineContainer.pixelsPerSecond +
-        timelineController.startTime;
+          timeline.timelineContainer.pixelsPerSecond +
+        timeline.startTime;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timelineController.scrollController],
+    [timeline.scrollController],
   );
 
   useEffect(() => {
-    timelineController.scrollController.addListener(updateHorizontalScrollbar);
+    timeline.scrollController.addListener(updateHorizontalScrollbar);
 
     return () =>
-      timelineController.scrollController.removeListener(
-        updateHorizontalScrollbar,
-      );
-  }, [timelineController.scrollController, updateHorizontalScrollbar]);
+      timeline.scrollController.removeListener(updateHorizontalScrollbar);
+  }, [timeline.scrollController, updateHorizontalScrollbar]);
 
   return (
     <TimelineScrollMemoized
       className={cn('min-h-[10px]', className)}
       scrollDivRef={horizontalScrollRef}
-      timelineScrollWidth={
-        timelineController.timelineContainer.timelineScrollWidth
-      }
+      timelineScrollWidth={timeline.timelineContainer.timelineScrollWidth}
       xPadding={4}
       onChange={handleHorizontalScrollbarOnScroll}
       {...props}

@@ -4,7 +4,7 @@ import { clamp, useGlobalDnD } from '@/shared/lib';
 import { DnDData } from '@/shared/model';
 import { TrimSide } from '@/shared/ui';
 
-import { Player, TimelineController } from '@/entities/audio-editor';
+import { Player, Timeline } from '@/entities/audio-editor';
 
 import { checkAndToggleRegionLoop } from './checkAndToggleRegionLoop';
 
@@ -18,7 +18,7 @@ const updateRegionEnd = (newTime: number, player: Player) =>
 
 export const useAudioEditorRegionTrimMarker = (
   player: Player,
-  timelineController: TimelineController,
+  timeline: Timeline,
   trimSide: TrimSide,
 ) => {
   const updateRegion = useMemo(() => {
@@ -54,8 +54,8 @@ export const useAudioEditorRegionTrimMarker = (
       }
 
       const timeOffset =
-        timelineController.pixelsToTime(dndData.currentPosition.x) -
-        timelineController.pixelsToTime(dndData.startPosition.x);
+        timeline.pixelsToTime(dndData.currentPosition.x) -
+        timeline.pixelsToTime(dndData.startPosition.x);
 
       const newTime = dndData.customProperties.startTime + timeOffset;
 
@@ -63,7 +63,7 @@ export const useAudioEditorRegionTrimMarker = (
       checkAndToggleRegionLoop(player);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trimSide, timelineController],
+    [trimSide, timeline],
   );
 
   return useGlobalDnD({ onDragStart, onDrag });

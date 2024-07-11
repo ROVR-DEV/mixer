@@ -10,7 +10,7 @@ import { ChannelListItemView } from '@/features/channel-control';
 
 export const TimelineChannelsList = observer(function TimelineChannelsList() {
   const player = usePlayer();
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   return player.channels.map((channel) => (
     <ChannelListItemView
@@ -19,7 +19,7 @@ export const TimelineChannelsList = observer(function TimelineChannelsList() {
         'z-10': player.isChannelMuted(channel),
       })}
       channel={channel}
-      style={{ height: timelineController.trackHeight }}
+      style={{ height: timeline.trackHeight }}
     />
   ));
 });

@@ -17,11 +17,11 @@ export const AudioEditorRegionTrimMarker = observer(
     ...props
   }: AudioEditorRegionTrimMarkerProps) {
     const player = usePlayer();
-    const timelineController = useTimelineController();
+    const timeline = useTimelineController();
 
     const { onMouseDown, onMouseUp } = useAudioEditorRegionTrimMarker(
       player,
-      timelineController,
+      timeline,
       trimSide,
     );
 

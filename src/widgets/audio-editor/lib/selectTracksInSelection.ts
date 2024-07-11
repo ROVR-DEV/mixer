@@ -4,19 +4,16 @@ import {
   checkVerticalCollision,
 } from '@/shared/lib/checkCollision';
 
-import { AudioEditor, TimelineController } from '@/entities/audio-editor';
+import { AudioEditor, Timeline } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
 
-const getChannelVerticalBound = (
-  index: number,
-  timelineController: TimelineController,
-) => {
-  if (typeof timelineController.trackHeight !== 'number') {
+const getChannelVerticalBound = (index: number, timeline: Timeline) => {
+  if (typeof timeline.trackHeight !== 'number') {
     return { startY: 0, endY: 0 };
   }
 
-  const startY = index * timelineController.trackHeight;
-  const endY = startY + timelineController.trackHeight + 14;
+  const startY = index * timeline.trackHeight;
+  const endY = startY + timeline.trackHeight + 14;
 
   return { startY: startY, endY: endY };
 };
@@ -24,22 +21,22 @@ const getChannelVerticalBound = (
 const selectTrackInSelection = (
   track: AudioEditorTrack,
   audioEditor: AudioEditor,
-  timelineController: TimelineController,
+  timeline: Timeline,
   channelStartY: number,
   rect: Rect,
   addToSelection: boolean = false,
 ) => {
-  if (typeof timelineController.trackHeight !== 'number') {
+  if (typeof timeline.trackHeight !== 'number') {
     return;
   }
 
   const isIntersects = checkCollision(
     new Rect(
-      timelineController.timeToVirtualPixels(track.trimStartTime) +
-        timelineController.timelineLeftPadding,
+      timeline.timeToVirtualPixels(track.trimStartTime) +
+        timeline.timelineLeftPadding,
       channelStartY + 7,
-      timelineController.timeToVirtualPixels(track.trimDuration),
-      timelineController.trackHeight - 14,
+      timeline.timeToVirtualPixels(track.trimDuration),
+      timeline.trackHeight - 14,
     ),
     rect,
   );
@@ -55,25 +52,24 @@ const selectTrackInSelection = (
 
 export const selectTracksInSelection = (
   audioEditor: AudioEditor,
-  timelineController: TimelineController,
+  timeline: Timeline,
   rect: Rect,
   addToSelection: boolean = false,
 ) => {
   audioEditor.player.channels.forEach((channel, i) => {
-    if (typeof timelineController.trackHeight !== 'number') {
+    if (typeof timeline.trackHeight !== 'number') {
       return;
     }
 
     const virtualRect = new Rect(
-      rect.x +
-        timelineController.realToVirtualPixels(timelineController.scroll),
+      rect.x + timeline.realToVirtualPixels(timeline.scroll),
       rect.y,
       rect.width,
       rect.height,
     );
 
     const { startY: channelStartY, endY: channelEndY } =
-      getChannelVerticalBound(i, timelineController);
+      getChannelVerticalBound(i, timeline);
 
     const isChannelIntersects = checkVerticalCollision(
       channelStartY,
@@ -93,7 +89,7 @@ export const selectTracksInSelection = (
       selectTrackInSelection(
         track,
         audioEditor,
-        timelineController,
+        timeline,
         channelStartY,
         virtualRect,
         addToSelection,

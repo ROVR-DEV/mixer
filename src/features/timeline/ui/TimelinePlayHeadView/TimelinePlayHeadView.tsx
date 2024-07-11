@@ -20,12 +20,9 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
   const playHeadRef = useRef<HTMLDivElement | null>(null);
 
   const player = usePlayer();
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
-  const { playHeadHeight, updatePlayHead } = usePlayHead(
-    timelineController,
-    playHeadRef,
-  );
+  const { playHeadHeight, updatePlayHead } = usePlayHead(timeline, playHeadRef);
 
   const renderPlayHead = useCallback(
     (time: number) =>
@@ -47,25 +44,19 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
     };
     update();
 
-    timelineController.zoomController.addListener(update);
-    timelineController.scrollController.addListener(update);
+    timeline.zoomController.addListener(update);
+    timeline.scrollController.addListener(update);
     return () => {
-      timelineController.zoomController.removeListener(update);
-      timelineController.scrollController.removeListener(update);
+      timeline.zoomController.removeListener(update);
+      timeline.scrollController.removeListener(update);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    renderPlayHead,
-    timelineController.scrollController,
-    timelineController.zoomController,
-  ]);
+  }, [renderPlayHead, timeline.scrollController, timeline.zoomController]);
 
   return (
     <TimelinePlayHeadMemoized
       ref={playHeadRef}
-      initialPosition={
-        initialPosition || timelineController.timelineLeftPadding
-      }
+      initialPosition={initialPosition || timeline.timelineLeftPadding}
       style={{
         height: playHeadHeight,
       }}

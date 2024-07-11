@@ -20,12 +20,12 @@ export const FadeOverlay = observer(function FadePoint({
   className,
   ...props
 }: FadeOverlayProps) {
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   const { width, fadeMarkerProps } = useFadeMarker({
     side,
     track,
-    timelineController,
+    timeline,
   });
 
   return (

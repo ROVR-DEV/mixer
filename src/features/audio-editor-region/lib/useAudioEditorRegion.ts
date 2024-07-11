@@ -1,27 +1,21 @@
 import { Rect, clamp } from '@/shared/lib';
 import { useSelection } from '@/shared/lib/useSelection';
 
-import { Player, TimelineController } from '@/entities/audio-editor';
+import { Player, Timeline } from '@/entities/audio-editor';
 
 import { checkAndToggleRegionLoop } from './checkAndToggleRegionLoop';
 
-export const useAudioEditorRegion = (
-  player: Player,
-  timelineController: TimelineController,
-) => {
+export const useAudioEditorRegion = (player: Player, timeline: Timeline) => {
   const handleChange = (rect: Rect) => {
     if (!player.region.isEnabled) {
       player.region.toggle();
     }
 
     requestAnimationFrame(() => {
-      player.region.start = clamp(
-        timelineController.pixelsToTime(rect.left),
-        0,
-      );
+      player.region.start = clamp(timeline.pixelsToTime(rect.left), 0);
 
       player.region.end = clamp(
-        timelineController.pixelsToTime(rect.right),
+        timeline.pixelsToTime(rect.right),
         player.region.start,
       );
 
@@ -31,16 +25,16 @@ export const useAudioEditorRegion = (
 
   return useSelection({
     offsetRect: new Rect(
-      timelineController.realToVirtualPixels(timelineController.scroll),
+      timeline.realToVirtualPixels(timeline.scroll),
       0,
       0,
       0,
     ),
     boundsRect: new Rect(
-      timelineController.boundingClientRect.x,
-      timelineController.boundingClientRect.y,
-      timelineController.timelineScrollWidth,
-      timelineController.timelineClientHeight,
+      timeline.boundingClientRect.x,
+      timeline.boundingClientRect.y,
+      timeline.timelineScrollWidth,
+      timeline.timelineClientHeight,
     ),
     onChange: handleChange,
   });

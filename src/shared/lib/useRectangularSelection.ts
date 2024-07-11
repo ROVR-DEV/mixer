@@ -3,7 +3,7 @@
 import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
-import { TimelineController } from '@/entities/audio-editor';
+import { Timeline } from '@/entities/audio-editor';
 
 import { clamp } from './clamp';
 import { preventAll } from './preventAll';
@@ -41,13 +41,13 @@ export class Rect {
 
 export interface UseRectangularSelectionProps {
   ref: RefObject<HTMLDivElement>;
-  timelineController: TimelineController;
+  timeline: Timeline;
   onChange?: (rect: Rect, e?: MouseEvent) => void;
 }
 
 export const useRectangularSelection = ({
   ref,
-  timelineController,
+  timeline,
   onChange,
 }: UseRectangularSelectionProps): React.ComponentProps<'div'> & {
   isSelecting: boolean;
@@ -60,8 +60,7 @@ export const useRectangularSelection = ({
   const startPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const grid =
-    timelineController.timelineContainer.timelineRef.current?.parentElement;
+  const grid = timeline.timelineContainer.timelineRef.current?.parentElement;
 
   const updateSelection = useCallback(
     (x: number, y: number, e?: MouseEvent) => {
@@ -109,11 +108,8 @@ export const useRectangularSelection = ({
       isPressedRef.current = true;
 
       startPositionRef.current = {
-        x: e.pageX - timelineController.boundingClientRect.x,
-        y:
-          e.pageY -
-          timelineController.boundingClientRect.y +
-          (grid?.scrollTop ?? 0),
+        x: e.pageX - timeline.boundingClientRect.x,
+        y: e.pageY - timeline.boundingClientRect.y + (grid?.scrollTop ?? 0),
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,11 +139,8 @@ export const useRectangularSelection = ({
       prevEvent.current = e;
 
       mousePositionRef.current = {
-        x: e.pageX - timelineController.boundingClientRect.x,
-        y:
-          e.pageY -
-          timelineController.boundingClientRect.y +
-          (grid?.scrollTop ?? 0),
+        x: e.pageX - timeline.boundingClientRect.x,
+        y: e.pageY - timeline.boundingClientRect.y + (grid?.scrollTop ?? 0),
       };
 
       updateSelection(
@@ -192,19 +185,19 @@ export const useRectangularSelection = ({
 
     updateContainerRect();
 
-    timelineController.scrollController.addListener(updateContainerRect);
-    timelineController.zoomController.addListener(updateContainerRect);
+    timeline.scrollController.addListener(updateContainerRect);
+    timeline.zoomController.addListener(updateContainerRect);
 
     return () => {
-      timelineController.zoomController.removeListener(updateContainerRect);
-      timelineController.scrollController.removeListener(updateContainerRect);
+      timeline.zoomController.removeListener(updateContainerRect);
+      timeline.scrollController.removeListener(updateContainerRect);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    timelineController.scrollController,
-    timelineController.timelineClientHeight,
-    timelineController.timelineScrollWidth,
-    timelineController.zoomController,
+    timeline.scrollController,
+    timeline.timelineClientHeight,
+    timeline.timelineScrollWidth,
+    timeline.zoomController,
   ]);
 
   useEffect(() => {

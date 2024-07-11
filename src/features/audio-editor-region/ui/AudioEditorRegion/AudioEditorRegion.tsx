@@ -18,12 +18,12 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
   ...props
 }: AudioEditorRegionProps) {
   const player = usePlayer();
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const regionRef = useRef<HTMLDivElement | null>(null);
 
-  const { onMouseDown } = useAudioEditorRegion(player, timelineController);
+  const { onMouseDown } = useAudioEditorRegion(player, timeline);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -47,10 +47,10 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
         })}
         style={{
           left:
-            timelineController.timeToVirtualPixels(player.region.start) -
-            timelineController.realToVirtualPixels(timelineController.scroll) +
-            timelineController.timelineLeftPadding,
-          width: timelineController.timeToVirtualPixels(player.region.duration),
+            timeline.timeToVirtualPixels(player.region.start) -
+            timeline.realToVirtualPixels(timeline.scroll) +
+            timeline.timelineLeftPadding,
+          width: timeline.timeToVirtualPixels(player.region.duration),
         }}
       >
         <RegionMarker

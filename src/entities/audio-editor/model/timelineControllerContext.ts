@@ -2,10 +2,9 @@
 
 import { createContext, useContext } from 'react';
 
-import { TimelineController } from './timelineController';
+import { Timeline } from './timeline';
 
-export const TimelineControllerContext =
-  createContext<TimelineController | null>(null);
+export const TimelineControllerContext = createContext<Timeline | null>(null);
 
 export const useTimelineController = () => {
   const context = useContext(TimelineControllerContext);

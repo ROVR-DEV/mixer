@@ -24,7 +24,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const trackRef = useRef<HTMLDivElement | null>(null);
 
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
@@ -32,7 +32,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     trackRef,
     track,
     audioEditor,
-    timelineController,
+    timeline,
     disableInteractive,
   );
 
@@ -61,9 +61,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       preventAll(e);
 
       if (audioEditor.tool === 'scissors') {
-        const copiedTrack = track.cut(
-          timelineController.virtualPixelsToTime(e.pageX),
-        );
+        const copiedTrack = track.cut(timeline.virtualPixelsToTime(e.pageX));
 
         audioEditor.selectTrack(copiedTrack);
 
@@ -77,7 +75,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         handleEdit();
       }
     },
-    [audioEditor, track, timelineController, handleEdit],
+    [audioEditor, track, timeline, handleEdit],
   );
 
   const handleSnapLeft = useCallback(

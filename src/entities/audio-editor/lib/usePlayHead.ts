@@ -1,48 +1,46 @@
 import { RefObject, useCallback, useMemo } from 'react';
 
-import { TimelineController } from '../model';
+import { Timeline } from '../model';
 
 export const usePlayHead = (
-  timelineController: TimelineController,
+  timeline: Timeline,
   playHeadRef: RefObject<HTMLDivElement>,
 ) => {
   const playHeadHeight = useMemo(
     () =>
-      timelineController.timelineClientHeight
-        ? `calc(100% + ${timelineController.timelineClientHeight}px)`
+      timeline.timelineClientHeight
+        ? `calc(100% + ${timeline.timelineClientHeight}px)`
         : '100vh',
-    [timelineController.timelineClientHeight],
+    [timeline.timelineClientHeight],
   );
 
   const getPlayHeadPosition = useCallback(
     (time: number) => {
       return (
-        timelineController.timeToVirtualPixels(time) -
-        timelineController.realToVirtualPixels(timelineController.scroll) +
-        timelineController.timelineLeftPadding
+        timeline.timeToVirtualPixels(time) -
+        timeline.realToVirtualPixels(timeline.scroll) +
+        timeline.timelineLeftPadding
       );
     },
-    [timelineController],
+    [timeline],
   );
 
   const setViewToPlayHead = useCallback(
     (playHeadPosition: number) => {
       const virtualScroll =
-        timelineController.realToVirtualPixels(timelineController.scroll) +
-        timelineController.timelineLeftPadding;
+        timeline.realToVirtualPixels(timeline.scroll) +
+        timeline.timelineLeftPadding;
       const globalPlayHeadPosition = playHeadPosition + virtualScroll;
 
       if (
         globalPlayHeadPosition < virtualScroll ||
-        globalPlayHeadPosition >
-          timelineController.timelineClientWidth + virtualScroll
+        globalPlayHeadPosition > timeline.timelineClientWidth + virtualScroll
       ) {
-        timelineController.scroll =
-          globalPlayHeadPosition /
-          timelineController.timelineContainer.pixelsPerSecond;
+        timeline.scroll =
+          globalPlayHeadPosition / timeline.timelineContainer.pixelsPerSecond;
       }
     },
-    [timelineController],
+    [timeline],
   );
 
   const setPlayHeadPosition = useCallback(
@@ -65,11 +63,11 @@ export const usePlayHead = (
       }
 
       const isPlayHeadVisible =
-        playHeadX >= 0 && playHeadX <= timelineController.timelineClientWidth;
+        playHeadX >= 0 && playHeadX <= timeline.timelineClientWidth;
 
       playHead.style.display = isPlayHeadVisible ? '' : 'none';
     },
-    [playHeadRef, timelineController.timelineClientWidth],
+    [playHeadRef, timeline.timelineClientWidth],
   );
 
   const updatePlayHead = useCallback(

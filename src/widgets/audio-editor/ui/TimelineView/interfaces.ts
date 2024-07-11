@@ -1,5 +1,5 @@
-import { PlaylistDTO } from '@/entities/playlist';
+import { RefObject } from 'react';
 
-export interface TimelineViewProps extends React.ComponentProps<'div'> {
-  playlist: PlaylistDTO;
+export interface TimelineProps extends React.ComponentProps<'div'> {
+  timelineRef: RefObject<HTMLDivElement>;
 }

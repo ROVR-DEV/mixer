@@ -19,7 +19,7 @@ const _AudioEditorChannelsList = forwardRef<
   AudioEditorChannelsListProps
 >(function AudioEditorChannelsList({ ...props }, ref) {
   const audioEditor = useAudioEditor();
-  const timelineController = useTimelineController();
+  const timeline = useTimelineController();
 
   const handleAddChannel = useCallback(() => {
     audioEditor.player.addChannel();
@@ -32,7 +32,7 @@ const _AudioEditorChannelsList = forwardRef<
       <ChannelListItemMemoized
         className='justify-center'
         disableBorder
-        style={{ height: timelineController.trackHeight }}
+        style={{ height: timeline.trackHeight }}
       >
         <AddNewChannelButtonMemoized onClick={handleAddChannel} />
       </ChannelListItemMemoized>

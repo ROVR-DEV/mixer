@@ -8,7 +8,7 @@ import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 import { DnDData } from '@/shared/model';
 
 import {
-  TimelineController,
+  Timeline,
   useAudioEditor,
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
@@ -20,7 +20,7 @@ import { getFadeMarkerAriaAttributes } from './fadeMarkerAria';
 export interface UseFadeMarkerProps {
   side: FadeSide;
   track: AudioEditorTrack | null;
-  timelineController: TimelineController;
+  timeline: Timeline;
 }
 
 const setFade = throttle(
@@ -60,7 +60,7 @@ interface FadeMarkerDnDData extends DnDData<{ startTime: number }> {}
 export const useFadeMarker = ({
   side,
   track,
-  timelineController,
+  timeline,
 }: UseFadeMarkerProps): {
   width: number;
   fadeMarkerProps: React.ComponentPropsWithoutRef<'div'>;
@@ -104,7 +104,7 @@ export const useFadeMarker = ({
   );
 
   const [width, setWidth] = useState(
-    timelineController.timeToVirtualPixels(getMarkerStartTime()),
+    timeline.timeToVirtualPixels(getMarkerStartTime()),
   );
 
   const updateWidth = useCallback(() => {
@@ -116,13 +116,13 @@ export const useFadeMarker = ({
 
     setWidth(
       clamp(
-        timelineController.timeToVirtualPixels(
+        timeline.timeToVirtualPixels(
           side === 'left' ? startTime : track.trimDuration - startTime,
         ),
         0,
       ),
     );
-  }, [getMarkerStartTime, side, timelineController, track]);
+  }, [getMarkerStartTime, side, timeline, track]);
 
   const handleDragStart = useCallback(
     (
@@ -155,14 +155,14 @@ export const useFadeMarker = ({
       }
 
       const timeOffset =
-        timelineController.pixelsToTime(dndData.currentPosition.x) -
-        timelineController.pixelsToTime(dndData.startPosition.x);
+        timeline.pixelsToTime(dndData.currentPosition.x) -
+        timeline.pixelsToTime(dndData.startPosition.x);
 
       const time = clampTime(dndData.customProperties.startTime + timeOffset);
 
       setFade(track, time, side);
     },
-    [clampTime, side, timelineController, track],
+    [clampTime, side, timeline, track],
   );
 
   const handleDragEnd = useCallback(() => {
@@ -184,8 +184,8 @@ export const useFadeMarker = ({
   ]);
 
   useListener(
-    timelineController.zoomController.addListener,
-    timelineController.zoomController.removeListener,
+    timeline.zoomController.addListener,
+    timeline.zoomController.removeListener,
     updateWidth,
   );
 

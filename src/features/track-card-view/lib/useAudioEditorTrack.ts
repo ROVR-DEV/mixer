@@ -7,7 +7,7 @@ import React, { RefObject, useCallback, useEffect, useMemo } from 'react';
 import { clamp } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
-import { AudioEditor, TimelineController } from '@/entities/audio-editor';
+import { AudioEditor, Timeline } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
 
 import { getNewChannelIndex } from './getNewChannelIndex';
@@ -23,26 +23,25 @@ export const useAudioEditorTrack = (
   trackRef: RefObject<HTMLDivElement>,
   track: AudioEditorTrack,
   audioEditor: AudioEditor,
-  timelineController: TimelineController,
+  timeline: Timeline,
   disableInteractive?: boolean,
 ) => {
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
-  const grid = (
-    timelineController.timelineContainer.timelineRef.current as HTMLElement
-  )?.parentElement;
+  const grid = (timeline.timelineContainer.timelineRef.current as HTMLElement)
+    ?.parentElement;
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
     () =>
       getTrackCoordinates(
         track.trimStartTime,
         track.trimEndTime,
-        timelineController.timelineContainer.pixelsPerSecond,
+        timeline.timelineContainer.pixelsPerSecond,
       ),
     [
       track.trimStartTime,
       track.trimEndTime,
-      timelineController.timelineContainer.pixelsPerSecond,
+      timeline.timelineContainer.pixelsPerSecond,
     ],
   );
 
@@ -63,15 +62,12 @@ export const useAudioEditorTrack = (
       return;
     }
 
-    const virtualScrollOffsetX =
-      timelineController.scroll * timelineController.pixelsPerSecond;
+    const virtualScrollOffsetX = timeline.scroll * timeline.pixelsPerSecond;
     const bufferViewWidth = 400;
 
     const isVisible =
       trackStartXGlobal <
-        timelineController.timelineClientWidth +
-          virtualScrollOffsetX +
-          bufferViewWidth &&
+        timeline.timelineClientWidth + virtualScrollOffsetX + bufferViewWidth &&
       trackEndXGlobal > virtualScrollOffsetX - bufferViewWidth;
 
     if (isVisible) {
@@ -95,7 +91,7 @@ export const useAudioEditorTrack = (
       return;
     }
 
-    if (typeof timelineController.trackHeight !== 'number') {
+    if (typeof timeline.trackHeight !== 'number') {
       return;
     }
 
@@ -112,21 +108,17 @@ export const useAudioEditorTrack = (
     const channelOffset = currentChannelIndex - prevChannelIndex;
 
     trackRef.current.style.top =
-      channelOffset * timelineController.trackHeight + 7 + 'px';
+      channelOffset * timeline.trackHeight + 7 + 'px';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackRef]);
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
       const virtualScrollOffsetX =
-        timelineController.scroll *
-        timelineController.timelineContainer.pixelsPerSecond;
+        timeline.scroll * timeline.timelineContainer.pixelsPerSecond;
       return globalX - virtualScrollOffsetX;
     },
-    [
-      timelineController.timelineContainer.pixelsPerSecond,
-      timelineController.scroll,
-    ],
+    [timeline.timelineContainer.pixelsPerSecond, timeline.scroll],
   );
 
   const updateTrackHorizontalPosition = useCallback(() => {
@@ -135,13 +127,13 @@ export const useAudioEditorTrack = (
     }
 
     const position = globalToLocalCoordinates(
-      trackStartXGlobal + timelineController.timelineLeftPadding,
+      trackStartXGlobal + timeline.timelineLeftPadding,
     );
 
     trackRef.current.style.left = `${position}px`;
   }, [
     globalToLocalCoordinates,
-    timelineController.timelineLeftPadding,
+    timeline.timelineLeftPadding,
     trackRef,
     trackStartXGlobal,
   ]);
@@ -173,11 +165,11 @@ export const useAudioEditorTrack = (
     ) => {
       const timeOffset =
         (e.pageX - track.dndInfo.startX) /
-        timelineController.timelineContainer.pixelsPerSecond;
+        timeline.timelineContainer.pixelsPerSecond;
 
       return clamp(track.dndInfo.startTime + timeOffset, leftBound);
     },
-    [timelineController.timelineContainer.pixelsPerSecond],
+    [timeline.timelineContainer.pixelsPerSecond],
   );
 
   const setVerticalPosition = throttle(
@@ -196,7 +188,7 @@ export const useAudioEditorTrack = (
           return;
         }
 
-        if (typeof timelineController.trackHeight !== 'number') {
+        if (typeof timeline.trackHeight !== 'number') {
           return;
         }
 
@@ -206,13 +198,12 @@ export const useAudioEditorTrack = (
           track.channel,
         );
 
-        const offsetY =
-          timelineController.boundingClientRect.y - (grid?.scrollTop ?? 0);
+        const offsetY = timeline.boundingClientRect.y - (grid?.scrollTop ?? 0);
 
         const newChannelIndex = getNewChannelIndex(
           e.pageY - offsetY,
           track.dndInfo.startY - offsetY,
-          timelineController.trackHeight,
+          timeline.trackHeight,
           startChannelIndex,
           minChannelIndex,
           maxChannelIndex,
@@ -233,8 +224,8 @@ export const useAudioEditorTrack = (
       [
         audioEditor.player.channels,
         trackRef,
-        timelineController.trackHeight,
-        timelineController.boundingClientRect.y,
+        timeline.trackHeight,
+        timeline.boundingClientRect.y,
         grid?.scrollTop,
       ],
     ),
@@ -445,22 +436,22 @@ export const useAudioEditorTrack = (
   });
 
   useEffect(() => {
-    timelineController.zoomController.addListener(updateTrack);
-    timelineController.scrollController.addListener(updateTrack);
+    timeline.zoomController.addListener(updateTrack);
+    timeline.scrollController.addListener(updateTrack);
 
     updateTrack();
 
     return () => {
-      timelineController.zoomController.removeListener(updateTrack);
-      timelineController.scrollController.removeListener(updateTrack);
+      timeline.zoomController.removeListener(updateTrack);
+      timeline.scrollController.removeListener(updateTrack);
     };
   }, [
     track.startTrimDuration,
     track.endTrimDuration,
     track.channel,
     track.startTime,
-    timelineController.scrollController,
-    timelineController.zoomController,
+    timeline.scrollController,
+    timeline.zoomController,
     updateTrack,
   ]);
 
