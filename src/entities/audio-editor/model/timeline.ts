@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
-import { Rect } from '@/shared/lib';
+import { clamp, Rect } from '@/shared/lib';
 
 import {
   TimelineTicks,
@@ -102,7 +102,7 @@ export class Timeline {
   }
 
   set zoom(zoom: number) {
-    this._zoom = zoom;
+    this.zoomController.value = zoom;
   }
 
   get scroll() {
@@ -218,8 +218,7 @@ export class Timeline {
   timeToPixels = (time: number) => {
     return (
       time * this.pixelsPerSecond +
-      this.timelineLeftPadding +
-      this.timelineContainer.pixelsPerSecond
+      this.timelineLeftPadding * this.timelineContainer.pixelsPerSecond
     );
   };
 
@@ -262,6 +261,26 @@ export class Timeline {
     return this.realLocalPixelsToGlobal(
       this.virtualToRealPixels(x - this.boundingClientRect.x),
     );
+  };
+
+  setViewBoundsInPixels = (startX: number, endX: number): void => {
+    runInAction(() => {
+      const startTime = clamp(this.virtualToRealPixels(startX), 0);
+      const newZoom = this._getNewZoomToReachBounds(startX, endX);
+
+      if (!isNaN(newZoom)) {
+        this.zoom = newZoom;
+      }
+      this.scroll = startTime;
+    });
+  };
+
+  private _getNewZoomToReachBounds = (start: number, end: number) => {
+    const distance = end - start;
+    const zoomDifference =
+      this.timelineContainer.timelineClientWidth / distance;
+
+    return this.zoom * Math.floor(zoomDifference / 1.25) * 1.25;
   };
 
   private _wheelListener = (e: WheelEvent) => {

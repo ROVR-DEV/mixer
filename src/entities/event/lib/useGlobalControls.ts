@@ -36,6 +36,11 @@ export const useGlobalControls = (
 
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyZ') {
         handler({ type: 'Redo' });
+        return;
+      }
+
+      if (e.code == 'KeyM') {
+        handler({ type: 'Magnifier' });
       }
     };
 

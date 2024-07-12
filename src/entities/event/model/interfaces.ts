@@ -1,3 +1,3 @@
 export interface GlobalControlsEvent {
-  type: 'Play/Pause' | 'Undo' | 'Redo';
+  type: 'Play/Pause' | 'Undo' | 'Redo' | 'Magnifier';
 }

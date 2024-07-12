@@ -43,12 +43,14 @@ export interface UseRectangularSelectionProps {
   ref: RefObject<HTMLDivElement>;
   timeline: Timeline;
   onChange?: (rect: Rect, e?: MouseEvent) => void;
+  onEnd?: (rect: Rect, e?: MouseEvent) => void;
 }
 
 export const useRectangularSelection = ({
   ref,
   timeline,
   onChange,
+  onEnd,
 }: UseRectangularSelectionProps): React.ComponentProps<'div'> & {
   isSelecting: boolean;
 } => {
@@ -62,25 +64,29 @@ export const useRectangularSelection = ({
 
   const grid = timeline.timelineContainer.timelineRef.current?.parentElement;
 
+  const getSelectionRec = useCallback((x: number, y: number) => {
+    const startX = startPositionRef.current.x;
+
+    const startY = startPositionRef.current.y;
+
+    const mouseX = clamp(x, 0);
+    const mouseY = clamp(y, 0);
+
+    return new Rect(
+      Math.min(startX, mouseX),
+      Math.min(startY, mouseY),
+      Math.abs(startX - mouseX),
+      Math.abs(startY - mouseY),
+    );
+  }, []);
+
   const updateSelection = useCallback(
     (x: number, y: number, e?: MouseEvent) => {
       if (!isSelecting) {
         return;
       }
 
-      const startX = startPositionRef.current.x;
-
-      const startY = startPositionRef.current.y;
-
-      const mouseX = clamp(x, 0);
-      const mouseY = clamp(y, 0);
-
-      const selectionRect = new Rect(
-        Math.min(startX, mouseX),
-        Math.min(startY, mouseY),
-        Math.abs(startX - mouseX),
-        Math.abs(startY - mouseY),
-      );
+      const selectionRect = getSelectionRec(x, y);
 
       requestAnimationFrame(() => {
         if (!ref.current) {
@@ -94,7 +100,7 @@ export const useRectangularSelection = ({
       });
       onChange?.(selectionRect, e);
     },
-    [isSelecting, onChange, ref],
+    [getSelectionRec, isSelecting, onChange, ref],
   );
 
   const handleMouseDown = useCallback(
@@ -167,11 +173,31 @@ export const useRectangularSelection = ({
 
       preventAll(e);
 
+      mousePositionRef.current = {
+        x: e.pageX - timeline.boundingClientRect.x,
+        y: e.pageY - timeline.boundingClientRect.y + (grid?.scrollTop ?? 0),
+      };
+
+      const selectionRect = getSelectionRec(
+        mousePositionRef.current.x,
+        mousePositionRef.current.y,
+      );
+
+      onEnd?.(selectionRect, e);
+
       setIsSelecting(false);
 
       ref.current.style.display = 'none';
     },
-    [isSelecting, ref],
+    [
+      getSelectionRec,
+      grid?.scrollTop,
+      isSelecting,
+      onEnd,
+      ref,
+      timeline.boundingClientRect.x,
+      timeline.boundingClientRect.y,
+    ],
   );
 
   useEffect(() => {

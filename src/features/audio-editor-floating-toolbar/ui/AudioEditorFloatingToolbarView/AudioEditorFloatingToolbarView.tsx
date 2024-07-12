@@ -19,6 +19,7 @@ import {
   AudioEditorTool,
   ToolGroup,
   useAudioEditor,
+  useTimelineController,
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarViewProps } from './interfaces';
@@ -34,6 +35,7 @@ export const AudioEditorFloatingToolbarView = observer(
     ...props
   }: AudioEditorFloatingToolbarViewProps) {
     const audioEditor = useAudioEditor();
+    const timelineController = useTimelineController();
 
     const tools = useMemo(
       () =>
@@ -62,7 +64,25 @@ export const AudioEditorFloatingToolbarView = observer(
                 name: 'fit',
                 icon: <FitIcon />,
                 isActive: false,
-                onClick: () => {},
+                onClick: () => {
+                  const minMax = audioEditor.player.tracks.reduce(
+                    (acc, track) => {
+                      if (acc.min > track.startTime) {
+                        acc.min = track.startTime;
+                      }
+                      if (acc.max < track.endTime) {
+                        acc.max = track.endTime;
+                      }
+                      return acc;
+                    },
+                    { min: Infinity, max: -Infinity },
+                  );
+
+                  timelineController.setViewBoundsInPixels(
+                    timelineController.timeToVirtualPixels(minMax.min),
+                    timelineController.timeToVirtualPixels(minMax.max),
+                  );
+                },
                 fillType: 'fill',
               },
               {

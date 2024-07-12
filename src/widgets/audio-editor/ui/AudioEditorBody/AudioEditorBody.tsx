@@ -34,7 +34,8 @@ const CURSORS: Record<AudioEditorTool, string> = {
   cursor: '',
   scissors:
     'url(icons/scissors-up.svg) 16 16, url(icons/scissors-up.png) 16 16, auto',
-  magnifier: '',
+  magnifier:
+    'url(icons/magnifier.svg) 14 14, url(icons/magnifier.png) 14 14, auto',
 };
 
 export const AudioEditorBody = observer(function AudioEditorBody({
@@ -44,6 +45,8 @@ export const AudioEditorBody = observer(function AudioEditorBody({
 }: TimelineViewProps) {
   const audioEditor = useAudioEditor();
   const player = usePlayer();
+
+  const prevZoomRef = useRef<{ zoom: number; scroll: number } | null>(null);
 
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -59,16 +62,54 @@ export const AudioEditorBody = observer(function AudioEditorBody({
   const cursor = useMemo(() => CURSORS[audioEditor.tool], [audioEditor.tool]);
 
   const handleSelectionChange = useCallback(
-    (rect: Rect, e?: MouseEvent) =>
-      selectTracksInSelection(audioEditor, timeline, rect, e?.shiftKey ?? true),
+    (rect: Rect, e?: MouseEvent) => {
+      if (audioEditor.tool !== 'cursor') {
+        return;
+      }
+      selectTracksInSelection(audioEditor, timeline, rect, e?.shiftKey ?? true);
+    },
     [audioEditor, timeline],
+  );
+
+  const handleSelectionEnd = useCallback(
+    (rect: Rect) => {
+      if (audioEditor.tool !== 'magnifier') {
+        return;
+      }
+
+      const virtualRect = new Rect(
+        timeline.timeToVirtualPixels(
+          timeline.virtualPixelsToTime(
+            rect.x +
+              timeline.boundingClientRect.x +
+              timeline.timelineLeftPadding,
+          ),
+        ),
+        rect.y,
+        rect.width,
+        rect.height,
+      );
+
+      prevZoomRef.current = { zoom: timeline.zoom, scroll: timeline.scroll };
+
+      timeline.setViewBoundsInPixels(virtualRect.left, virtualRect.right);
+    },
+    [audioEditor.tool, timeline],
   );
 
   const { isSelecting, onMouseDown } = useRectangularSelection({
     ref: rectangularSelectionRef,
     timeline,
     onChange: handleSelectionChange,
+    onEnd: handleSelectionEnd,
   });
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      onMouseDown?.(e);
+    },
+    [onMouseDown],
+  );
 
   const handleTimeSeek = useHandleTimeSeek(player, timeline);
 
@@ -76,6 +117,16 @@ export const AudioEditorBody = observer(function AudioEditorBody({
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (isSelecting) {
         return;
+      }
+
+      if (
+        audioEditor.tool === 'magnifier' &&
+        prevZoomRef.current !== null &&
+        !isSelecting
+      ) {
+        timeline.zoom = prevZoomRef.current.zoom;
+        timeline.scroll = prevZoomRef.current.scroll;
+        prevZoomRef.current = null;
       }
 
       if (audioEditor.tool !== 'cursor') {
@@ -86,7 +137,7 @@ export const AudioEditorBody = observer(function AudioEditorBody({
 
       audioEditor.unselectTracks();
     },
-    [audioEditor, handleTimeSeek, isSelecting],
+    [audioEditor, handleTimeSeek, isSelecting, timeline],
   );
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
@@ -109,7 +160,7 @@ export const AudioEditorBody = observer(function AudioEditorBody({
           <TimelineView
             timelineRef={timelineRef}
             onMouseUp={handleMouseUp}
-            onMouseDown={onMouseDown}
+            onMouseDown={handleMouseDown}
             style={{ cursor }}
           >
             <RectangularSelection

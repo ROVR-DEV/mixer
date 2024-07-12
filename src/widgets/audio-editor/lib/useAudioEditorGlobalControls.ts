@@ -22,6 +22,9 @@ export const useAudioEditorGlobalControls = (audioEditor: AudioEditor) => {
         case 'Redo':
           audioEditor.redo();
           break;
+        case 'Magnifier':
+          audioEditor.tool = 'magnifier';
+          break;
       }
     },
     [audioEditor],
