@@ -10,6 +10,7 @@ import { AudioEditorTrack } from '@/entities/track';
 
 import { ALL_AUDIO_EDITOR_TOOLS, AudioEditorTool } from './audioEditorTool';
 import { Player, PlayerState } from './player';
+import { Timeline } from './timeline';
 
 const AUDIO_EDITOR_DEFAULT_OPTIONS: AudioEditorOptions = {
   availableTools: ALL_AUDIO_EDITOR_TOOLS,
@@ -31,6 +32,8 @@ export interface AudioEditor {
   readonly draggingTracksMinChannelIndex: number;
   readonly draggingTracksMaxChannelIndex: number;
 
+  timeline: Timeline | null;
+
   tool: AudioEditorTool;
 
   selectedChannel: Channel | null;
@@ -43,6 +46,8 @@ export interface AudioEditor {
   unselectTracks: () => void;
 
   isTrackSelected: (track: AudioEditorTrack) => boolean;
+
+  fit(): void;
 
   saveState(): void;
   undo: () => void;
@@ -58,15 +63,25 @@ export class ObservableAudioEditor implements AudioEditor {
 
   readonly selectedTracks = observable.set<AudioEditorTrack>();
 
+  private _zoomBeforeFit: number | null = null;
+
   private _history = new HistoryManager<AudioEditorState>();
 
   private _player: Player;
+  private _timeline: Timeline | null = null;
   private _tool: AudioEditorTool;
 
   private _selectedChannel: Channel | null = null;
 
   private _editableTrack: AudioEditorTrack | null = null;
   private _draggingTracks = observable.array<AudioEditorTrack>();
+
+  get timeline(): Timeline | null {
+    return this._timeline;
+  }
+  set timeline(value: Timeline | null) {
+    this._timeline = value;
+  }
 
   get selectedChannel(): Channel | null {
     return this._selectedChannel;
@@ -173,6 +188,39 @@ export class ObservableAudioEditor implements AudioEditor {
 
   isTrackSelected = (track: AudioEditorTrack) => {
     return this.selectedTracks.has(track);
+  };
+
+  fit = () => {
+    if (!this._timeline) {
+      return;
+    }
+
+    if (this._zoomBeforeFit) {
+      this._timeline.zoom = this._zoomBeforeFit;
+      this._timeline.zoomController.min = 1;
+      this._zoomBeforeFit = null;
+      return;
+    }
+
+    this._zoomBeforeFit = this._timeline.zoom;
+
+    const minMax = this.player.tracks.reduce(
+      (acc, track) => {
+        if (acc.min > track.startTime) {
+          acc.min = track.startTime;
+        }
+        if (acc.max < track.endTime) {
+          acc.max = track.endTime;
+        }
+        return acc;
+      },
+      { min: Infinity, max: -Infinity },
+    );
+
+    this._timeline.setViewBoundsInPixels(
+      this._timeline.timeToVirtualPixels(minMax.min),
+      this._timeline.timeToVirtualPixels(minMax.max),
+    );
   };
 
   clearState(): void {

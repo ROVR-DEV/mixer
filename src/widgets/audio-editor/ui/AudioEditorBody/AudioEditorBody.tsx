@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   Rect,
@@ -146,6 +146,10 @@ export const AudioEditorBody = observer(function AudioEditorBody({
     },
     [audioEditor, handleTimeSeek, isSelecting, timeline],
   );
+
+  useEffect(() => {
+    audioEditor.timeline = timeline;
+  }, [audioEditor, timeline]);
 
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
 

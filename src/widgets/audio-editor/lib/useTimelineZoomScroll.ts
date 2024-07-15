@@ -4,7 +4,11 @@ import { RefObject, useCallback, useEffect, useMemo } from 'react';
 
 import { useWheel } from '@/shared/lib';
 
-import { TIMELINE_LEFT_PADDING, Timeline } from '@/entities/audio-editor';
+import {
+  TIMELINE_LEFT_PADDING,
+  Timeline,
+  useAudioEditor,
+} from '@/entities/audio-editor';
 
 export interface TimelineZoomScrollProps {
   timelineRef: RefObject<HTMLDivElement>;
@@ -53,6 +57,8 @@ export const useTimelineZoomScroll = ({
   onScrollChange,
   onChange,
 }: TimelineZoomScrollProps): Timeline => {
+  const audioEditor = useAudioEditor();
+
   const timeline = useMemo(
     () =>
       new Timeline({
@@ -112,11 +118,15 @@ export const useTimelineZoomScroll = ({
     (delta: number) => {
       const isZoomIn = delta <= 0;
 
+      if (timeline.zoom < 1) {
+        audioEditor.fit();
+      }
+
       isZoomIn
         ? timeline.zoomController.increase()
         : timeline.zoomController.decrease();
     },
-    [timeline.zoomController],
+    [audioEditor, timeline.zoom, timeline.zoomController],
   );
 
   const handleWheelHorizontalScroll = useCallback(

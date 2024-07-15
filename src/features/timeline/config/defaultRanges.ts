@@ -1,6 +1,7 @@
 import { ResultRange } from '../model';
 
 export const DEFAULT_RANGES: Omit<ResultRange, 'result'>[] = [
+  { start: 0.1, end: 1 },
   { start: 1, end: Math.pow(1.25, 3) },
   { start: Math.pow(1.25, 3), end: Math.pow(1.25, 6) },
   { start: Math.pow(1.25, 6), end: Math.pow(1.25, 13) },
@@ -10,9 +11,10 @@ export const DEFAULT_RANGES: Omit<ResultRange, 'result'>[] = [
   { start: Math.pow(1.25, 26), end: Number.MAX_VALUE },
 ];
 
-const STEP_IN_SECONDS = [30, 10, 5, 1, 0.5, 0.1, 0.05];
+const STEP_IN_SECONDS = [60, 30, 10, 5, 1, 0.5, 0.1, 0.05];
 
 const TICK_SEGMENT_WIDTH = [
+  { min: 24, max: Infinity },
   { min: 123, max: 201 },
   { min: 80, max: 125 },
   { min: 78, max: 313 },
@@ -23,6 +25,7 @@ const TICK_SEGMENT_WIDTH = [
 ];
 
 const SUB_TICK_SEGMENT_WIDTH = [
+  { min: 5, max: 68 },
   { min: 42, max: 68 },
   { min: 7, max: 14 },
   { min: 14, max: 62 },

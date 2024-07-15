@@ -269,6 +269,7 @@ export class Timeline {
       const startTime = clamp(this.virtualToRealPixels(startX), 0);
       const newZoom = this._getNewZoomToReachBounds(startX, endX);
 
+      this.zoomController.min = newZoom;
       if (!isNaN(newZoom)) {
         this.zoom = newZoom;
       }
@@ -280,6 +281,10 @@ export class Timeline {
     const distance = end - start;
     const zoomDifference =
       this.timelineContainer.timelineClientWidth / distance;
+
+    if (zoomDifference < 1) {
+      return this.zoom * zoomDifference;
+    }
 
     return this.zoom * Math.floor(zoomDifference / 1.25) * 1.25;
   };
