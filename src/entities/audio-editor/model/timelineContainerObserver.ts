@@ -8,11 +8,13 @@ export type TimelineContainerSizeListener = (
   timelineScrollWidth: number,
   timelineClientHeight: number,
   pixelsPerSecond: number,
+  size: Rect | null,
 ) => void;
 
 export class TimelineContainerObserver {
   private _timelineRef: RefObject<HTMLElement | null>;
   private _timelineSize: Rect | null = null;
+  private _timelineBoundingBox: Rect | null = null;
   private _resizeObserver: ResizeObserver | null = null;
 
   private _totalTime = 0;
@@ -100,6 +102,8 @@ export class TimelineContainerObserver {
       this._resizeObserver = new ResizeObserver((entries) => {
         runInAction(() => {
           this._timelineSize = entries[0].contentRect;
+          this._timelineBoundingBox =
+            this.timelineRef.current?.getBoundingClientRect() ?? null;
           this._triggerAllListeners();
         });
       });
@@ -115,6 +119,7 @@ export class TimelineContainerObserver {
         this.timelineScrollWidth,
         this.timelineClientHeight,
         this.pixelsPerSecond,
+        this._timelineBoundingBox,
       ),
     );
   };

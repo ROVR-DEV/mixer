@@ -166,6 +166,7 @@ export class Timeline {
       this.timelineContainer.timelineScrollWidth,
       this.timelineContainer.timelineClientHeight,
       this.timelineContainer.pixelsPerSecond,
+      new Rect(0, 0, 0, 0),
     );
 
     makeAutoObservable(this);
@@ -296,6 +297,7 @@ export class Timeline {
     timelineScrollWidth: number,
     timelineClientHeight: number,
     pixelsPerSecond: number,
+    size: Rect | null,
   ) => {
     runInAction(() => {
       this.scrollController.max =
@@ -307,9 +309,7 @@ export class Timeline {
       this._timelineScrollWidth = timelineScrollWidth;
       this._pixelsPerSecond = pixelsPerSecond;
 
-      this.boundingClientRect =
-        this.timelineContainer.timelineRef.current?.getBoundingClientRect() ??
-        new Rect(0, 0, 0, 0);
+      this.boundingClientRect = size ?? new Rect(0, 0, 0, 0);
     });
   };
 
