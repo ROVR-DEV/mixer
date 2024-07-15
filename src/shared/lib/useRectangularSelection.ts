@@ -66,7 +66,6 @@ export const useRectangularSelection = ({
 
   const getSelectionRec = useCallback((x: number, y: number) => {
     const startX = startPositionRef.current.x;
-
     const startY = startPositionRef.current.y;
 
     const mouseX = clamp(x, 0);

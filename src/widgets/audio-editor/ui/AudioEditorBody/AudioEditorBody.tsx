@@ -17,6 +17,7 @@ import {
   useHandleTimeSeek,
   AudioEditorTool,
   useAudioEditor,
+  MIN_ZOOM_WIDTH_IN_PIXELS,
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
@@ -90,7 +91,13 @@ export const AudioEditorBody = observer(function AudioEditorBody({
         rect.height,
       );
 
-      prevZoomRef.current = { zoom: timeline.zoom, scroll: timeline.scroll };
+      if (rect.width < MIN_ZOOM_WIDTH_IN_PIXELS) {
+        return;
+      }
+
+      if (prevZoomRef.current === null) {
+        prevZoomRef.current = { zoom: timeline.zoom, scroll: timeline.scroll };
+      }
 
       timeline.setViewBoundsInPixels(virtualRect.left, virtualRect.right);
     },
