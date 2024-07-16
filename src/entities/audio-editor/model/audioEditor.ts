@@ -217,6 +217,8 @@ export class ObservableAudioEditor implements AudioEditor {
       { min: Infinity, max: -Infinity },
     );
 
+    this._timeline.zoomController.min = 0.1;
+
     this._timeline.setViewBoundsInPixels(
       this._timeline.timeToVirtualPixels(minMax.min),
       this._timeline.timeToVirtualPixels(minMax.max),

@@ -267,9 +267,8 @@ export class Timeline {
   setViewBoundsInPixels = (startX: number, endX: number): void => {
     runInAction(() => {
       const startTime = clamp(this.virtualToRealPixels(startX), 0);
-      const newZoom = this._getNewZoomToReachBounds(startX, endX);
+      const newZoom = clamp(this._getNewZoomToReachBounds(startX, endX), 0.1);
 
-      this.zoomController.min = newZoom;
       if (!isNaN(newZoom)) {
         this.zoom = newZoom;
       }

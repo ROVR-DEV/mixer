@@ -71,6 +71,7 @@ export const getTicks = (
     zoom,
     zoomStepBreakpoint,
   );
+
   // const subTickSegmentWidthZoomed = getTickSegmentWidthZoomed(
   //   subTickSegmentWidth.min,
   //   zoom,
