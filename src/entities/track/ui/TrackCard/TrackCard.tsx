@@ -21,6 +21,8 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       color,
       hideTitle = false,
       editPopoverContent,
+      isEditingName,
+      onNameEdited,
       className,
       children,
       ...props
@@ -64,7 +66,12 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
 
         <div className='row-start-2 w-full'>{waveformComponent}</div>
         {!hideTitle && (
-          <TrackTitle className='row-start-3 pl-1' track={track} />
+          <TrackTitle
+            className='z-20 row-start-3 pl-1'
+            track={track}
+            isEditing={isEditingName}
+            onEdited={onNameEdited}
+          />
         )}
 
         <div className='absolute z-10 row-span-full size-full overflow-hidden rounded-lg'>

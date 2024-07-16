@@ -1,7 +1,14 @@
 'use client';
 
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { cn, preventAll } from '@/shared/lib';
 
@@ -28,6 +35,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
+  const [isEditingName, setIsEditingName] = useState(false);
+
   const { onMouseUp, onMouseDown } = useAudioEditorTrack(
     trackRef,
     track,
@@ -50,6 +59,19 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const isSelected = useMemo(
     () => !disableInteractive && isSelectedInPlayer,
     [disableInteractive, isSelectedInPlayer],
+  );
+
+  const handleNameEdited = useCallback(
+    (title: string | undefined, artist: string | undefined) => {
+      runInAction(() => {
+        track.meta.title = title?.trim() ?? '';
+        track.meta.artist = artist?.trim() ?? '';
+        setIsEditingName(false);
+        audioEditor.unselectTrack(track);
+        audioEditor.selectTrack(track, true);
+      });
+    },
+    [audioEditor, track],
   );
 
   const handleEdit = useCallback(() => {
@@ -96,13 +118,27 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [],
   );
 
+  const handleRename = useCallback(() => {
+    setIsEditingName(true);
+  }, []);
+
   const editMenu = useMemo(
     () =>
       EditMenu ? (
-        <EditMenu onSnapLeft={handleSnapLeft} onSnapRight={handleSnapRight} />
+        <EditMenu
+          onRename={handleRename}
+          onSnapLeft={handleSnapLeft}
+          onSnapRight={handleSnapRight}
+        />
       ) : null,
-    [EditMenu, handleSnapLeft, handleSnapRight],
+    [EditMenu, handleRename, handleSnapLeft, handleSnapRight],
   );
+
+  useEffect(() => {
+    if (!isSelected) {
+      setIsEditingName(false);
+    }
+  }, [isSelected]);
 
   return (
     <div
@@ -120,6 +156,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         isSolo={track.channel?.isSolo}
         isSelected={isSelected}
         editPopoverContent={editMenu}
+        isEditingName={isEditingName}
+        onNameEdited={handleNameEdited}
         {...props}
       />
     </div>

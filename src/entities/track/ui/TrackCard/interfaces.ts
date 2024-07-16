@@ -10,4 +10,9 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
   color?: string;
   hideTitle?: boolean;
   editPopoverContent?: ReactNode;
+  isEditingName?: boolean;
+  onNameEdited?: (
+    title: string | undefined,
+    artist: string | undefined,
+  ) => void;
 }

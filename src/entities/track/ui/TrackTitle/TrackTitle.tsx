@@ -1,13 +1,48 @@
-import { cn } from '@/shared/lib';
+'use client';
+
+import React, { useEffect, useRef } from 'react';
+
+import { cn, stopPropagation } from '@/shared/lib';
+
+import { EditInput } from '../EditInput';
 
 import { TrackTitleProps } from './interfaces';
 
-export const TrackTitle = ({ track, className, ...props }: TrackTitleProps) => {
+export const TrackTitle = ({
+  track,
+  isEditing,
+  onEdited,
+  className,
+  ...props
+}: TrackTitleProps) => {
   const trackTitleArtist = track
-    ? `${track.title} | ${track.artist} `
-    : 'No track selected ';
+    ? `${track.title} | ${track.artist}`
+    : 'No track selected';
 
   const trackDuration = track ? `(${track.duration})` : '(00:00:00)';
+
+  const titleRef = useRef<HTMLInputElement | null>(null);
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get('title')?.toString();
+    const artist = formData.get('artist')?.toString();
+
+    onEdited?.(title, artist);
+  };
+
+  useEffect(() => {
+    if (isEditing) {
+      const timerId = setTimeout(() => {
+        titleRef.current?.focus();
+        titleRef.current?.select();
+      }, 100);
+
+      return () => clearTimeout(timerId);
+    }
+  }, [isEditing]);
 
   return (
     <span
@@ -17,7 +52,36 @@ export const TrackTitle = ({ track, className, ...props }: TrackTitleProps) => {
       )}
       {...props}
     >
-      <span className='font-bold'>{trackTitleArtist}</span>
+      {isEditing ? (
+        <form
+          className='inline-flex gap-1'
+          onClick={stopPropagation}
+          onMouseDown={stopPropagation}
+          onMouseUp={stopPropagation}
+          onSubmit={onSubmit}
+          onKeyDown={stopPropagation}
+        >
+          <EditInput
+            ref={titleRef}
+            className='font-bold'
+            name='title'
+            placeholder='Title'
+            maxLength={255}
+            defaultValue={track?.title ?? ''}
+          />
+          <EditInput
+            className='font-bold'
+            name='artist'
+            placeholder='Artist'
+            maxLength={255}
+            defaultValue={track?.artist ?? ''}
+          />
+          <input type='submit' hidden />
+        </form>
+      ) : (
+        <span className='font-bold'>{trackTitleArtist}</span>
+      )}
+      <span> </span>
       <span>{trackDuration}</span>
     </span>
   );

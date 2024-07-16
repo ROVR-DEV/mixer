@@ -6,7 +6,7 @@ export const preventAll = (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
   }
 };
 
-export const stopPropagation = (e: React.MouseEvent) => {
+export const stopPropagation = (e: React.UIEvent | React.SyntheticEvent) => {
   e.stopPropagation();
   e.nativeEvent.stopImmediatePropagation();
 };
