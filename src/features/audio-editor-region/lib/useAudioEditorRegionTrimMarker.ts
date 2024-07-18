@@ -55,7 +55,7 @@ export const useAudioEditorRegionTrimMarker = (
 
       const timeOffset =
         timeline.pixelsToTime(dndData.currentPosition.x) -
-        timeline.pixelsToTime(dndData.startPosition.x);
+        timeline.pixelsToTime(dndData.startTime.x);
 
       const newTime = dndData.customProperties.startTime + timeOffset;
 
