@@ -67,7 +67,9 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         <div className='row-start-2 w-full'>{waveformComponent}</div>
         {!hideTitle && (
           <TrackTitle
-            className='z-20 row-start-3 pl-1'
+            className={cn('row-start-3 pl-1', {
+              'z-20': isEditingName,
+            })}
             track={track}
             isEditing={isEditingName}
             onEdited={onNameEdited}

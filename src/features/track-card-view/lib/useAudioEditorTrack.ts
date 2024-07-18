@@ -108,7 +108,7 @@ export const useAudioEditorTrack = (
     const channelOffset = currentChannelIndex - prevChannelIndex;
 
     trackRef.current.style.top =
-      channelOffset * timeline.trackHeight + 7 + 'px';
+      channelOffset * timeline.trackHeight + 6 + 'px';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackRef]);
 

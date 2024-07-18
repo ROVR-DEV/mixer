@@ -7,6 +7,8 @@ export interface WaveformProps extends React.ComponentProps<'div'> {
   data?: string | Blob | null;
   color: WaveformColor;
   waveColor?: string;
+  trimStart?: number;
+  trimEnd?: number;
   options?: Omit<WaveSurferOptions, 'container'>;
   onMount: (wavesurfer: WaveSurfer) => void;
 }

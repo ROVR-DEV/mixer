@@ -95,6 +95,8 @@ export const TrackWaveform = observer(function TrackWaveform({
         }}
         color={color}
         waveColor={track.color ?? undefined}
+        trimStart={(track.startTrimDuration / track.duration) * 100}
+        trimEnd={(track.endTrimDuration / track.duration) * 100}
         options={finalOptions}
         onMount={handleMount}
         {...props}

@@ -19,7 +19,7 @@ export const TrimBackgroundView = observer(function TrimBackgroundView({
     track.isTrimming && (
       <div
         className={cn(
-          'pointer-events-none box-content size-full rounded-lg border border-third-dark bg-transparent',
+          'pointer-events-none size-full rounded-lg border border-third-dark bg-transparent',
           className,
         )}
         style={{
