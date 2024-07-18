@@ -64,8 +64,17 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const handleNameEdited = useCallback(
     (title: string | undefined, artist: string | undefined) => {
       runInAction(() => {
-        track.meta.title = title?.trim() ?? '';
-        track.meta.artist = artist?.trim() ?? '';
+        const trimmedTitle = title?.trim();
+        const trimmedArtist = artist?.trim();
+
+        if (trimmedTitle) {
+          track.meta.title = trimmedTitle;
+        }
+
+        if (trimmedArtist) {
+          track.meta.artist = trimmedArtist;
+        }
+
         setIsEditingName(false);
         audioEditor.unselectTrack(track);
         audioEditor.selectTrack(track, true);
