@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Rect,
   cn,
+  preventAll,
   useGlobalMouseMove,
   useRectangularSelection,
 } from '@/shared/lib';
@@ -22,7 +23,11 @@ import {
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
 
-import { selectTracksInSelection, useTimelineZoomScroll } from '../../lib';
+import {
+  selectTracksInSelection,
+  useFloatingToolbarDnD,
+  useTimelineZoomScroll,
+} from '../../lib';
 import { AudioEditorChannelsList } from '../AudioEditorChannelsList';
 import { ChannelsListHeaderMemoized } from '../ChannelsListHeader';
 import { TimelineHeader } from '../TimelineHeader';
@@ -51,6 +56,8 @@ export const AudioEditorBody = observer(function AudioEditorBody({
 
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+
+  const floatingToolbarRef = useRef<HTMLDivElement | null>(null);
 
   const rectangularSelectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -110,6 +117,8 @@ export const AudioEditorBody = observer(function AudioEditorBody({
     onChange: handleSelectionChange,
     onEnd: handleSelectionEnd,
   });
+
+  const toolbarProps = useFloatingToolbarDnD(floatingToolbarRef, timelineRef);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -179,8 +188,14 @@ export const AudioEditorBody = observer(function AudioEditorBody({
               ref={rectangularSelectionRef}
               style={{ display: 'none' }}
             />
+            <AudioEditorFloatingToolbarView
+              toolbarRef={floatingToolbarRef}
+              className='absolute left-[calc(42%-229.5px)] top-[calc(100%-70px)] z-30 mx-auto flex w-max'
+              onMouseDown={preventAll}
+              onMoveHandleMouseDown={toolbarProps.onMouseDown}
+              onMoveHandleMouseUp={toolbarProps.onMouseUp}
+            />
           </TimelineView>
-          <AudioEditorFloatingToolbarView className='absolute inset-x-0 bottom-[15px] left-[296px] z-30 mx-auto flex w-max' />
         </div>
       </div>
       <TimelineViewFooterMemoized />

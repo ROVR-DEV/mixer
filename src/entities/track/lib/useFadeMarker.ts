@@ -156,7 +156,7 @@ export const useFadeMarker = ({
 
       const timeOffset =
         timeline.pixelsToTime(dndData.currentPosition.x) -
-        timeline.pixelsToTime(dndData.startTime.x);
+        timeline.pixelsToTime(dndData.startPosition.x);
 
       const time = clampTime(dndData.customProperties.startTime + timeOffset);
 

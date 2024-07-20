@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { forwardRef, memo, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 import { IconButton } from '@/shared/ui';
@@ -10,11 +10,13 @@ import { AudioEditorFloatingToolbarGroup } from '../AudioEditorFloatingToolbarGr
 
 import { AudioEditorFloatingToolbarProps } from './interfaces';
 
-export const AudioEditorFloatingToolbar = ({
-  tools,
-  className,
-  ...props
-}: AudioEditorFloatingToolbarProps) => {
+export const AudioEditorFloatingToolbar = forwardRef<
+  HTMLDivElement,
+  AudioEditorFloatingToolbarProps
+>(function AudioEditorFloatingToolbar(
+  { tools, onMoveHandleMouseDown, onMoveHandleMouseUp, className, ...props },
+  ref,
+) {
   const groups = useMemo(() => {
     return tools.map((toolGroup) => (
       <AudioEditorFloatingToolbarGroup key={toolGroup.name}>
@@ -36,16 +38,21 @@ export const AudioEditorFloatingToolbar = ({
 
   return (
     <div
+      ref={ref}
       className={cn('flex items-center rounded-lg bg-accent', className)}
       {...props}
     >
-      <div className='cursor-move pl-4'>
+      <div
+        className='cursor-move pl-4'
+        onMouseDown={onMoveHandleMouseDown}
+        onMouseUp={onMoveHandleMouseUp}
+      >
         <MoveIcon />
       </div>
       <div className='flex items-center divide-x divide-primary'>{groups}</div>
     </div>
   );
-};
+});
 
 export const AudioEditorFloatingToolbarMemoized = memo(
   AudioEditorFloatingToolbar,

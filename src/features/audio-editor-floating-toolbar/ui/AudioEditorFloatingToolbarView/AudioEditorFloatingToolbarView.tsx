@@ -31,6 +31,7 @@ const TOOL_ICONS: Record<AudioEditorTool, JSX.Element> = {
 
 export const AudioEditorFloatingToolbarView = observer(
   function AudioEditorFloatingToolbarView({
+    toolbarRef,
     ...props
   }: AudioEditorFloatingToolbarViewProps) {
     const audioEditor = useAudioEditor();
@@ -99,6 +100,12 @@ export const AudioEditorFloatingToolbarView = observer(
       [audioEditor.tool, audioEditor.player.region.isEnabled],
     );
 
-    return <AudioEditorFloatingToolbarMemoized tools={tools} {...props} />;
+    return (
+      <AudioEditorFloatingToolbarMemoized
+        ref={toolbarRef}
+        tools={tools}
+        {...props}
+      />
+    );
   },
 );

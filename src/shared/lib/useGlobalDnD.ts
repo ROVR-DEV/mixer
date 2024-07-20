@@ -1,6 +1,6 @@
 'use client';
 
-import { CSSProperties, useCallback, useRef, useState } from 'react';
+import { CSSProperties, RefObject, useCallback, useRef, useState } from 'react';
 
 import { DnDData, Point } from '../model';
 
@@ -8,6 +8,7 @@ import { preventAll } from './preventAll';
 import { useWindowEvent } from './useWindowEvent';
 
 export interface UseGlobalDnDProps<T extends Record<string, unknown>> {
+  container?: RefObject<HTMLElement>;
   cursor?: CSSProperties['cursor'];
   onDragStart?: (
     e: MouseEvent | React.MouseEvent<HTMLElement>,
@@ -23,6 +24,7 @@ export interface UseGlobalDnDProps<T extends Record<string, unknown>> {
 export const useGlobalDnD = <
   T extends Record<string, unknown> = Record<string, unknown>,
 >({
+  container: container,
   cursor,
   onDragStart,
   onDrag,
@@ -37,7 +39,8 @@ export const useGlobalDnD = <
 
   const dndDataRef = useRef<DnDData<T>>({
     isDragging: false,
-    startTime: { x: 0, y: 0 },
+    offsetFromContainer: { x: 0, y: 0 },
+    startPosition: { x: 0, y: 0 },
     currentPosition: { x: 0, y: 0 },
     customProperties: {},
   });
@@ -45,7 +48,7 @@ export const useGlobalDnD = <
   const updateDnDData = useCallback(
     (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
       dndDataRef.current.isDragging = isDraggingRef.current;
-      dndDataRef.current.startTime = startDragPointRef.current;
+      dndDataRef.current.startPosition = startDragPointRef.current;
       dndDataRef.current.currentPosition = { x: e.pageX, y: e.pageY };
 
       return dndDataRef.current;
@@ -75,9 +78,18 @@ export const useGlobalDnD = <
         document.body.style.cursor = cursor;
       }
 
+      const containerRect = container?.current?.getBoundingClientRect();
+
+      if (containerRect) {
+        dndDataRef.current.offsetFromContainer = {
+          x: e.pageX - containerRect.x,
+          y: e.pageY - containerRect.y,
+        };
+      }
+
       startDragPointRef.current = { x: e.pageX, y: e.pageY };
     },
-    [cursor],
+    [cursor, container],
   );
 
   const onMouseMove = useCallback(
@@ -99,6 +111,10 @@ export const useGlobalDnD = <
     (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
       isPressedRef.current = false;
 
+      if (cursor) {
+        document.body.style.cursor = '';
+      }
+
       if (!isDraggingRef.current) {
         return;
       }
@@ -107,10 +123,6 @@ export const useGlobalDnD = <
 
       onDragEnd?.(e, updateDnDData(e));
       setDrag(false);
-
-      if (cursor) {
-        document.body.style.cursor = '';
-      }
     },
     [onDragEnd, updateDnDData, setDrag, cursor],
   );

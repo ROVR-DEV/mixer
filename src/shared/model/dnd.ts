@@ -13,7 +13,8 @@ export interface DnDData<
   CustomData extends Record<string, unknown> = Record<string, unknown>,
 > {
   isDragging: boolean;
-  startTime: Point;
+  offsetFromContainer: Point;
+  startPosition: Point;
   currentPosition: Point;
   customProperties: Partial<CustomData>;
 }

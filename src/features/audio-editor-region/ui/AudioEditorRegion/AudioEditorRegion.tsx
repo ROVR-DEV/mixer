@@ -52,7 +52,7 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
 
       const timeOffset =
         timeline.pixelsToTime(dndData.currentPosition.x) -
-        timeline.pixelsToTime(dndData.startTime.x);
+        timeline.pixelsToTime(dndData.startPosition.x);
 
       const newTime = clamp(dndData.customProperties.startTime + timeOffset, 0);
 

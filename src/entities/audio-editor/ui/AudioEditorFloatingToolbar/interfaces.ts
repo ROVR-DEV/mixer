@@ -16,4 +16,6 @@ export interface ToolGroup {
 export interface AudioEditorFloatingToolbarProps
   extends React.ComponentProps<'div'> {
   tools: ToolGroup[];
+  onMoveHandleMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMoveHandleMouseUp?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
