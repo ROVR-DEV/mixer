@@ -1,6 +1,6 @@
 'use client';
 
-import { offset } from '@floating-ui/react';
+import { flip, offset } from '@floating-ui/react';
 import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
@@ -48,7 +48,10 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         ref={ref}
         {...props}
       >
-        <Popover placement='bottom-start' middleware={[offset(5)]}>
+        <Popover
+          placement='bottom-start'
+          middleware={[offset(5), flip({ padding: 5 })]}
+        >
           <PopoverTrigger
             className={cn(
               '@[128px]:left-7 row-start-1 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-50 transition-[left] rounded-md',

@@ -112,6 +112,11 @@ export class GhostResizePlugin extends BasePlugin<
         const ghostCtx = ghostCanvas.getContext(
           '2d',
         ) as CanvasRenderingContext2D;
+
+        if (canvas.width === 0 || canvas.height === 0) {
+          return;
+        }
+
         ghostCtx.drawImage(canvas, 0, 0);
         // Set the composition method to draw only where the waveform is drawn
         ghostCtx.globalCompositeOperation = 'source-in';
