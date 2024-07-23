@@ -73,6 +73,7 @@ export class Channel {
   addTrack = (track: AudioEditorTrack) => {
     track.channel = this;
     this.tracks.push(track);
+    this.tracks.sort((a, b) => a.startTime - b.startTime);
   };
 
   removeTrack = (track: AudioEditorTrack) => {

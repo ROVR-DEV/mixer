@@ -41,7 +41,7 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
             { 'text-third divide-third': !!track },
           )}
         >
-          <span className='pr-1'>{`BMP: ${track?.bpm ?? '000'}`}</span>
+          <span className='pr-1'>{`BPM: ${track?.bpm ?? '000'}`}</span>
           <span className='px-1'>{`Key: ${track?.key?.value ?? '00001'}`}</span>
         </span>
       </p>

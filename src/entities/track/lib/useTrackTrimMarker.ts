@@ -13,6 +13,7 @@ import { Timeline, useAudioEditor } from '@/entities/audio-editor';
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
 
+import { MIN_TRACK_DURATION } from '../config';
 import { AudioEditorTrack, Side } from '../model';
 
 import { getTrimMarkerAriaAttributes } from './trimMarkerAria';
@@ -42,9 +43,21 @@ const updateTrim = throttle(
     );
 
     if (side === 'left') {
-      track.setStartTrimDuration(time - track.startTime);
+      const leftTime = clamp(
+        time,
+        -Infinity,
+        track.trimEndTime - MIN_TRACK_DURATION,
+      );
+
+      track.setStartTrimDuration(leftTime - track.startTime);
     } else if (side === 'right') {
-      track.setEndTrimDuration(track.endTime - time);
+      const rightTime = clamp(
+        time,
+        track.trimStartTime + MIN_TRACK_DURATION,
+        Infinity,
+      );
+
+      track.setEndTrimDuration(track.endTime - rightTime);
     }
   },
   3,
@@ -81,16 +94,12 @@ export const useTrimMarker = ({
   });
 
   const handleDragStart = useCallback(
-    (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
+    (_: MouseEvent | React.MouseEvent<HTMLElement>) => {
       if (!trimMarkerRef.current) {
         return;
       }
 
       if (!track) {
-        return;
-      }
-
-      if (e.target !== trimMarkerRef.current) {
         return;
       }
 
