@@ -14,10 +14,10 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
       )}
       {...props}
     >
-      <p className='inline-flex h-full flex-col justify-between'>
+      <p className='inline-flex size-full flex-col justify-between text-nowrap'>
         <span
           className={cn(
-            'flex text-nowrap gap-1 font-bold text-secondary-light',
+            'flex gap-1 font-bold text-secondary-light overflow-x-hidden',
             {
               'text-third': !!track,
             },
@@ -30,11 +30,14 @@ export const TrackInfo = ({ track, className, ...props }: TrackInfoProps) => {
           >
             {'Track Info:'}
           </span>
-          <TrackTitle className='text-[14px]' track={track} />
+          <TrackTitle
+            className='overflow-x-hidden text-ellipsis text-[14px]'
+            track={track}
+          />
         </span>
         <span
           className={cn(
-            'divide-x divide-secondary-light text-secondary-light',
+            'divide-x divide-secondary-light text-secondary-light overflow-x-hidden overflow-ellipsis',
             { 'text-third divide-third': !!track },
           )}
         >
