@@ -14,13 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
-      <body
-        className={cn(
-          'flex flex-col min-h-screen h-screen',
-          kernFont.className,
-        )}
-      >
+    <html lang='en' className={cn('font-sans', kernFont.variable)}>
+      <body className='flex h-screen min-h-screen flex-col font-sans'>
         <AppHeader />
         {children}
       </body>
