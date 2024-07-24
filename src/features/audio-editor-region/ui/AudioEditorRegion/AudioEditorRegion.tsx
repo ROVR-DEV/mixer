@@ -120,11 +120,11 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
           onMouseUp={handleOnMouseUp}
         />
         <AudioEditorRegionTrimMarker
-          className='absolute left-0 top-0 h-full'
+          className='absolute -left-1 top-0 h-full w-2'
           trimSide='left'
         />
         <AudioEditorRegionTrimMarker
-          className='absolute right-0 top-0 h-full'
+          className='absolute -right-1 top-0 h-full w-2'
           trimSide='right'
         />
       </div>
