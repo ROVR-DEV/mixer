@@ -28,7 +28,7 @@ export const DEFAULT_WAVEFORM_OPTIONS: Partial<WaveSurferOptions> = {
   barHeight: 1.5,
   height: 'auto',
   interact: false,
-  normalize: true,
+  normalize: false,
   backend: 'MediaElement',
 };
 
