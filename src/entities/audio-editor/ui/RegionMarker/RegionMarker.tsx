@@ -13,7 +13,11 @@ export const RegionMarker = forwardRef<HTMLDivElement, RegionProps>(
             'bg-[#FF6B00B2]': isActive,
           })}
         />
-        <div className='pointer-events-none h-screen bg-white/5' />
+        <div
+          className={cn('pointer-events-none h-screen bg-white/5', {
+            hidden: !isActive,
+          })}
+        />
       </div>
     );
   },
