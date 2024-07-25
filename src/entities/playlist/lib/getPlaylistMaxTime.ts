@@ -1,6 +1,6 @@
-import { Playlist } from '../model';
+import { PlaylistDTO } from '../model';
 
-export const getPlaylistMaxTime = (playlist: Playlist) =>
+export const getPlaylistMaxTime = (playlist: PlaylistDTO) =>
   !playlist.tracks.length
     ? 0
     : playlist.tracks.reduce((prev, current) => {

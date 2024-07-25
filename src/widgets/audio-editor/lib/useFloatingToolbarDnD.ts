@@ -3,6 +3,8 @@ import { RefObject, useCallback } from 'react';
 import { clamp, preventAll, useGlobalDnD } from '@/shared/lib';
 import { DnDData, Point } from '@/shared/model';
 
+import { SIDEBAR_WIDTH } from '@/entities/audio-editor';
+
 export type FloatingToolbarDnDData = DnDData<{ startPoint: Point }>;
 
 const draggingCursor = 'move';
@@ -38,7 +40,7 @@ export const useFloatingToolbarDnD = (
 
       const x = clamp(
         dndData.startPosition.x + offsetX - containerRect.x,
-        0,
+        SIDEBAR_WIDTH,
         containerRect.width - ref.current.clientWidth,
       );
 

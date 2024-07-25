@@ -1,2 +1,2 @@
-export * from './playlist';
 export * from './playlistDto';
+export * from './playlist';

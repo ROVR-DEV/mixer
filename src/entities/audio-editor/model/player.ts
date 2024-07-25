@@ -10,7 +10,7 @@ import {
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
-import { PlaylistDTO } from '@/entities/playlist';
+import { Playlist } from '@/entities/playlist';
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrack, AudioEditorTrackState } from '@/entities/track';
 
@@ -31,11 +31,15 @@ export interface PlayerEvents {
 export interface Player {
   readonly channels: Channel[];
   readonly tracks: AudioEditorTrack[];
+  readonly tracksByAudioUuid: Map<string, AudioEditorTrack>;
+  readonly playlist: Playlist | null;
 
   readonly region: Region;
 
   readonly time: number;
   readonly isPlaying: boolean;
+
+  importPlaylist(playlists: Playlist): void;
 
   play(): void;
   stop(): void;
@@ -62,11 +66,17 @@ export class ObservablePlayer implements Player {
   readonly channels = observable.array<Channel>();
   readonly region: Region = new ObservableRegion();
 
+  private _playlist: Playlist | null = null;
+
   private _emitter = new EventEmitter<PlayerEvents>();
 
   private _timer: Timer | null = null;
   private _time = 0;
   private _isPlaying = false;
+
+  get playlist(): Playlist | null {
+    return this._playlist;
+  }
 
   get time() {
     return this._time;
@@ -79,6 +89,13 @@ export class ObservablePlayer implements Player {
     return this._isPlaying;
   }
 
+  get tracksByAudioUuid(): Map<string, AudioEditorTrack> {
+    return this.tracks.reduce(
+      (acc, track) => acc.set(track.meta.uuid, track),
+      new Map(),
+    );
+  }
+
   get tracks(): AudioEditorTrack[] {
     return this.channels.flatMap((channel) => channel.tracks);
   }
@@ -87,8 +104,11 @@ export class ObservablePlayer implements Player {
     return this.channels.filter((channel) => channel.isSolo);
   }
 
-  constructor(playlist?: PlaylistDTO) {
+  constructor(playlist?: Playlist) {
     this._timer = new Timer((time: number) => this._onTimeUpdate(time / 1000));
+
+    this.addChannel();
+    this.addChannel();
 
     if (playlist) {
       this.importPlaylist(playlist);
@@ -101,13 +121,17 @@ export class ObservablePlayer implements Player {
     });
   }
 
-  importPlaylist(playlist: PlaylistDTO) {
+  importPlaylist(playlist: Playlist) {
+    this.clear();
+
     this.addChannel();
     this.addChannel();
 
     playlist.tracks.forEach((track, i) =>
       this.channels[i % 2]?.importTrack(track),
     );
+
+    this._playlist = playlist;
   }
 
   //#region Player actions

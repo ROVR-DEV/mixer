@@ -1,5 +1,5 @@
-import { PlaylistDTO } from '@/entities/playlist';
+import { Playlist } from '@/entities/playlist';
 
 export interface TimelineViewProps extends React.ComponentProps<'div'> {
-  playlist: PlaylistDTO;
+  playlist: Playlist;
 }

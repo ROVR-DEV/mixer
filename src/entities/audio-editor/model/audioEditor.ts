@@ -1,6 +1,7 @@
 import { computed, makeAutoObservable, observable } from 'mobx';
 
 // eslint-disable-next-line boundaries/element-types
+import { Rect } from '@/shared/lib';
 import { HistoryManager } from '@/shared/model';
 
 // eslint-disable-next-line boundaries/element-types
@@ -9,7 +10,7 @@ import { Channel } from '@/entities/channel';
 import { AudioEditorTrack } from '@/entities/track';
 
 import { ALL_AUDIO_EDITOR_TOOLS, AudioEditorTool } from './audioEditorTool';
-import { Player, PlayerState } from './player';
+import { ObservablePlayer, Player, PlayerState } from './player';
 import { Timeline } from './timeline';
 
 const AUDIO_EDITOR_DEFAULT_OPTIONS: AudioEditorOptions = {
@@ -48,6 +49,8 @@ export interface AudioEditor {
   isTrackSelected: (track: AudioEditorTrack) => boolean;
 
   fit(): void;
+  magnify(virtualRect: Rect): void;
+  unMagnify(): void;
 
   saveState(): void;
   undo: () => void;
@@ -63,6 +66,7 @@ export class ObservableAudioEditor implements AudioEditor {
 
   readonly selectedTracks = observable.set<AudioEditorTrack>();
 
+  private _zoomBeforeMagnifier: number | null = null;
   private _zoomBeforeFit: number | null = null;
 
   private _history = new HistoryManager<AudioEditorState>();
@@ -144,7 +148,7 @@ export class ObservableAudioEditor implements AudioEditor {
   }
 
   constructor(
-    player: Player,
+    player: Player = new ObservablePlayer(),
     options: AudioEditorOptions = AUDIO_EDITOR_DEFAULT_OPTIONS,
   ) {
     this.options = options;
@@ -223,6 +227,25 @@ export class ObservableAudioEditor implements AudioEditor {
       this._timeline.timeToVirtualPixels(minMax.min),
       this._timeline.timeToVirtualPixels(minMax.max),
     );
+  };
+
+  magnify = (virtualRect: Rect) => {
+    if (!this._timeline) {
+      return;
+    }
+
+    this._zoomBeforeMagnifier = this._timeline.zoom;
+
+    this._timeline.setViewBoundsInPixels(virtualRect.left, virtualRect.right);
+  };
+
+  unMagnify = () => {
+    if (!this._timeline || !this._zoomBeforeMagnifier) {
+      return;
+    }
+
+    this._timeline.zoom = this._zoomBeforeMagnifier;
+    this._zoomBeforeMagnifier = null;
   };
 
   clearState(): void {

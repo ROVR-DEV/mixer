@@ -1,22 +1,20 @@
-import { responseToJsonData, responseErrorToData } from '@/shared/lib';
+import { FetchResult, fetchJson } from '@/shared/lib';
 
-import { convertPlaylistToDto } from '../lib';
-import { PlaylistDTO } from '../model';
+import { Playlist, PlaylistDTO, toPlaylist } from '../model';
 
 export const getPlaylist = async (
   id: string,
-): Promise<{ data: PlaylistDTO | undefined; error: Error | undefined }> => {
-  try {
-    const res = await fetch(`${process.env.BACKEND_URL}/site/playlist/${id}`, {
+): Promise<FetchResult<Playlist>> => {
+  const res = await fetchJson<PlaylistDTO>(
+    `${process.env.BACKEND_URL}/site/playlist/${id}`,
+    {
       cache: 'force-cache',
-    });
+    },
+  );
 
-    const jsonData = await responseToJsonData(res);
-    return {
-      ...jsonData,
-      data: convertPlaylistToDto(jsonData.data),
-    };
-  } catch (error) {
-    return responseErrorToData(error as Error);
+  if (res.data) {
+    return { ...res, data: toPlaylist(res.data) };
+  } else {
+    return res;
   }
 };

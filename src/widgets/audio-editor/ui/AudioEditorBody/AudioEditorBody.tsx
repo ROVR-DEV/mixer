@@ -1,30 +1,22 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
-import {
-  Rect,
-  cn,
-  preventAll,
-  useGlobalMouseMove,
-  useRectangularSelection,
-} from '@/shared/lib';
+import { cn, preventAll } from '@/shared/lib';
 import { RectangularSelection } from '@/shared/ui';
 
 import {
+  SIDEBAR_WIDTH,
   TimelineControllerContext,
-  usePlayer,
-  useHandleTimeSeek,
-  AudioEditorTool,
   useAudioEditor,
-  MIN_ZOOM_WIDTH_IN_PIXELS,
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
 
 import {
-  selectTracksInSelection,
+  useAudioEditorEvents,
+  useCurrentCursorIcon,
   useFloatingToolbarDnD,
   useTimelineZoomScroll,
 } from '../../lib';
@@ -36,23 +28,14 @@ import { TimelineViewFooterMemoized } from '../TimelineViewFooter';
 
 import { TimelineViewProps } from './interfaces';
 
-const CURSORS: Record<AudioEditorTool, string> = {
-  cursor: '',
-  scissors:
-    'url(icons/scissors-up.svg) 16 16, url(icons/scissors-up.png) 16 16, auto',
-  magnifier:
-    'url(icons/magnifier.svg) 14 14, url(icons/magnifier.png) 14 14, auto',
-};
-
 export const AudioEditorBody = observer(function AudioEditorBody({
   playlist,
   className,
   ...props
 }: TimelineViewProps) {
   const audioEditor = useAudioEditor();
-  const player = usePlayer();
 
-  const prevZoomRef = useRef<{ zoom: number; scroll: number } | null>(null);
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
 
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -67,100 +50,32 @@ export const AudioEditorBody = observer(function AudioEditorBody({
     duration: playlist.duration_in_seconds,
   });
 
-  const cursor = useMemo(() => CURSORS[audioEditor.tool], [audioEditor.tool]);
-
-  const handleSelectionChange = useCallback(
-    (rect: Rect, e?: MouseEvent) => {
-      if (audioEditor.tool !== 'cursor') {
-        return;
-      }
-      selectTracksInSelection(audioEditor, timeline, rect, e?.shiftKey ?? true);
-    },
-    [audioEditor, timeline],
-  );
-
-  const handleSelectionEnd = useCallback(
-    (rect: Rect) => {
-      if (audioEditor.tool !== 'magnifier') {
-        return;
-      }
-
-      const virtualRect = new Rect(
-        timeline.timeToVirtualPixels(
-          timeline.virtualPixelsToTime(
-            rect.x +
-              timeline.boundingClientRect.x +
-              timeline.timelineLeftPadding,
-          ),
-        ),
-        rect.y,
-        rect.width,
-        rect.height,
-      );
-
-      if (rect.width < MIN_ZOOM_WIDTH_IN_PIXELS) {
-        return;
-      }
-
-      if (prevZoomRef.current === null) {
-        prevZoomRef.current = { zoom: timeline.zoom, scroll: timeline.scroll };
-      }
-
-      timeline.setViewBoundsInPixels(virtualRect.left, virtualRect.right);
-    },
-    [audioEditor.tool, timeline],
-  );
-
-  const { isSelecting, onMouseDown } = useRectangularSelection({
-    ref: rectangularSelectionRef,
+  const { onMouseDown, onMouseUp } = useAudioEditorEvents(
+    audioEditor,
     timeline,
-    onChange: handleSelectionChange,
-    onEnd: handleSelectionEnd,
-  });
-
-  const toolbarProps = useFloatingToolbarDnD(floatingToolbarRef, timelineRef);
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      onMouseDown?.(e);
-    },
-    [onMouseDown],
+    rulerWrapperRef,
+    rectangularSelectionRef,
   );
 
-  const handleTimeSeek = useHandleTimeSeek(player, timeline);
+  const toolbarProps = useFloatingToolbarDnD(
+    floatingToolbarRef,
+    timelineContainerRef,
+  );
 
-  const handleMouseUp = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (isSelecting) {
-        return;
-      }
+  const timelineViewCursor = useCurrentCursorIcon(audioEditor.tool);
 
-      if (
-        audioEditor.tool === 'magnifier' &&
-        prevZoomRef.current !== null &&
-        !isSelecting
-      ) {
-        timeline.zoom = prevZoomRef.current.zoom;
-        timeline.scroll = prevZoomRef.current.scroll;
-        prevZoomRef.current = null;
-      }
-
-      if (audioEditor.tool !== 'cursor') {
-        return;
-      }
-
-      handleTimeSeek(e);
-
-      audioEditor.unselectTracks();
-    },
-    [audioEditor, handleTimeSeek, isSelecting, timeline],
+  const timelineViewProps = useMemo(
+    () => ({
+      onMouseUp: onMouseUp,
+      onMouseDown: onMouseDown,
+      style: { cursor: timelineViewCursor },
+    }),
+    [timelineViewCursor, onMouseDown, onMouseUp],
   );
 
   useEffect(() => {
     audioEditor.timeline = timeline;
   }, [audioEditor, timeline]);
-
-  useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
 
   return (
     <TimelineControllerContext.Provider value={timeline}>
@@ -175,27 +90,32 @@ export const AudioEditorBody = observer(function AudioEditorBody({
           <ChannelsListHeaderMemoized playlist={playlist} />
           <TimelineHeader className='pb-[9px]' rulerRef={rulerWrapperRef} />
         </div>
-        <div className='flex h-full grow overflow-y-auto overflow-x-clip'>
-          <AudioEditorChannelsList className='z-30 min-h-max min-w-[296px] grow bg-primary' />
-          <TimelineView
-            timelineRef={timelineRef}
-            onMouseUp={handleMouseUp}
-            onMouseDown={handleMouseDown}
-            style={{ cursor }}
-          >
-            <RectangularSelection
-              className='absolute'
-              ref={rectangularSelectionRef}
-              style={{ display: 'none' }}
+        <div
+          ref={timelineContainerRef}
+          className='relative flex h-full grow overflow-y-auto overflow-x-clip'
+        >
+          <div className='relative flex h-full grow overflow-y-auto overflow-x-clip'>
+            <AudioEditorChannelsList
+              className='z-30 min-h-max  grow bg-primary'
+              style={{
+                minWidth: SIDEBAR_WIDTH,
+              }}
             />
-            <AudioEditorFloatingToolbarView
-              toolbarRef={floatingToolbarRef}
-              className='absolute left-[calc(42%-229.5px)] top-[calc(100%-70px)] z-30 mx-auto flex w-max'
-              onMouseDown={preventAll}
-              onMoveHandleMouseDown={toolbarProps.onMouseDown}
-              onMoveHandleMouseUp={toolbarProps.onMouseUp}
-            />
-          </TimelineView>
+            <TimelineView timelineRef={timelineRef} {...timelineViewProps}>
+              <RectangularSelection
+                className='absolute'
+                ref={rectangularSelectionRef}
+                style={{ display: 'none' }}
+              />
+            </TimelineView>
+          </div>
+          <AudioEditorFloatingToolbarView
+            toolbarRef={floatingToolbarRef}
+            className='absolute left-[calc(50%-229.5px)] top-[calc(100%-70px)] z-30 mx-auto flex w-max'
+            onMouseDown={preventAll}
+            onMoveHandleMouseDown={toolbarProps.onMouseDown}
+            onMoveHandleMouseUp={toolbarProps.onMouseUp}
+          />
         </div>
       </div>
       <TimelineViewFooterMemoized />
