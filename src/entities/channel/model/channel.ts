@@ -67,13 +67,15 @@ export class Channel {
     }
 
     this.tracks.push(audioEditorTrack);
+    this.sortTracks();
+
     return audioEditorTrack;
   };
 
   addTrack = (track: AudioEditorTrack) => {
     track.channel = this;
     this.tracks.push(track);
-    this.tracks.sort((a, b) => a.startTime - b.startTime);
+    this.sortTracks();
   };
 
   removeTrack = (track: AudioEditorTrack) => {
@@ -86,6 +88,10 @@ export class Channel {
     if (this._colorsGenerator) {
       this._colorsGenerator.next({ reset: true });
     }
+  };
+
+  sortTracks = () => {
+    this.tracks.sort((a, b) => a.trimStartTime - b.trimStartTime);
   };
 
   dispose = () => {

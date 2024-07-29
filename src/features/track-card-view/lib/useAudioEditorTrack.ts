@@ -332,8 +332,10 @@ export const useAudioEditorTrack = (
         track.dndInfo.startChannelIndex === undefined ||
         track.dndInfo.startChannelIndex === dropChannelIndex
       ) {
+        track.channel.sortTracks();
         return;
       }
+
       const startChannel =
         audioEditor.player.channels[track.dndInfo.startChannelIndex];
 
@@ -419,7 +421,7 @@ export const useAudioEditorTrack = (
     [disableInteractive, trackRef, audioEditor, handleDragEnd],
   );
 
-  const { onMouseUp, onMouseDown } = useGlobalDnD({
+  const { isDragging, onMouseUp, onMouseDown } = useGlobalDnD({
     onDragStart,
     onDrag,
     onDragEnd,
@@ -457,5 +459,5 @@ export const useAudioEditorTrack = (
     updateTrack,
   ]);
 
-  return { onMouseUp, onMouseDown };
+  return { isDragging, onMouseUp, onMouseDown };
 };

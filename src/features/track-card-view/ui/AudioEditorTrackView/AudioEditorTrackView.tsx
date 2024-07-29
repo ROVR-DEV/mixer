@@ -37,7 +37,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const [isEditingName, setIsEditingName] = useState(false);
 
-  const { onMouseUp, onMouseDown } = useAudioEditorTrack(
+  const { isDragging, onMouseUp, onMouseDown } = useAudioEditorTrack(
     trackRef,
     track,
     audioEditor,
@@ -152,10 +152,17 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   return (
     <div
       ref={trackRef}
-      className={cn('absolute z-0', className)}
+      className={cn('absolute z-0', className, {
+        'z-50': track.isTrimming || isDragging,
+      })}
       onMouseDown={handleMouseDown}
       onMouseUp={onMouseUp}
       onClick={handleClick}
+      title={
+        process.env.NEXT_PUBLIC_DEBUG_SHOW_TRACKS_ID
+          ? `Track id: ${track.id}\nMeta id: ${track.meta.uuid}`
+          : undefined
+      }
     >
       <TrimBackgroundView className='absolute left-0 top-0' track={track} />
       <TrackCardMemoized

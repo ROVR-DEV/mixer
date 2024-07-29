@@ -8,7 +8,7 @@ import { HomePageProps } from './interfaces';
 export const HomePage = async ({ searchParams }: HomePageProps) => {
   const { data: playlist } = await getPlaylist(searchParams.id);
 
-  if (process.env.NEXT_PUBLIC_DEBUG_TRACKS_MAX_ENABLED && !!playlist) {
+  if (process.env.NEXT_PUBLIC_DEBUG_TRACKS_MAX_COUNT && !!playlist) {
     playlist.tracks = playlist.tracks.slice(
       0,
       process.env.NEXT_PUBLIC_DEBUG_TRACKS_MAX_COUNT,
