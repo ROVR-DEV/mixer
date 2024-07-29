@@ -2,11 +2,11 @@
 
 import { useCallback, useRef, useState } from 'react';
 
+import { Point, Rect } from '../model';
+
 import { preventAll } from './preventAll';
 
-import { Rect, clamp, useWindowEvent } from '.';
-
-type Point = { x: number; y: number };
+import { clamp, useWindowEvent } from '.';
 
 export interface UseSelectionProps {
   offsetRect?: Rect;

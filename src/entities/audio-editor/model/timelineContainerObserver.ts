@@ -1,7 +1,7 @@
 import { computed, makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
-import { Rect } from '@/shared/lib';
+import { Rect } from '@/shared/model';
 
 export type TimelineContainerSizeListener = (
   timelineClientWidth: number,

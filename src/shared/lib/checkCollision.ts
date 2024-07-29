@@ -1,4 +1,4 @@
-import { Rect } from '.';
+import { Rect } from '../model';
 
 export const checkHorizontalCollision = (
   aXStart: number,

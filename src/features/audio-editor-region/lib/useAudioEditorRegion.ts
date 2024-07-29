@@ -1,5 +1,6 @@
-import { Rect, clamp } from '@/shared/lib';
+import { clamp } from '@/shared/lib';
 import { useSelection } from '@/shared/lib/useSelection';
+import { Rect } from '@/shared/model';
 
 import { Player, Timeline } from '@/entities/audio-editor';
 

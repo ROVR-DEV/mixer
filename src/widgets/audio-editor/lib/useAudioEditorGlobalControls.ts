@@ -25,6 +25,12 @@ export const useAudioEditorGlobalControls = (audioEditor: AudioEditor) => {
         case 'Magnifier':
           audioEditor.tool = 'magnifier';
           break;
+        case 'Cut':
+          audioEditor.tool = 'scissors';
+          break;
+        case 'Cursor':
+          audioEditor.tool = 'cursor';
+          break;
       }
     },
     [audioEditor],

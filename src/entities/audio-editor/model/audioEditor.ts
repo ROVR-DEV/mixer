@@ -1,8 +1,6 @@
 import { computed, makeAutoObservable, observable } from 'mobx';
 
-// eslint-disable-next-line boundaries/element-types
-import { Rect } from '@/shared/lib';
-import { HistoryManager } from '@/shared/model';
+import { HistoryManager, Rect } from '@/shared/model';
 
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';

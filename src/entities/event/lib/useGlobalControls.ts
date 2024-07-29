@@ -3,9 +3,11 @@
 import { useEffect } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
+import { KEY_BINDINGS } from '@/entities/audio-editor';
+// eslint-disable-next-line boundaries/element-types
 import { isTrackCachingEnabled, toggleTrackCaching } from '@/entities/track';
 
-import { GlobalControlsEvent } from '../model';
+import { GlobalControlsEvent, KeyBind, keyBindToString } from '../model';
 
 export const useGlobalControls = (
   handler: (event: GlobalControlsEvent) => void,
@@ -22,25 +24,18 @@ export const useGlobalControls = (
         return;
       }
 
-      if (e.code === 'Space') {
-        e.preventDefault();
-        e.stopPropagation();
-        handler({ type: 'Play/Pause' });
-        return;
-      }
+      const keyBind: KeyBind = {
+        key: e.code,
+        ctrl: e.ctrlKey,
+        shift: e.shiftKey,
+        alt: e.altKey,
+        meta: e.metaKey,
+      };
 
-      if (e.ctrlKey && !e.shiftKey && e.code === 'KeyZ') {
-        handler({ type: 'Undo' });
-        return;
-      }
+      const keyBindString = keyBindToString(keyBind);
 
-      if (e.ctrlKey && e.shiftKey && e.code === 'KeyZ') {
-        handler({ type: 'Redo' });
-        return;
-      }
-
-      if (e.code == 'KeyM') {
-        handler({ type: 'Magnifier' });
+      if (keyBindString in KEY_BINDINGS) {
+        handler({ type: KEY_BINDINGS[keyBindString] });
       }
     };
 

@@ -1,6 +1,7 @@
 import { RefObject, useCallback } from 'react';
 
-import { Rect, useRectangularSelection } from '@/shared/lib';
+import { useRectangularSelection } from '@/shared/lib';
+import { Rect } from '@/shared/model';
 
 import {
   AudioEditor,
@@ -9,6 +10,13 @@ import {
 } from '@/entities/audio-editor';
 
 import { selectTracksInSelection } from './selectTracksInSelection';
+
+const MIN_SELECTION_RECT = new Rect(
+  0,
+  0,
+  MIN_ZOOM_WIDTH_IN_PIXELS,
+  MIN_ZOOM_WIDTH_IN_PIXELS,
+);
 
 export const useAudioEditorSelection = (
   audioEditor: AudioEditor,
@@ -58,6 +66,7 @@ export const useAudioEditorSelection = (
   return useRectangularSelection({
     ref: selectionRef,
     timeline,
+    minSelectionRect: MIN_SELECTION_RECT,
     onChange: handleSelectionChange,
     onEnd: handleSelectionEnd,
   });

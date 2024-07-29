@@ -5,43 +5,16 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 // eslint-disable-next-line boundaries/element-types
 import { Timeline } from '@/entities/audio-editor';
 
+import { Rect } from '../model';
+
 import { clamp } from './clamp';
 import { preventAll } from './preventAll';
 import { useWindowEvent } from './useWindowEvent';
 
-export class Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-
-  get left(): number {
-    return this.x;
-  }
-
-  get right(): number {
-    return this.x + this.width;
-  }
-
-  get top(): number {
-    return this.y;
-  }
-
-  get bottom(): number {
-    return this.y + this.height;
-  }
-
-  constructor(x?: number, y?: number, width?: number, height?: number) {
-    this.x = x ?? 0;
-    this.y = y ?? 0;
-    this.width = width ?? 0;
-    this.height = height ?? 0;
-  }
-}
-
 export interface UseRectangularSelectionProps {
   ref: RefObject<HTMLDivElement>;
   timeline: Timeline;
+  minSelectionRect?: Rect;
   onChange?: (rect: Rect, e?: MouseEvent) => void;
   onEnd?: (rect: Rect, e?: MouseEvent) => void;
 }
@@ -49,6 +22,7 @@ export interface UseRectangularSelectionProps {
 export const useRectangularSelection = ({
   ref,
   timeline,
+  minSelectionRect,
   onChange,
   onEnd,
 }: UseRectangularSelectionProps): React.ComponentProps<'div'> & {
@@ -80,12 +54,10 @@ export const useRectangularSelection = ({
   }, []);
 
   const updateSelection = useCallback(
-    (x: number, y: number, e?: MouseEvent) => {
+    (selectionRect: Rect, e?: MouseEvent) => {
       if (!isSelecting) {
         return;
       }
-
-      const selectionRect = getSelectionRec(x, y);
 
       requestAnimationFrame(() => {
         if (!ref.current) {
@@ -99,7 +71,7 @@ export const useRectangularSelection = ({
       });
       onChange?.(selectionRect, e);
     },
-    [getSelectionRec, isSelecting, onChange, ref],
+    [isSelecting, onChange, ref],
   );
 
   const handleMouseDown = useCallback(
@@ -128,6 +100,21 @@ export const useRectangularSelection = ({
       }
 
       if (isPressedRef.current && !isSelecting) {
+        const mousePosition = {
+          x: e.pageX - timeline.boundingClientRect.x,
+          y: e.pageY - timeline.boundingClientRect.y + (grid?.scrollTop ?? 0),
+        };
+
+        const selectionRect = getSelectionRec(mousePosition.x, mousePosition.y);
+
+        if (
+          minSelectionRect &&
+          selectionRect.width < minSelectionRect.width &&
+          selectionRect.height < minSelectionRect.height
+        ) {
+          return;
+        }
+
         setIsSelecting(true);
       }
 
@@ -149,8 +136,7 @@ export const useRectangularSelection = ({
       };
 
       updateSelection(
-        mousePositionRef.current.x,
-        mousePositionRef.current.y,
+        getSelectionRec(mousePositionRef.current.x, mousePositionRef.current.y),
         e,
       );
     },
@@ -182,6 +168,7 @@ export const useRectangularSelection = ({
         mousePositionRef.current.y,
       );
 
+      updateSelection(selectionRect, e);
       onEnd?.(selectionRect, e);
 
       setIsSelecting(false);
@@ -196,14 +183,14 @@ export const useRectangularSelection = ({
       ref,
       timeline.boundingClientRect.x,
       timeline.boundingClientRect.y,
+      updateSelection,
     ],
   );
 
   useEffect(() => {
     const updateContainerRect = () => {
       updateSelection(
-        mousePositionRef.current.x,
-        mousePositionRef.current.y,
+        getSelectionRec(mousePositionRef.current.x, mousePositionRef.current.y),
         prevEvent.current ?? undefined,
       );
     };

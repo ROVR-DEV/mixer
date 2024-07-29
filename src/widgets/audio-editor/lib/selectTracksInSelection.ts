@@ -1,8 +1,8 @@
-import { Rect } from '@/shared/lib';
 import {
   checkCollision,
   checkVerticalCollision,
 } from '@/shared/lib/checkCollision';
+import { Rect } from '@/shared/model';
 
 import { AudioEditor, Timeline } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';

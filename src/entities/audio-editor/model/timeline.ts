@@ -1,7 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { RefObject } from 'react';
 
-import { clamp, Rect } from '@/shared/lib';
+import { clamp } from '@/shared/lib';
+import { Rect } from '@/shared/model';
 
 import {
   TimelineTicks,
