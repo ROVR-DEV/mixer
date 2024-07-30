@@ -1,6 +1,5 @@
 export { default as PersonIcon } from './person.svg';
 export { default as MagnetIcon } from './magnet.svg';
-export { default as SaveMixIcon } from './save-mix.svg';
 export { default as PlayIcon } from './play.svg';
 export { default as StopIcon } from './stop.svg';
 export { default as PlusIcon } from './plus.svg';

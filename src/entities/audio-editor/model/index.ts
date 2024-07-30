@@ -2,7 +2,7 @@ export * from './player';
 export * from './playerContext';
 export * from './scrollController';
 export * from './timeline';
-export * from './timelineControllerContext';
+export * from './timelineContext';
 export * from './valueInRangeController';
 export * from './zoomController';
 export * from './trackColorsGenerator';

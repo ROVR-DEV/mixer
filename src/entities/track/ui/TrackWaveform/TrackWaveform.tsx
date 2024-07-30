@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 // eslint-disable-next-line boundaries/element-types
-import { useAudioEditor, useTimelineController } from '@/entities/audio-editor';
+import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
 
 import { DEFAULT_WAVEFORM_OPTIONS } from '../../config';
 import { WaveformMemoized } from '../Waveform';
@@ -22,7 +22,7 @@ export const TrackWaveform = observer(function TrackWaveform({
 
   const waveformRef = useRef<HTMLDivElement | null>(null);
 
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 

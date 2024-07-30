@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { cn, preventAll } from '@/shared/lib';
 
 // eslint-disable-next-line boundaries/element-types
-import { useTimelineController } from '@/entities/audio-editor';
+import { useTimeline } from '@/entities/audio-editor';
 
 import { useFadeMarker } from '../../lib';
 import { FadeMarkerMemoized } from '../FadeMarker';
@@ -20,7 +20,7 @@ export const FadeOverlay = observer(function FadePoint({
   className,
   ...props
 }: FadeOverlayProps) {
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const { width, fadeMarkerProps } = useFadeMarker({
     side,

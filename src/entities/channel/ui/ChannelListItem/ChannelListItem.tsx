@@ -5,7 +5,6 @@ import { cn } from '@/shared/lib';
 import { ChannelListItemProps } from './interfaces';
 
 export const ChannelListItem = ({
-  disableBorder,
   isSelected,
   isMuted,
   leftPadding,
@@ -17,7 +16,7 @@ export const ChannelListItem = ({
   return (
     <div
       className={cn('py-1.5 h-24 flex items-center relative', className, {
-        'border-b border-b-secondary': !disableBorder,
+        // 'border-b border-b-secondary': !disableBorder,
         'bg-primary-dark': !isMuted && !ignoreSelection && isSelected,
         'px-4': leftPadding,
       })}

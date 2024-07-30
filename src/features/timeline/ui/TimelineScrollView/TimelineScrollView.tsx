@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
-import { useTimelineController } from '@/entities/audio-editor';
+import { useTimeline } from '@/entities/audio-editor';
 
 import {
   TimelineScrollDivRef,
@@ -20,7 +20,7 @@ export const TimelineScrollView = observer(function TimelineScrollView({
 }: TimelineScrollViewProps) {
   const horizontalScrollRef = useRef<TimelineScrollDivRef>(null);
 
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const updateHorizontalScrollbar = useCallback(
     (scroll: number) => {

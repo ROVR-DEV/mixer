@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
-import { usePlayer, useTimelineController } from '@/entities/audio-editor';
+import { usePlayer, useTimeline } from '@/entities/audio-editor';
 import { useTracksManager } from '@/entities/track';
 
 import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
@@ -23,7 +23,7 @@ export const TimelineView = observer(function TimelineView({
   ...props
 }: TimelineProps) {
   const player = usePlayer();
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
   const tracksManager = useTracksManager()!;
 
   const gridControlRef = useRef<TimelineGridRef | null>(null);
@@ -81,7 +81,7 @@ export const TimelineView = observer(function TimelineView({
       ) : (
         <>
           <div className='absolute size-full'>
-            <TimelineChannelsList />
+            <TimelineChannelsList itemClassName='border-b border-secondary' />
           </div>
           <TimelineGridMemoized
             className='pointer-events-none absolute w-full'

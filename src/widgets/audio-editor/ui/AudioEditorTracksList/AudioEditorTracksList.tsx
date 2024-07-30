@@ -2,7 +2,7 @@
 
 import { observer } from 'mobx-react-lite';
 
-import { useTimelineController } from '@/entities/audio-editor';
+import { useTimeline } from '@/entities/audio-editor';
 
 import { ChannelListItemClickView } from '@/features/channel-control';
 
@@ -13,7 +13,7 @@ import { AudioEditorTracksListProps } from './interfaces';
 export const AudioEditorTracksList = observer(function AudioEditorTracksList({
   player,
 }: AudioEditorTracksListProps) {
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   return player.channels.map((channel) => (
     <ChannelListItemClickView

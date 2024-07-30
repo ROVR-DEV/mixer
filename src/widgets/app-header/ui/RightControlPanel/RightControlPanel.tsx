@@ -18,11 +18,8 @@ export const RightControlPanel = ({
       )}
       {...props}
     >
-      <Button
-        aria-label='Save mix'
-        className='h-7 text-[13px] uppercase italic'
-      >
-        <span className='font-fix'>{'Save mix'}</span>
+      <Button aria-label='Publish' className='h-7 text-[13px] uppercase italic'>
+        <span className='font-fix'>{'Publish'}</span>
       </Button>
       <div className='flex items-center gap-5'>
         <Link className='text-accent' href='#'>

@@ -3,11 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback, useEffect, useRef } from 'react';
 
-import {
-  usePlayer,
-  usePlayHead,
-  useTimelineController,
-} from '@/entities/audio-editor';
+import { usePlayer, usePlayHead, useTimeline } from '@/entities/audio-editor';
 
 import { TimelinePlayHeadMemoized } from '../TimelinePlayHead';
 
@@ -20,7 +16,7 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
   const playHeadRef = useRef<HTMLDivElement | null>(null);
 
   const player = usePlayer();
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const { playHeadHeight, updatePlayHead } = usePlayHead(timeline, playHeadRef);
 

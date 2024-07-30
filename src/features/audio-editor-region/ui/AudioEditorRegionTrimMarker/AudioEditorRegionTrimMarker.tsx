@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { preventAll } from '@/shared/lib';
 import { TrimMakerMemoized } from '@/shared/ui';
 
-import { usePlayer, useTimelineController } from '@/entities/audio-editor';
+import { usePlayer, useTimeline } from '@/entities/audio-editor';
 
 import { useAudioEditorRegionTrimMarker } from '../../lib';
 
@@ -17,7 +17,7 @@ export const AudioEditorRegionTrimMarker = observer(
     ...props
   }: AudioEditorRegionTrimMarkerProps) {
     const player = usePlayer();
-    const timeline = useTimelineController();
+    const timeline = useTimeline();
 
     const { onMouseDown, onMouseUp } = useAudioEditorRegionTrimMarker(
       player,

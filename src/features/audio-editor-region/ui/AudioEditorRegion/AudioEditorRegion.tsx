@@ -4,11 +4,7 @@ import { useCallback, useRef } from 'react';
 import { clamp, cn, preventAll, useGlobalDnD } from '@/shared/lib';
 import { DnDData } from '@/shared/model';
 
-import {
-  RegionMarker,
-  usePlayer,
-  useTimelineController,
-} from '@/entities/audio-editor';
+import { RegionMarker, usePlayer, useTimeline } from '@/entities/audio-editor';
 
 import { useAudioEditorRegion } from '../../lib';
 import { AudioEditorRegionTrimMarker } from '../AudioEditorRegionTrimMarker';
@@ -23,7 +19,7 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
   ...props
 }: AudioEditorRegionProps) {
   const player = usePlayer();
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const regionRef = useRef<HTMLDivElement | null>(null);

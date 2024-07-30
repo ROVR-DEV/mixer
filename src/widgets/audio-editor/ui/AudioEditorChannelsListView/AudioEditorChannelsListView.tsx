@@ -9,12 +9,17 @@ import {
   ChannelListItemView,
 } from '@/features/channel-control';
 
+import { AudioEditorChannelsListViewProps } from './interfaces';
+
 export const AudioEditorChannelsListView = observer(
-  function AudioEditorChannelsListView() {
+  function AudioEditorChannelsListView({
+    itemClassName,
+  }: AudioEditorChannelsListViewProps) {
     const audioEditor = useAudioEditor();
 
     return audioEditor.player.channels.map((channel, index) => (
       <ChannelListItemView
+        className={itemClassName}
         key={`channel-${channel.id}`}
         channel={channel}
         leftPadding

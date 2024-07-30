@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { cn } from '@/shared/lib';
 
 import {
-  useTimelineController,
+  useTimeline,
   useHandleTimeSeek,
   usePlayer,
 } from '@/entities/audio-editor';
@@ -29,7 +29,7 @@ export const TimelineHeader = observer(function TimelineHeader({
   ...props
 }: TimelineHeaderProps) {
   const player = usePlayer();
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const handleClickOnRuler = useHandleTimeSeek(player, timeline);
 

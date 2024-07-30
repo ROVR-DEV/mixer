@@ -1,7 +1,5 @@
 import { memo } from 'react';
 
-import { cn } from '@/shared/lib';
-
 import {
   ChannelListItemMemoized,
   ChannelListMemoized,
@@ -12,16 +10,11 @@ import { ChannelsListHeaderProps } from './interfaces';
 
 export const ChannelsListHeader = ({
   playlist,
-  className,
   ...props
 }: ChannelsListHeaderProps) => {
   return (
-    <ChannelListMemoized className={cn('min-w-[296px]', className)} {...props}>
-      <ChannelListItemMemoized
-        className='h-[72px] items-start'
-        disableBorder
-        leftPadding
-      >
+    <ChannelListMemoized {...props}>
+      <ChannelListItemMemoized className='h-[72px] items-center' leftPadding>
         <PlaylistInfoMemoized
           totalPlaytime={playlist.duration_in_seconds}
           tracksCount={playlist.tracks.length}

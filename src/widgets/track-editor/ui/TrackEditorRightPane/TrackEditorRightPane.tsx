@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { cn } from '@/shared/lib';
 
 import {
-  TimelineControllerContext,
+  TimelineContext,
   usePlayer,
   useHandleTimeSeek,
   useAudioEditor,
@@ -82,7 +82,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   }, [audioEditor.editableTrack, timelineController]);
 
   return (
-    <TimelineControllerContext.Provider value={timelineController}>
+    <TimelineContext.Provider value={timelineController}>
       <div className={cn('flex flex-col', className)} {...props}>
         <TimelineHeader
           className='h-16 min-h-16'
@@ -100,7 +100,6 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                 className='relative size-full'
                 channel={audioEditor.editableTrack?.channel}
                 ignoreSelection
-                disableBorder
               >
                 <AudioEditorTrackView
                   className='h-[calc(100%-14px)]'
@@ -121,6 +120,6 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
           <TimelineScrollView />
         </div>
       </div>
-    </TimelineControllerContext.Provider>
+    </TimelineContext.Provider>
   );
 });

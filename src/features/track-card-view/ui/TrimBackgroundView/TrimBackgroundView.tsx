@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 
 import { cn } from '@/shared/lib';
 
-import { useTimelineController } from '@/entities/audio-editor';
+import { useTimeline } from '@/entities/audio-editor';
 
 import { TrimBackgroundViewProps } from './interfaces';
 
@@ -13,7 +13,7 @@ export const TrimBackgroundView = observer(function TrimBackgroundView({
   className,
   ...props
 }: TrimBackgroundViewProps) {
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   return (
     track.isTrimming && (

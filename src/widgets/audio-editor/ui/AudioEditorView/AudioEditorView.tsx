@@ -17,7 +17,7 @@ import {
 } from '@/entities/track';
 
 import { useAudioEditorGlobalControls } from '../../lib';
-import { AudioEditorBody } from '../AudioEditorBody';
+import { AudioEditorContent } from '../AudioEditorContent';
 import { AudioEditorHeaderMemoized } from '../AudioEditorHeader';
 
 import { AudioEditorViewProps } from './interfaces';
@@ -63,7 +63,7 @@ export const AudioEditorView = observer(function AudioEditorView({
         <TracksManagerContext.Provider value={tracksManager}>
           <div className={cn('flex flex-col relative', className)} {...props}>
             <AudioEditorHeaderMemoized />
-            <AudioEditorBody playlist={playlist} />
+            <AudioEditorContent playlist={playlist} />
             {!audioEditor.editableTrack ? null : (
               <TrackEditor className='absolute bottom-[100px] z-50 h-[43%] max-h-[466px] min-h-[161px] w-full' />
             )}

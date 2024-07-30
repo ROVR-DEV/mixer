@@ -12,7 +12,7 @@ import React, {
 
 import { cn, preventAll } from '@/shared/lib';
 
-import { useAudioEditor, useTimelineController } from '@/entities/audio-editor';
+import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
 import { TrackCardMemoized } from '@/entities/track';
 
 import { snapTo, useAudioEditorTrack } from '../../lib';
@@ -31,7 +31,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const trackRef = useRef<HTMLDivElement | null>(null);
 
-  const timeline = useTimelineController();
+  const timeline = useTimeline();
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
