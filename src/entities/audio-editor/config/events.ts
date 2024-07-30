@@ -5,6 +5,10 @@ export const AUDIO_EDITOR_EVENTS = [
   'Magnifier',
   'Cut',
   'Cursor',
+  'Fit',
+  'Loop',
+  'Mute',
+  'Solo',
 ] as const;
 
 export type AudioEditorEvent = (typeof AUDIO_EDITOR_EVENTS)[number];

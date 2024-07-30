@@ -22,15 +22,26 @@ export const useAudioEditorGlobalControls = (audioEditor: AudioEditor) => {
         case 'Redo':
           audioEditor.redo();
           break;
+        case 'Cursor':
+          audioEditor.tool = 'cursor';
+          break;
         case 'Magnifier':
           audioEditor.tool = 'magnifier';
           break;
         case 'Cut':
           audioEditor.tool = 'scissors';
           break;
-        case 'Cursor':
-          audioEditor.tool = 'cursor';
+        case 'Fit':
+          audioEditor.fit();
           break;
+        case 'Loop':
+          audioEditor.player.region.toggle();
+          break;
+        case 'Mute':
+          audioEditor.selectedChannel?.toggleMute();
+          break;
+        case 'Solo':
+          audioEditor.selectedChannel?.toggleSolo();
       }
     },
     [audioEditor],
