@@ -3,6 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { useMemo } from 'react';
 
+import { capitalize } from '@/shared/lib';
 import {
   CursorIcon,
   FitIcon,
@@ -42,7 +43,8 @@ export const AudioEditorFloatingToolbarView = observer(
           {
             name: 'Tools',
             buttons: audioEditor.options.availableTools.map((tool) => ({
-              name: tool,
+              label: capitalize(tool),
+              value: tool,
               icon: TOOL_ICONS[tool],
               isActive: tool == audioEditor.tool,
               onClick: () => {
@@ -54,20 +56,23 @@ export const AudioEditorFloatingToolbarView = observer(
             name: 'Actions',
             buttons: [
               {
-                name: 'loop',
+                label: 'Loop',
+                value: 'loop',
                 icon: <LoopIcon />,
                 isActive: audioEditor.player.region.isEnabled,
                 onClick: () => audioEditor.player.region.toggle(),
               },
               {
-                name: 'fit',
+                label: 'Fit',
+                value: 'fit',
                 icon: <FitIcon />,
                 isActive: false,
                 onClick: () => audioEditor.fit(),
                 fillType: 'fill',
               },
               {
-                name: 'magnet',
+                label: 'Magnet',
+                value: 'magnet',
                 icon: <MagnetIcon />,
                 isActive: false,
                 onClick: () => {},
@@ -78,7 +83,8 @@ export const AudioEditorFloatingToolbarView = observer(
             name: 'Undo/Redo',
             buttons: [
               {
-                name: 'undo',
+                label: 'Undo',
+                value: 'undo',
                 icon: <UndoIcon />,
                 isActive: false,
                 onClick: () => {
@@ -86,7 +92,8 @@ export const AudioEditorFloatingToolbarView = observer(
                 },
               },
               {
-                name: 'redo',
+                label: 'Redo',
+                value: 'redo',
                 icon: <RedoIcon />,
                 isActive: false,
                 onClick: () => {

@@ -1,7 +1,8 @@
 import { IconButtonProps } from '@/shared/ui';
 
 export interface ToolButton {
-  name: string;
+  value: string;
+  label: string;
   icon: JSX.Element;
   isActive: boolean;
   onClick: () => void;

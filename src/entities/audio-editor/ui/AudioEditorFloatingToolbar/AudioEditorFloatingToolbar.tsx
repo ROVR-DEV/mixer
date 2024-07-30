@@ -23,7 +23,8 @@ export const AudioEditorFloatingToolbar = forwardRef<
         {toolGroup.buttons.map((toolButton) => {
           return (
             <IconButton
-              key={toolButton.name}
+              key={toolButton.value}
+              title={toolButton.label}
               variant={toolButton.isActive ? 'accent' : 'primaryFilled'}
               svgFillType={toolButton.fillType ?? 'stroke'}
               onClick={toolButton.onClick}
