@@ -11,6 +11,7 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
   hideTitle?: boolean;
   editPopoverContent?: ReactNode;
   isEditingName?: boolean;
+  hideEditButton?: boolean;
   onNameEdited?: (
     title: string | undefined,
     artist: string | undefined,

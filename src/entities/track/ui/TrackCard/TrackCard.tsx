@@ -23,6 +23,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       editPopoverContent,
       isEditingName,
       onNameEdited,
+      hideEditButton,
       className,
       children,
       ...props
@@ -56,7 +57,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             className={cn(
               '@[128px]:left-7 row-start-1 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-50 transition-[left] rounded-md',
               {
-                '@[96px]:flex': isSelected,
+                '@[96px]:flex': isSelected && !hideEditButton,
               },
             )}
           >

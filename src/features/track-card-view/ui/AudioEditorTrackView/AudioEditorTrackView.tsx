@@ -35,6 +35,11 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
+  const hideEditButton = useMemo(
+    () => audioEditor.tool !== 'cursor',
+    [audioEditor.tool],
+  );
+
   const [isEditingName, setIsEditingName] = useState(false);
 
   const { isDragging, onMouseUp, onMouseDown } = useAudioEditorTrack(
@@ -166,6 +171,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     >
       <TrimBackgroundView className='absolute left-0 top-0' track={track} />
       <TrackCardMemoized
+        hideEditButton={hideEditButton}
         className='size-full'
         color={track.color ?? undefined}
         track={track.meta}

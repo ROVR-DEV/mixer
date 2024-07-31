@@ -3,7 +3,8 @@
 import { forwardRef, memo, useEffect, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
-import { cn, GhostResizePlugin } from '@/shared/lib';
+import { resolvedTailwindConfig } from '@/shared/config';
+import { cn, DynamicWaveColorPlugin, GhostResizePlugin } from '@/shared/lib';
 
 import { WAVEFORM_COLORS } from '../../config';
 
@@ -28,6 +29,9 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const ghostResizePluginRef = useRef<GhostResizePlugin | null>(null);
+    const dynamicWaveColorPluginRef = useRef<DynamicWaveColorPlugin | null>(
+      null,
+    );
 
     const isDataExists = !!data || options?.media;
 
@@ -52,15 +56,27 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
         return;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const baseWaveColor = (resolvedTailwindConfig.theme.colors as any).third
+        .DEFAULT;
+
       ghostResizePluginRef.current = GhostResizePlugin.create({
-        overlayColor: 'gray',
+        overlayColor: baseWaveColor,
+      });
+
+      dynamicWaveColorPluginRef.current = DynamicWaveColorPlugin.create({
+        waveColor: waveformColors['secondary'].waveColor,
       });
 
       wavesurferRef.current = WaveSurfer.create({
         container: container,
-        ...waveformColors['secondary'],
+        waveColor: baseWaveColor,
+        progressColor: baseWaveColor,
         ...options,
-        plugins: [ghostResizePluginRef.current],
+        plugins: [
+          ghostResizePluginRef.current,
+          dynamicWaveColorPluginRef.current,
+        ],
       });
 
       onMount(wavesurferRef.current);
@@ -97,16 +113,20 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
 
     useEffect(() => {
       requestAnimationFrame(() => {
-        wavesurferRef.current?.setOptions(waveformColors[color]);
+        dynamicWaveColorPluginRef.current?.setColor(
+          waveformColors[color].waveColor,
+        );
       });
     }, [color, waveformColors]);
 
     useEffect(() => {
       ghostResizePluginRef.current?.setLeftGhostWidthInPercent(trimStart ?? 0);
+      dynamicWaveColorPluginRef.current?.setStartInPercent(trimStart ?? 0);
     }, [trimStart]);
 
     useEffect(() => {
       ghostResizePluginRef.current?.setRightGhostWidthInPercent(trimEnd ?? 0);
+      dynamicWaveColorPluginRef.current?.setEndInPercent(trimEnd ?? 0);
     }, [trimEnd]);
 
     return (
@@ -138,8 +158,6 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
             className='absolute inset-y-0 my-auto h-px w-full'
             style={{
               backgroundColor: `${waveformColors[color].waveColor}66`,
-              // width: `calc(${wavesurferRef.current?.options.width ?? 0} *
-              //   ${trimDuration})`,
               left: `${trimStart}%`,
               width: `calc(100% - ${trimStart}% - ${trimEnd}%)`,
             }}
