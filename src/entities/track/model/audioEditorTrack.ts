@@ -29,7 +29,7 @@ export interface AudioEditorTrackState {
 
   meta: Track;
 
-  audioPeaks: number[][] | null;
+  audioPeaks: Array<Float32Array | number[]> | null;
   src: HTMLMediaElement['src'];
 
   color: string | null;
@@ -49,11 +49,12 @@ export interface AudioEditorTrackState {
 export class AudioEditorTrack {
   readonly id: string = v4();
 
+  readonly webAudio: AudioContext = new AudioContext();
   readonly mediaElement: HTMLMediaElement = new Audio();
 
   readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
 
-  audioPeaks: number[][] | null = null;
+  audioPeaks: Array<Float32Array | number[]> | null = [[]];
 
   startTime: number;
   endTime: number;
@@ -156,13 +157,17 @@ export class AudioEditorTrack {
           return;
         }
 
-        this.audioPeaks = this._audioBuffer.exportPeaks();
+        // this.audioPeaks = this._audioBuffer.exportPeaks();
       });
     });
   };
 
   load = (src: HTMLMediaElement['src']) => {
     this.mediaElement.src = src;
+  };
+
+  setPeaks = (peaks: typeof this.audioPeaks) => {
+    this.audioPeaks = peaks;
   };
 
   setStartTime = (time: number) => {

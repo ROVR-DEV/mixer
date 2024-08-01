@@ -34,7 +34,8 @@
     "react": "^18",
     "react-dom": "^18",
     "uuid": "^9.0.1",
-    "wavesurfer.js": "^7.8.0"
+    "wavesurfer.js": "^7.8.0",
+    "webaudio-peaks": "^1.0.0"
   },
   "devDependencies": {
     "@feature-sliced/eslint-config": "^0.1.0-beta.6",

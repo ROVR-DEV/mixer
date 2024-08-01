@@ -1,7 +1,7 @@
 import { responseToBlobData, responseErrorToData } from '@/shared/lib';
 import { getCachedData } from '@/shared/lib/getCachedData';
 
-const getTrackDownloadUrl = (uuid: string) =>
+export const getTrackDownloadUrl = (uuid: string) =>
   `https://app.rovr.live/api/track/${uuid}/play`;
 
 export const getTrack = async (
@@ -34,11 +34,12 @@ export const getTrack = async (
       if (!res) {
         throw new Error('Failed to get from cache or fetch');
       }
+
       return responseToBlobData(res);
     }
 
     return await responseToBlobData(await fetch(req));
   } catch (error) {
-    return responseErrorToData(error as Error);
+    return responseErrorToData(null, error as Error);
   }
 };

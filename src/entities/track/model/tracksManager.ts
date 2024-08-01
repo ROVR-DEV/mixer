@@ -1,6 +1,7 @@
 import { ObservableMap, makeAutoObservable, observable, values } from 'mobx';
 
-import { getTrack } from '../api';
+import { arrayBufferToBlob } from '@/shared/lib';
+
 import { isTrackCachingEnabled } from '../lib';
 
 import { Track } from './track';
@@ -26,8 +27,8 @@ export class TracksManager {
     );
   }
 
-  downloadTracks = async (onLoad?: (trackData: TrackData) => void) => {
-    this.tracks.forEach((track) => {
+  downloadTracks = (onLoad?: (trackData: TrackData) => void) => {
+    this.tracks.forEach(async (track) => {
       const trackData = this.tracksData.get(track.uuid);
 
       if (!trackData || trackData.status !== 'empty') {
@@ -36,14 +37,22 @@ export class TracksManager {
 
       trackData.status = 'loading';
 
-      getTrack(track.uuid, isTrackCachingEnabled()).then((res) => {
-        if (!res.data) {
+      const worker = new Worker(new URL('./loadTrackWorker', import.meta.url));
+
+      worker.onmessage = async ({ data }: MessageEvent<ArrayBuffer | null>) => {
+        if (!data) {
           return;
         }
 
-        trackData.setData(res.data);
+        const blob = arrayBufferToBlob(data);
+
+        trackData.setData(blob);
         onLoad?.(trackData);
-      });
+
+        worker.terminate();
+      };
+
+      worker.postMessage({ uuid: track.uuid, cache: isTrackCachingEnabled() });
     });
   };
 }

@@ -21,3 +21,5 @@ export * from './useWheel';
 export * from './useWindowEvent';
 export * from './capitalize';
 export * from './dynamicWaveColorPlugin';
+export * from './converters';
+export * from './extractPeaksPromise';

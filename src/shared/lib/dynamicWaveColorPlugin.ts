@@ -1,14 +1,14 @@
-import { CSSProperties } from 'react';
 // eslint-disable-next-line import/no-named-as-default
 import BasePlugin, {
   BasePluginEvents,
 } from 'wavesurfer.js/dist/base-plugin.js';
 // eslint-disable-next-line import/no-named-as-default
 import createElement from 'wavesurfer.js/dist/dom.js';
+import { WaveSurferOptions } from 'wavesurfer.js/dist/types.js';
 
 export type DynamicWaveColorPluginOptions = {
   /** Wave color */
-  waveColor?: CSSProperties['color'];
+  waveColor?: Exclude<WaveSurferOptions['waveColor'], string[]>;
 };
 
 export type DynamicWaveColorPluginEvents = BasePluginEvents;
@@ -63,7 +63,7 @@ export class DynamicWaveColorPlugin extends BasePlugin<
     this.setClip(this.trimStart, this.trimEnd);
   }
 
-  setColor(waveColor: string) {
+  setColor(waveColor: typeof this.options.waveColor) {
     this.options.waveColor = waveColor;
     this.updateCanvasesColor();
     // this.onRedraw();

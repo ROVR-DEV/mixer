@@ -11,6 +11,7 @@ import {
   PlayerContext,
 } from '@/entities/audio-editor';
 import {
+  calculatePeaks,
   TrackData,
   TracksManager,
   TracksManagerContext,
@@ -46,6 +47,22 @@ export const AudioEditorView = observer(function AudioEditorView({
       const track = audioEditor.player.tracksByAudioUuid.get(trackData.uuid);
       if (!track) {
         return;
+      }
+
+      if (trackData.blob) {
+        const loadAndSetPeaks = async () => {
+          const buffer = await trackData.blob?.arrayBuffer();
+
+          if (!buffer) {
+            return;
+          }
+
+          const peaks = await calculatePeaks(buffer);
+
+          track.setPeaks(peaks);
+        };
+
+        loadAndSetPeaks();
       }
 
       track.load(trackData.objectUrl);

@@ -12,20 +12,10 @@ const primaryColor = (resolvedTailwindConfig.theme.colors as any).primary
 const secondaryColor = (resolvedTailwindConfig.theme.colors as any).third
   .DEFAULT as string;
 
-const primaryColorOptions: Partial<WaveSurfer['options']> = {
-  waveColor: primaryColor,
-  progressColor: primaryColor,
-};
-
-const secondaryColorOptions: Partial<WaveSurfer['options']> = {
-  waveColor: secondaryColor,
-  progressColor: secondaryColor,
-};
-
 export const DEFAULT_WAVEFORM_OPTIONS: Partial<WaveSurferOptions> = {
   barWidth: 1.5,
   barGap: 2.8,
-  barHeight: 1.5,
+  // barHeight: 1.5,
   height: 'auto',
   interact: false,
   normalize: false,
@@ -34,8 +24,8 @@ export const DEFAULT_WAVEFORM_OPTIONS: Partial<WaveSurferOptions> = {
 
 export const WAVEFORM_COLORS: Record<
   WaveformColor,
-  Partial<WaveSurfer['options']>
+  Exclude<WaveSurferOptions['waveColor'], string[]>
 > = {
-  primary: primaryColorOptions,
-  secondary: secondaryColorOptions,
+  primary: primaryColor,
+  secondary: secondaryColor,
 };
