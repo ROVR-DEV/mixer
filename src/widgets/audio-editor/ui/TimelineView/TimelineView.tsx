@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { cn } from '@/shared/lib';
 
 import { usePlayer, useTimeline } from '@/entities/audio-editor';
-import { useTracksManager } from '@/entities/track';
 
 import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
 
@@ -24,7 +23,6 @@ export const TimelineView = observer(function TimelineView({
 }: TimelineProps) {
   const player = usePlayer();
   const timeline = useTimeline();
-  const tracksManager = useTracksManager()!;
 
   const gridControlRef = useRef<TimelineGridRef | null>(null);
 
@@ -73,10 +71,11 @@ export const TimelineView = observer(function TimelineView({
       ref={timelineRef}
       {...props}
     >
-      {tracksManager.loadedTracksCount !== tracksManager.tracksData.size ? (
+      {player.trackLoader.loadedTracksCount !==
+      player.trackLoader.tracksData.size ? (
         <span className='flex size-full flex-col items-center justify-center'>
           <span>{'Loading...'}</span>
-          <span>{`${tracksManager.loadedTracksCount} / ${tracksManager.tracks.length}`}</span>
+          <span>{`${player.trackLoader.loadedTracksCount} / ${player.tracks.length}`}</span>
         </span>
       ) : (
         <>

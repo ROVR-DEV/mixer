@@ -11,8 +11,15 @@ import {
 } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
 import { Playlist } from '@/entities/playlist';
-// eslint-disable-next-line boundaries/element-types
-import { AudioEditorTrack, AudioEditorTrackState } from '@/entities/track';
+import {
+  AudioEditorTrack,
+  AudioEditorTrackState,
+  calculatePeaks,
+  ObserverTrackLoader,
+  TrackData,
+  TrackLoader,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/entities/track';
 
 import { ObservableRegion, Region } from './region';
 import { trackColorsGenerator } from './trackColorsGenerator';
@@ -33,6 +40,7 @@ export interface Player {
   readonly tracks: AudioEditorTrack[];
   readonly tracksByAudioUuid: Map<string, AudioEditorTrack>;
   readonly playlist: Playlist | null;
+  readonly trackLoader: TrackLoader;
 
   readonly region: Region;
 
@@ -40,6 +48,7 @@ export interface Player {
   readonly isPlaying: boolean;
 
   importPlaylist(playlists: Playlist): void;
+  loadTracks(withPeaks: boolean): void;
 
   play(): void;
   stop(): void;
@@ -65,6 +74,7 @@ export class ObservablePlayer implements Player {
 
   readonly channels = observable.array<Channel>();
   readonly region: Region = new ObservableRegion();
+  readonly trackLoader: TrackLoader = new ObserverTrackLoader();
 
   private _playlist: Playlist | null = null;
 
@@ -123,6 +133,7 @@ export class ObservablePlayer implements Player {
 
   importPlaylist(playlist: Playlist) {
     this.clear();
+    this.trackLoader.clearData();
 
     this.addChannel();
     this.addChannel();
@@ -133,6 +144,43 @@ export class ObservablePlayer implements Player {
 
     this._playlist = playlist;
   }
+
+  loadTracks = (withPeaks: boolean): void => {
+    if (!this._playlist) {
+      return;
+    }
+
+    const onTrackLoad = (trackData: TrackData) => {
+      if (!trackData.objectUrl || !trackData.blob) {
+        return;
+      }
+
+      const track = this.tracksByAudioUuid.get(trackData.uuid);
+      if (!track) {
+        return;
+      }
+
+      if (withPeaks) {
+        const generateAndSetPeaks = async () => {
+          const buffer = await trackData.blob?.arrayBuffer();
+
+          if (!buffer) {
+            return;
+          }
+
+          const peaks = await calculatePeaks(buffer);
+
+          track.setPeaks(peaks);
+        };
+
+        generateAndSetPeaks();
+      }
+
+      track.load(trackData.objectUrl);
+    };
+
+    this.trackLoader.downloadTracks(this._playlist.tracks, onTrackLoad);
+  };
 
   //#region Player actions
   play = () => {

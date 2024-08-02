@@ -15,12 +15,15 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
     );
   }
 
+  const playlistKey = !playlist ? null : JSON.stringify(playlist);
+
   return (
     <main className='h-[calc(100%-64px)] max-h-[calc(100%_-_64px)] min-h-[calc(100%-64px)]'>
-      {!!searchParams.id && playlist ? (
+      {!!searchParams.id && playlist && playlistKey ? (
         <AudioEditorView
           className='h-full max-h-full overflow-hidden'
           playlist={playlist}
+          playlistKey={playlistKey}
           trackEditor={TrackEditor}
         />
       ) : (

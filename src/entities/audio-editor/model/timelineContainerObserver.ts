@@ -74,7 +74,7 @@ export class TimelineContainerObserver {
   }
 
   get timelineClientHeight(): number {
-    return this._timelineSize?.height ?? 1000;
+    return this._timelineSize?.height ?? 0;
   }
 
   get maxScroll(): number {

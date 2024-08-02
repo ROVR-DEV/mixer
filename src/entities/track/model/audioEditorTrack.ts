@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 // eslint-disable-next-line import/named
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
@@ -49,29 +49,21 @@ export interface AudioEditorTrackState {
 export class AudioEditorTrack {
   readonly id: string = v4();
 
-  readonly webAudio: AudioContext = new AudioContext();
-  readonly mediaElement: HTMLMediaElement = new Audio();
-
   readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
+  readonly mediaElement: HTMLMediaElement = new Audio();
 
   audioPeaks: Array<Float32Array | number[]> | null = [[]];
 
   startTime: number;
   endTime: number;
-
   startTrimDuration: number = 0;
   endTrimDuration: number = 0;
 
   private _meta: Track;
-
   private _channel: Channel;
-
   private _audioBuffer: WaveSurfer | null = null;
-
   private _filters: AudioFilters = new AudioFilters();
-
   private _color: string | null = null;
-
   private _isTrimming: boolean = false;
 
   get meta() {
@@ -150,16 +142,6 @@ export class AudioEditorTrack {
 
     this._audioBuffer = audioBuffer;
     this._filters.audioBuffer = audioBuffer;
-
-    this._audioBuffer.once('decode', () => {
-      runInAction(() => {
-        if (!this._audioBuffer) {
-          return;
-        }
-
-        // this.audioPeaks = this._audioBuffer.exportPeaks();
-      });
-    });
   };
 
   load = (src: HTMLMediaElement['src']) => {
@@ -216,6 +198,7 @@ export class AudioEditorTrack {
     const clonedTrack = new AudioEditorTrack(this.meta, this.channel);
     clonedTrack.color = this.color;
     clonedTrack.load(this.mediaElement.src);
+    clonedTrack.audioPeaks = this.audioPeaks;
     clonedTrack.setStartTime(this.startTime);
     return clonedTrack;
   };

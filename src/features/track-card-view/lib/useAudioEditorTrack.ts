@@ -244,7 +244,8 @@ export const useAudioEditorTrack = (
       track.setStartTime(startTime);
       track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
     },
-    [calcNewStartTime, audioEditor.player.time],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [calcNewStartTime],
   );
 
   const handleDragStart = useCallback(

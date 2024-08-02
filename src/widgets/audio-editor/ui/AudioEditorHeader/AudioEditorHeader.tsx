@@ -1,5 +1,3 @@
-'use client';
-
 import { memo } from 'react';
 
 import { HEADER_LAYOUT } from '@/shared/config/sharedStyles';

@@ -14,7 +14,7 @@ export const TimelineViewFooter = ({
 }: TimelineViewFooterProps) => {
   return (
     <div
-      className={cn('grid grow', className)}
+      className={cn('grid grow bg-primary z-20', className)}
       style={{
         gridTemplateColumns: `${SIDEBAR_WIDTH}px auto`,
       }}

@@ -5,5 +5,6 @@ import { TrackEditor } from '@/widgets/track-editor';
 
 export interface AudioEditorViewProps extends React.ComponentProps<'div'> {
   playlist: Playlist;
+  playlistKey: string;
   trackEditor: typeof TrackEditor;
 }
