@@ -68,7 +68,7 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
       });
 
       dynamicWaveColorPluginRef.current = DynamicWaveColorPlugin.create({
-        waveColor: overrideWaveColor['secondary'],
+        waveColor: overrideWaveColor[color],
       });
 
       wavesurferRef.current = WaveSurfer.create({

@@ -31,6 +31,8 @@ export interface AudioEditor {
   readonly draggingTracksMinChannelIndex: number;
   readonly draggingTracksMaxChannelIndex: number;
 
+  readonly isFitActivated: boolean;
+
   timeline: Timeline | null;
 
   tool: AudioEditorTool;
@@ -145,6 +147,10 @@ export class ObservableAudioEditor implements AudioEditor {
     this._tool = value;
   }
 
+  get isFitActivated(): boolean {
+    return this._zoomBeforeFit !== null;
+  }
+
   constructor(
     player: Player = new ObservablePlayer(),
     options: AudioEditorOptions = AUDIO_EDITOR_DEFAULT_OPTIONS,
@@ -158,6 +164,7 @@ export class ObservableAudioEditor implements AudioEditor {
 
     makeAutoObservable(this, {
       tool: computed,
+      isFitActivated: computed,
     });
   }
 
@@ -230,6 +237,10 @@ export class ObservableAudioEditor implements AudioEditor {
   magnify = (virtualRect: Rect) => {
     if (!this._timeline) {
       return;
+    }
+
+    if (this._zoomBeforeFit) {
+      this.fit();
     }
 
     this._zoomBeforeMagnifier = this._timeline.zoom;

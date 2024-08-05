@@ -26,9 +26,11 @@ export const useAudioEditorEvents = (
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      onMouseDownSelection?.(e);
+      if (audioEditor.tool === 'cursor' || audioEditor.tool === 'magnifier') {
+        onMouseDownSelection?.(e);
+      }
     },
-    [onMouseDownSelection],
+    [audioEditor.tool, onMouseDownSelection],
   );
 
   const onMouseUp = useCallback(

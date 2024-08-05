@@ -118,7 +118,7 @@ export const useTimelineZoomScroll = ({
     (delta: number) => {
       const isZoomIn = delta <= 0;
 
-      if (timeline.zoom < 1) {
+      if (audioEditor.isFitActivated || timeline.zoom < 1) {
         audioEditor.fit();
       }
 

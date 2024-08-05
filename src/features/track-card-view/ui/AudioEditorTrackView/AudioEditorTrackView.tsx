@@ -47,7 +47,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     track,
     audioEditor,
     timeline,
-    disableInteractive,
+    disableInteractive || audioEditor.tool !== 'cursor',
   );
 
   const handleMouseDown = useCallback(
@@ -102,13 +102,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         audioEditor.selectTrack(copiedTrack);
 
         audioEditor.saveState();
-        return;
-      }
+      } else if (audioEditor.tool === 'cursor') {
+        audioEditor.selectTrack(track, e.shiftKey);
 
-      audioEditor.selectTrack(track, e.shiftKey);
-
-      if (e.detail === 2) {
-        handleEdit();
+        if (e.detail === 2) {
+          handleEdit();
+        }
       }
     },
     [audioEditor, track, timeline, handleEdit],

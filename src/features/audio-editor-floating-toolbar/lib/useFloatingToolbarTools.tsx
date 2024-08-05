@@ -58,7 +58,7 @@ export const useFloatingToolbarTools = () => {
               label: 'Fit',
               value: 'fit',
               icon: <FitIcon />,
-              isActive: false,
+              isActive: audioEditor.isFitActivated,
               onClick: () => audioEditor.fit(),
               fillType: 'fill',
             },
@@ -96,6 +96,10 @@ export const useFloatingToolbarTools = () => {
         },
       ] satisfies ToolGroup[],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [audioEditor.tool, audioEditor.player.region.isEnabled],
+    [
+      audioEditor.tool,
+      audioEditor.player.region.isEnabled,
+      audioEditor.isFitActivated,
+    ],
   );
 };

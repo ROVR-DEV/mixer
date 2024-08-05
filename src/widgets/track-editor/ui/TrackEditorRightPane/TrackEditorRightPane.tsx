@@ -39,7 +39,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     startTime: audioEditor.editableTrack?.isTrimming
       ? audioEditor.editableTrack.startTime
       : audioEditor.editableTrack?.trimStartTime,
-    duration: audioEditor.editableTrack?.duration ?? 0,
+    duration: (audioEditor.editableTrack?.duration ?? 0) + 2,
   });
 
   const waveformComponent = useMemo(

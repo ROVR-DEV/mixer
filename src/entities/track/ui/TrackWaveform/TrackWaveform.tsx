@@ -68,18 +68,6 @@ export const TrackWaveform = observer(function TrackWaveform({
     [timeline],
   );
 
-  const shift = useMemo(
-    () => -timeline.timeToVirtualPixels(track.startTrimDuration),
-    [timeline, track.startTrimDuration],
-  );
-
-  const style = useMemo(
-    () => ({
-      left: shift,
-    }),
-    [shift],
-  );
-
   useEffect(() => {
     updateWidth(track.duration);
   }, [track.duration, updateWidth]);
@@ -102,7 +90,7 @@ export const TrackWaveform = observer(function TrackWaveform({
       <WaveformMemoized
         ref={waveformRef}
         className='absolute w-full'
-        style={style}
+        style={{ left: -timeline.timeToVirtualPixels(track.startTrimDuration) }}
         color={color}
         waveColor={track.color ?? undefined}
         trimStart={(track.startTrimDuration / track.duration) * 100}

@@ -17,12 +17,13 @@ export const AudioEditorFloatingToolbar = forwardRef<
   { tools, onMoveHandleMouseDown, onMoveHandleMouseUp, className, ...props },
   ref,
 ) {
-  const groups = useMemo(() => {
-    return tools.map((toolGroup) => (
-      <AudioEditorFloatingToolbarGroup key={toolGroup.name}>
-        {toolGroup.buttons.map((toolButton) => {
-          return (
+  const groups = useMemo(
+    () =>
+      tools.map((toolGroup) => (
+        <AudioEditorFloatingToolbarGroup key={toolGroup.name} role='group'>
+          {toolGroup.buttons.map((toolButton) => (
             <IconButton
+              role='listitem'
               key={toolButton.value}
               title={toolButton.label}
               variant={toolButton.isActive ? 'accent' : 'primaryFilled'}
@@ -31,11 +32,11 @@ export const AudioEditorFloatingToolbar = forwardRef<
             >
               {toolButton.icon}
             </IconButton>
-          );
-        })}
-      </AudioEditorFloatingToolbarGroup>
-    ));
-  }, [tools]);
+          ))}
+        </AudioEditorFloatingToolbarGroup>
+      )),
+    [tools],
+  );
 
   return (
     <div
@@ -50,7 +51,9 @@ export const AudioEditorFloatingToolbar = forwardRef<
       >
         <MoveIcon />
       </div>
-      <div className='flex items-center divide-x divide-primary'>{groups}</div>
+      <div className='flex items-center divide-x divide-primary' role='list'>
+        {groups}
+      </div>
     </div>
   );
 });
