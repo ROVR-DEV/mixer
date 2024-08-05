@@ -27,8 +27,7 @@ export const AudioEditorView = observer(function AudioEditorView({
   const [audioEditor] = useState(() => new ObservableAudioEditor());
 
   useEffect(() => {
-    audioEditor.player.importPlaylist(playlist);
-    audioEditor.player.loadTracks(true);
+    audioEditor.importPlaylist(playlist);
 
     return () => audioEditor.player.clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,7 +42,7 @@ export const AudioEditorView = observer(function AudioEditorView({
           <AudioEditorHeaderMemoized />
           <AudioEditorContent playlist={playlist} />
           {!audioEditor.editableTrack ? null : (
-            <TrackEditor className='absolute bottom-[100px] z-50 h-[43%] max-h-[466px] min-h-[161px] w-full' />
+            <TrackEditor className='absolute bottom-[100px] z-40 h-[43%] max-h-[466px] min-h-[161px] w-full' />
           )}
         </div>
       </PlayerContext.Provider>

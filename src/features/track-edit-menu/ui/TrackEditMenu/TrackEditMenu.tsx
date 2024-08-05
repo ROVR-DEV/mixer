@@ -13,7 +13,8 @@ export const TrackEditMenu = ({
 }: TrackEditMenuProps) => {
   return (
     <div
-      className='flex h-max flex-col justify-between divide-y divide-accent'
+      tabIndex={0}
+      className='flex h-max flex-col justify-between divide-y divide-accent outline-none'
       {...props}
     >
       <TrackEditMenuButton onClick={onRename}>{'Rename'}</TrackEditMenuButton>

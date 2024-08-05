@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback } from 'react';
 
-import { useAudioEditor } from '@/entities/audio-editor';
+import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
 import { ChannelListItemMemoized } from '@/entities/channel';
 
 import { ChannelListItemViewProps } from './interfaces';
@@ -15,6 +15,7 @@ export const ChannelListItemView = observer(function ChannelListItemView({
   ...props
 }: ChannelListItemViewProps) {
   const audioEditor = useAudioEditor();
+  const timeline = useTimeline();
 
   const handleClick = useCallback(() => {
     if (ignoreSelection) {
@@ -34,6 +35,7 @@ export const ChannelListItemView = observer(function ChannelListItemView({
       onClick={handleClick}
       ignoreSelection={ignoreSelection}
       isMuted={!ignoreMuted && audioEditor.player.isChannelMuted(channel)}
+      style={{ height: timeline.trackHeight }}
       {...props}
     />
   );

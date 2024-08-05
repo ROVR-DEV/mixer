@@ -48,7 +48,7 @@ export interface Player {
   readonly isPlaying: boolean;
 
   importPlaylist(playlists: Playlist): void;
-  loadTracks(withPeaks: boolean): void;
+  loadTracks(withPeaks: boolean): Promise<void>;
 
   play(): void;
   stop(): void;
@@ -145,7 +145,7 @@ export class ObservablePlayer implements Player {
     this._playlist = playlist;
   }
 
-  loadTracks = (withPeaks: boolean): void => {
+  loadTracks = async (withPeaks: boolean): Promise<void> => {
     if (!this._playlist) {
       return;
     }
@@ -165,6 +165,7 @@ export class ObservablePlayer implements Player {
           const buffer = await trackData.blob?.arrayBuffer();
 
           if (!buffer) {
+            track.setPeaks([]);
             return;
           }
 
@@ -179,7 +180,7 @@ export class ObservablePlayer implements Player {
       track.load(trackData.objectUrl);
     };
 
-    this.trackLoader.downloadTracks(this._playlist.tracks, onTrackLoad);
+    await this.trackLoader.downloadTracks(this._playlist.tracks, onTrackLoad);
   };
 
   //#region Player actions

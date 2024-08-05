@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { cn, stopPropagation } from '@/shared/lib';
 
+import { getDurationDisplayText } from '../../lib';
 import { EditInput } from '../EditInput';
 
 import { TrackTitleProps } from './interfaces';
@@ -15,11 +16,15 @@ export const TrackTitle = ({
   className,
   ...props
 }: TrackTitleProps) => {
-  const trackTitleArtist = track
-    ? `${track.title} | ${track.artist}`
-    : 'No track selected';
+  const trackTitleArtist = useMemo(
+    () => (track ? `${track.title} | ${track.artist}` : 'No track selected'),
+    [track],
+  );
 
-  const trackDuration = track ? `(${track.duration})` : '(00:00:00)';
+  const trackDuration = useMemo(
+    () => `(${getDurationDisplayText(track ? track.end - track.start : 0)})`,
+    [track],
+  );
 
   const titleRef = useRef<HTMLInputElement | null>(null);
 

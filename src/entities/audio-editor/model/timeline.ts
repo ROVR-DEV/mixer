@@ -48,7 +48,7 @@ export class Timeline {
   private _wheelListeners: Set<WheelEventListener> = new Set();
   private _wheelEventTriggerElements: Set<RefObject<HTMLElement>> = new Set();
 
-  private _trackHeight: number | string = 96;
+  private _trackHeight: number | string = 98;
 
   private _disableListeners: boolean = false;
 

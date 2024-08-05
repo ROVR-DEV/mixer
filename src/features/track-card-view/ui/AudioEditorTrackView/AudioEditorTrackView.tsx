@@ -35,9 +35,14 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
-  const hideEditButton = useMemo(
-    () => audioEditor.tool !== 'cursor',
+  const isDraggable = useMemo(
+    () => audioEditor.tool === 'cursor',
     [audioEditor.tool],
+  );
+
+  const isInteractive = useMemo(
+    () => isDraggable || audioEditor.tool === 'scissors',
+    [audioEditor.tool, isDraggable],
   );
 
   const [isEditingName, setIsEditingName] = useState(false);
@@ -47,7 +52,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     track,
     audioEditor,
     timeline,
-    disableInteractive || audioEditor.tool !== 'cursor',
+    disableInteractive || !isDraggable,
   );
 
   const handleMouseDown = useCallback(
@@ -97,7 +102,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       preventAll(e);
 
       if (audioEditor.tool === 'scissors') {
-        const copiedTrack = track.cut(timeline.virtualPixelsToTime(e.pageX));
+        const copiedTrack = track.split(timeline.virtualPixelsToTime(e.pageX));
 
         audioEditor.selectTrack(copiedTrack);
 
@@ -153,32 +158,33 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     }
   }, [isSelected]);
 
+  const title = process.env.NEXT_PUBLIC_DEBUG_SHOW_TRACKS_ID
+    ? `Track id: ${track.id}\nMeta id: ${track.meta.uuid}`
+    : undefined;
+
   return (
     <div
       ref={trackRef}
       className={cn('absolute z-0', className, {
-        'z-50': track.isTrimming || isDragging,
+        'z-30': track.isTrimming || isDragging,
+        'pointer-events-none': !isInteractive,
       })}
+      title={title}
       onMouseDown={handleMouseDown}
       onMouseUp={onMouseUp}
       onClick={handleClick}
-      title={
-        process.env.NEXT_PUBLIC_DEBUG_SHOW_TRACKS_ID
-          ? `Track id: ${track.id}\nMeta id: ${track.meta.uuid}`
-          : undefined
-      }
     >
       <TrimBackgroundView className='absolute left-0 top-0' track={track} />
       <TrackCardMemoized
-        hideEditButton={hideEditButton}
         className='size-full'
         color={track.color ?? undefined}
         track={track.meta}
         isSolo={track.channel?.isSolo}
         isSelected={isSelected}
-        editPopoverContent={editMenu}
+        hideEditButton={!isDraggable}
         isEditingName={isEditingName}
         onNameEdited={handleNameEdited}
+        editPopoverContent={editMenu}
         {...props}
       />
     </div>

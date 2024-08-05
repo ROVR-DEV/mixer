@@ -87,7 +87,7 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
 
         <AudioEditorFloatingToolbarView
           ref={floatingToolbarRef}
-          className='absolute left-[calc(50%-229.5px)] top-[calc(100%-70px)] z-30 mx-auto flex w-max'
+          className='absolute left-[calc(50%-229.5px)] top-[calc(100%-70px)] z-50 mx-auto flex w-max'
           onMouseDown={preventAll}
           onMoveHandleMouseDown={toolbarProps.onMouseDown}
           onMoveHandleMouseUp={toolbarProps.onMouseUp}

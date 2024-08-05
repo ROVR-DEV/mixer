@@ -30,6 +30,8 @@ export interface AudioEditorTrackState {
   meta: Track;
 
   audioPeaks: Array<Float32Array | number[]> | null;
+  isPeaksReady: boolean;
+
   src: HTMLMediaElement['src'];
 
   color: string | null;
@@ -52,19 +54,24 @@ export class AudioEditorTrack {
   readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
   readonly mediaElement: HTMLMediaElement = new Audio();
 
-  audioPeaks: Array<Float32Array | number[]> | null = [[]];
+  audioPeaks: Array<Float32Array | number[]> | null = [];
 
   startTime: number;
   endTime: number;
   startTrimDuration: number = 0;
   endTrimDuration: number = 0;
 
+  private _isPeaksReady: boolean = false;
   private _meta: Track;
   private _channel: Channel;
   private _audioBuffer: WaveSurfer | null = null;
   private _filters: AudioFilters = new AudioFilters();
   private _color: string | null = null;
   private _isTrimming: boolean = false;
+
+  get isPeaksReady(): boolean {
+    return this._isPeaksReady;
+  }
 
   get meta() {
     return this._meta;
@@ -150,6 +157,7 @@ export class AudioEditorTrack {
 
   setPeaks = (peaks: typeof this.audioPeaks) => {
     this.audioPeaks = peaks;
+    this._isPeaksReady = true;
   };
 
   setStartTime = (time: number) => {
@@ -167,7 +175,7 @@ export class AudioEditorTrack {
     this._updateAudioFilters();
   }
 
-  cut = (time: number) => {
+  split = (time: number) => {
     const trackCopy = this.clone();
 
     trackCopy.setStartTrimDuration(time - trackCopy.startTime);
@@ -200,6 +208,8 @@ export class AudioEditorTrack {
     clonedTrack.load(this.mediaElement.src);
     clonedTrack.audioPeaks = this.audioPeaks;
     clonedTrack.setStartTime(this.startTime);
+    clonedTrack._isPeaksReady = this._isPeaksReady;
+
     return clonedTrack;
   };
 
@@ -261,6 +271,7 @@ export class AudioEditorTrack {
       src: this.mediaElement.src,
       color: this.color,
       meta: this.meta,
+      isPeaksReady: this._isPeaksReady,
       audioPeaks: this.audioPeaks,
       filters: {
         fadeIn: {
@@ -287,7 +298,9 @@ export class AudioEditorTrack {
     }
     this.color = state.color;
 
-    this.audioPeaks = state.audioPeaks;
+    if (state.isPeaksReady) {
+      this.audioPeaks = state.audioPeaks;
+    }
 
     this.filters.fadeInNode.linearFadeIn(
       state.filters.fadeIn.startTime,

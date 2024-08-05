@@ -5,6 +5,8 @@ import { HistoryManager, Rect } from '@/shared/model';
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
 // eslint-disable-next-line boundaries/element-types
+import { Playlist } from '@/entities/playlist';
+// eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrack } from '@/entities/track';
 
 import { ALL_AUDIO_EDITOR_TOOLS, AudioEditorTool } from './audioEditorTool';
@@ -41,6 +43,8 @@ export interface AudioEditor {
 
   editableTrack: AudioEditorTrack | null;
   draggingTracks: AudioEditorTrack[];
+
+  importPlaylist: (playlist: Playlist) => Promise<void>;
 
   selectTrack: (track: AudioEditorTrack, multiple?: boolean) => void;
   unselectTrack: (track: AudioEditorTrack) => void;
@@ -167,6 +171,15 @@ export class ObservableAudioEditor implements AudioEditor {
       isFitActivated: computed,
     });
   }
+
+  importPlaylist = async (playlist: Playlist): Promise<void> => {
+    this.clearState();
+
+    this.player.importPlaylist(playlist);
+    await this.player.loadTracks(true);
+
+    this.saveState();
+  };
 
   selectTrack = (track: AudioEditorTrack, multiple: boolean = false) => {
     if (this.isTrackSelected(track)) {

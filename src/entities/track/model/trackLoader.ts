@@ -15,15 +15,25 @@ import { TrackData } from './trackData';
 
 export type TrackLoadedFunction = (trackData: TrackData) => void;
 
+export interface TrackLoaderState {
+  tracksData: Map<string, TrackData>;
+}
+
 export interface TrackLoader {
   readonly tracksData: Map<string, TrackData>;
 
   readonly loadedTracksCount: number;
 
-  downloadTracks: (tracks: Track[], onLoaded?: TrackLoadedFunction) => void;
-  downloadTrack: (uuid: Track, onLoaded?: TrackLoadedFunction) => void;
+  downloadTracks: (
+    tracks: Track[],
+    onLoaded?: TrackLoadedFunction,
+  ) => Promise<void>;
+  downloadTrack: (uuid: Track, onLoaded?: TrackLoadedFunction) => Promise<void>;
 
   clearData: () => void;
+
+  getState(): TrackLoaderState;
+  restoreState(state: TrackLoaderState): void;
 }
 
 const getLoadTrackWorker = (): Worker =>
@@ -45,15 +55,20 @@ export class ObserverTrackLoader implements TrackLoader {
     });
   }
 
-  downloadTracks = (tracks: Track[], onLoaded?: TrackLoadedFunction) => {
-    tracks.forEach((track) => this.downloadTrack(track, onLoaded));
+  downloadTracks = async (
+    tracks: Track[],
+    onLoaded?: TrackLoadedFunction,
+  ): Promise<void> => {
+    await Promise.all(
+      tracks.map((track) => this.downloadTrack(track, onLoaded)),
+    );
   };
 
-  downloadTrack = (
+  downloadTrack = async (
     track: Track,
     onLoaded?: TrackLoadedFunction,
     force: boolean = false,
-  ): void => {
+  ): Promise<void> => {
     const trackData = this._ensureTrackDataExists(track);
 
     if (!force && trackData.status !== 'empty') {
@@ -72,18 +87,35 @@ export class ObserverTrackLoader implements TrackLoader {
       onLoaded?.(trackData);
     };
 
-    const worker = getLoadTrackWorker();
+    await new Promise((resolve, reject) => {
+      const worker = getLoadTrackWorker();
 
-    worker.onmessage = async ({ data }: MessageEvent<ArrayBuffer | null>) => {
-      await onDataLoaded(data);
-      worker.terminate();
-    };
+      worker.onmessage = async ({ data }: MessageEvent<ArrayBuffer | null>) => {
+        await onDataLoaded(data);
+        worker.terminate();
+        resolve();
+      };
 
-    worker.postMessage({ uuid: track.uuid, cache: isTrackCachingEnabled() });
+      worker.onerror = async (error: ErrorEvent) => {
+        reject(error.error);
+      };
+
+      worker.postMessage({ uuid: track.uuid, cache: isTrackCachingEnabled() });
+    });
   };
 
   clearData = (): void => {
     this.tracksData.clear();
+  };
+
+  getState = (): TrackLoaderState => {
+    return {
+      tracksData: this.tracksData,
+    };
+  };
+
+  restoreState = (state: TrackLoaderState): void => {
+    this.tracksData.replace(state.tracksData);
   };
 
   private _ensureTrackDataExists = (track: Track): TrackData => {

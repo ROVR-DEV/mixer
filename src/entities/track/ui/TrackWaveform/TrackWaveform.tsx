@@ -82,6 +82,8 @@ export const TrackWaveform = observer(function TrackWaveform({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeline.zoomController, updateWidth]);
 
+  const trackCardBorderWidthCompensatorFactor = 0.1 / timeline.pixelsPerSecond;
+
   return (
     <div
       className='relative size-full'
@@ -93,8 +95,16 @@ export const TrackWaveform = observer(function TrackWaveform({
         style={{ left: -timeline.timeToVirtualPixels(track.startTrimDuration) }}
         color={color}
         waveColor={track.color ?? undefined}
-        trimStart={(track.startTrimDuration / track.duration) * 100}
-        trimEnd={(track.endTrimDuration / track.duration) * 100}
+        trimStart={
+          ((track.startTrimDuration - trackCardBorderWidthCompensatorFactor) /
+            track.duration) *
+          100
+        }
+        trimEnd={
+          ((track.endTrimDuration - trackCardBorderWidthCompensatorFactor) /
+            track.duration) *
+          100
+        }
         options={finalOptions}
         onMount={handleMount}
         {...props}
