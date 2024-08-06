@@ -52,10 +52,15 @@ export const TimelineView = observer(function TimelineView({
   );
 
   useEffect(() => {
+    renderGrid();
+  }, [gridHeight, renderGrid]);
+
+  useEffect(() => {
     timeline.scrollController.addListener(renderGrid);
     timeline.zoomController.addListener(renderGrid);
 
     renderGrid();
+
     return () => {
       timeline.scrollController.removeListener(renderGrid);
       timeline.zoomController.removeListener(renderGrid);
