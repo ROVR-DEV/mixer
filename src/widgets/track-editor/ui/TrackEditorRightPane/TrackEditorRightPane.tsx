@@ -33,7 +33,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const rulerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
-  const timelineController = useTimelineZoomScroll({
+  const timeline = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerRef,
     startTime: audioEditor.editableTrack?.isTrimming
@@ -53,7 +53,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     [audioEditor.editableTrack],
   );
 
-  const handleTimeSeek = useHandleTimeSeek(player, timelineController);
+  const handleTimeSeek = useHandleTimeSeek(player, timeline);
 
   useEffect(() => {
     if (!audioEditor.editableTrack) {
@@ -62,15 +62,15 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
 
     if (
       audioEditor.editableTrack.isTrimming &&
-      timelineController.scroll > audioEditor.editableTrack.trimStartTime
+      timeline.scroll > audioEditor.editableTrack.trimStartTime
     ) {
-      timelineController.scroll = audioEditor.editableTrack.trimStartTime;
+      timeline.scroll = audioEditor.editableTrack.trimStartTime;
     }
   }, [
     audioEditor.editableTrack,
     audioEditor.editableTrack?.isTrimming,
     audioEditor.editableTrack?.trimStartTime,
-    timelineController,
+    timeline,
   ]);
 
   useEffect(() => {
@@ -78,11 +78,15 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
       return;
     }
 
-    timelineController.scroll = audioEditor.editableTrack.trimStartTime;
-  }, [audioEditor.editableTrack, timelineController]);
+    timeline.scroll = audioEditor.editableTrack.trimStartTime;
+  }, [audioEditor.editableTrack, timeline]);
+
+  useEffect(() => {
+    timeline.trackHeight = '100%';
+  }, [timeline]);
 
   return (
-    <TimelineContext.Provider value={timelineController}>
+    <TimelineContext.Provider value={timeline}>
       <div className={cn('flex flex-col', className)} {...props}>
         <TimelineHeader
           className='h-16 min-h-16'
