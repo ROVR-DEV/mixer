@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 
+import { useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
+
 import { useAudioEditor } from '@/entities/audio-editor';
 
 import { ChannelListItemClickViewProps } from './interfaces';
@@ -10,13 +12,25 @@ export const ChannelListItemClickView = ({
 }: ChannelListItemClickViewProps) => {
   const audioEditor = useAudioEditor();
 
-  const handleClick = useCallback(() => {
-    if (audioEditor.tool !== 'cursor') {
-      return;
-    }
+  const { onClick: onElementClick, onMouseDown: onElementMouseDown } =
+    useIsMouseClickStartsOnThisSpecificElement();
 
-    audioEditor.selectedChannel = channel;
-  }, [audioEditor, channel]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!onElementClick?.(e)) {
+        return;
+      }
 
-  return <div onClick={handleClick} {...props} />;
+      if (audioEditor.tool !== 'cursor') {
+        return;
+      }
+
+      audioEditor.selectedChannel = channel;
+    },
+    [audioEditor, channel, onElementClick],
+  );
+
+  return (
+    <div onClick={handleClick} onMouseDown={onElementMouseDown} {...props} />
+  );
 };

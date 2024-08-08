@@ -1,7 +1,10 @@
 import { RefObject, useCallback } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
-import { useGlobalMouseMove } from '@/shared/lib';
+import {
+  useGlobalMouseMove,
+  useIsMouseClickStartsOnThisSpecificElement,
+} from '@/shared/lib';
 
 import {
   AudioEditor,
@@ -16,25 +19,38 @@ export const useAudioEditorEvents = (
   timeline: Timeline,
   rulerWrapperRef: RefObject<HTMLDivElement>,
   rectangularSelectionRef: RefObject<HTMLDivElement>,
-): Pick<React.ComponentProps<'div'>, 'onMouseDown' | 'onMouseUp'> => {
+): { isSelecting: boolean } & Pick<
+  React.ComponentProps<'div'>,
+  'onMouseDown' | 'onMouseUp'
+> => {
   const { isSelecting, onMouseDown: onMouseDownSelection } =
     useAudioEditorSelection(audioEditor, timeline, rectangularSelectionRef);
 
   const handleTimeSeek = useHandleTimeSeek(audioEditor.player, timeline);
 
-  useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
+  const { onClick: onElementClick, onMouseDown: onElementMouseDown } =
+    useIsMouseClickStartsOnThisSpecificElement();
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      onElementMouseDown?.(e);
       if (audioEditor.tool === 'cursor' || audioEditor.tool === 'magnifier') {
         onMouseDownSelection?.(e);
       }
     },
-    [audioEditor.tool, onMouseDownSelection],
+    [audioEditor.tool, onElementMouseDown, onMouseDownSelection],
   );
 
   const onMouseUp = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isSelecting) {
+        return;
+      }
+
+      if (!onElementClick?.(e)) {
+        return;
+      }
+
       if (isSelecting) {
         return;
       }
@@ -46,8 +62,10 @@ export const useAudioEditorEvents = (
         audioEditor.unMagnify();
       }
     },
-    [audioEditor, handleTimeSeek, isSelecting],
+    [audioEditor, handleTimeSeek, isSelecting, onElementClick],
   );
 
-  return { onMouseUp: onMouseUp, onMouseDown: onMouseDown };
+  useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
+
+  return { isSelecting, onMouseUp: onMouseUp, onMouseDown: onMouseDown };
 };

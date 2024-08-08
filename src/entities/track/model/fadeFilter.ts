@@ -19,27 +19,29 @@ export class FadeFilter {
   }
   set minTime(value: number) {
     this._minTime = value;
+    this._updateStartEndTime();
   }
 
   get maxTime(): number {
     return this._maxTime;
   }
   set maxTime(value: number) {
-    this.maxTime = value;
+    this._maxTime = value;
+    this._updateStartEndTime();
   }
 
   get startTime(): number {
     return this._startTime;
   }
-  set startTime(startTime: number) {
-    this._startTime = startTime;
+  set startTime(value: number) {
+    this._startTime = value;
   }
 
   get endTime(): number {
     return this._endTime;
   }
-  set endTime(endTime: number) {
-    this._endTime = endTime;
+  set endTime(value: number) {
+    this._endTime = value;
   }
 
   get duration(): number {
@@ -65,22 +67,40 @@ export class FadeFilter {
     });
   }
 
-  linearFadeIn = (start: number, duration: number) => {
-    this._linearFade(start, duration, 0, 1);
+  setBounds = (minTime: number, maxTime: number) => {
+    this.minTime = minTime;
+    this.maxTime = maxTime;
   };
 
-  linearFadeOut = (start: number, duration: number) => {
-    this._linearFade(start, duration, 1, 0);
+  linearFadeInDuration = (duration: number) => {
+    this.linearFadeIn(this.minTime, this.minTime + duration);
+  };
+
+  linearFadeOutDuration = (duration: number) => {
+    this.linearFadeOut(this.maxTime - duration, this.maxTime);
+  };
+
+  linearFadeIn = (startTime: number, endTime: number) => {
+    this._linearFade(startTime, endTime, 0, 1);
+  };
+
+  linearFadeOut = (startTime: number, endTime: number) => {
+    this._linearFade(startTime, endTime, 1, 0);
+  };
+
+  private _updateStartEndTime = () => {
+    this.startTime = clamp(this.startTime, this._minTime, this._maxTime);
+    this.endTime = clamp(this.endTime, this._minTime, this._maxTime);
   };
 
   private _linearFade = (
-    start: number,
-    duration: number,
+    startTime: number,
+    endTime: number,
     startTimeValue: number,
     endTimeValue: number,
   ) => {
-    this.startTime = clamp(start, this.minTime, this.maxTime);
-    this.endTime = clamp(start + duration, this.minTime, this.maxTime);
+    this.startTime = clamp(startTime, this.minTime, this.maxTime);
+    this.endTime = clamp(endTime, this.minTime, this.maxTime);
 
     this._startTimeValue = startTimeValue;
     this._endTimeValue = endTimeValue;

@@ -3,15 +3,11 @@ import { makeAutoObservable } from 'mobx';
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
 
-import { clamp } from '@/shared/lib';
-
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
 
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
-
-import { getLocalBounds } from '../lib';
 
 import { AudioFilters } from './audioFilters';
 import { TrackDnDInfo } from './dndInfo';
@@ -39,11 +35,11 @@ export interface AudioEditorTrackState {
   filters: {
     fadeIn: {
       startTime: number;
-      duration: number;
+      endTime: number;
     };
     fadeOut: {
       startTime: number;
-      duration: number;
+      endTime: number;
     };
   };
 }
@@ -133,11 +129,9 @@ export class AudioEditorTrack {
     this.startTime = track.start;
     this.endTime = track.end;
 
-    this._filters.fadeInNode.linearFadeIn(this.startTrimDuration, 0);
-    this._filters.fadeOutNode.linearFadeOut(
-      this.duration - this.endTrimDuration,
-      0,
-    );
+    this._updateAudioFiltersBounds();
+    this._filters.fadeInNode.linearFadeInDuration(0);
+    this._filters.fadeOutNode.linearFadeOutDuration(0);
 
     makeAutoObservable(this);
   }
@@ -167,12 +161,12 @@ export class AudioEditorTrack {
 
   setStartTrimDuration(duration: number) {
     this.startTrimDuration = duration;
-    this._updateAudioFilters();
+    this._updateAudioFiltersBounds();
   }
 
   setEndTrimDuration(duration: number) {
     this.endTrimDuration = duration;
-    this._updateAudioFilters();
+    this._updateAudioFiltersBounds();
   }
 
   split = (time: number) => {
@@ -217,46 +211,28 @@ export class AudioEditorTrack {
     this.audioBuffer?.destroy();
   };
 
-  private _updateAudioFilters = () => {
+  private _updateAudioFiltersBounds = () => {
     if (!this.filters) {
       return;
     }
 
-    const fadeInBounds = getLocalBounds(this, 'left');
+    const fadeInDuration = this.filters.fadeInDuration;
+    const fadeOutDuration = this.filters.fadeOutDuration;
 
-    const newFadeInStartTime = clamp(
+    this.filters.fadeInNode.setBounds(
       this.startTrimDuration,
-      fadeInBounds.leftBound,
-      fadeInBounds.rightBound,
+      this.duration - this.endTrimDuration,
+    );
+    this.filters.fadeOutNode.setBounds(
+      this.startTrimDuration,
+      this.duration - this.endTrimDuration,
     );
 
-    const newFadeInDuration =
-      clamp(
-        newFadeInStartTime + this.filters.fadeInNode.duration,
-        fadeInBounds.leftBound,
-        fadeInBounds.rightBound,
-      ) - newFadeInStartTime;
-
-    this.filters.fadeInNode.linearFadeIn(newFadeInStartTime, newFadeInDuration);
-
-    const fadeOutBounds = getLocalBounds(this, 'right');
-
-    const newFadeOutStartTime = clamp(
-      this.duration - this.endTrimDuration - this.filters.fadeOutNode.duration,
-      fadeOutBounds.leftBound,
-      fadeOutBounds.rightBound,
+    this.filters.setFadeInEndTime(
+      this.filters.fadeInNode.minTime + fadeInDuration,
     );
-
-    const newFadeOutDuration =
-      clamp(
-        newFadeOutStartTime + this.filters.fadeOutNode.duration,
-        fadeOutBounds.leftBound,
-        fadeOutBounds.rightBound,
-      ) - newFadeOutStartTime;
-
-    this.filters.fadeOutNode.linearFadeOut(
-      newFadeOutStartTime,
-      newFadeOutDuration,
+    this.filters.setFadeOutStartTime(
+      this.filters.fadeOutNode.maxTime - fadeOutDuration,
     );
   };
 
@@ -276,11 +252,11 @@ export class AudioEditorTrack {
       filters: {
         fadeIn: {
           startTime: this.filters.fadeInNode.startTime,
-          duration: this.filters.fadeInNode.duration,
+          endTime: this.filters.fadeInNode.endTime,
         },
         fadeOut: {
           startTime: this.filters.fadeOutNode.startTime,
-          duration: this.filters.fadeOutNode.duration,
+          endTime: this.filters.fadeOutNode.endTime,
         },
       },
     } satisfies AudioEditorTrackState;
@@ -304,11 +280,11 @@ export class AudioEditorTrack {
 
     this.filters.fadeInNode.linearFadeIn(
       state.filters.fadeIn.startTime,
-      state.filters.fadeIn.duration,
+      state.filters.fadeIn.endTime,
     );
     this.filters.fadeOutNode.linearFadeOut(
       state.filters.fadeOut.startTime,
-      state.filters.fadeOut.duration,
+      state.filters.fadeOut.endTime,
     );
   };
 }

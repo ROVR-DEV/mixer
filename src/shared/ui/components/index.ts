@@ -5,3 +5,4 @@ export * from './Version';
 export * from './Popover';
 export * from './RectangularSelection';
 export * from './TrimMarker';
+export * from './CustomDraggable';

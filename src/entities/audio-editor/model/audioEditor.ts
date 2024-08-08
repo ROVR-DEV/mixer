@@ -84,6 +84,8 @@ export class ObservableAudioEditor implements AudioEditor {
   private _editableTrack: AudioEditorTrack | null = null;
   private _draggingTracks = observable.array<AudioEditorTrack>();
 
+  isDraggingSomething: boolean = false;
+
   get timeline(): Timeline | null {
     return this._timeline;
   }

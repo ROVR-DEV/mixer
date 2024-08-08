@@ -23,3 +23,4 @@ export * from './capitalize';
 export * from './dynamicWaveColorPlugin';
 export * from './converters';
 export * from './extractPeaksPromise';
+export * from './useIsMouseClickStartsOnThisSpecificElement';

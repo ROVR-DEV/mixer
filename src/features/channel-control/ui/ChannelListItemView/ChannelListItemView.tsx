@@ -3,6 +3,8 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback } from 'react';
 
+import { useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
+
 import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
 import { ChannelListItemMemoized } from '@/entities/channel';
 
@@ -17,22 +19,33 @@ export const ChannelListItemView = observer(function ChannelListItemView({
   const audioEditor = useAudioEditor();
   const timeline = useTimeline();
 
-  const handleClick = useCallback(() => {
-    if (ignoreSelection) {
-      return;
-    }
+  const { onClick: onElementClick, onMouseDown: onElementMouseDown } =
+    useIsMouseClickStartsOnThisSpecificElement();
 
-    if (audioEditor.tool !== 'cursor') {
-      return;
-    }
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!onElementClick?.(e)) {
+        return;
+      }
 
-    audioEditor.selectedChannel = channel;
-  }, [ignoreSelection, audioEditor, channel]);
+      if (ignoreSelection) {
+        return;
+      }
+
+      if (audioEditor.tool !== 'cursor') {
+        return;
+      }
+
+      audioEditor.selectedChannel = channel;
+    },
+    [onElementClick, ignoreSelection, audioEditor, channel],
+  );
 
   return (
     <ChannelListItemMemoized
       isSelected={audioEditor.selectedChannel === channel}
       onClick={handleClick}
+      onMouseDown={onElementMouseDown}
       ignoreSelection={ignoreSelection}
       isMuted={!ignoreMuted && audioEditor.player.isChannelMuted(channel)}
       style={{ height: timeline.trackHeight }}

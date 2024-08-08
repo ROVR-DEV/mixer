@@ -23,16 +23,40 @@ export class AudioFilters {
     this._audioBuffer = value;
 
     this._unsubscribeFunctions.push(
-      this._audioBuffer.on('ready', this._initFilters),
+      this._audioBuffer.once('ready', this._initFilters),
     );
     this._unsubscribeFunctions.push(
-      this._audioBuffer.on('timeupdate', this._process),
+      this._audioBuffer.on('timeupdate', this._processFilters),
     );
+  }
+
+  get fadeInDuration(): number {
+    return this.fadeInNode.duration;
+  }
+
+  get fadeOutDuration(): number {
+    return this.fadeOutNode.duration;
   }
 
   constructor() {
     makeAutoObservable(this);
   }
+
+  setFadeInEndTime = (time: number) => {
+    this.fadeInNode.linearFadeIn(this.fadeInNode.minTime, time);
+
+    if (this.fadeInNode.endTime > this.fadeOutNode.startTime) {
+      this.setFadeOutStartTime(this.fadeInNode.endTime);
+    }
+  };
+
+  setFadeOutStartTime = (time: number) => {
+    this.fadeOutNode.linearFadeOut(time, this.fadeOutNode.maxTime);
+
+    if (this.fadeOutNode.startTime < this.fadeInNode.endTime) {
+      this.setFadeInEndTime(this.fadeOutNode.startTime);
+    }
+  };
 
   private _initFilters = () => {
     runInAction(() => {
@@ -54,10 +78,13 @@ export class AudioFilters {
 
     const timeDiff = fadeFilter.endTime - fadeFilter.startTime;
     const volumeDiff = fadeFilter.endTimeValue - fadeFilter.startTimeValue;
+
     const newVolume =
       fadeFilter.startTimeValue +
       ((time - fadeFilter.startTime) * volumeDiff) / timeDiff;
+
     const clampedVolume = Math.min(1, Math.max(0, newVolume));
+
     const roundedVolume = Math.round(clampedVolume * 100) / 100;
 
     if (roundedVolume !== this._audioBuffer.getVolume()) {
@@ -65,7 +92,7 @@ export class AudioFilters {
     }
   };
 
-  private _process = (time: number) => {
+  private _processFilters = (time: number) => {
     runInAction(() => {
       if (!this._audioBuffer) {
         return;
@@ -77,8 +104,7 @@ export class AudioFilters {
         this._audioBuffer.getVolume() !== 1
       ) {
         this._audioBuffer.setVolume(1);
-      }
-      if (time < this.fadeInNode.endTime) {
+      } else if (time < this.fadeInNode.endTime) {
         this._processFade(time, this.fadeInNode);
       } else if (time > this.fadeOutNode.startTime) {
         this._processFade(time, this.fadeOutNode);

@@ -24,7 +24,7 @@ export interface UseTrimMarkerProps {
   timeline: Timeline;
 }
 
-const updateTrim = throttle(
+const setTrim = throttle(
   (
     e: MouseEvent,
     track: AudioEditorTrack | null,
@@ -128,7 +128,7 @@ export const useTrimMarker = ({
         return;
       }
 
-      updateTrim(e, track, trimSide, timeline, bounds);
+      setTrim(e, track, trimSide, timeline, bounds);
     },
     [bounds, trimSide, timeline, track],
   );

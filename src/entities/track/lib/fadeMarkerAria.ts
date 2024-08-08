@@ -1,4 +1,5 @@
 import { roundTo } from '@/shared/lib';
+import { SliderAriaAttributes } from '@/shared/model';
 
 import { Side } from '../model';
 
@@ -6,7 +7,7 @@ export const getFadeMarkerAriaAttributes = (
   trackDuration: number,
   side: Side,
   time: number,
-) => {
+): SliderAriaAttributes => {
   const currentTime = roundTo(side === 'left' ? time : trackDuration - time, 2);
 
   return {

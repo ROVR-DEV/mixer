@@ -1,3 +1,7 @@
+import { DraggableEventHandler } from 'react-draggable';
+
+import { AddParameters } from './interfaces';
+
 export interface Point {
   x: number;
   y: number;
@@ -9,12 +13,20 @@ export interface DnDInfo {
   startY: number;
 }
 
+export type CustomData<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = Partial<T>;
+
 export interface DnDData<
-  CustomData extends Record<string, unknown> = Record<string, unknown>,
+  T extends Record<string, unknown> = Record<string, unknown>,
 > {
   isDragging: boolean;
   offsetFromContainer: Point;
   startPosition: Point;
   currentPosition: Point;
-  customProperties: Partial<CustomData>;
+  customProperties: CustomData<T>;
 }
+
+export type CustomDragEventHandler<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = AddParameters<DraggableEventHandler, [customData: CustomData<T>]>;

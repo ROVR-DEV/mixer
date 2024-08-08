@@ -209,7 +209,7 @@ export class Timeline {
     this._wheelEventTriggerElements.delete(element);
   };
 
-  mapPixelsFromGlobal = (x: number) => {
+  mapPixelsToLocal = (x: number) => {
     return x + this.scroll;
   };
 

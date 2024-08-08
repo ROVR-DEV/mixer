@@ -1,14 +1,15 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
+import { useMemo } from 'react';
 
 import { cn, preventAll } from '@/shared/lib';
 
 // eslint-disable-next-line boundaries/element-types
 import { useTimeline } from '@/entities/audio-editor';
 
-import { useFadeMarker } from '../../lib';
-import { FadeMarkerMemoized } from '../FadeMarker';
+import { useFadeData } from '../../lib';
+import { DraggableFadeMarker } from '../DraggableFadeMarker';
 import { FadeTriangleMemoized } from '../FadeTriangle';
 
 import { FadeOverlayProps } from './interfaces';
@@ -22,11 +23,12 @@ export const FadeOverlay = observer(function FadePoint({
 }: FadeOverlayProps) {
   const timeline = useTimeline();
 
-  const { width, fadeMarkerProps } = useFadeMarker({
-    side,
-    track,
-    timeline,
-  });
+  const { fadeDuration, ariaAttributes } = useFadeData(track, side, timeline);
+
+  const width = useMemo(
+    () => timeline.timeToVirtualPixels(fadeDuration),
+    [fadeDuration, timeline],
+  );
 
   return (
     <div
@@ -36,13 +38,16 @@ export const FadeOverlay = observer(function FadePoint({
         left: side === 'left' ? '0' : '',
         right: side === 'right' ? '0' : '',
       }}
-      onPointerOver={preventAll}
       {...props}
     >
-      <FadeMarkerMemoized
+      <DraggableFadeMarker
         className='absolute z-10'
+        track={track}
         side={side}
-        {...fadeMarkerProps}
+        onClick={preventAll}
+        onMouseUp={preventAll}
+        onMouseDown={preventAll}
+        {...ariaAttributes}
       />
       <FadeTriangleMemoized
         className='absolute'

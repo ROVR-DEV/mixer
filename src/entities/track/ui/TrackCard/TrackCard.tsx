@@ -80,7 +80,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
           />
         )}
 
-        <div className='absolute z-10 row-span-full size-full overflow-hidden rounded-lg'>
+        <div className='absolute -left-px -top-px z-10 row-span-full size-[calc(100%_+_2px)] overflow-hidden rounded-lg'>
           {children}
         </div>
       </div>

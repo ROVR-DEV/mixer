@@ -47,13 +47,14 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
   );
 
   const timelineViewCursor = useCurrentCursorIcon(audioEditor.tool);
+
   const timelineViewProps = useMemo(
     () => ({
-      onMouseUp: onMouseUp,
-      onMouseDown: onMouseDown,
+      onMouseDown,
+      onMouseUp,
       style: { cursor: timelineViewCursor },
     }),
-    [timelineViewCursor, onMouseDown, onMouseUp],
+    [timelineViewCursor, onMouseUp, onMouseDown],
   );
 
   const toolbarProps = useFloatingToolbarDnD(

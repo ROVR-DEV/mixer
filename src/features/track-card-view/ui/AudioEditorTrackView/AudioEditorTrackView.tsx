@@ -10,7 +10,11 @@ import React, {
   useState,
 } from 'react';
 
-import { cn, preventAll } from '@/shared/lib';
+import {
+  cn,
+  preventAll,
+  useIsMouseClickStartsOnThisSpecificElement,
+} from '@/shared/lib';
 
 import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
 import { TrackCardMemoized } from '@/entities/track';
@@ -55,15 +59,20 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     disableInteractive || !isDraggable,
   );
 
+  const { onClick: onElementClick, onMouseDown: onElementMouseDown } =
+    useIsMouseClickStartsOnThisSpecificElement();
+
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      preventAll(e);
       if (e.currentTarget !== trackRef.current) {
         return;
       }
 
+      onElementMouseDown?.(e);
       onMouseDown?.(e);
     },
-    [onMouseDown],
+    [onElementMouseDown, onMouseDown],
   );
 
   const isSelected = useMemo(
@@ -101,6 +110,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     (e: React.MouseEvent<HTMLDivElement>) => {
       preventAll(e);
 
+      if (!onElementClick?.(e)) {
+        return;
+      }
+
       if (audioEditor.tool === 'scissors') {
         const copiedTrack = track.split(timeline.virtualPixelsToTime(e.pageX));
 
@@ -115,7 +128,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         }
       }
     },
-    [audioEditor, track, timeline, handleEdit],
+    [onElementClick, audioEditor, track, timeline, handleEdit],
   );
 
   const handleSnapLeft = useCallback(
@@ -174,7 +187,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       onMouseUp={onMouseUp}
       onClick={handleClick}
     >
-      <TrimBackgroundView className='absolute left-0 top-0' track={track} />
+      <TrimBackgroundView
+        className='absolute left-0 top-0 z-10'
+        track={track}
+      />
       <TrackCardMemoized
         className='size-full'
         color={track.color ?? undefined}
