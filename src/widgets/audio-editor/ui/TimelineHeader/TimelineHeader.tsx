@@ -1,9 +1,9 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { cn } from '@/shared/lib';
+import { cn, useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
 
 import {
   useTimeline,
@@ -11,7 +11,7 @@ import {
   usePlayer,
 } from '@/entities/audio-editor';
 
-import { AudioEditorRegion } from '@/features/audio-editor-region';
+import { AudioEditorRegionPanel } from '@/features/audio-editor-region';
 import {
   TimelinePlayHeadView,
   TimelineRulerMemoized,
@@ -36,6 +36,19 @@ export const TimelineHeader = observer(function TimelineHeader({
   const rulerControlRef = useRef<TimelineRulerRef | null>(null);
 
   const renderRuler = useAudioEditorTimelineRuler(rulerControlRef);
+
+  const { onMouseDown, onClick } = useIsMouseClickStartsOnThisSpecificElement();
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!onClick?.(e)) {
+        return;
+      }
+
+      handleClickOnRuler(e);
+    },
+    [handleClickOnRuler, onClick],
+  );
 
   useEffect(() => {
     if (timeline.disableListeners) {
@@ -65,11 +78,12 @@ export const TimelineHeader = observer(function TimelineHeader({
     <div
       className={cn('w-full relative flex items-end', className)}
       ref={rulerRef}
-      onClick={handleClickOnRuler}
+      onClick={handleClick}
+      onMouseDown={onMouseDown}
       {...props}
     >
       <TimelinePlayHeadView className='absolute z-20' />
-      <AudioEditorRegion className='absolute top-[50px] z-20 h-[12px] w-full overflow-x-clip' />
+      <AudioEditorRegionPanel className='absolute top-[50px] z-20 h-[12px] w-full overflow-x-clip' />
       <TimelineRulerMemoized
         className='pointer-events-none w-full'
         centerLine={centerLine}

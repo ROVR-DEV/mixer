@@ -367,7 +367,9 @@ export const useAudioEditorTrack = (
         audioEditor.draggingTracks = [...audioEditor.selectedTracks];
       });
 
-      setDragProperties(trackRef.current);
+      if (!disableInteractive) {
+        setDragProperties(trackRef.current);
+      }
 
       runInAction(() => {
         audioEditor.draggingTracks.forEach((selectedTrack) => {

@@ -1,9 +1,9 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { cn } from '@/shared/lib';
+import { cn, useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
 
 import {
   TimelineContext,
@@ -55,6 +55,19 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
 
   const handleTimeSeek = useHandleTimeSeek(player, timeline);
 
+  const { onMouseDown, onClick } = useIsMouseClickStartsOnThisSpecificElement();
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!onClick?.(e)) {
+        return;
+      }
+
+      handleTimeSeek(e);
+    },
+    [handleTimeSeek, onClick],
+  );
+
   useEffect(() => {
     if (!audioEditor.editableTrack) {
       return;
@@ -97,7 +110,8 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
           <div
             className='size-full grow overflow-x-clip'
             ref={timelineRef}
-            onMouseUp={handleTimeSeek}
+            onClick={handleClick}
+            onMouseDown={onMouseDown}
           >
             {!audioEditor.editableTrack ? null : (
               <ChannelListItemView

@@ -1,2 +1,3 @@
+export * from './RegionTrimMarker';
 export * from './AudioEditorRegion';
-export * from './AudioEditorRegionTrimMarker';
+export * from './AudioEditorRegionPanel';

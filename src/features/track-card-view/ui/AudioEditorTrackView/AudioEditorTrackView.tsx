@@ -1,5 +1,6 @@
 'use client';
 
+import { delay } from 'lodash-es';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, {
@@ -16,7 +17,11 @@ import {
   useIsMouseClickStartsOnThisSpecificElement,
 } from '@/shared/lib';
 
-import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
+import {
+  useAudioEditor,
+  useHandleTimeSeek,
+  useTimeline,
+} from '@/entities/audio-editor';
 import { TrackCardMemoized } from '@/entities/track';
 
 import { snapTo, useAudioEditorTrack } from '../../lib';
@@ -102,9 +107,21 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [audioEditor, track],
   );
 
+  const handleTimeSeek = useHandleTimeSeek(audioEditor.player, timeline);
+
+  const clickTimerRef = useRef<number | null>(null);
+
   const handleEdit = useCallback(() => {
     audioEditor.editableTrack = track;
   }, [audioEditor, track]);
+
+  const cursorOnClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      audioEditor.selectTrack(track, e.shiftKey);
+      handleTimeSeek(e);
+    },
+    [audioEditor, handleTimeSeek, track],
+  );
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -114,21 +131,40 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         return;
       }
 
-      if (audioEditor.tool === 'scissors') {
-        const copiedTrack = track.split(timeline.virtualPixelsToTime(e.pageX));
+      if (e.detail === 1) {
+        if (audioEditor.tool === 'cursor') {
+          if (disableInteractive) {
+            cursorOnClick(e);
+          } else {
+            clickTimerRef.current = delay(cursorOnClick, 160, e);
+          }
+        } else if (audioEditor.tool === 'scissors') {
+          const copiedTrack = track.split(
+            timeline.virtualPixelsToTime(e.pageX),
+          );
 
-        audioEditor.selectTrack(copiedTrack);
+          audioEditor.selectTrack(copiedTrack);
 
-        audioEditor.saveState();
-      } else if (audioEditor.tool === 'cursor') {
-        audioEditor.selectTrack(track, e.shiftKey);
-
-        if (e.detail === 2) {
-          handleEdit();
+          audioEditor.saveState();
         }
+      } else if (e.detail === 2 && audioEditor.tool === 'cursor') {
+        if (clickTimerRef.current) {
+          clearTimeout(clickTimerRef.current);
+        }
+
+        audioEditor.selectTrack(track, e.shiftKey);
+        handleEdit();
       }
     },
-    [onElementClick, audioEditor, track, timeline, handleEdit],
+    [
+      onElementClick,
+      audioEditor,
+      track,
+      timeline,
+      disableInteractive,
+      cursorOnClick,
+      handleEdit,
+    ],
   );
 
   const handleSnapLeft = useCallback(
@@ -179,7 +215,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     <div
       ref={trackRef}
       className={cn('absolute z-0', className, {
-        'z-30': track.isTrimming || isDragging,
+        'z-30': !disableInteractive && (track.isTrimming || isDragging),
         'pointer-events-none': !isInteractive,
       })}
       title={title}

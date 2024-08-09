@@ -1,4 +1,6 @@
-import pkg from './package.json' with { type: 'json' };
+import { createRequire } from 'module';
+
+const pkg = createRequire(import.meta.url)('./package.json');
 
 const webpack = (config) => {
   // Grab the existing rule that handles SVG imports

@@ -1,5 +1,4 @@
 export const setDragProperties = (track: HTMLDivElement) => {
-  track.style.zIndex = '10';
   track.style.cursor = 'grabbing';
 };
 

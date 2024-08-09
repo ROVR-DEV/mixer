@@ -1,3 +1,3 @@
 export * from './useAudioEditorRegion';
-export * from './checkAndToggleRegionLoop';
-export * from './useAudioEditorRegionTrimMarker';
+export * from './useRegionTrimMarker';
+export * from './useAudioEditorRegionDnD';

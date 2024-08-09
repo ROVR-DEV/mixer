@@ -1,13 +1,16 @@
 import { makeAutoObservable } from 'mobx';
 
+import { clamp } from '@/shared/lib';
+
 export interface Region {
   start: number;
   end: number;
 
-  get duration(): number;
-
   isEnabled: boolean;
 
+  get duration(): number;
+
+  setBounds(start: number, end: number): void;
   toggle(): void;
 }
 
@@ -21,14 +24,16 @@ export class ObservableRegion implements Region {
     return this._from;
   }
   set start(value: number) {
-    this._from = value;
+    this._from = clamp(value, 0);
+    this._disableIfDurationIsZero();
   }
 
   get end(): number {
     return this._to;
   }
   set end(value: number) {
-    this._to = value;
+    this._to = clamp(value, this._from);
+    this._disableIfDurationIsZero();
   }
 
   get duration(): number {
@@ -42,6 +47,15 @@ export class ObservableRegion implements Region {
     this._isEnabled = value;
   }
 
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  setBounds = (start: number, end: number) => {
+    this.start = start;
+    this.end = end;
+  };
+
   toggle = () => {
     if (this.duration === 0) {
       if (this._isEnabled) {
@@ -54,7 +68,9 @@ export class ObservableRegion implements Region {
     this._isEnabled = !this._isEnabled;
   };
 
-  constructor() {
-    makeAutoObservable(this);
-  }
+  private _disableIfDurationIsZero = () => {
+    if (this.duration === 0 && this.isEnabled) {
+      this.toggle();
+    }
+  };
 }

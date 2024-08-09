@@ -1,19 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
-import { clamp, cn, preventAll, useGlobalDnD } from '@/shared/lib';
-import { DnDData } from '@/shared/model';
+import { cn, preventAll } from '@/shared/lib';
+import { CustomDragEventHandler } from '@/shared/model';
+import { CustomDraggable } from '@/shared/ui';
 
 import { RegionMarker, usePlayer, useTimeline } from '@/entities/audio-editor';
 
-import { useAudioEditorRegion } from '../../lib';
-import { AudioEditorRegionTrimMarker } from '../AudioEditorRegionTrimMarker';
+import { useAudioEditorRegionDnD } from '../../lib';
+import { RegionTrimMarker } from '../RegionTrimMarker';
 
 import { AudioEditorRegionProps } from './interfaces';
-
-type AudioEditorRegionDnDData = DnDData<{ startTime: number }>;
-
-const draggingCursor = 'grabbing';
 
 export const AudioEditorRegion = observer(function AudioEditorRegion({
   ...props
@@ -21,109 +18,81 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
   const player = usePlayer();
   const timeline = useTimeline();
 
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const regionRef = useRef<HTMLDivElement | null>(null);
   const markerRef = useRef<HTMLDivElement | null>(null);
 
-  const { onMouseDown } = useAudioEditorRegion(player, timeline);
-
-  const handleDragStartMarker = useCallback(
-    (
-      _: MouseEvent | React.MouseEvent<HTMLElement>,
-      dndData: AudioEditorRegionDnDData,
-    ) => {
-      if (markerRef.current) {
-        markerRef.current.style.cursor = draggingCursor;
-      }
-      dndData.customProperties.startTime = player.region.start;
-    },
-    [player.region.start],
+  const { isDragging, onStop, ...draggableProps } = useAudioEditorRegionDnD(
+    player,
+    timeline,
   );
 
-  const handleDragMarker = useCallback(
-    (_: MouseEvent, dndData: AudioEditorRegionDnDData) => {
-      if (dndData.customProperties.startTime === undefined) {
-        return;
-      }
-
-      const timeOffset =
-        timeline.pixelsToTime(dndData.currentPosition.x) -
-        timeline.pixelsToTime(dndData.startPosition.x);
-
-      const newTime = clamp(dndData.customProperties.startTime + timeOffset, 0);
-
-      player.region.end = newTime + player.region.duration;
-      player.region.start = newTime;
-    },
-    [player.region, timeline],
-  );
-
-  const handleDragEndMarker = useCallback(() => {
-    if (markerRef.current) {
-      markerRef.current.style.cursor = '';
-    }
-  }, []);
-
-  const {
-    isDragging,
-    onMouseDown: markerOnMouseDown,
-    onMouseUp: markerOnMouseUp,
-  } = useGlobalDnD({
-    cursor: 'grabbing',
-    onDragStart: handleDragStartMarker,
-    onDrag: handleDragMarker,
-    onDragEnd: handleDragEndMarker,
-  });
-
-  const handleOnMouseUp = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      preventAll(e);
-
-      markerOnMouseUp(e);
-
+  const handleOnMouseUp: CustomDragEventHandler = useCallback(
+    (...args) => {
       if (!isDragging) {
         player.region.toggle();
       }
+      onStop?.(...args);
     },
-    [isDragging, markerOnMouseUp, player.region],
+    [isDragging, onStop, player.region],
+  );
+
+  const { isHidden, width } = useMemo(
+    () => ({
+      isHidden: player.region.duration === 0,
+      width: timeline.timeToVirtualPixels(player.region.duration),
+    }),
+    [player.region.duration, timeline],
+  );
+
+  const position = useMemo(
+    () =>
+      timeline.timeToVirtualPixels(player.region.start) -
+      timeline.realToVirtualPixels(timeline.scroll) +
+      timeline.timelineLeftPadding,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      timeline,
+      timeline.scroll,
+      timeline.timelineLeftPadding,
+      player,
+      player.region.start,
+    ],
   );
 
   return (
     <div
-      ref={wrapperRef}
-      onMouseDown={onMouseDown}
-      onClick={preventAll}
+      ref={regionRef}
+      className={cn('absolute left-0 top-0 h-full max-h-3', {
+        hidden: isHidden,
+      })}
+      style={{
+        left: position,
+        width: width,
+      }}
       {...props}
     >
-      <div
-        ref={regionRef}
-        className={cn('absolute left-0 top-0 h-full max-h-3', {
-          hidden: player.region.duration === 0,
-        })}
-        style={{
-          left:
-            timeline.timeToVirtualPixels(player.region.start) -
-            timeline.realToVirtualPixels(timeline.scroll) +
-            timeline.timelineLeftPadding,
-          width: timeline.timeToVirtualPixels(player.region.duration),
-        }}
+      <CustomDraggable
+        cancel=''
+        handle=''
+        nodeRef={markerRef}
+        onMouseDown={preventAll}
+        onStop={handleOnMouseUp}
+        {...draggableProps}
       >
         <RegionMarker
           ref={markerRef}
           className='h-full cursor-grab'
           isActive={player.region.isEnabled}
-          onMouseDown={markerOnMouseDown}
-          onMouseUp={handleOnMouseUp}
         />
-        <AudioEditorRegionTrimMarker
-          className='absolute -left-1 top-0 h-full w-2'
-          trimSide='left'
-        />
-        <AudioEditorRegionTrimMarker
-          className='absolute -right-1 top-0 h-full w-2'
-          trimSide='right'
-        />
-      </div>
+      </CustomDraggable>
+      <RegionTrimMarker
+        className='absolute -left-1 top-0 h-full w-2'
+        trimSide='left'
+      />
+      <RegionTrimMarker
+        className='absolute -right-1 top-0 h-full w-2'
+        trimSide='right'
+      />
     </div>
   );
 });

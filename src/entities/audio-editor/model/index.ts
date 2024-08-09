@@ -9,3 +9,5 @@ export * from './trackColorsGenerator';
 export * from './audioEditorTool';
 export * from './audioEditorContext';
 export * from './audioEditor';
+export * from './region';
+export * from './AudioEditorDragData';

@@ -11,7 +11,7 @@ export const CustomDraggable = <
   allowAnyClick = false,
   disabled = false,
   enableUserSelectHack = false,
-  offsetParent = document.body,
+  offsetParent = typeof window === 'undefined' ? undefined : document.body,
   scale = 1,
   onDrag,
   onStart,

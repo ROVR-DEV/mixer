@@ -53,6 +53,9 @@ export const fetchJson = async <T>(
   const res = await fetch(input, init);
 
   try {
+    if (!res.ok) {
+      throw new Error(`Response status: ${res.status}`, { cause: res });
+    }
     return await responseToJsonData<T>(res);
   } catch (error) {
     return responseErrorToData(res, error as Error);
@@ -66,6 +69,9 @@ export const fetchArrayBuffer = async (
   const res = await fetch(input, init);
 
   try {
+    if (!res.ok) {
+      throw new Error(`Response status: ${res.status}`, { cause: res });
+    }
     return await responseToArrayBufferData(res);
   } catch (error) {
     return responseErrorToData(res, error as Error);

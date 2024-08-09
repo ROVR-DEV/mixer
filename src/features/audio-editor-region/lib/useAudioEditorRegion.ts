@@ -1,37 +1,27 @@
-import { clamp } from '@/shared/lib';
+import { useCallback, useMemo } from 'react';
+
 import { useSelection } from '@/shared/lib/useSelection';
 import { Rect } from '@/shared/model';
 
-import { Player, Timeline } from '@/entities/audio-editor';
-
-import { checkAndToggleRegionLoop } from './checkAndToggleRegionLoop';
+import { Player, Timeline, updateRegionRect } from '@/entities/audio-editor';
 
 export const useAudioEditorRegion = (player: Player, timeline: Timeline) => {
-  const handleChange = (rect: Rect) => {
-    if (!player.region.isEnabled) {
-      player.region.toggle();
-    }
+  const onChange = useCallback(
+    (rect: Rect) =>
+      requestAnimationFrame(() =>
+        updateRegionRect(timeline, player.region, rect),
+      ),
+    [player, timeline],
+  );
 
-    requestAnimationFrame(() => {
-      player.region.start = clamp(timeline.pixelsToTime(rect.left), 0);
-
-      player.region.end = clamp(
-        timeline.pixelsToTime(rect.right),
-        player.region.start,
-      );
-
-      checkAndToggleRegionLoop(player);
-    });
-  };
+  const offsetRect = useMemo(
+    () => new Rect(timeline.realToVirtualPixels(timeline.scroll), 0, 0, 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeline, timeline.scroll],
+  );
 
   return useSelection({
-    offsetRect: new Rect(
-      timeline.realToVirtualPixels(timeline.scroll),
-      0,
-      0,
-      0,
-    ),
-
-    onChange: handleChange,
+    offsetRect,
+    onChange,
   });
 };

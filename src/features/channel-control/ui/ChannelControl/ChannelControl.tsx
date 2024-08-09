@@ -59,7 +59,7 @@ export const ChannelControl = observer(function ChannelControl({
           aria-label='Remove channel'
           onClick={onClickRemove}
         >
-          <CrossIcon />
+          <CrossIcon className='size-full p-2 [&_path]:stroke-error' />
         </IconButton>
       )}
     </div>
