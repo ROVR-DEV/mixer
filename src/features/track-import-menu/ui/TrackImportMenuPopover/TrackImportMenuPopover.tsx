@@ -36,7 +36,7 @@ export const TrackImportMenuPopover = ({
         onMouseUp={preventAll}
       >
         {isFileUploading ? (
-          <div className='rounded-lg border border-accent bg-primary px-4 py-8'>
+          <div className='rounded-lg border border-accent bg-primary px-8 py-4'>
             {'Loading file'}
           </div>
         ) : (

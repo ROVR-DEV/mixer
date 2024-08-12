@@ -38,6 +38,9 @@ const nextConfig = {
     version: pkg.version,
   },
   experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost', 'localhost:3000', 'devmixer.techrovr.com'],
+    },
     optimizePackageImports: [
       '@/app',
       '@/pages-flat',
