@@ -2,6 +2,7 @@
 
 import { observer } from 'mobx-react-lite';
 import { useMemo, useRef } from 'react';
+import { useOutsideClick } from 'rooks';
 
 import { preventAll } from '@/shared/lib';
 import { RectangularSelection } from '@/shared/ui';
@@ -13,6 +14,10 @@ import {
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
+import {
+  useTrackImportMenu,
+  TrackImportMenuPopover,
+} from '@/features/track-import-menu';
 
 import {
   useAudioEditorEvents,
@@ -39,6 +44,17 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
 
   const rectangularSelectionRef = useRef<HTMLDivElement | null>(null);
 
+  const importMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const {
+    isFileUploading,
+    droppedFiles,
+    setDroppedFiles,
+    onDrop,
+    onAddToTheEnd,
+    onAddToNewChannel,
+  } = useTrackImportMenu(audioEditor);
+
   const { onMouseDown, onMouseUp } = useAudioEditorEvents(
     audioEditor,
     timeline,
@@ -62,6 +78,10 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
     timelineContainerRef,
   );
 
+  useOutsideClick(importMenuRef, () => {
+    setDroppedFiles(null);
+  });
+
   return (
     <div className='flex size-full flex-col overflow-hidden'>
       <div
@@ -77,11 +97,26 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
             }}
           />
 
-          <TimelineView timelineRef={timelineRef} {...timelineViewProps}>
+          <TimelineView
+            timelineRef={timelineRef}
+            {...timelineViewProps}
+            onDragOver={preventAll}
+            onDrop={onDrop}
+          >
             <RectangularSelection
               className='absolute'
               ref={rectangularSelectionRef}
               style={{ display: 'none' }}
+            />
+
+            <TrackImportMenuPopover
+              open={!!droppedFiles || isFileUploading}
+              modal={isFileUploading}
+              onAddToNewChannel={onAddToNewChannel}
+              onAddToTheEnd={onAddToTheEnd}
+              onClose={() => setDroppedFiles(null)}
+              onReplaceExisting={() => {}}
+              isFileUploading={isFileUploading}
             />
           </TimelineView>
         </div>

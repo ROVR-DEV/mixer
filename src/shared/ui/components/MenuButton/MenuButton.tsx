@@ -3,7 +3,7 @@ import { Button } from '@/shared/ui';
 
 import { TrackEditMenuButtonProps } from './interfaces';
 
-export const TrackEditMenuButton = ({
+export const MenuButton = ({
   className,
   ...props
 }: TrackEditMenuButtonProps) => {

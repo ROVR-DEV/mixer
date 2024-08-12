@@ -208,6 +208,7 @@ export class AudioEditorTrack {
   };
 
   dispose = () => {
+    this.audioBuffer?.stop();
     this.audioBuffer?.destroy();
   };
 

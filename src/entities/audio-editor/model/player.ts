@@ -16,6 +16,7 @@ import {
   AudioEditorTrackState,
   calculatePeaks,
   ObserverTrackLoader,
+  Track,
   TrackData,
   TrackLoader,
   // eslint-disable-next-line boundaries/element-types
@@ -48,7 +49,12 @@ export interface Player {
   readonly isPlaying: boolean;
 
   importPlaylist(playlists: Playlist): void;
-  loadTracks(withPeaks: boolean): Promise<void>;
+  updatePlaylist(playlists: Playlist): void;
+
+  importTrack(track: Track): void;
+  removeTrack(track: AudioEditorTrack): void;
+
+  loadTracks(withPeaks?: boolean): Promise<void>;
 
   play(): void;
   stop(): void;
@@ -131,7 +137,7 @@ export class ObservablePlayer implements Player {
     });
   }
 
-  importPlaylist(playlist: Playlist) {
+  importPlaylist = (playlist: Playlist): void => {
     this.clear();
     this.trackLoader.clearData();
 
@@ -143,9 +149,23 @@ export class ObservablePlayer implements Player {
     );
 
     this._playlist = playlist;
-  }
+  };
 
-  loadTracks = async (withPeaks: boolean): Promise<void> => {
+  updatePlaylist = (playlist: Playlist): void => {
+    this._playlist = playlist;
+  };
+
+  importTrack = (track: Track): void => {
+    const index = this.tracks.length;
+
+    this.channels[index % 2]?.importTrack(track);
+  };
+
+  removeTrack = (track: AudioEditorTrack): void => {
+    track.channel.removeTrack(track);
+  };
+
+  loadTracks = async (withPeaks: boolean = true): Promise<void> => {
     if (!this._playlist) {
       return;
     }

@@ -1,8 +1,7 @@
 import { responseToBlobData, responseErrorToData } from '@/shared/lib';
 import { getCachedData } from '@/shared/lib/getCachedData';
 
-export const getTrackDownloadUrl = (uuid: string) =>
-  `https://app.rovr.live/api/track/${uuid}/play`;
+export const TRACK_BASE_URL = 'https://app.rovr.live/api/track';
 
 export const getTrack = async (
   uuid: string,
@@ -10,7 +9,7 @@ export const getTrack = async (
 ): Promise<{ data: Blob | undefined; error: Error | undefined }> => {
   const cacheName = 'tracks';
 
-  const trackUrl = getTrackDownloadUrl(uuid);
+  const trackUrl = `${TRACK_BASE_URL}/${uuid}/play`;
 
   const req = new Request(trackUrl, {
     headers: {

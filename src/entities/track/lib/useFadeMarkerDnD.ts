@@ -7,6 +7,7 @@ import { CustomDraggableProps } from '@/shared/ui';
 
 import {
   AudioEditor,
+  isAudioEditorDragDataFilled,
   Timeline,
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
@@ -59,10 +60,7 @@ export const useFadeMarkerDnD = ({
         return;
       }
 
-      if (
-        customData.startX === undefined ||
-        customData.startTime === undefined
-      ) {
+      if (!isAudioEditorDragDataFilled(customData)) {
         return;
       }
 

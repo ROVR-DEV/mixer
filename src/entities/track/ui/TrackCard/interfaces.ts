@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
 
+import { Point } from '@/shared/model';
+
 import { Track } from '../../model';
 
 export interface TrackCardProps extends React.ComponentProps<'div'> {
@@ -16,4 +18,6 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
     title: string | undefined,
     artist: string | undefined,
   ) => void;
+  contextMenuPosition?: Point;
+  contextMenuContent?: ReactNode;
 }

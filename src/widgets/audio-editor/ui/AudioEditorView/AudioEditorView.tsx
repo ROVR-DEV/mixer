@@ -1,13 +1,13 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 
 import {
-  ObservableAudioEditor,
   AudioEditorContext,
+  initializeAudioEditor,
   PlayerContext,
 } from '@/entities/audio-editor';
 
@@ -24,12 +24,33 @@ export const AudioEditorView = observer(function AudioEditorView({
   className,
   ...props
 }: AudioEditorViewProps) {
-  const [audioEditor] = useState(() => new ObservableAudioEditor());
+  const audioEditor = useMemo(() => initializeAudioEditor(), []);
 
   useEffect(() => {
-    audioEditor.importPlaylist(playlist);
+    if (audioEditor.player.tracks.length === 0) {
+      audioEditor.importPlaylist(playlist);
+    }
 
-    return () => audioEditor.player.clear();
+    audioEditor.player.updatePlaylist(playlist);
+
+    playlist.tracks.forEach((track) => {
+      if (!audioEditor.player.tracksByAudioUuid.has(track.uuid)) {
+        audioEditor.importTrack(track);
+      }
+    });
+
+    audioEditor.player.tracks.forEach((track) => {
+      if (
+        !playlist.tracks.find(
+          (playlistTrack) => playlistTrack.uuid === track.meta.uuid,
+        )
+      ) {
+        audioEditor.removeTrack(track);
+      }
+    });
+
+    audioEditor.player.loadTracks();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioEditor.player, playlistKey]);
 

@@ -9,11 +9,10 @@ export type AudioEditorDragData = Partial<{
   startTime: number;
 }>;
 
-export const isAudioEditorDragDataFilled = (
-  data: AudioEditorDragData,
-): data is Required<AudioEditorDragData> => {
-  return data.startTime != undefined && data.startX != undefined;
-};
+export const isAudioEditorDragDataFilled = <T extends AudioEditorDragData>(
+  data: T,
+): data is Required<T> =>
+  data.startTime != undefined && data.startX != undefined;
 
 export const getTimeAfterDrag = (
   timeline: Timeline,

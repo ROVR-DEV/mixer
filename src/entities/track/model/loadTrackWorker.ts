@@ -5,7 +5,7 @@ import {
   responseToArrayBufferData,
 } from '@/shared/lib';
 
-import { getTrackDownloadUrl } from '../api';
+import { TRACK_BASE_URL } from '../api';
 
 interface TrackLoadData {
   uuid: string;
@@ -31,7 +31,7 @@ const downloadTrack = async (
 ): Promise<FetchResult<ArrayBuffer>> => {
   const cacheName = 'tracks';
 
-  const trackUrl = getTrackDownloadUrl(uuid);
+  const trackUrl = `${TRACK_BASE_URL}/${uuid}/play`;
 
   const req = new Request(trackUrl, {
     headers: {

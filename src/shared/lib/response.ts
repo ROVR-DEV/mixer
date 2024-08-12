@@ -10,6 +10,14 @@ export type FetchResult<D, E = Error> =
       response: Response | null;
     };
 
+export const responseToData = async (
+  res: Response,
+): Promise<FetchResult<Response>> => ({
+  data: res,
+  error: undefined,
+  response: res,
+});
+
 export const responseToArrayBufferData = async (
   res: Response,
 ): Promise<FetchResult<ArrayBuffer>> => ({
@@ -46,19 +54,35 @@ export const responseErrorToData = async (
   response: res,
 });
 
+export const customFetch = async (
+  input: string | URL | Request,
+  init?: RequestInit,
+): Promise<FetchResult<Response>> => {
+  let res: Response | null = null;
+
+  try {
+    res = await fetch(input, init);
+
+    if (!res.ok) {
+      throw new Error(`Response status: ${res.status}`, { cause: res });
+    }
+
+    return responseToData(res);
+  } catch (error) {
+    return responseErrorToData(res, error as Error);
+  }
+};
+
 export const fetchJson = async <T>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
 ): Promise<FetchResult<T>> => {
-  const res = await fetch(input, init);
+  const response = await customFetch(input, init);
 
-  try {
-    if (!res.ok) {
-      throw new Error(`Response status: ${res.status}`, { cause: res });
-    }
-    return await responseToJsonData<T>(res);
-  } catch (error) {
-    return responseErrorToData(res, error as Error);
+  if (response.data) {
+    return await responseToJsonData<T>(response.data);
+  } else {
+    return response;
   }
 };
 
@@ -66,14 +90,11 @@ export const fetchArrayBuffer = async (
   input: string | URL | globalThis.Request,
   init?: RequestInit,
 ): Promise<FetchResult<ArrayBuffer>> => {
-  const res = await fetch(input, init);
+  const response = await customFetch(input, init);
 
-  try {
-    if (!res.ok) {
-      throw new Error(`Response status: ${res.status}`, { cause: res });
-    }
-    return await responseToArrayBufferData(res);
-  } catch (error) {
-    return responseErrorToData(res, error as Error);
+  if (response.data) {
+    return await responseToArrayBufferData(response.data);
+  } else {
+    return response;
   }
 };

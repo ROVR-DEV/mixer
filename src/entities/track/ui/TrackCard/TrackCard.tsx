@@ -3,7 +3,7 @@
 import { flip, offset } from '@floating-ui/react';
 import { forwardRef, memo } from 'react';
 
-import { cn } from '@/shared/lib';
+import { cn, preventAll } from '@/shared/lib';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
 
 import { EditBadge } from '../EditBadge';
@@ -24,6 +24,8 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       isEditingName,
       onNameEdited,
       hideEditButton,
+      contextMenuPosition,
+      contextMenuContent,
       className,
       children,
       ...props
@@ -60,11 +62,34 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
                 '@[96px]:flex': isSelected && !hideEditButton,
               },
             )}
+            onClick={preventAll}
+            onMouseDown={preventAll}
+            onMouseUp={preventAll}
           >
             <EditBadge />
           </PopoverTrigger>
-          <PopoverContent className='z-20 w-[213px] overflow-hidden rounded-lg border border-accent bg-primary'>
+          <PopoverContent
+            className='z-20'
+            onClick={preventAll}
+            onMouseDown={preventAll}
+            onMouseUp={preventAll}
+          >
             {editPopoverContent}
+          </PopoverContent>
+        </Popover>
+
+        <Popover open={!!contextMenuPosition}>
+          <PopoverContent
+            className='z-20'
+            onClick={preventAll}
+            onMouseDown={preventAll}
+            onMouseUp={preventAll}
+            style={{
+              left: contextMenuPosition?.x,
+              top: contextMenuPosition?.y,
+            }}
+          >
+            {contextMenuContent}
           </PopoverContent>
         </Popover>
 

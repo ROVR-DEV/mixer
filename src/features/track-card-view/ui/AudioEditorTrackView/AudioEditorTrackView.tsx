@@ -10,18 +10,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useOutsideClick } from 'rooks';
 
 import {
   cn,
   preventAll,
   useIsMouseClickStartsOnThisSpecificElement,
 } from '@/shared/lib';
+import { Point } from '@/shared/model';
+import { MenuButton, MenuMemoized } from '@/shared/ui';
 
 import {
   useAudioEditor,
   useHandleTimeSeek,
   useTimeline,
 } from '@/entities/audio-editor';
+import { removeTrack } from '@/entities/playlist';
 import { TrackCardMemoized } from '@/entities/track';
 
 import { snapTo, useAudioEditorTrack } from '../../lib';
@@ -147,13 +151,6 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
 
           audioEditor.saveState();
         }
-      } else if (e.detail === 2 && audioEditor.tool === 'cursor') {
-        if (clickTimerRef.current) {
-          clearTimeout(clickTimerRef.current);
-        }
-
-        audioEditor.selectTrack(track, e.shiftKey);
-        handleEdit();
       }
     },
     [
@@ -163,8 +160,34 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       timeline,
       disableInteractive,
       cursorOnClick,
-      handleEdit,
     ],
+  );
+
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (audioEditor.tool === 'cursor') {
+        if (clickTimerRef.current) {
+          clearTimeout(clickTimerRef.current);
+        }
+
+        audioEditor.selectTrack(track, e.shiftKey);
+        handleEdit();
+      }
+    },
+    [audioEditor, handleEdit, track],
+  );
+
+  const [contextMenuPosition, setContextMenuPosition] = useState<
+    Point | undefined
+  >(undefined);
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      preventAll(e);
+
+      setContextMenuPosition({ x: e.pageX, y: e.pageY });
+    },
+    [],
   );
 
   const handleSnapLeft = useCallback(
@@ -211,6 +234,20 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     ? `Track id: ${track.id}\nMeta id: ${track.meta.uuid}`
     : undefined;
 
+  const contextMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const handleTrackRemove = useCallback(() => {
+    if (audioEditor.player.playlist?.id === undefined) {
+      return;
+    }
+
+    removeTrack(audioEditor.player.playlist.id, track.meta.uuid);
+  }, [audioEditor.player.playlist?.id, track.meta.uuid]);
+
+  useOutsideClick(contextMenuRef, () => {
+    setContextMenuPosition(undefined);
+  });
+
   return (
     <div
       ref={trackRef}
@@ -222,6 +259,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       onMouseDown={handleMouseDown}
       onMouseUp={onMouseUp}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
     >
       <TrimBackgroundView
         className='absolute left-0 top-0 z-10'
@@ -237,6 +276,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         isEditingName={isEditingName}
         onNameEdited={handleNameEdited}
         editPopoverContent={editMenu}
+        contextMenuPosition={contextMenuPosition}
+        contextMenuContent={
+          <MenuMemoized ref={contextMenuRef}>
+            <MenuButton onClick={handleTrackRemove}>{'Remove'}</MenuButton>
+          </MenuMemoized>
+        }
         {...props}
       />
     </div>
