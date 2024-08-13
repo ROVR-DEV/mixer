@@ -45,7 +45,7 @@ export interface AudioEditor {
   draggingTracks: AudioEditorTrack[];
 
   importPlaylist: (playlist: Playlist) => Promise<void>;
-  importTrack(track: Track): Promise<void>;
+  importTrack(track: Track, channelIndex?: number): Promise<void>;
 
   removeTrack(track: AudioEditorTrack): void;
 
@@ -186,8 +186,8 @@ export class ObservableAudioEditor implements AudioEditor {
     this.saveState();
   };
 
-  importTrack = async (track: Track): Promise<void> => {
-    this.player.importTrack(track);
+  importTrack = async (track: Track, channelIndex?: number): Promise<void> => {
+    this.player.importTrack(track, channelIndex);
     this.saveState();
   };
 

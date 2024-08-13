@@ -51,7 +51,7 @@ export interface Player {
   importPlaylist(playlists: Playlist): void;
   updatePlaylist(playlists: Playlist): void;
 
-  importTrack(track: Track): void;
+  importTrack(track: Track, channelIndex?: number): void;
   removeTrack(track: AudioEditorTrack): void;
 
   loadTracks(withPeaks?: boolean): Promise<void>;
@@ -155,10 +155,14 @@ export class ObservablePlayer implements Player {
     this._playlist = playlist;
   };
 
-  importTrack = (track: Track): void => {
+  importTrack = (track: Track, channelIndex?: number): void => {
     const index = this.tracks.length;
 
-    this.channels[index % 2]?.importTrack(track);
+    if (channelIndex && channelIndex >= this.channels.length) {
+      this.addChannel();
+    }
+
+    this.channels[channelIndex ?? index % 2]?.importTrack(track);
   };
 
   removeTrack = (track: AudioEditorTrack): void => {

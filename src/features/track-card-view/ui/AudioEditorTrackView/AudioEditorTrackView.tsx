@@ -18,7 +18,6 @@ import {
   useIsMouseClickStartsOnThisSpecificElement,
 } from '@/shared/lib';
 import { Point } from '@/shared/model';
-import { MenuButton, MenuMemoized } from '@/shared/ui';
 
 import {
   useAudioEditor,
@@ -37,16 +36,14 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   track,
   disableInteractive,
   editMenu: EditMenu,
+  contextMenu: ContextMenu,
   className,
   ...props
 }: AudioEditorTrackViewProps) {
   const audioEditor = useAudioEditor();
-
-  const trackRef = useRef<HTMLDivElement | null>(null);
-
   const timeline = useTimeline();
 
-  const isSelectedInPlayer = audioEditor.isTrackSelected(track);
+  const trackRef = useRef<HTMLDivElement | null>(null);
 
   const isDraggable = useMemo(
     () => audioEditor.tool === 'cursor',
@@ -58,8 +55,31 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [audioEditor.tool, isDraggable],
   );
 
+  const isSelectedInPlayer = audioEditor.isTrackSelected(track);
+
+  const isSelected = useMemo(
+    () => !disableInteractive && isSelectedInPlayer,
+    [disableInteractive, isSelectedInPlayer],
+  );
+
   const [isEditingName, setIsEditingName] = useState(false);
 
+  const handleNameEdited = useCallback(
+    (title: string | undefined, artist: string | undefined) => {
+      track.setTitleAndArtist(title, artist);
+
+      setIsEditingName(false);
+
+      // TODO: make meta information observable to do not force update it on every change
+      runInAction(() => {
+        audioEditor.unselectTrack(track);
+        audioEditor.selectTrack(track, true);
+      });
+    },
+    [audioEditor, track],
+  );
+
+  //#region Click handlers
   const { isDragging, onMouseUp, onMouseDown } = useAudioEditorTrack(
     trackRef,
     track,
@@ -84,40 +104,9 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [onElementMouseDown, onMouseDown],
   );
 
-  const isSelected = useMemo(
-    () => !disableInteractive && isSelectedInPlayer,
-    [disableInteractive, isSelectedInPlayer],
-  );
-
-  const handleNameEdited = useCallback(
-    (title: string | undefined, artist: string | undefined) => {
-      runInAction(() => {
-        const trimmedTitle = title?.trim();
-        const trimmedArtist = artist?.trim();
-
-        if (trimmedTitle) {
-          track.meta.title = trimmedTitle;
-        }
-
-        if (trimmedArtist) {
-          track.meta.artist = trimmedArtist;
-        }
-
-        setIsEditingName(false);
-        audioEditor.unselectTrack(track);
-        audioEditor.selectTrack(track, true);
-      });
-    },
-    [audioEditor, track],
-  );
-
-  const handleTimeSeek = useHandleTimeSeek(audioEditor.player, timeline);
-
   const clickTimerRef = useRef<number | null>(null);
 
-  const handleEdit = useCallback(() => {
-    audioEditor.editableTrack = track;
-  }, [audioEditor, track]);
+  const handleTimeSeek = useHandleTimeSeek(audioEditor.player, timeline);
 
   const cursorOnClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -163,6 +152,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     ],
   );
 
+  const handleEdit = useCallback(() => {
+    audioEditor.editableTrack = track;
+  }, [audioEditor, track]);
+
   const handleDoubleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (audioEditor.tool === 'cursor') {
@@ -176,20 +169,9 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     },
     [audioEditor, handleEdit, track],
   );
+  //#endregion
 
-  const [contextMenuPosition, setContextMenuPosition] = useState<
-    Point | undefined
-  >(undefined);
-
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      preventAll(e);
-
-      setContextMenuPosition({ x: e.pageX, y: e.pageY });
-    },
-    [],
-  );
-
+  //#region Edit menu
   const handleSnapLeft = useCallback(
     () => {
       snapTo(track, 'left', audioEditor.player.tracks);
@@ -219,10 +201,66 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
           onRename={handleRename}
           onSnapLeft={handleSnapLeft}
           onSnapRight={handleSnapRight}
+          onClick={preventAll}
+          onMouseDown={preventAll}
+          onMouseUp={preventAll}
         />
       ) : null,
     [EditMenu, handleRename, handleSnapLeft, handleSnapRight],
   );
+  //#endregion
+
+  //#region Context menu
+  const handleTrackRemove = useCallback(async () => {
+    if (audioEditor.player.playlist?.id === undefined) {
+      return;
+    }
+
+    track.channel.removeTrack(track);
+    const res = await removeTrack(
+      audioEditor.player.playlist.id,
+      track.meta.uuid,
+    );
+    if (res.error) {
+      track.channel.addTrack(track);
+    }
+    setContextMenuPosition(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioEditor.player.playlist?.id, track, track.meta.uuid]);
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      preventAll(e);
+
+      setContextMenuPosition({ x: e.pageX, y: e.pageY });
+    },
+    [],
+  );
+
+  const [contextMenuPosition, setContextMenuPosition] = useState<
+    Point | undefined
+  >(undefined);
+
+  const contextMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const contextMenu = useMemo(
+    () =>
+      ContextMenu ? (
+        <ContextMenu
+          ref={contextMenuRef}
+          onTrackRemove={handleTrackRemove}
+          onClick={preventAll}
+          onMouseDown={preventAll}
+          onMouseUp={preventAll}
+        />
+      ) : null,
+    [ContextMenu, handleTrackRemove],
+  );
+
+  useOutsideClick(contextMenuRef, () => {
+    setContextMenuPosition(undefined);
+  });
+  //#endregion
 
   useEffect(() => {
     if (!isSelected) {
@@ -230,28 +268,16 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     }
   }, [isSelected]);
 
+  // Debug
   const title = process.env.NEXT_PUBLIC_DEBUG_SHOW_TRACKS_ID
     ? `Track id: ${track.id}\nMeta id: ${track.meta.uuid}`
     : undefined;
-
-  const contextMenuRef = useRef<HTMLDivElement | null>(null);
-
-  const handleTrackRemove = useCallback(() => {
-    if (audioEditor.player.playlist?.id === undefined) {
-      return;
-    }
-
-    removeTrack(audioEditor.player.playlist.id, track.meta.uuid);
-  }, [audioEditor.player.playlist?.id, track.meta.uuid]);
-
-  useOutsideClick(contextMenuRef, () => {
-    setContextMenuPosition(undefined);
-  });
 
   return (
     <div
       ref={trackRef}
       className={cn('absolute z-0', className, {
+        // Push track up when dragging over timeline
         'z-30': !disableInteractive && (track.isTrimming || isDragging),
         'pointer-events-none': !isInteractive,
       })}
@@ -277,11 +303,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         onNameEdited={handleNameEdited}
         editPopoverContent={editMenu}
         contextMenuPosition={contextMenuPosition}
-        contextMenuContent={
-          <MenuMemoized ref={contextMenuRef}>
-            <MenuButton onClick={handleTrackRemove}>{'Remove'}</MenuButton>
-          </MenuMemoized>
-        }
+        contextMenuContent={contextMenu}
         {...props}
       />
     </div>

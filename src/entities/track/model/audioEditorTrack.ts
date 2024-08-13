@@ -169,6 +169,21 @@ export class AudioEditorTrack {
     this._updateAudioFiltersBounds();
   }
 
+  setTitleAndArtist = (
+    title: string | undefined,
+    artist: string | undefined,
+  ) => {
+    const trimmedTitle = title?.trim();
+    if (trimmedTitle) {
+      this.meta.title = trimmedTitle;
+    }
+
+    const trimmedArtist = artist?.trim();
+    if (trimmedArtist) {
+      this.meta.artist = trimmedArtist;
+    }
+  };
+
   split = (time: number) => {
     const trackCopy = this.clone();
 
@@ -212,31 +227,7 @@ export class AudioEditorTrack {
     this.audioBuffer?.destroy();
   };
 
-  private _updateAudioFiltersBounds = () => {
-    if (!this.filters) {
-      return;
-    }
-
-    const fadeInDuration = this.filters.fadeInDuration;
-    const fadeOutDuration = this.filters.fadeOutDuration;
-
-    this.filters.fadeInNode.setBounds(
-      this.startTrimDuration,
-      this.duration - this.endTrimDuration,
-    );
-    this.filters.fadeOutNode.setBounds(
-      this.startTrimDuration,
-      this.duration - this.endTrimDuration,
-    );
-
-    this.filters.setFadeInEndTime(
-      this.filters.fadeInNode.minTime + fadeInDuration,
-    );
-    this.filters.setFadeOutStartTime(
-      this.filters.fadeOutNode.maxTime - fadeOutDuration,
-    );
-  };
-
+  //#region State
   getState = (): AudioEditorTrackState => {
     return {
       uuid: this.id,
@@ -286,6 +277,32 @@ export class AudioEditorTrack {
     this.filters.fadeOutNode.linearFadeOut(
       state.filters.fadeOut.startTime,
       state.filters.fadeOut.endTime,
+    );
+  };
+  //#endregion
+
+  private _updateAudioFiltersBounds = () => {
+    if (!this.filters) {
+      return;
+    }
+
+    const fadeInDuration = this.filters.fadeInDuration;
+    const fadeOutDuration = this.filters.fadeOutDuration;
+
+    this.filters.fadeInNode.setBounds(
+      this.startTrimDuration,
+      this.duration - this.endTrimDuration,
+    );
+    this.filters.fadeOutNode.setBounds(
+      this.startTrimDuration,
+      this.duration - this.endTrimDuration,
+    );
+
+    this.filters.setFadeInEndTime(
+      this.filters.fadeInNode.minTime + fadeInDuration,
+    );
+    this.filters.setFadeOutStartTime(
+      this.filters.fadeOutNode.maxTime - fadeOutDuration,
     );
   };
 }

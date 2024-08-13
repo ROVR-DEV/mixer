@@ -74,6 +74,10 @@ export const useGlobalDnD = <
       isPressedRef.current = true;
       preventAll(e);
 
+      if (e.button !== 0) {
+        return;
+      }
+
       if (cursor) {
         document.body.style.cursor = cursor;
       }
@@ -94,6 +98,10 @@ export const useGlobalDnD = <
 
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
+      if (e.buttons !== 1) {
+        return;
+      }
+
       if (isPressedRef.current && !isDraggingRef.current) {
         startDrag(e);
       }

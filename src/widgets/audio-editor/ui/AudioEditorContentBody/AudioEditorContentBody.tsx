@@ -51,8 +51,7 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
     droppedFiles,
     setDroppedFiles,
     onDrop,
-    onAddToTheEnd,
-    onAddToNewChannel,
+    ...trackImportMenuProps
   } = useTrackImportMenu(audioEditor);
 
   const { onMouseDown, onMouseUp } = useAudioEditorEvents(
@@ -112,11 +111,9 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
             <TrackImportMenuPopover
               open={!!droppedFiles || isFileUploading}
               modal={isFileUploading}
-              onAddToNewChannel={onAddToNewChannel}
-              onAddToTheEnd={onAddToTheEnd}
               onClose={() => setDroppedFiles(null)}
-              onReplaceExisting={() => {}}
               isFileUploading={isFileUploading}
+              {...trackImportMenuProps}
             />
           </TimelineView>
         </div>

@@ -69,11 +69,22 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
     const formData = new FormData();
     formData.append('track', droppedFiles[0]);
 
+    localStorage.setItem(
+      'nextTrackChannel',
+      audioEditor.player.channels.length.toString(),
+    );
+
     setIsFileUploading(true);
     await addTrackLast(audioEditor.player.playlist.id, formData);
     setIsFileUploading(false);
     setDroppedFiles(null);
-  }, [audioEditor.player.playlist?.id, droppedFiles]);
+  }, [
+    audioEditor.player.channels.length,
+    audioEditor.player.playlist?.id,
+    droppedFiles,
+  ]);
+
+  const onReplaceExisting = useCallback(() => {}, []);
 
   return {
     isFileUploading,
@@ -82,5 +93,6 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
     onDrop,
     onAddToTheEnd,
     onAddToNewChannel,
+    onReplaceExisting,
   };
 };
