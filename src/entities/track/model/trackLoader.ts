@@ -8,8 +8,6 @@ import {
 
 import { arrayBufferToBlob } from '@/shared/lib';
 
-import { isTrackCachingEnabled } from '../lib';
-
 import { Track } from './track';
 import { TrackData } from './trackData';
 
@@ -100,7 +98,7 @@ export class ObserverTrackLoader implements TrackLoader {
         reject(error.error);
       };
 
-      worker.postMessage({ uuid: track.uuid, cache: isTrackCachingEnabled() });
+      worker.postMessage({ uuid: track.uuid, cache: true });
     });
   };
 

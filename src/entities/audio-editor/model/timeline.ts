@@ -282,11 +282,15 @@ export class Timeline {
     const zoomDifference =
       this.timelineContainer.timelineClientWidth / distance;
 
-    if (zoomDifference < 1) {
+    if (zoomDifference < this.zoomController.step) {
       return this.zoom * zoomDifference;
     }
 
-    return this.zoom * Math.floor(zoomDifference / 1.25) * 1.25;
+    return (
+      this.zoom *
+      Math.floor(zoomDifference / this.zoomController.step) *
+      this.zoomController.step
+    );
   };
 
   private _wheelListener = (e: WheelEvent) => {

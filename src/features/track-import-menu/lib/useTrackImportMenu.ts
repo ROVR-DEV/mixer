@@ -1,15 +1,38 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { getDroppedFiles, preventAll } from '@/shared/lib';
 
 import { AudioEditor } from '@/entities/audio-editor';
 import { addTrackLast } from '@/entities/playlist';
 
+import { checkDragFilesMimeType } from './checkDragFilesMimeType';
+
 export const useTrackImportMenu = (audioEditor: AudioEditor) => {
   const [droppedFiles, setDroppedFiles] = useState<File[] | null>(null);
   const [isFileUploading, setIsFileUploading] = useState(false);
+  const isOnlyAudioFilesRef = useRef(false);
+
+  const onDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    isOnlyAudioFilesRef.current = checkDragFilesMimeType(
+      e.dataTransfer.items,
+      (type) => type.startsWith('audio'),
+    );
+  }, []);
+
+  const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    if (!isOnlyAudioFilesRef.current) {
+      e.dataTransfer.effectAllowed = 'none';
+      e.dataTransfer.dropEffect = 'none';
+    } else {
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  }, []);
 
   const onDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -25,12 +48,14 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
 
       const files = getDroppedFiles(e);
 
-      if (files.length === 0) {
+      if (files.length === 0 || !isOnlyAudioFilesRef.current) {
         setDroppedFiles(null);
+        return;
       }
 
       if (files.length > 1) {
         alert('Now you can upload only one file at the time');
+        setDroppedFiles(null);
         return;
       }
 
@@ -84,15 +109,25 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
     droppedFiles,
   ]);
 
-  const onReplaceExisting = useCallback(() => {}, []);
+  const onCancelUpload = useCallback(() => {
+    setDroppedFiles(null);
+  }, []);
+
+  const onOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      setDroppedFiles(null);
+    }
+  }, []);
 
   return {
     isFileUploading,
     droppedFiles,
-    setDroppedFiles,
+    onDragEnter,
+    onDragOver,
     onDrop,
+    onOpenChange,
     onAddToTheEnd,
     onAddToNewChannel,
-    onReplaceExisting,
+    onCancelUpload,
   };
 };

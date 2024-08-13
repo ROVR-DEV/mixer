@@ -1,14 +1,16 @@
 import { ResultRange } from '../model';
 
+export const ZOOM_STEP = 1.25;
+
 export const DEFAULT_RANGES: Omit<ResultRange, 'result'>[] = [
   { start: 0.1, end: 1 },
-  { start: 1, end: Math.pow(1.25, 3) },
-  { start: Math.pow(1.25, 3), end: Math.pow(1.25, 6) },
-  { start: Math.pow(1.25, 6), end: Math.pow(1.25, 13) },
-  { start: Math.pow(1.25, 13), end: Math.pow(1.25, 16) },
-  { start: Math.pow(1.25, 16), end: Math.pow(1.25, 23) },
-  { start: Math.pow(1.25, 23), end: Math.pow(1.25, 26) },
-  { start: Math.pow(1.25, 26), end: Number.MAX_VALUE },
+  { start: 1, end: Math.pow(ZOOM_STEP, 3) },
+  { start: Math.pow(ZOOM_STEP, 3), end: Math.pow(ZOOM_STEP, 6) },
+  { start: Math.pow(ZOOM_STEP, 6), end: Math.pow(ZOOM_STEP, 13) },
+  { start: Math.pow(ZOOM_STEP, 13), end: Math.pow(ZOOM_STEP, 16) },
+  { start: Math.pow(ZOOM_STEP, 16), end: Math.pow(ZOOM_STEP, 23) },
+  { start: Math.pow(ZOOM_STEP, 23), end: Math.pow(ZOOM_STEP, 26) },
+  { start: Math.pow(ZOOM_STEP, 26), end: Number.MAX_VALUE },
 ];
 
 const STEP_IN_SECONDS = [60, 30, 10, 5, 1, 0.5, 0.1, 0.05];

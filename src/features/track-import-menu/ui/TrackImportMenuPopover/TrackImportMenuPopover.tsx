@@ -1,10 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { useOutsideClick } from 'rooks';
-
 import { preventAll } from '@/shared/lib';
-import { Popover, PopoverContent } from '@/shared/ui';
+import { Popover, PopoverContent, ProgressBar } from '@/shared/ui';
 
 import { TrackImportMenu } from '..';
 
@@ -12,20 +9,15 @@ import { TrackImportMenuPopoverProps } from './interfaces';
 
 export const TrackImportMenuPopover = ({
   isFileUploading,
-  onClose,
   onAddToNewChannel,
   onAddToTheEnd,
-  onReplaceExisting,
+  onCancelUpload,
   ...props
 }: TrackImportMenuPopoverProps) => {
-  const importMenuRef = useRef<HTMLDivElement | null>(null);
-
-  useOutsideClick(importMenuRef, onClose);
-
   return (
     <Popover {...props}>
       <PopoverContent
-        className='z-50'
+        className='z-50 outline-none'
         style={{
           left: '50%',
           top: '50%',
@@ -36,15 +28,18 @@ export const TrackImportMenuPopover = ({
         onMouseUp={preventAll}
       >
         {isFileUploading ? (
-          <div className='rounded-lg border border-accent bg-primary px-8 py-4'>
-            {'Loading file'}
+          <div className='flex flex-col gap-2 rounded-lg border border-accent bg-primary px-8 py-4'>
+            <span className='font-bold text-third-light'>
+              {'Uploading track'}
+            </span>
+            <ProgressBar value={null} />
           </div>
         ) : (
           <TrackImportMenu
-            ref={importMenuRef}
+            // ref={importMenuRef}
             onAddToTheEnd={onAddToTheEnd}
             onAddToNewChannel={onAddToNewChannel}
-            onReplaceExisting={onReplaceExisting}
+            onCancelUpload={onCancelUpload}
           />
         )}
       </PopoverContent>

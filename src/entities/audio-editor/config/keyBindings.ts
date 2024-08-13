@@ -1,28 +1,28 @@
 // eslint-disable-next-line boundaries/element-types
-import { KeyBindString, keyBindToString } from '@/entities/event';
+import { KeyBind, KeyBindString } from '@/entities/event';
 
 import { AudioEditorEvent } from './events';
 
 export const KEY_BINDINGS: Record<KeyBindString, AudioEditorEvent> = {
-  [keyBindToString({ key: 'Space' })]: 'Play/Pause',
+  [new KeyBind({ key: 'Space' }).toString()]: 'Play/Pause',
 
-  [keyBindToString({ key: 'KeyZ', ctrl: true })]: 'Undo',
-  [keyBindToString({ key: 'KeyZ', ctrl: true, shift: true })]: 'Redo',
+  [new KeyBind({ key: 'KeyZ', ctrl: true }).toString()]: 'Undo',
+  [new KeyBind({ key: 'KeyZ', ctrl: true, shift: true }).toString()]: 'Redo',
 
-  [keyBindToString({ key: 'KeyZ' })]: 'Fit',
+  [new KeyBind({ key: 'KeyZ' }).toString()]: 'Fit',
 
-  [keyBindToString({ key: 'KeyF' })]: 'Magnifier',
+  [new KeyBind({ key: 'KeyF' }).toString()]: 'Magnifier',
 
-  [keyBindToString({ key: 'KeyT' })]: 'Cut',
+  [new KeyBind({ key: 'KeyT' }).toString()]: 'Cut',
 
-  [keyBindToString({ key: 'KeyV' })]: 'Cursor',
-  [keyBindToString({ key: 'KeyD' })]: 'Cursor',
+  [new KeyBind({ key: 'KeyV' }).toString()]: 'Cursor',
+  [new KeyBind({ key: 'KeyD' }).toString()]: 'Cursor',
 
-  [keyBindToString({ key: 'KeyC' })]: 'Loop',
-  [keyBindToString({ key: 'KeyU' })]: 'Loop',
-  [keyBindToString({ key: 'KeyL' })]: 'Loop',
+  [new KeyBind({ key: 'KeyC' }).toString()]: 'Loop',
+  [new KeyBind({ key: 'KeyU' }).toString()]: 'Loop',
+  [new KeyBind({ key: 'KeyL' }).toString()]: 'Loop',
 
-  [keyBindToString({ key: 'KeyM' })]: 'Mute',
+  [new KeyBind({ key: 'KeyM' }).toString()]: 'Mute',
 
-  [keyBindToString({ key: 'KeyS' })]: 'Solo',
+  [new KeyBind({ key: 'KeyS' }).toString()]: 'Solo',
 };

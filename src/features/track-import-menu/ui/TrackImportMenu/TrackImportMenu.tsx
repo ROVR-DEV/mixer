@@ -6,7 +6,7 @@ import { TrackImportMenuProps } from './interfaces';
 
 export const TrackImportMenu = forwardRef<HTMLDivElement, TrackImportMenuProps>(
   function TrackImportMenu(
-    { onAddToTheEnd, onAddToNewChannel, onReplaceExisting, ...props },
+    { onAddToTheEnd, onAddToNewChannel, onCancelUpload, ...props },
     ref,
   ) {
     return (
@@ -17,9 +17,7 @@ export const TrackImportMenu = forwardRef<HTMLDivElement, TrackImportMenuProps>(
         <MenuButton onClick={onAddToNewChannel}>
           {'Add a new track to a new channel'}
         </MenuButton>
-        <MenuButton onClick={onReplaceExisting}>
-          {'Replace an existing song'}
-        </MenuButton>
+        <MenuButton onClick={onCancelUpload}>{'Cancel Upload'}</MenuButton>
       </MenuMemoized>
     );
   },

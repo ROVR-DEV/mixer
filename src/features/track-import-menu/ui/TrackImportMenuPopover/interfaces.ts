@@ -6,8 +6,7 @@ export interface TrackImportMenuPopoverProps
   extends PopoverProps,
     Pick<
       TrackImportMenuProps,
-      'onAddToTheEnd' | 'onAddToNewChannel' | 'onReplaceExisting'
+      'onAddToTheEnd' | 'onAddToNewChannel' | 'onCancelUpload'
     > {
-  onClose: () => void;
   isFileUploading: boolean;
 }

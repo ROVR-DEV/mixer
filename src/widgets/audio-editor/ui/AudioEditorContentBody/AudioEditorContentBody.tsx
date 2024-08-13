@@ -2,7 +2,6 @@
 
 import { observer } from 'mobx-react-lite';
 import { useMemo, useRef } from 'react';
-import { useOutsideClick } from 'rooks';
 
 import { preventAll } from '@/shared/lib';
 import { RectangularSelection } from '@/shared/ui';
@@ -44,13 +43,13 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
 
   const rectangularSelectionRef = useRef<HTMLDivElement | null>(null);
 
-  const importMenuRef = useRef<HTMLDivElement | null>(null);
-
   const {
     isFileUploading,
     droppedFiles,
-    setDroppedFiles,
+    onDragEnter,
+    onDragOver,
     onDrop,
+    onOpenChange,
     ...trackImportMenuProps
   } = useTrackImportMenu(audioEditor);
 
@@ -77,10 +76,6 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
     timelineContainerRef,
   );
 
-  useOutsideClick(importMenuRef, () => {
-    setDroppedFiles(null);
-  });
-
   return (
     <div className='flex size-full flex-col overflow-hidden'>
       <div
@@ -99,7 +94,8 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
           <TimelineView
             timelineRef={timelineRef}
             {...timelineViewProps}
-            onDragOver={preventAll}
+            onDragEnter={onDragEnter}
+            onDragOver={onDragOver}
             onDrop={onDrop}
           >
             <RectangularSelection
@@ -109,9 +105,9 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
             />
 
             <TrackImportMenuPopover
+              modal
               open={!!droppedFiles || isFileUploading}
-              modal={isFileUploading}
-              onClose={() => setDroppedFiles(null)}
+              onOpenChange={onOpenChange}
               isFileUploading={isFileUploading}
               {...trackImportMenuProps}
             />

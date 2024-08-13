@@ -1,7 +1,11 @@
 // eslint-disable-next-line boundaries/element-types
 import { AudioEditorEvent } from '@/entities/audio-editor';
 
-export interface KeyBind {
+export interface GlobalControlsEvent {
+  type: AudioEditorEvent;
+}
+
+export interface KeyBindProps {
   key: string;
   ctrl?: boolean;
   shift?: boolean;
@@ -9,26 +13,56 @@ export interface KeyBind {
   meta?: boolean;
 }
 
-export type KeyBindString = string;
+export class KeyBind {
+  private key: string;
+  private ctrl: boolean;
+  private shift: boolean;
+  private alt: boolean;
+  private meta: boolean;
 
-export const keyBindToString = (keyBind: KeyBind): KeyBindString => {
-  const { key, ctrl, shift, alt, meta } = keyBind;
+  constructor({
+    key,
+    ctrl = false,
+    shift = false,
+    alt = false,
+    meta = false,
+  }: KeyBindProps) {
+    this.key = key;
+    this.ctrl = ctrl;
+    this.shift = shift;
+    this.alt = alt;
+    this.meta = meta;
+  }
 
-  const modifiers = {
-    Ctrl: ctrl,
-    Shift: shift,
-    Alt: alt,
-    Meta: meta,
+  toString = (): string => {
+    return KeyBind.getStringView(this);
   };
 
-  const keys = Object.entries(modifiers)
-    .filter(([_, value]) => Boolean(value))
-    .map(([key, _]) => key)
-    .join('+');
+  static fromKeyboardEvent = (e: KeyboardEvent): KeyBind => {
+    return new KeyBind({
+      key: e.code,
+      ctrl: e.ctrlKey,
+      shift: e.shiftKey,
+      alt: e.altKey,
+      meta: e.metaKey,
+    });
+  };
 
-  return `${keys.length ? keys + ' + ' : ''}${key}`;
-};
+  static getStringView = (keyBind: KeyBind): KeyBindString => {
+    const modifiers = {
+      Ctrl: keyBind.ctrl,
+      Shift: keyBind.shift,
+      Alt: keyBind.alt,
+      Meta: keyBind.meta,
+    };
 
-export interface GlobalControlsEvent {
-  type: AudioEditorEvent;
+    const keys = Object.entries(modifiers)
+      .filter(([_, value]) => Boolean(value))
+      .map(([key, _]) => key)
+      .join('+');
+
+    return `${keys.length ? keys + ' + ' : ''}${keyBind.key}`;
+  };
 }
+
+export type KeyBindString = string;
