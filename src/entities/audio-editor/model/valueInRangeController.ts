@@ -1,29 +1,24 @@
-export type ValueInRangeListener = (value: number) => void;
+export type RangeListener = (value: number) => void;
 
-export type ValueInRangeChangeRule = (
+export type RangeRule = (
   value: number,
   step: number,
   increase: boolean,
 ) => number;
 
-export class ValueInRangeController {
+export class Range {
   private _step: number;
   private _min: number;
   private _max: number;
-  readonly rule: ValueInRangeChangeRule;
+  readonly rule: RangeRule;
 
   private _value: number;
 
-  private _listeners: Set<ValueInRangeListener> = new Set();
+  private _listeners: Set<RangeListener> = new Set();
 
   private _disableListeners: boolean = false;
 
-  constructor(
-    step: number,
-    min: number,
-    max: number,
-    rule: ValueInRangeChangeRule,
-  ) {
+  constructor(step: number, min: number, max: number, rule: RangeRule) {
     this._step = step;
     this._min = min;
     this._max = max;
@@ -81,11 +76,11 @@ export class ValueInRangeController {
     this._step = step;
   }
 
-  addListener = (listener: ValueInRangeListener) => {
+  addListener = (listener: RangeListener) => {
     this._listeners.add(listener);
   };
 
-  removeListener = (listener: ValueInRangeListener) => {
+  removeListener = (listener: RangeListener) => {
     this._listeners.delete(listener);
   };
 

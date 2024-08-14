@@ -12,3 +12,5 @@ export * from './audioEditor';
 export * from './region';
 export * from './AudioEditorDragData';
 export * from './initializeAudioEditor';
+export * from './timeline2';
+export * from './timeline2Context';

@@ -1,7 +1,4 @@
-import {
-  ValueInRangeChangeRule,
-  ValueInRangeController,
-} from './valueInRangeController';
+import { RangeRule, Range } from './valueInRangeController';
 
 export const zoomRule = (
   value: number,
@@ -11,12 +8,12 @@ export const zoomRule = (
   return increase ? value * step : value / step;
 };
 
-export class ZoomController extends ValueInRangeController {
+export class ZoomController extends Range {
   constructor(
     step: number,
     min: number,
     max: number,
-    rule: ValueInRangeChangeRule = zoomRule,
+    rule: RangeRule = zoomRule,
   ) {
     super(step, min, max, rule);
   }

@@ -1,5 +1,5 @@
-import { RefObject } from 'react';
+import { Ref } from 'react';
 
 export interface TimelineProps extends React.ComponentProps<'div'> {
-  timelineRef: RefObject<HTMLDivElement>;
+  timelineRef: Ref<HTMLDivElement>;
 }

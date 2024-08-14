@@ -1,7 +1,7 @@
-import { RefObject } from 'react';
+import { Ref, RefObject } from 'react';
 
 export interface AudioEditorContentBodyProps
   extends React.ComponentProps<'div'> {
   rulerWrapperRef: RefObject<HTMLDivElement>;
-  timelineRef: RefObject<HTMLDivElement>;
+  timelineRef: Ref<HTMLDivElement>;
 }
