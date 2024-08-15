@@ -84,16 +84,84 @@ export class Range {
     this._listeners.delete(listener);
   };
 
-  increase = (): number => {
+  increase = (
+    options: { behavior?: 'instant' | 'smooth' } | undefined = {
+      behavior: 'instant',
+    },
+  ): number => {
+    if (options.behavior === 'instant') {
+      return this._increase();
+    } else {
+      return this._increaseSmooth();
+    }
+  };
+
+  decrease = (
+    options: { behavior?: 'instant' | 'smooth' } | undefined = {
+      behavior: 'instant',
+    },
+  ): number => {
+    if (options.behavior === 'instant') {
+      return this._decrease();
+    } else {
+      return this._decreaseSmooth();
+    }
+  };
+
+  private _decrease = (): number => {
+    this._value = this._clamp(this.rule(this._value, this._step, false));
+    this._triggerAllListeners();
+    return this._value;
+  };
+
+  private _decreaseSmooth = (): number => {
+    const time = 100;
+    const steps = 20;
+    const finalValue = this._clamp(this.rule(this._value, this._step, false));
+    const diff = this._value - finalValue;
+
+    let step = 0;
+    const t = () => {
+      this._value = this._clamp(this._value - diff / steps);
+      this._triggerAllListeners();
+
+      step++;
+      if (step < steps) {
+        setTimeout(t, time / steps);
+      }
+    };
+
+    t();
+
+    return finalValue;
+  };
+
+  private _increase = (): number => {
     this._value = this._clamp(this.rule(this._value, this._step, true));
     this._triggerAllListeners();
     return this._value;
   };
 
-  decrease = (): number => {
-    this._value = this._clamp(this.rule(this._value, this._step, false));
-    this._triggerAllListeners();
-    return this._value;
+  private _increaseSmooth = (): number => {
+    const time = 100;
+    const steps = 20;
+    const finalValue = this._clamp(this.rule(this._value, this._step, true));
+    const diff = finalValue - this._value;
+
+    let step = 0;
+    const t = () => {
+      this._value = this._clamp(this._value + diff / steps);
+      this._triggerAllListeners();
+
+      step++;
+      if (step < steps) {
+        setTimeout(t, time / steps);
+      }
+    };
+
+    t();
+
+    return finalValue;
   };
 
   private _triggerAllListeners = () => {

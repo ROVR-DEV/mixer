@@ -8,12 +8,16 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react';
+import { useWindowEventListener } from 'rooks';
 
 import { drawGrid, getDpi, setupCanvasAndCtx } from '../../lib';
 import { Tick } from '../../model';
 
 import { TimelineGridProps, TimelineGridRef } from './interfaces';
 
+// TODO: refactor rendering mechanism
+// move out render functions in separate files and
+// expose only render with canvas context access to imperative handle
 export const TimelineGrid = ({
   height,
   controlRef,
@@ -23,28 +27,20 @@ export const TimelineGrid = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const handleCanvasRef = (newRef: HTMLCanvasElement | null) => {
-    if (!newRef) {
+  const updateCanvasSize = useCallback(() => {
+    if (canvasRef.current === null) {
       return;
     }
+    canvasCtxRef.current = setupCanvasAndCtx(canvasRef.current, getDpi());
+  }, []);
 
-    canvasRef.current = newRef;
-
-    const canvas = canvasRef.current;
-
-    if (!canvas) {
-      return;
-    }
-
-    const dpi = getDpi();
-
-    const ctx = setupCanvasAndCtx(canvas, dpi);
-    if (!ctx) {
-      return;
-    }
-
-    canvasCtxRef.current = ctx;
-  };
+  const handleCanvasRef = useCallback(
+    (ref: HTMLCanvasElement | null) => {
+      canvasRef.current = ref;
+      updateCanvasSize();
+    },
+    [updateCanvasSize],
+  );
 
   const render = useCallback(
     (
@@ -84,25 +80,10 @@ export const TimelineGrid = ({
   }, [controlRef]);
 
   useEffect(() => {
-    const recalculateDpi = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        return;
-      }
+    updateCanvasSize();
+  }, [height, updateCanvasSize]);
 
-      const dpi = getDpi();
-
-      const ctx = setupCanvasAndCtx(canvas, dpi);
-      if (!ctx) {
-        return;
-      }
-
-      canvasCtxRef.current = ctx;
-    };
-
-    window.addEventListener('resize', recalculateDpi);
-    return () => window.removeEventListener('resize', recalculateDpi);
-  }, []);
+  useWindowEventListener('resize', updateCanvasSize);
 
   return (
     <canvas

@@ -8,6 +8,25 @@ import { TimelineRulerRef, TimelineTicks } from '@/features/timeline';
 
 const emptyTicks = { mainTicks: [], subTicks: [] };
 
+export const renderDefaultTimelineRuler = (
+  rulerRef: RefObject<TimelineRulerRef>,
+  ticks: TimelineTicks | null,
+  zoom: number,
+  scroll: number,
+  pixelsPerSecond: number,
+  timelineLeftPadding: number,
+) =>
+  requestAnimationFrame(() => {
+    rulerRef.current?.render(
+      ticks ?? emptyTicks,
+      scroll * pixelsPerSecond,
+      timelineLeftPadding,
+      zoom,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (resolvedTailwindConfig.theme.colors as any).third.DEFAULT,
+    );
+  });
+
 export const useAudioEditorTimelineRuler = (
   rulerRef: RefObject<TimelineRulerRef>,
 ) => {
@@ -19,16 +38,15 @@ export const useAudioEditorTimelineRuler = (
       pixelsPerSecond: number,
       timelineLeftPadding: number,
     ) =>
-      requestAnimationFrame(() => {
-        rulerRef.current?.render(
-          ticks ?? emptyTicks,
-          scroll * pixelsPerSecond,
-          timelineLeftPadding,
-          zoom,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (resolvedTailwindConfig.theme.colors as any).third.DEFAULT,
-        );
-      }),
+      renderDefaultTimelineRuler(
+        rulerRef,
+        ticks,
+        zoom,
+        scroll,
+        pixelsPerSecond,
+        timelineLeftPadding,
+      ),
+
     [rulerRef],
   );
 };

@@ -43,7 +43,10 @@ export const TimelineScroll = ({
       {...props}
     >
       <div
-        className={cn('w-full overflow-x-scroll', styles.timelineScroll)}
+        className={cn(
+          'w-full h-[10px] min-h-[10px] overflow-x-scroll',
+          styles.timelineScroll,
+        )}
         ref={scrollRef}
         onScroll={handleScroll}
       >

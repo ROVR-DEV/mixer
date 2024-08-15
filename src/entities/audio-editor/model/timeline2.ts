@@ -23,11 +23,20 @@ export interface Timeline2 {
 
   timelineElement: HTMLElement | null;
 
+  boundingRect: Rect;
+
+  clientWidth: number;
+  scrollWidth: number;
+
+  clientHeight: number;
+
   startTime: number;
   endTime: number;
 
   hScroll: number;
   // verticalScroll: number;
+
+  readonly dpi: number;
 
   zoom: number;
   hPixelsPerSecond: number;
@@ -70,11 +79,8 @@ export class ObservableTimeline implements Timeline2 {
   readonly zoomController: ZoomController;
   readonly hScrollController: ScrollController;
 
-  zeroMarkOffset: number = 0;
-  trackHeight: number | null = 98;
-
   private _timelineElement: HTMLElement | null;
-  private _timelineResizeObserver: ResizeObserver;
+  private _timelineResizeObserver: ResizeObserver | null = null;
 
   private _timelineBoundingRect: Rect = new Rect();
 
@@ -87,6 +93,10 @@ export class ObservableTimeline implements Timeline2 {
   private _startTime: number;
   private _endTime: number;
 
+  private _zeroMarkOffset: number = 0;
+  private _trackHeight: number | null = 98;
+
+  //#region Getters/Setters
   get timelineElement(): HTMLElement | null {
     return this._timelineElement;
   }
@@ -123,6 +133,10 @@ export class ObservableTimeline implements Timeline2 {
     this.hScrollController.value = value;
   }
 
+  get dpi(): number {
+    return this._dpi;
+  }
+
   get zoom(): number {
     return this._zoom;
   }
@@ -150,6 +164,20 @@ export class ObservableTimeline implements Timeline2 {
     this.hScrollController.max = value;
   }
 
+  get zeroMarkOffset(): number {
+    return this._zeroMarkOffset;
+  }
+  set zeroMarkOffset(value: number) {
+    this._zeroMarkOffset = value;
+  }
+
+  get trackHeight(): number | null {
+    return this._trackHeight;
+  }
+  set trackHeight(value: number | null) {
+    this._trackHeight = value;
+  }
+
   get ticks(): TimelineTicks {
     return getTicksForSeconds(
       this.clientWidth,
@@ -157,6 +185,7 @@ export class ObservableTimeline implements Timeline2 {
       this.hScroll * this.hPixelsPerSecond,
     );
   }
+  //#endregion
 
   constructor({
     timelineElement = null,
@@ -169,10 +198,6 @@ export class ObservableTimeline implements Timeline2 {
   }: Timeline2Props) {
     this._timelineElement = timelineElement;
 
-    this._timelineResizeObserver = new ResizeObserver(
-      this._timelineSizeListener,
-    );
-
     this._startTime = startTime;
     this._endTime = endTime;
 
@@ -180,22 +205,22 @@ export class ObservableTimeline implements Timeline2 {
 
     this.trackHeight = trackHeight;
 
-    const { step: zoomStep, min: minZoom, max: maxZoom } = zoomControllerProps;
-    this.zoomController = new ZoomController(zoomStep, minZoom, maxZoom);
-
-    const {
-      step: hScrollStep,
-      min: minHScroll,
-      max: maxHScroll,
-    } = hScrollControllerProps;
+    this.zoomController = new ZoomController(
+      zoomControllerProps.step,
+      zoomControllerProps.min,
+      zoomControllerProps.max,
+    );
 
     this.hScrollController = new ScrollController(
-      hScrollStep,
-      minHScroll || this.startTime,
-      maxHScroll || this.scrollWidth - this.clientWidth,
+      hScrollControllerProps.step,
+      hScrollControllerProps.min || this.startTime,
+      hScrollControllerProps.max || this.scrollWidth - this.clientWidth,
     );
 
     makeAutoObservable(this, {
+      boundingRect: computed,
+      clientWidth: computed,
+      clientHeight: computed,
       hScroll: computed,
       zoom: computed,
       hPixelsPerSecond: computed,
@@ -204,6 +229,7 @@ export class ObservableTimeline implements Timeline2 {
     });
   }
 
+  //#region Observers
   // Use only on client side
   setupObservers = () => {
     this._setupZoomObserver();
@@ -226,6 +252,7 @@ export class ObservableTimeline implements Timeline2 {
       return;
     }
 
+    this._zoomControllerListener(this._zoom);
     this.zoomController.addListener(this._zoomControllerListener);
   };
 
@@ -236,20 +263,28 @@ export class ObservableTimeline implements Timeline2 {
       return;
     }
 
+    this._hScrollControllerListener(this.hScroll);
     this.hScrollController.addListener(this._hScrollControllerListener);
   };
 
   private _setupTimelineResizeObserver = (onlyCleanup: boolean = false) => {
-    this._timelineResizeObserver.disconnect();
+    this._timelineResizeObserver?.disconnect();
 
     if (onlyCleanup) {
       return;
+    }
+
+    if (this._timelineResizeObserver === null) {
+      this._timelineResizeObserver = new ResizeObserver(
+        this._timelineSizeListener,
+      );
     }
 
     if (this._timelineElement === null) {
       return;
     }
 
+    this._timelineBoundingRect = this._timelineElement?.getBoundingClientRect();
     this._timelineResizeObserver.observe(this._timelineElement);
   };
 
@@ -264,6 +299,7 @@ export class ObservableTimeline implements Timeline2 {
       return;
     }
 
+    this._dpiListener();
     window.addEventListener('resize', this._dpiListener);
   };
 
@@ -271,6 +307,8 @@ export class ObservableTimeline implements Timeline2 {
     runInAction(() => {
       this._zoom = zoom;
       this._pixelsPerSecond = getPixelPerSeconds(zoom);
+
+      this.hScrollController.step = 100 / this.hPixelsPerSecond;
 
       this.events.emit('zoom', this);
       this.events.emit('change', this);
@@ -304,4 +342,5 @@ export class ObservableTimeline implements Timeline2 {
       this.events.emit('change', this);
     });
   };
+  //#endregion
 }
