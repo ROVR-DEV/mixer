@@ -1,3 +1,5 @@
+import { interpolateInTime } from '@/shared/lib';
+
 export type RangeListener = (value: number) => void;
 
 export type RangeRule = (
@@ -13,10 +15,14 @@ export class Range {
   readonly rule: RangeRule;
 
   private _value: number;
+  private _targetValue: number;
 
   private _listeners: Set<RangeListener> = new Set();
 
   private _disableListeners: boolean = false;
+
+  private _increaseTimerId: number | null = null;
+  private _decreaseTimerId: number | null = null;
 
   constructor(step: number, min: number, max: number, rule: RangeRule) {
     this._step = step;
@@ -24,6 +30,7 @@ export class Range {
     this._max = max;
 
     this._value = this._clamp(0);
+    this._targetValue = this._value;
 
     this.rule = rule;
   }
@@ -34,6 +41,7 @@ export class Range {
 
   set value(value: number) {
     this._value = this._clamp(value);
+    this._targetValue = this._value;
     this._triggerAllListeners();
   }
 
@@ -89,6 +97,10 @@ export class Range {
       behavior: 'instant',
     },
   ): number => {
+    if (this._value === this.max) {
+      return this._value;
+    }
+
     if (options.behavior === 'instant') {
       return this._increase();
     } else {
@@ -101,6 +113,10 @@ export class Range {
       behavior: 'instant',
     },
   ): number => {
+    if (this._value === this._min) {
+      return this._value;
+    }
+
     if (options.behavior === 'instant') {
       return this._decrease();
     } else {
@@ -108,60 +124,69 @@ export class Range {
     }
   };
 
-  private _decrease = (): number => {
-    this._value = this._clamp(this.rule(this._value, this._step, false));
-    this._triggerAllListeners();
-    return this._value;
-  };
-
-  private _decreaseSmooth = (): number => {
-    const time = 100;
-    const steps = 20;
-    const finalValue = this._clamp(this.rule(this._value, this._step, false));
-    const diff = this._value - finalValue;
-
-    let step = 0;
-    const t = () => {
-      this._value = this._clamp(this._value - diff / steps);
-      this._triggerAllListeners();
-
-      step++;
-      if (step < steps) {
-        setTimeout(t, time / steps);
-      }
-    };
-
-    t();
-
-    return finalValue;
-  };
-
   private _increase = (): number => {
     this._value = this._clamp(this.rule(this._value, this._step, true));
+    this._targetValue = this.value;
     this._triggerAllListeners();
     return this._value;
   };
 
   private _increaseSmooth = (): number => {
-    const time = 100;
-    const steps = 20;
-    const finalValue = this._clamp(this.rule(this._value, this._step, true));
-    const diff = finalValue - this._value;
+    this._targetValue = this._clamp(
+      this.rule(this._targetValue, this._step, true),
+    );
 
-    let step = 0;
-    const t = () => {
-      this._value = this._clamp(this._value + diff / steps);
-      this._triggerAllListeners();
+    if (this._increaseTimerId !== null) {
+      cancelAnimationFrame(this._increaseTimerId);
+      this._increaseTimerId = null;
+    }
 
-      step++;
-      if (step < steps) {
-        setTimeout(t, time / steps);
-      }
-    };
+    interpolateInTime(
+      this._value,
+      this._targetValue,
+      (value, timerId) => {
+        this._value = value;
+        this._triggerAllListeners();
 
-    t();
+        this._increaseTimerId = timerId;
+      },
+      165,
+      15,
+    );
 
-    return finalValue;
+    return this._targetValue;
+  };
+
+  private _decrease = (): number => {
+    this._value = this._clamp(this.rule(this._value, this._step, false));
+    this._targetValue = this.value;
+    this._triggerAllListeners();
+    return this._value;
+  };
+
+  private _decreaseSmooth = (): number => {
+    this._targetValue = this._clamp(
+      this.rule(this._targetValue, this._step, false),
+    );
+
+    if (this._decreaseTimerId !== null) {
+      cancelAnimationFrame(this._decreaseTimerId);
+      this._decreaseTimerId = null;
+    }
+
+    interpolateInTime(
+      this._value,
+      this._targetValue,
+      (value, timerId) => {
+        this._value = value;
+        this._triggerAllListeners();
+        this._decreaseTimerId = timerId;
+      },
+      165,
+      15,
+    );
+
+    return this._targetValue;
   };
 
   private _triggerAllListeners = () => {
