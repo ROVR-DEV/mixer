@@ -3,7 +3,7 @@ export * from './playerContext';
 export * from './scrollController';
 export * from './timeline';
 export * from './timelineContext';
-export * from './valueInRangeController';
+export * from './range';
 export * from './zoomController';
 export * from './trackColorsGenerator';
 export * from './audioEditorTool';

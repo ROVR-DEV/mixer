@@ -131,6 +131,7 @@ export class Range {
     return this._value;
   };
 
+  // TODO: need to override in child classes to different smooth behavior
   private _increaseSmooth = (): number => {
     this._targetValue = this._clamp(
       this.rule(this._targetValue, this._step, true),
@@ -150,8 +151,8 @@ export class Range {
 
         this._increaseTimerId = timerId;
       },
-      165,
-      15,
+      165, // Default chrome one scroll duration
+      15, // Default chrome on scroll steps
     );
 
     return this._targetValue;

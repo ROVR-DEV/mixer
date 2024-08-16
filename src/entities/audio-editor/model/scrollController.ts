@@ -1,4 +1,4 @@
-import { RangeRule, Range } from './valueInRangeController';
+import { RangeRule, Range } from './range';
 
 export const scrollRule = (
   value: number,
