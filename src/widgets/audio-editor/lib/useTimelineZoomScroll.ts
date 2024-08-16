@@ -134,8 +134,8 @@ export const useTimelineZoomScroll = ({
       const isScrollRight = delta >= 0;
 
       isScrollRight
-        ? timeline.scrollController.increase()
-        : timeline.scrollController.decrease();
+        ? timeline.scrollController.increase({ behavior: 'smooth' })
+        : timeline.scrollController.decrease({ behavior: 'smooth' });
     },
     [timeline.scrollController],
   );
