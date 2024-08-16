@@ -119,7 +119,9 @@ export const HomePage2 = observer(function HomePage2({
               />
             </div>
           </div>
-          <Timeline2ScrollView />
+          <div className='mx-[300px]'>
+            <Timeline2ScrollView />
+          </div>
         </Timeline2Context.Provider>
       </div>
     </main>

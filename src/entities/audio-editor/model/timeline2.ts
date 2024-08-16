@@ -33,6 +33,7 @@ export interface Timeline2 {
   startTime: number;
   endTime: number;
 
+  hScrollElement: HTMLElement | null;
   hScroll: number;
   // verticalScroll: number;
 
@@ -84,6 +85,7 @@ export class ObservableTimeline implements Timeline2 {
 
   private _timelineBoundingRect: Rect = new Rect();
 
+  private _hScrollElement: HTMLElement | null = null;
   private _hScroll: number = 0;
 
   private _zoom: number = 1;
@@ -124,6 +126,13 @@ export class ObservableTimeline implements Timeline2 {
     return (
       (this.boundingRect.height || this._timelineElement?.clientHeight) ?? 0
     );
+  }
+
+  get hScrollElement(): HTMLElement | null {
+    return this._hScrollElement;
+  }
+  set hScrollElement(value: HTMLElement | null) {
+    this._hScrollElement = value;
   }
 
   get hScroll(): number {

@@ -1,3 +1,5 @@
+'use client';
+
 import { RefObject, useCallback } from 'react';
 
 import { useEventListener } from '@/shared/lib';
@@ -78,15 +80,40 @@ export const useTimelineZoomScrollHandler = (
     [audioEditor, timeline.zoomController],
   );
 
+  // const hScrollCountRef = useRef(1);
+  // const hScrollCountTimerIdRef = useRef<number | null>(null);
+
   const handleWheelHorizontalScroll = useCallback(
     (delta: number) => {
-      const isScrollRight = delta >= 0;
+      const sign = delta >= 0 ? 1 : -1;
 
-      isScrollRight
+      // TODO: try to make scroll through native element if exists
+      // hScrollCountRef.current += 1;
+      // if (timeline.hScrollElement) {
+      //   timeline.hScrollElement.scrollTo({
+      //     left:
+      //       timeline.hScroll +
+      //       sign *
+      //         timeline.hScrollController.step *
+      //         timeline.hPixelsPerSecond *
+      //         hScrollCountRef.current,
+      //     behavior: 'smooth',
+      //   });
+      // } else {
+      sign === 1
         ? timeline.hScrollController.increase({ behavior: 'smooth' })
         : timeline.hScrollController.decrease({ behavior: 'smooth' });
+      // }
+
+      // if (hScrollCountTimerIdRef.current) {
+      //   clearTimeout(hScrollCountTimerIdRef.current);
+      // }
+      // hScrollCountTimerIdRef.current = delay(() => {
+      //   hScrollCountRef.current = 1;
+      // }, 20);
     },
-    [timeline.hScrollController],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeline.hScrollController, timeline.hScrollElement],
   );
 
   // Wheel event handler

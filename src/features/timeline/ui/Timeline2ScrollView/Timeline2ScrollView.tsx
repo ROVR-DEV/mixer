@@ -48,9 +48,47 @@ export const Timeline2ScrollView = observer(function Timeline2ScrollView({
     <TimelineScrollMemoized
       scrollDivRef={horizontalScrollRef}
       timelineScrollWidth={timeline.scrollWidth}
-      xPadding={4}
       onChange={handleHorizontalScrollbarOnScroll}
       {...props}
     />
   );
 });
+
+// TODO: trying to implement scroll through native element (useTimelineZoomScrollHandler)
+// export const Timeline2ScrollView = observer(function Timeline2ScrollView({
+//   ...props
+// }: Timeline2ScrollViewProps) {
+//   const timeline = useTimeline2();
+
+//   const scrollRefHandler = useCallback(
+//     (ref: HTMLDivElement) => {
+//       timeline.hScrollElement = ref;
+//     },
+//     [timeline],
+//   );
+
+//   const handleHorizontalScrollbarOnScroll = useCallback(
+//     (e: React.UIEvent<HTMLDivElement>) => {
+//       timeline.hScroll =
+//         e.currentTarget.scrollLeft / timeline.hPixelsPerSecond +
+//         timeline.startTime;
+//     },
+//     [timeline],
+//   );
+
+//   const scrollDivProps = useMemo(
+//     () => ({
+//       onScroll: handleHorizontalScrollbarOnScroll,
+//     }),
+//     [handleHorizontalScrollbarOnScroll],
+//   );
+
+//   return (
+//     <Timeline2ScrollMemoized
+//       scrollDivRef={scrollRefHandler}
+//       timelineScrollWidth={timeline.scrollWidth}
+//       scrollDivProps={scrollDivProps}
+//       {...props}
+//     />
+//   );
+// });
