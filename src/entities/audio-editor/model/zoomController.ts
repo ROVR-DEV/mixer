@@ -5,7 +5,7 @@ export const zoomRule = (
   step: number,
   increase: boolean,
 ): number => {
-  return increase ? value * step : value / step;
+  return increase ? value + step : value - step;
 };
 
 export class ZoomController extends Range {
