@@ -55,7 +55,6 @@ export const TimelineScrollView = observer(function TimelineScrollView({
       className={cn('min-h-[10px]', className)}
       scrollDivRef={horizontalScrollRef}
       timelineScrollWidth={timeline.timelineContainer.timelineScrollWidth}
-      xPadding={4}
       onChange={handleHorizontalScrollbarOnScroll}
       {...props}
     />
