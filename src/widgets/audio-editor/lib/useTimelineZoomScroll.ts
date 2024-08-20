@@ -48,7 +48,7 @@ export const useTimelineZoomScroll = ({
   timelineRulerRef,
   startTime = 0,
   duration,
-  zoomStep = 1.25,
+  zoomStep = 0.1,
   scrollStep = 1,
   minZoom = 1,
   maxZoom = Math.pow(1.25, 33),
