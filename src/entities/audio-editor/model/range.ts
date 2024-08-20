@@ -93,7 +93,7 @@ export class Range {
   };
 
   increase = (
-    options: { behavior?: 'instant' | 'smooth' } | undefined = {
+    options: { behavior?: 'instant' | 'smooth' } = {
       behavior: 'instant',
     },
   ): number => {
@@ -124,12 +124,7 @@ export class Range {
     }
   };
 
-  private _increase = (): number => {
-    this._value = this._clamp(this.rule(this._value, this._step, true));
-    this._targetValue = this.value;
-    this._triggerAllListeners();
-    return this._value;
-  };
+  private _increase = (): number => this.handleZoomStep(true);
 
   // TODO: need to override in child classes to different smooth behavior
   private _increaseSmooth = (): number => {
@@ -158,12 +153,18 @@ export class Range {
     return this._targetValue;
   };
 
-  private _decrease = (): number => {
-    this._value = this._clamp(this.rule(this._value, this._step, false));
-    this._targetValue = this.value;
+  // TODO: remove bool, make mode variable with enum
+  private handleZoomStep(shouldIncrease: boolean = true): number {
+    const ruleValue: number = this.rule(this._value, 0.1, shouldIncrease);
+
+    const newZoom = (this._targetValue = this._value = this._clamp(ruleValue));
+
     this._triggerAllListeners();
-    return this._value;
-  };
+
+    return newZoom;
+  }
+
+  private _decrease = (): number => this.handleZoomStep(false);
 
   private _decreaseSmooth = (): number => {
     this._targetValue = this._clamp(
