@@ -89,17 +89,19 @@ export class ValueInRangeController {
     this._listeners.delete(listener);
   };
 
-  increase = (): number => {
-    this._value = this._clamp(this.rule(this._value, this._step, true));
+  // TODO: bool as argument is bad practice, negative step is better solution
+  private handleZoomStep(shouldIncrease = false): number {
+    this._value = this._clamp(
+      this.rule(this._value, this._step, shouldIncrease),
+    );
     this._triggerAllListeners();
-    return this._value;
-  };
 
-  decrease = (): number => {
-    this._value = this._clamp(this.rule(this._value, this._step, false));
-    this._triggerAllListeners();
     return this._value;
-  };
+  }
+
+  public increase = (): number => this.handleZoomStep(true);
+
+  public decrease = (): number => this.handleZoomStep(false);
 
   private _triggerAllListeners = () => {
     if (this.disableListeners) {
