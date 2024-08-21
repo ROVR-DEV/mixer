@@ -130,12 +130,8 @@ export const useTimelineZoomScroll = ({
   );
 
   const handleWheelHorizontalScroll = useCallback(
-    (delta: number) => {
-      const isScrollRight = delta >= 0;
-
-      isScrollRight
-        ? timeline.scrollController.increase()
-        : timeline.scrollController.decrease();
+    (deltaX: number) => {
+      timeline.scrollController.shiftX(deltaX);
     },
     [timeline.scrollController],
   );
