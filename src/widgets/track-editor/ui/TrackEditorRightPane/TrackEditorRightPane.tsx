@@ -15,7 +15,7 @@ import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
 import { ChannelListItemView } from '@/features/channel-control';
-import { Timeline2ScrollView } from '@/features/timeline';
+import { TimelineScrollView } from '@/features/timeline';
 import { AudioEditorTrackView } from '@/features/track-card-view';
 
 // eslint-disable-next-line boundaries/element-types
@@ -135,7 +135,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
               </ChannelListItemView>
             )}
           </div>
-          <Timeline2ScrollView />
+          <TimelineScrollView />
         </div>
       </div>
     </TimelineContext.Provider>

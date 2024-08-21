@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 export interface TimelineScrollProps extends React.ComponentProps<'div'> {
   timelineScrollWidth: number;
+  xPadding?: number;
   scrollDivRef: RefObject<TimelineScrollDivRef>;
   onChange?: (e: React.UIEvent<HTMLDivElement>) => void;
 }
