@@ -9,6 +9,7 @@ import styles from './styles.module.css';
 
 export const TimelineScroll = ({
   timelineScrollWidth,
+  xPadding = 0,
   scrollDivRef,
   onChange,
   className,
@@ -36,19 +37,20 @@ export const TimelineScroll = ({
   };
 
   return (
-    <div className={cn('mb-2 overflow-hidden', className)} {...props}>
+    <div
+      className={cn('mb-2 overflow-hidden', className)}
+      style={{ paddingLeft: xPadding, paddingRight: xPadding }}
+      {...props}
+    >
       <div
-        className={cn(
-          'w-full h-[10px] min-h-[10px] overflow-x-scroll outline-none',
-          styles.timelineScroll,
-        )}
+        className={cn('w-full overflow-x-scroll', styles.timelineScroll)}
         ref={scrollRef}
         onScroll={handleScroll}
       >
         <div
           className='h-px'
           style={{
-            width: `${timelineScrollWidth}px`,
+            width: `max(${timelineScrollWidth - xPadding * 2}px, calc(100% + 0.5px))`,
           }}
         />
       </div>

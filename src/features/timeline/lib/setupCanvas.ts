@@ -1,26 +1,18 @@
-import { clamp } from '@/shared/lib';
-
-export const setupCanvasAndCtx = (
-  canvas: HTMLCanvasElement,
-  dpi: number,
-): CanvasRenderingContext2D | null => {
-  const clampedDpi = clamp(dpi, 1);
-
+export const setupCanvasAndCtx = (canvas: HTMLCanvasElement, dpi: number) => {
   const canvasRect = canvas.getBoundingClientRect();
-
-  canvas.width = canvasRect.width * clampedDpi;
-  canvas.height = canvasRect.height * clampedDpi;
+  canvas.width = canvasRect.width * dpi;
+  canvas.height = canvasRect.height * dpi;
 
   const ctx = canvas.getContext('2d', { desynchronized: true });
   if (!ctx) {
-    return null;
+    return;
   }
 
   const computedStyles = getComputedStyle(canvas);
   ctx.font = `11.5px ${computedStyles.fontFamily}`;
 
   ctx.resetTransform();
-  ctx.scale(clampedDpi, clampedDpi);
+  ctx.scale(dpi, dpi);
 
   return ctx;
 };
