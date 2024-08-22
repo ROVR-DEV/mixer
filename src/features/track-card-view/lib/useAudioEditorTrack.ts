@@ -284,6 +284,60 @@ export const useAudioEditorTrack = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const calculatePercent = (currentX: number, startX: number, endX: number) =>
+    ((currentX - startX) / (endX - startX)) * 100;
+
+  const shiftXTimelineViewport = useCallback(
+    (e: MouseEvent, track: AudioEditorTrack, leftBound: number) => {
+      const timelineElement = timeline.timelineContainer.timelineRef.current;
+
+      if (!timelineElement) {
+        return;
+      }
+
+      const { x: mouseX } = e;
+
+      const { x: timelineContainerX, width: timelineContainerWidth } =
+        timelineElement.getBoundingClientRect();
+
+      const leftSideBoxStart = timelineContainerX - 100;
+      const leftSideBoxEnd = timelineContainerX + 100;
+      const rightSideBoxStart =
+        timelineContainerX + timelineContainerWidth - 100;
+      const rightSideBoxEnd = timelineContainerX + timelineContainerWidth;
+
+      const isMouseInLeftSideBox =
+        mouseX < leftSideBoxEnd && mouseX > leftSideBoxStart;
+      const isMouseInRightSideBox =
+        mouseX > rightSideBoxStart && mouseX < rightSideBoxEnd;
+
+      let percent: number = 0,
+        shiftX: number = 0;
+
+      if (isMouseInLeftSideBox) {
+        percent = calculatePercent(mouseX, leftSideBoxEnd, leftSideBoxStart);
+
+        timeline.scrollController.shiftX(-1 * percent);
+      } else if (isMouseInRightSideBox) {
+        percent = calculatePercent(mouseX, rightSideBoxStart, rightSideBoxEnd);
+
+        shiftX = timeline.scrollController.shiftX(1 * percent);
+
+        // TODO: make separate function for this logic
+        track.setStartTime(track.startTime + shiftX);
+        track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+      } else {
+        setTime(e, track, leftBound);
+      }
+    },
+    [
+      timeline.scrollController,
+      timeline.timelineContainer,
+      audioEditor.player.time,
+      setTime,
+    ],
+  );
+
   const drag = useCallback(
     (
       e: MouseEvent,
@@ -292,16 +346,17 @@ export const useAudioEditorTrack = (
       minChannel: number = 0,
       maxChannel: number = Infinity,
     ) => {
-      setTime(e, track, leftBound);
+      shiftXTimelineViewport(e, track, leftBound);
       setVerticalPosition(e, track, minChannel, maxChannel);
     },
-    [setTime, setVerticalPosition],
+    [shiftXTimelineViewport, setVerticalPosition],
   );
 
   const handleDrag = useCallback(
     (e: MouseEvent) => {
       audioEditor.draggingTracks.forEach((selectedTrack) => {
         setupBounds(selectedTrack);
+
         drag(
           e,
           selectedTrack,
