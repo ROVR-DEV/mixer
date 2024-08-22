@@ -312,23 +312,31 @@ export const useAudioEditorTrack = (
         mouseX > rightSideBoxStart && mouseX < rightSideBoxEnd;
 
       let percent: number = 0,
-        shiftX: number = 0;
+        shiftX: number = 0,
+        time: number = 0;
 
       if (isMouseInLeftSideBox) {
         percent = calculatePercent(mouseX, leftSideBoxEnd, leftSideBoxStart);
 
         shiftX = timeline.scrollController.shiftX(-1 * percent);
+        time = Math.max(track.startTime + shiftX, 0);
 
         // TODO: make separate function for this logic
-        track.setStartTime(track.startTime + shiftX);
+        // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
+        track.setStartTime(time);
         track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
       } else if (isMouseInRightSideBox) {
         percent = calculatePercent(mouseX, rightSideBoxStart, rightSideBoxEnd);
 
         shiftX = timeline.scrollController.shiftX(1 * percent);
+        time = Math.min(
+          track.startTime + shiftX,
+          timeline.totalTime - track.duration,
+        );
 
         // TODO: make separate function for this logic
-        track.setStartTime(track.startTime + shiftX);
+        // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
+        track.setStartTime(time);
         track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
       } else {
         setTime(e, track, leftBound);
@@ -337,6 +345,7 @@ export const useAudioEditorTrack = (
     [
       timeline.scrollController,
       timeline.timelineContainer,
+      timeline.totalTime,
       audioEditor.player.time,
       setTime,
     ],
