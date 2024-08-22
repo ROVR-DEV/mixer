@@ -317,7 +317,11 @@ export const useAudioEditorTrack = (
       if (isMouseInLeftSideBox) {
         percent = calculatePercent(mouseX, leftSideBoxEnd, leftSideBoxStart);
 
-        timeline.scrollController.shiftX(-1 * percent);
+        shiftX = timeline.scrollController.shiftX(-1 * percent);
+
+        // TODO: make separate function for this logic
+        track.setStartTime(track.startTime + shiftX);
+        track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
       } else if (isMouseInRightSideBox) {
         percent = calculatePercent(mouseX, rightSideBoxStart, rightSideBoxEnd);
 
