@@ -26,8 +26,13 @@ export class ScrollController extends ValueInRangeController {
   /**
    * @description Allows to shift visible area to left or right depending on track pad delta
    * @param deltaX Track pad delta value
+   * @returns {number} Coefficient value
    */
-  public shiftX(deltaX: number): void {
-    this.value = this.value + deltaX / SCROLL_DELTA_X_STEP_COEFFICIENT;
+  public shiftX(deltaX: number): number {
+    const coefficient = deltaX / SCROLL_DELTA_X_STEP_COEFFICIENT;
+
+    this.value = this.value + coefficient;
+
+    return coefficient;
   }
 }
