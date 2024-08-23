@@ -159,20 +159,20 @@ export const useAudioEditorTrack = (
     updateTrackWidth,
   ]);
 
-  const calcNewStartTime = useCallback(
-    (
-      e: MouseEvent | React.MouseEvent<HTMLElement>,
-      track: AudioEditorTrack,
-      leftBound: number = 0,
-    ) => {
-      const timeOffset =
-        (e.pageX - track.dndInfo.startX) /
-        timeline.timelineContainer.pixelsPerSecond;
+  // const calcNewStartTime = useCallback(
+  //   (
+  //     e: MouseEvent | React.MouseEvent<HTMLElement>,
+  //     track: AudioEditorTrack,
+  //     leftBound: number = 0,
+  //   ) => {
+  //     const timeOffset =
+  //       (e.pageX - track.dndInfo.startX) /
+  //       timeline.timelineContainer.pixelsPerSecond;
 
-      return clamp(track.dndInfo.startTime + timeOffset, leftBound);
-    },
-    [timeline.timelineContainer.pixelsPerSecond],
-  );
+  //     return clamp(track.dndInfo.startTime + timeOffset, leftBound);
+  //   },
+  //   [timeline.timelineContainer.pixelsPerSecond],
+  // );
 
   const setVerticalPosition = throttle(
     useCallback(
@@ -233,20 +233,20 @@ export const useAudioEditorTrack = (
     ),
   );
 
-  const setTime = useCallback(
-    (e: MouseEvent, track: AudioEditorTrack, leftBound: number = 0) => {
-      const startTime = calcNewStartTime(e, track, leftBound);
+  // const setTime = useCallback(
+  //   (e: MouseEvent, track: AudioEditorTrack, leftBound: number = 0) => {
+  //     const startTime = calcNewStartTime(e, track, leftBound);
 
-      if (track.trimStartTime === startTime) {
-        return;
-      }
+  //     if (track.trimStartTime === startTime) {
+  //       return;
+  //     }
 
-      track.setStartTime(startTime);
-      track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [calcNewStartTime],
-  );
+  //     track.setStartTime(startTime);
+  //     track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+  //   },
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [calcNewStartTime],
+  // );
 
   const handleDragStart = useCallback(
     (e: MouseEvent, track: AudioEditorTrack) => {
@@ -339,7 +339,15 @@ export const useAudioEditorTrack = (
         track.setStartTime(time);
         track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
       } else {
-        setTime(e, track, leftBound);
+        const timeOffset =
+          (e.pageX - track.dndInfo.startX) /
+            timeline.timelineContainer.pixelsPerSecond +
+          timeline.scrollController.value;
+
+        time = clamp(track.dndInfo.startTime + timeOffset, leftBound);
+
+        track.setStartTime(time);
+        track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
       }
     },
     [
@@ -347,7 +355,6 @@ export const useAudioEditorTrack = (
       timeline.timelineContainer,
       timeline.totalTime,
       audioEditor.player.time,
-      setTime,
     ],
   );
 
