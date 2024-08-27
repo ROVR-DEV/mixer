@@ -8,5 +8,4 @@ export * from './RectangularSelection';
 export * from './TrimMarker';
 export * from './Version';
 export * from './Menu';
-export * from './LoadingProgress';
 export * from './ProgressBar';
