@@ -18,7 +18,11 @@ export const RightControlPanel = ({
       )}
       {...props}
     >
-      <Button aria-label='Publish' className='h-7 text-[13px] uppercase italic'>
+      <Button
+        aria-label='Publish'
+        title='Publish'
+        className='h-7 text-[13px] uppercase italic'
+      >
         <span className='font-fix'>{'Publish'}</span>
       </Button>
       <div className='flex items-center gap-5'>
@@ -29,7 +33,8 @@ export const RightControlPanel = ({
         <IconButton
           className='size-7'
           variant='primaryFilled'
-          aria-label='profile'
+          aria-label='Profile'
+          title='Profile'
         >
           <PersonIcon height={14} />
         </IconButton>

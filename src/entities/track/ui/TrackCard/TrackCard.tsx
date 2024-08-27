@@ -62,6 +62,8 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
                 '@[96px]:flex': isSelected && !hideEditButton,
               },
             )}
+            aria-label='Edit track menu'
+            title='Edit track menu'
             onClick={preventAll}
             onMouseDown={preventAll}
             onMouseUp={preventAll}

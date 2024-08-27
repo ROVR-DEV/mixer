@@ -7,9 +7,9 @@ export const MuteButton = ({ isMuted, ...props }: MuteButtonProps) => {
   return (
     <IconButton
       className='size-7'
-      role='switch'
+      title='Mute'
       aria-label='Mute\unmute this track'
-      aria-checked={isMuted}
+      aria-pressed={isMuted}
       variant={isMuted ? 'inverseFilled' : 'secondary'}
       {...props}
     >

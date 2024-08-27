@@ -7,9 +7,9 @@ export const SoloButton = ({ isSolo, ...props }: SoloButtonProps) => {
   return (
     <IconButton
       className='size-7'
-      role='switch'
+      title='Solo'
       aria-label='Solo this track'
-      aria-checked={isSolo}
+      aria-pressed={isSolo}
       variant={isSolo ? 'primaryFilled' : 'secondary'}
       {...props}
     >

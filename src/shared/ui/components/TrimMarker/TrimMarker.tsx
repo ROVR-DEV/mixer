@@ -13,6 +13,7 @@ export const TrimMarker = forwardRef<HTMLDivElement, TrimMarkerProps>(
           'cursor-trim-left': trimSide === 'left',
           'cursor-trim-right': trimSide === 'right',
         })}
+        title={trimSide === 'left' ? 'Trim left' : 'Trim right'}
         {...props}
       />
     );

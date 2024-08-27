@@ -8,6 +8,8 @@ export const PlayButton = ({ isPlaying, ...props }: PlayButtonProps) => {
     <IconButton
       className='pl-[2px]'
       aria-label='Play'
+      title='Play'
+      aria-pressed={isPlaying}
       disabled={isPlaying}
       variant={isPlaying ? 'secondaryFilled' : 'primaryFilled'}
       {...props}

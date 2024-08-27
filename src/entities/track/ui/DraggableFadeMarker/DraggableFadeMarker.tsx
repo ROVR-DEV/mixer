@@ -41,6 +41,7 @@ export const DraggableFadeMarker = observer(function FadeMarkerDragHandler({
     >
       <FadeMarkerMemoized
         ref={markerRef}
+        title={side === 'left' ? 'Fade left' : 'Fade right'}
         className='absolute z-10'
         side={side}
         {...props}

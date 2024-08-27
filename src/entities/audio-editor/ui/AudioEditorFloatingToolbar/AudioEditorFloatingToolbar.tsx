@@ -23,9 +23,9 @@ export const AudioEditorFloatingToolbar = forwardRef<
         <AudioEditorFloatingToolbarGroup key={toolGroup.name} role='group'>
           {toolGroup.buttons.map((toolButton) => (
             <IconButton
-              role='listitem'
               key={toolButton.value}
               title={toolButton.label}
+              aria-pressed={toolButton.isActive}
               variant={toolButton.isActive ? 'accent' : 'primaryFilled'}
               svgFillType={toolButton.fillType ?? 'stroke'}
               onClick={toolButton.onClick}
@@ -46,12 +46,17 @@ export const AudioEditorFloatingToolbar = forwardRef<
     >
       <div
         className='cursor-move pl-4'
+        title='Move'
         onMouseDown={onMoveHandleMouseDown}
         onMouseUp={onMoveHandleMouseUp}
       >
         <MoveIcon />
       </div>
-      <div className='flex items-center divide-x divide-primary' role='list'>
+      <div
+        className='flex items-center divide-x divide-primary'
+        role='toolbar'
+        aria-orientation='horizontal'
+      >
         {groups}
       </div>
     </div>

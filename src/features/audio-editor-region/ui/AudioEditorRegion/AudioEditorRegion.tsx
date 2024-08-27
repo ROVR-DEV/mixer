@@ -41,7 +41,8 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
       isHidden: player.region.duration === 0,
       width: timeline.timeToVirtualPixels(player.region.duration),
     }),
-    [player.region.duration, timeline],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [player.region.duration, timeline, timeline.zoom],
   );
 
   const position = useMemo(

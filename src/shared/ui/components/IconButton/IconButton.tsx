@@ -11,5 +11,5 @@ export const IconButton = ({
 }: IconButtonProps) => {
   const styles = getStyles(variant, svgFillType);
 
-  return <button className={cn(styles, className)} {...props} />;
+  return <button type='button' className={cn(styles, className)} {...props} />;
 };

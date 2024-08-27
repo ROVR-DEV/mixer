@@ -7,7 +7,7 @@ import { AddNewChannelButtonProps } from './interfaces';
 
 export const AddNewChannelButton = ({ ...props }: AddNewChannelButtonProps) => {
   return (
-    <IconButton aria-label='Add new channel' {...props}>
+    <IconButton aria-label='Add new channel' title='Add new channel' {...props}>
       <PlusIcon />
     </IconButton>
   );
