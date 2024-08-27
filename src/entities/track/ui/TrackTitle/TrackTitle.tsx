@@ -87,7 +87,7 @@ export const TrackTitle = ({
         <span className='font-bold'>{trackTitleArtist}</span>
       )}
       <span> </span>
-      <span>{trackDuration}</span>
+      <span className='font-normal'>{trackDuration}</span>
     </span>
   );
 };
