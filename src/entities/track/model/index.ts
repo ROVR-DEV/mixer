@@ -5,3 +5,4 @@ export * from './types';
 export * from './dndInfo';
 export * from './calculatePeaks';
 export * from './trackLoader';
+export * from './trackUpdate';

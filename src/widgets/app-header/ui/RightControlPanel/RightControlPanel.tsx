@@ -1,15 +1,32 @@
+'use client';
+
+import { observer } from 'mobx-react-lite';
 import Link from 'next/link';
+import { useCallback, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 import { Button, IconButton } from '@/shared/ui';
 import { PersonIcon } from '@/shared/ui/assets';
 
+import { initializeAudioEditor } from '@/entities/audio-editor';
+import { updateTracksInfo } from '@/entities/playlist';
+
 import { RightControlPanelProps } from './interfaces';
 
-export const RightControlPanel = ({
+export const RightControlPanel = observer(function RightControlPanel({
   className,
   ...props
-}: RightControlPanelProps) => {
+}: RightControlPanelProps) {
+  const audioEditor = useMemo(() => initializeAudioEditor(), []);
+
+  const onPublish = useCallback(() => {
+    if (audioEditor.player.playlist?.id === undefined) {
+      return;
+    }
+    updateTracksInfo(audioEditor.player.playlist.id, audioEditor.player.tracks);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
       className={cn(
@@ -22,6 +39,7 @@ export const RightControlPanel = ({
         aria-label='Publish'
         title='Publish'
         className='h-7 text-[13px] uppercase italic'
+        onClick={onPublish}
       >
         <span className='font-fix'>{'Publish'}</span>
       </Button>
@@ -41,4 +59,4 @@ export const RightControlPanel = ({
       </div>
     </div>
   );
-};
+});
