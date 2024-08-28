@@ -51,15 +51,12 @@ export const TrackTitle = ({
 
   return (
     <span
-      className={cn(
-        'overflow-hidden text-ellipsis text-nowrap text-[12px]',
-        className,
-      )}
+      className={cn('inline-flex text-nowrap text-[12px]', className)}
       {...props}
     >
       {isEditing ? (
         <form
-          className='inline-flex gap-1'
+          className='inline-flex gap-1 rounded-sm bg-accent p-px'
           onClick={stopPropagation}
           onMouseDown={stopPropagation}
           onMouseUp={stopPropagation}
@@ -84,10 +81,18 @@ export const TrackTitle = ({
           <input type='submit' hidden />
         </form>
       ) : (
-        <span className='font-bold'>{trackTitleArtist}</span>
+        <span
+          className='overflow-hidden text-ellipsis font-bold'
+          aria-label='Track title and artist'
+          title={trackTitleArtist}
+        >
+          {trackTitleArtist}
+        </span>
       )}
-      <span> </span>
-      <span className='font-normal'>{trackDuration}</span>
+      &nbsp;
+      <span className='font-normal' aria-label='Track duration'>
+        {trackDuration}
+      </span>
     </span>
   );
 };

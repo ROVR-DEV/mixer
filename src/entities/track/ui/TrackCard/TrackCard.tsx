@@ -95,10 +95,10 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
           </PopoverContent>
         </Popover>
 
-        <div className='row-start-2 w-full'>{waveformComponent}</div>
+        <div className='row-start-2 w-full py-px'>{waveformComponent}</div>
         {!hideTitle && (
           <TrackTitle
-            className={cn('row-start-3 pl-1', {
+            className={cn('row-start-3 px-1', {
               'z-20': isEditingName,
             })}
             track={track}

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { HEADER_LAYOUT } from '@/shared/config/sharedStyles';
+import { HEADER_LAYOUT } from '@/shared/config';
 import { cn } from '@/shared/lib';
 import { Version } from '@/shared/ui';
 import { LogoImageRaw } from '@/shared/ui/assets';

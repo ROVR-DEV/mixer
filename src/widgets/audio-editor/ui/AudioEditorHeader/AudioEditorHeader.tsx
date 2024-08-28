@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { HEADER_LAYOUT } from '@/shared/config/sharedStyles';
+import { HEADER_LAYOUT } from '@/shared/config';
 import { cn } from '@/shared/lib';
 
 import { ClockView } from '@/entities/clock';
