@@ -1,7 +1,11 @@
 import { FetchResult, customFetch, fetchJson } from '@/shared/lib';
 
-// eslint-disable-next-line boundaries/element-types
-import { AudioEditorTrack, TrackUpdate } from '@/entities/track';
+import {
+  AudioEditorTrack,
+  tracksToTracksUpdateDto,
+  TracksUpdateDto,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/entities/track';
 
 import { invalidatePlaylist } from '../lib';
 import { Playlist, PlaylistDTO, toPlaylist } from '../model';
@@ -10,6 +14,10 @@ const PLAYLIST_BASE_URL = 'https://app.rovr.live/api/playlist';
 
 const HEADERS_WITH_AUTHORIZATION = {
   Authorization: 'Bearer 1e10f824-8fb2-4951-9815-d84d7bb141f5',
+};
+
+const JSON_HEADERS = {
+  'Content-Type': 'application/json',
 };
 
 export const getPlaylist = async (
@@ -34,22 +42,15 @@ export const updateTracksInfo = async (
   playlistId: number,
   tracks: AudioEditorTrack[],
 ) => {
-  const tracksInfo = tracks.map<TrackUpdate>((track) => ({
-    id: track.meta.id,
-    offset: track.startTime,
-    duration: track.duration,
-    filters: {
-      fadeIn: track.filters.fadeInDuration,
-      fadeOut: track.filters.fadeOutDuration,
-    },
-  }));
+  const body: TracksUpdateDto = tracksToTracksUpdateDto(tracks);
 
   return await customFetch(`${PLAYLIST_BASE_URL}/${playlistId}/mix/manual`, {
     method: 'POST',
-    headers: HEADERS_WITH_AUTHORIZATION,
-    body: JSON.stringify({
-      tracks: tracksInfo,
-    }),
+    headers: {
+      ...HEADERS_WITH_AUTHORIZATION,
+      ...JSON_HEADERS,
+    },
+    body: JSON.stringify(body),
   });
 };
 

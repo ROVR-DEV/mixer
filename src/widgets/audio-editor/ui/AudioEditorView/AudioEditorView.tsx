@@ -27,54 +27,9 @@ export const AudioEditorView = observer(function AudioEditorView({
   const audioEditor = useMemo(() => initializeAudioEditor(), []);
 
   useEffect(() => {
-    // if (audioEditor.player.tracks.length === 0) {
-    //   audioEditor.importPlaylist(playlist);
-    // }
-
-    audioEditor.player.updatePlaylist(playlist);
-
-    playlist.tracks.forEach((track) => {
-      if (!audioEditor.player.tracksByAudioUuid.has(track.uuid)) {
-        const nextTrackChannel = localStorage.getItem('nextTrackChannel');
-        let nextTrackChannelIndex;
-
-        if (nextTrackChannel !== null) {
-          nextTrackChannelIndex = parseInt(nextTrackChannel, 10);
-          localStorage.setItem(
-            playlist.id.toString(),
-            JSON.stringify({
-              [track.uuid]: nextTrackChannelIndex,
-            }),
-          );
-          localStorage.removeItem('nextTrackChannel');
-        }
-
-        const playlistInfo = localStorage.getItem(playlist.id.toString());
-        if (playlistInfo !== null) {
-          const parsedInfo = JSON.parse(playlistInfo) as Record<string, number>;
-          if (parsedInfo !== null) {
-            nextTrackChannelIndex = parsedInfo[track.uuid];
-          }
-        }
-
-        audioEditor.importTrack(track, nextTrackChannelIndex);
-      }
-    });
-
-    audioEditor.player.tracks.forEach((track) => {
-      if (
-        !playlist.tracks.find(
-          (playlistTrack) => playlistTrack.uuid === track.meta.uuid,
-        )
-      ) {
-        audioEditor.removeTrack(track);
-      }
-    });
-
-    audioEditor.player.loadTracks();
-
+    audioEditor.hydration(playlist);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioEditor.player, playlistKey]);
+  }, [audioEditor, audioEditor.player, playlistKey]);
 
   useAudioEditorGlobalControls(audioEditor);
 

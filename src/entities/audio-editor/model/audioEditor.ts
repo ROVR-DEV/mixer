@@ -62,6 +62,8 @@ export interface AudioEditor {
   saveState(): void;
   undo: () => void;
   redo: () => void;
+
+  hydration(playlist: Playlist): void;
 }
 
 export interface AudioEditorState {
@@ -318,5 +320,49 @@ export class ObservableAudioEditor implements AudioEditor {
     this._draggingTracks.clear();
 
     this.player.restoreState(state.player);
+  };
+
+  hydration = (playlist: Playlist): void => {
+    this.player.updatePlaylist(playlist);
+
+    playlist.tracks.forEach((track) => {
+      if (!this.player.tracksByAudioUuid.has(track.uuid)) {
+        const nextTrackChannel = localStorage.getItem('nextTrackChannel');
+        let nextTrackChannelIndex;
+
+        if (nextTrackChannel !== null) {
+          nextTrackChannelIndex = parseInt(nextTrackChannel, 10);
+          localStorage.setItem(
+            playlist.id.toString(),
+            JSON.stringify({
+              [track.uuid]: nextTrackChannelIndex,
+            }),
+          );
+          localStorage.removeItem('nextTrackChannel');
+        }
+
+        const playlistInfo = localStorage.getItem(playlist.id.toString());
+        if (playlistInfo !== null) {
+          const parsedInfo = JSON.parse(playlistInfo) as Record<string, number>;
+          if (parsedInfo !== null) {
+            nextTrackChannelIndex = parsedInfo[track.uuid];
+          }
+        }
+
+        this.importTrack(track, nextTrackChannelIndex);
+      }
+    });
+
+    this.player.tracks.forEach((track) => {
+      if (
+        !playlist.tracks.find(
+          (playlistTrack) => playlistTrack.uuid === track.meta.uuid,
+        )
+      ) {
+        this.removeTrack(track);
+      }
+    });
+
+    this.player.loadTracks();
   };
 }
