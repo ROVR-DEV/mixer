@@ -85,7 +85,7 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
       >
         <div className='relative flex size-full overflow-y-auto overflow-x-clip'>
           <AudioEditorChannelsList
-            className='z-[70] h-max min-h-full bg-primary'
+            className='h-max min-h-full bg-primary'
             style={{
               minWidth: SIDEBAR_WIDTH,
             }}

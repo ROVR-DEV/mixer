@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Point } from '@/shared/model';
+import { Point, Rect } from '@/shared/model';
 
 import { Track } from '../../model';
 
@@ -20,4 +20,5 @@ export interface TrackCardProps extends React.ComponentProps<'div'> {
   ) => void;
   contextMenuPosition?: Point;
   contextMenuContent?: ReactNode;
+  popoverBoundary?: Rect;
 }

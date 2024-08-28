@@ -1,7 +1,7 @@
 'use client';
 
-import { flip, offset } from '@floating-ui/react';
-import { forwardRef, memo } from 'react';
+import { detectOverflow, MiddlewareState, offset } from '@floating-ui/react';
+import { forwardRef, memo, useMemo, useRef } from 'react';
 
 import { cn, preventAll } from '@/shared/lib';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
@@ -26,12 +26,37 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       hideEditButton,
       contextMenuPosition,
       contextMenuContent,
+      popoverBoundary,
       className,
       children,
       ...props
     },
     ref,
   ) {
+    const popoverTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+    const overflowMiddleware = useMemo(
+      () => ({
+        name: 'overflowMiddleware',
+        async fn(state: MiddlewareState): Promise<Partial<MiddlewareState>> {
+          if (popoverBoundary === undefined) {
+            return {};
+          }
+
+          const overflow = await detectOverflow(state, {
+            boundary: popoverBoundary,
+          });
+
+          if (overflow.left > 0) {
+            popoverTriggerRef.current?.click();
+          }
+
+          return {};
+        },
+      }),
+      [popoverBoundary],
+    );
+
     return (
       <div
         className={cn(
@@ -53,9 +78,10 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       >
         <Popover
           placement='bottom-start'
-          middleware={[offset(5), flip({ padding: 5 })]}
+          middleware={[offset(5), overflowMiddleware]}
         >
           <PopoverTrigger
+            ref={popoverTriggerRef}
             className={cn(
               '@[128px]:left-7 row-start-1 absolute hidden items-center h-max left-3.5 top-0 bottom-0 my-auto cursor-pointer z-50 transition-[left] rounded-md',
               {

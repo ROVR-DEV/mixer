@@ -304,6 +304,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         editPopoverContent={editMenu}
         contextMenuPosition={contextMenuPosition}
         contextMenuContent={contextMenu}
+        popoverBoundary={timeline.boundingClientRect}
         {...props}
       />
     </div>
