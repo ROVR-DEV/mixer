@@ -26,7 +26,7 @@ export const shiftXTimeline = (e: MouseEvent, timeline: Timeline) => {
   const timelineElement = timeline.timelineContainer.timelineRef.current;
 
   if (!timelineElement) {
-    return;
+    return 0;
   }
 
   const { x: mouseX } = e;
@@ -39,12 +39,12 @@ export const shiftXTimeline = (e: MouseEvent, timeline: Timeline) => {
   const { start: rightStart, end: rightEnd } =
     getTimelineRightScrollBounds(timelineRect);
 
-  if (mouseX < leftEnd) {
+  if (mouseX <= leftEnd) {
     const percent = 100 - calculatePercent(mouseX, leftStart, leftEnd);
     timeline.scrollController.shiftX(-1 * percent);
 
     return -1;
-  } else if (mouseX > rightStart) {
+  } else if (mouseX >= rightStart) {
     const percent = calculatePercent(mouseX, rightStart, rightEnd);
     timeline.scrollController.shiftX(1 * percent);
 

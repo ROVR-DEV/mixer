@@ -11,6 +11,8 @@ export class TrackDnDInfo implements DnDInfo {
   startChannelIndex?: number = undefined;
   leftBound: number = 0;
 
+  currentX: number = 0;
+
   minChannel: number = 0;
   maxChannel: number = Infinity;
 
