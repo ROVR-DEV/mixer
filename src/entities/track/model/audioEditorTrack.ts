@@ -182,6 +182,8 @@ export class AudioEditorTrack {
     if (trimmedArtist) {
       this.meta.artist = trimmedArtist;
     }
+
+    this.meta = { ...this.meta };
   };
 
   split = (time: number) => {
