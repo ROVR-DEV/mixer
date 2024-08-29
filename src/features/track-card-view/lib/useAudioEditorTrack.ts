@@ -2,12 +2,18 @@
 
 import { throttle } from 'lodash-es';
 import { runInAction } from 'mobx';
-import React, { RefObject, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 
 import { clamp } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
-import { AudioEditor, Timeline } from '@/entities/audio-editor';
+import { AudioEditor, shiftXTimeline, Timeline } from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
 
 import { getNewChannelIndex } from './getNewChannelIndex';
@@ -146,12 +152,10 @@ export const useAudioEditorTrack = (
     //   });
     // }
 
-    requestAnimationFrame(() => {
-      updateTrackVerticalPosition();
-      updateTrackHorizontalPosition();
-      updateTrackWidth();
-      updateTrackVisibility();
-    });
+    updateTrackVerticalPosition();
+    updateTrackHorizontalPosition();
+    updateTrackWidth();
+    updateTrackVisibility();
   }, [
     updateTrackHorizontalPosition,
     updateTrackVerticalPosition,
@@ -159,20 +163,9 @@ export const useAudioEditorTrack = (
     updateTrackWidth,
   ]);
 
-  // const calcNewStartTime = useCallback(
-  //   (
-  //     e: MouseEvent | React.MouseEvent<HTMLElement>,
-  //     track: AudioEditorTrack,
-  //     leftBound: number = 0,
-  //   ) => {
-  //     const timeOffset =
-  //       (e.pageX - track.dndInfo.startX) /
-  //       timeline.timelineContainer.pixelsPerSecond;
-
-  //     return clamp(track.dndInfo.startTime + timeOffset, leftBound);
-  //   },
-  //   [timeline.timelineContainer.pixelsPerSecond],
-  // );
+  const updateTrackAnimation = useCallback(() => {
+    requestAnimationFrame(updateTrack);
+  }, [updateTrack]);
 
   const setVerticalPosition = throttle(
     useCallback(
@@ -233,24 +226,42 @@ export const useAudioEditorTrack = (
     ),
   );
 
-  // const setTime = useCallback(
-  //   (e: MouseEvent, track: AudioEditorTrack, leftBound: number = 0) => {
-  //     const startTime = calcNewStartTime(e, track, leftBound);
+  const calcNewStartTime = useCallback(
+    (
+      e: MouseEvent | React.MouseEvent<HTMLElement>,
+      track: AudioEditorTrack,
+      leftBound: number = 0,
+    ) => {
+      const currentTime = timeline.virtualPixelsToTime(e.pageX);
+      const dragStartTime = timeline.virtualPixelsToTime(track.dndInfo.startX);
 
-  //     if (track.trimStartTime === startTime) {
-  //       return;
-  //     }
+      const timeOffset =
+        currentTime - dragStartTime - track.dndInfo.scroll + timeline.scroll;
 
-  //     track.setStartTime(startTime);
-  //     track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-  //   },
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   [calcNewStartTime],
-  // );
+      return clamp(track.dndInfo.startTime + timeOffset, leftBound);
+    },
+    [timeline],
+  );
+
+  const setTime = useCallback(
+    (e: MouseEvent, track: AudioEditorTrack, leftBound: number = 0) => {
+      const startTime = calcNewStartTime(e, track, leftBound);
+
+      if (track.trimStartTime === startTime) {
+        return;
+      }
+
+      track.setStartTime(startTime);
+      track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [calcNewStartTime],
+  );
 
   const handleDragStart = useCallback(
     (e: MouseEvent, track: AudioEditorTrack) => {
       runInAction(() => {
+        track.dndInfo.scroll = timeline.scroll;
         track.dndInfo.startX = e.pageX;
         track.dndInfo.startY = e.pageY;
         track.dndInfo.startTime = track.trimStartTime;
@@ -284,79 +295,117 @@ export const useAudioEditorTrack = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const calculatePercent = (currentX: number, startX: number, endX: number) =>
-    ((currentX - startX) / (endX - startX)) * 100;
+  // const calculatePercent = (currentX: number, startX: number, endX: number) =>
+  //   ((currentX - startX) / (endX - startX)) * 100;
 
-  const shiftXTimelineViewport = useCallback(
-    (e: MouseEvent, track: AudioEditorTrack, leftBound: number) => {
-      const timelineElement = timeline.timelineContainer.timelineRef.current;
+  // const shiftXTimelineViewport = useCallback(
+  //   (e: MouseEvent, track: AudioEditorTrack, leftBound: number) => {
+  //     // const timelineElement = timeline.timelineContainer.timelineRef.current;
 
-      if (!timelineElement) {
-        return;
-      }
+  //     // if (!timelineElement) {
+  //     //   return;
+  //     // }
 
-      const { x: mouseX } = e;
+  //     // const { x: mouseX } = e;
 
-      const { x: timelineContainerX, width: timelineContainerWidth } =
-        timelineElement.getBoundingClientRect();
+  //     // const { x: timelineContainerX, width: timelineContainerWidth } =
+  //     //   timelineElement.getBoundingClientRect();
 
-      const leftSideBoxStart = timelineContainerX - 100;
-      const leftSideBoxEnd = timelineContainerX + 100;
-      const rightSideBoxStart =
-        timelineContainerX + timelineContainerWidth - 100;
-      const rightSideBoxEnd = timelineContainerX + timelineContainerWidth;
+  //     // const sideBoxWidth = 100;
 
-      const isMouseInLeftSideBox =
-        mouseX < leftSideBoxEnd && mouseX > leftSideBoxStart;
-      const isMouseInRightSideBox =
-        mouseX > rightSideBoxStart && mouseX < rightSideBoxEnd;
+  //     // const leftSideBoxStart = timelineContainerX - sideBoxWidth;
+  //     // const leftSideBoxEnd = timelineContainerX + sideBoxWidth;
 
-      let percent: number = 0,
-        shiftX: number = 0,
-        time: number = 0;
+  //     // const rightSideBoxStart =
+  //     //   timelineContainerX + timelineContainerWidth - sideBoxWidth;
+  //     // const rightSideBoxEnd = timelineContainerX + timelineContainerWidth;
 
-      if (isMouseInLeftSideBox) {
-        percent = calculatePercent(mouseX, leftSideBoxEnd, leftSideBoxStart);
+  //     // const isMouseInLeftSideBox =
+  //     //   mouseX < leftSideBoxEnd && mouseX > leftSideBoxStart;
+  //     // const isMouseInRightSideBox =
+  //     //   mouseX > rightSideBoxStart && mouseX < rightSideBoxEnd;
 
-        shiftX = timeline.scrollController.shiftX(-1 * percent);
-        time = Math.max(track.startTime + shiftX, 0);
+  //     // let percent: number = 0,
+  //     //   time: number = 0;
 
-        // TODO: make separate function for this logic
-        // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
-        track.setStartTime(time);
-        track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-      } else if (isMouseInRightSideBox) {
-        percent = calculatePercent(mouseX, rightSideBoxStart, rightSideBoxEnd);
+  //     // let shiftX: number = 0;
 
-        shiftX = timeline.scrollController.shiftX(1 * percent);
-        time = Math.min(
-          track.startTime + shiftX,
-          timeline.totalTime - track.duration,
-        );
+  //     // if (isMouseInLeftSideBox) {
+  //     //   percent = calculatePercent(mouseX, leftSideBoxEnd, leftSideBoxStart);
 
-        // TODO: make separate function for this logic
-        // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
-        track.setStartTime(time);
-        track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-      } else {
-        const timeOffset =
-          (e.pageX - track.dndInfo.startX) /
-            timeline.timelineContainer.pixelsPerSecond +
-          timeline.scrollController.value;
+  //     //   shiftX = timeline.scrollController.shiftX(-1 * percent);
+  //     //   time = Math.max(track.startTime + shiftX, 0);
 
-        time = clamp(track.dndInfo.startTime + timeOffset, leftBound);
+  //     //   // TODO: make separate function for this logic
+  //     //   // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
+  //     //   track.setStartTime(time);
+  //     //   track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+  //     // } else if (isMouseInRightSideBox) {
+  //     //   percent = calculatePercent(mouseX, rightSideBoxStart, rightSideBoxEnd);
 
-        track.setStartTime(time);
-        track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-      }
-    },
-    [
-      timeline.scrollController,
-      timeline.timelineContainer,
-      timeline.totalTime,
-      audioEditor.player.time,
-    ],
-  );
+  //     //   shiftX = timeline.scrollController.shiftX(1 * percent);
+  //     //   time = Math.min(
+  //     //     track.startTime + shiftX,
+  //     //     timeline.totalTime - track.duration,
+  //     //   );
+
+  //     //   // TODO: make separate function for this logic
+  //     //   // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
+  //     //   track.setStartTime(time);
+  //     //   track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+  //     // } else {
+  //     const timelineShiftXTime: number = timeline.scrollController.value;
+
+  //     // wide between track start time and mouse time
+  //     const mousePositionTime =
+  //       timelineShiftXTime + timeline.pixelsToTime(e.pageX);
+
+  //     const trackWideToMouseWide =
+  //       timelineShiftXTime +
+  //       timeline.pixelsToTime(track.dndInfo.startX) -
+  //       track.dndInfo.startTime;
+
+  //     // eslint-disable-next-line no-console
+  //     console.log(
+  //       'mousePositionTime - trackWideToMouseWide',
+  //       'смещение\n',
+  //       timelineShiftXTime,
+  //       '\n',
+  //       'смещение (мин)\n',
+  //       timelineShiftXTime / 60,
+  //       '\n',
+  //       'сейчас позиция мыши\n',
+  //       mousePositionTime,
+  //       '\n',
+  //       'сейчас позиция мыши (мин)\n',
+  //       mousePositionTime / 60,
+  //       '\n',
+  //       'сейчас размер\n',
+  //       trackWideToMouseWide,
+  //       '\n',
+  //       'значение времени\n',
+  //       timelineShiftXTime +
+  //         (mousePositionTime - trackWideToMouseWide - timelineShiftXTime),
+  //       '\n',
+  //       'значение времени (мин)\n',
+  //       (timelineShiftXTime +
+  //         (mousePositionTime - trackWideToMouseWide - timelineShiftXTime)) /
+  //         60,
+  //     );
+
+  //     const time = clamp(
+  //       timelineShiftXTime + (mousePositionTime - trackWideToMouseWide),
+  //       leftBound,
+  //     );
+
+  //     track.setStartTime(time);
+  //     track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+  //     // }
+  //   },
+  //   [timeline, audioEditor.player.time],
+  // );
+
+  const dragTimerIdRef = useRef<number | null>(null);
 
   const drag = useCallback(
     (
@@ -366,10 +415,24 @@ export const useAudioEditorTrack = (
       minChannel: number = 0,
       maxChannel: number = Infinity,
     ) => {
-      shiftXTimelineViewport(e, track, leftBound);
-      setVerticalPosition(e, track, minChannel, maxChannel);
+      if (dragTimerIdRef.current !== null) {
+        cancelAnimationFrame(dragTimerIdRef.current);
+      }
+
+      const dragUpdate = () => {
+        shiftXTimeline(e, timeline);
+        setTime(e, track, leftBound);
+        setVerticalPosition(e, track, minChannel, maxChannel);
+      };
+
+      const dragUpdateRec = () => {
+        requestAnimationFrame(dragUpdate);
+        dragTimerIdRef.current = requestAnimationFrame(dragUpdateRec);
+      };
+
+      dragUpdateRec();
     },
-    [shiftXTimelineViewport, setVerticalPosition],
+    [timeline, setTime, setVerticalPosition],
   );
 
   const handleDrag = useCallback(
@@ -447,9 +510,9 @@ export const useAudioEditorTrack = (
       }
 
       runInAction(() => {
-        audioEditor.draggingTracks.forEach((selectedTrack) => {
-          handleDragStart(e as MouseEvent, selectedTrack);
-        });
+        audioEditor.draggingTracks.forEach((draggingTrack) =>
+          handleDragStart(e as MouseEvent, draggingTrack),
+        );
       });
     },
     [
@@ -483,6 +546,10 @@ export const useAudioEditorTrack = (
         return;
       }
 
+      if (dragTimerIdRef.current !== null) {
+        cancelAnimationFrame(dragTimerIdRef.current);
+      }
+
       clearDragProperties(trackRef.current);
 
       runInAction(() => {
@@ -514,27 +581,37 @@ export const useAudioEditorTrack = (
       setDragProperties(trackRef.current);
     } else {
       clearDragProperties(trackRef.current);
+
+      if (dragTimerIdRef.current !== null) {
+        cancelAnimationFrame(dragTimerIdRef.current);
+      }
     }
-  });
+  }, [track.dndInfo.isDragging, trackRef]);
 
   useEffect(() => {
-    timeline.zoomController.addListener(updateTrack);
-    timeline.scrollController.addListener(updateTrack);
-
-    updateTrack();
-
-    return () => {
-      timeline.zoomController.removeListener(updateTrack);
-      timeline.scrollController.removeListener(updateTrack);
-    };
+    updateTrackAnimation();
   }, [
     track.startTrimDuration,
     track.endTrimDuration,
     track.channel,
     track.startTime,
+    updateTrackAnimation,
+  ]);
+
+  useEffect(() => {
+    timeline.zoomController.addListener(updateTrackAnimation);
+    timeline.scrollController.addListener(updateTrackAnimation);
+
+    updateTrackAnimation();
+
+    return () => {
+      timeline.zoomController.removeListener(updateTrackAnimation);
+      timeline.scrollController.removeListener(updateTrackAnimation);
+    };
+  }, [
     timeline.scrollController,
     timeline.zoomController,
-    updateTrack,
+    updateTrackAnimation,
   ]);
 
   return { isDragging, onMouseUp, onMouseDown };

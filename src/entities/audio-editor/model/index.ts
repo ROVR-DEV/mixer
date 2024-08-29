@@ -12,3 +12,4 @@ export * from './audioEditor';
 export * from './region';
 export * from './AudioEditorDragData';
 export * from './initializeAudioEditor';
+export * from './shiftXTimeline';

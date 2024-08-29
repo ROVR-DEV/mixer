@@ -7,8 +7,12 @@ import { clamp, preventAll } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 import { TrimSide } from '@/shared/ui';
 
-// eslint-disable-next-line boundaries/element-types
-import { Timeline, useAudioEditor } from '@/entities/audio-editor';
+import {
+  shiftXTimeline,
+  Timeline,
+  useAudioEditor,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/entities/audio-editor';
 
 // eslint-disable-next-line boundaries/element-types
 import { adjustTracksOnPaste } from '@/features/track-card-view';
@@ -122,18 +126,41 @@ export const useTrimMarker = ({
     [track],
   );
 
+  const dragUpdate = useCallback(
+    (e: MouseEvent) => {
+      shiftXTimeline(e, timeline);
+      setTrim(e, track, trimSide, timeline, bounds);
+    },
+    [bounds, timeline, track, trimSide],
+  );
+
+  const dragTimerIdRef = useRef<number | null>(null);
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!trimMarkerRef.current) {
         return;
       }
 
-      setTrim(e, track, trimSide, timeline, bounds);
+      if (dragTimerIdRef.current !== null) {
+        cancelAnimationFrame(dragTimerIdRef.current);
+      }
+
+      const dragUpdateRec = () => {
+        requestAnimationFrame(() => dragUpdate(e));
+        dragTimerIdRef.current = requestAnimationFrame(dragUpdateRec);
+      };
+
+      dragUpdateRec();
     },
-    [bounds, trimSide, timeline, track],
+    [dragUpdate],
   );
 
   const handleMouseUp = useCallback(() => {
+    if (dragTimerIdRef.current !== null) {
+      cancelAnimationFrame(dragTimerIdRef.current);
+    }
+
     if (!trimMarkerRef.current) {
       return;
     }
