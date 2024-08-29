@@ -27,9 +27,7 @@ export const usePlayHead = (
 
   const setViewToPlayHead = useCallback(
     (playHeadPosition: number) => {
-      const virtualScroll =
-        timeline.realToVirtualPixels(timeline.scroll) +
-        timeline.timelineLeftPadding;
+      const virtualScroll = timeline.realToVirtualPixels(timeline.scroll);
       const globalPlayHeadPosition = playHeadPosition + virtualScroll;
 
       if (
