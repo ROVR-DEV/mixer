@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 
@@ -25,9 +25,16 @@ export const AudioEditorView = observer(function AudioEditorView({
   ...props
 }: AudioEditorViewProps) {
   const audioEditor = useMemo(() => initializeAudioEditor(), []);
+  const previousKeyRef = useRef<string>('');
 
   useEffect(() => {
+    if (previousKeyRef.current === playlistKey) {
+      return;
+    }
+
     audioEditor.hydration(playlist);
+
+    previousKeyRef.current = playlistKey;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioEditor, audioEditor.player, playlistKey]);
 

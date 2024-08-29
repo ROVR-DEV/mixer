@@ -40,4 +40,8 @@ export class HistoryManager<T> {
   get currentState(): T {
     return this._stack[this._pointer];
   }
+
+  get state(): T[] {
+    return this._stack;
+  }
 }

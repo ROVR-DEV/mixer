@@ -89,6 +89,8 @@ export class ObservableAudioEditor implements AudioEditor {
   private _editableTrack: AudioEditorTrack | null = null;
   private _draggingTracks = observable.array<AudioEditorTrack>();
 
+  private _isSaveStatePaused: boolean = false;
+
   isDraggingSomething: boolean = false;
 
   get timeline(): Timeline | null {
@@ -170,8 +172,6 @@ export class ObservableAudioEditor implements AudioEditor {
     this._tool = options.availableTools[0];
 
     this._player = player;
-
-    this.saveState();
 
     makeAutoObservable(this, {
       tool: computed,
@@ -293,6 +293,10 @@ export class ObservableAudioEditor implements AudioEditor {
   }
 
   saveState(): void {
+    if (this._isSaveStatePaused) {
+      return;
+    }
+
     this._history.addState({ player: this._player.getState() });
   }
 
@@ -323,10 +327,15 @@ export class ObservableAudioEditor implements AudioEditor {
   };
 
   hydration = (playlist: Playlist): void => {
+    this._isSaveStatePaused = true;
+
+    // Update playlist in player
     this.player.updatePlaylist(playlist);
 
+    // Add new tracks from playlist
     playlist.tracks.forEach((track) => {
       if (!this.player.tracksByAudioUuid.has(track.uuid)) {
+        // Temporary logic to import track to a new channel
         const nextTrackChannel = localStorage.getItem('nextTrackChannel');
         let nextTrackChannelIndex;
 
@@ -348,21 +357,23 @@ export class ObservableAudioEditor implements AudioEditor {
             nextTrackChannelIndex = parsedInfo[track.uuid];
           }
         }
+        // End logic
 
         this.importTrack(track, nextTrackChannelIndex);
       }
     });
 
+    // Remove tracks that are no longer in the playlist
     this.player.tracks.forEach((track) => {
-      if (
-        !playlist.tracks.find(
-          (playlistTrack) => playlistTrack.uuid === track.meta.uuid,
-        )
-      ) {
+      if (!playlist.tracks.find((pTrack) => pTrack.uuid === track.meta.uuid)) {
         this.removeTrack(track);
       }
     });
 
+    // Load tracks audio
     this.player.loadTracks();
+
+    this._isSaveStatePaused = false;
+    this.saveState();
   };
 }

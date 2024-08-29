@@ -1,3 +1,5 @@
+import MurmurHash3 from 'imurmurhash';
+
 import { getPlaylist } from '@/entities/playlist';
 
 import { AudioEditorView } from '@/widgets/audio-editor';
@@ -15,7 +17,9 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
     );
   }
 
-  const playlistKey = !playlist ? null : JSON.stringify(playlist);
+  const playlistKey = !playlist
+    ? null
+    : MurmurHash3(JSON.stringify(playlist)).result().toString();
 
   return (
     <main className='h-[calc(100%-64px)] max-h-[calc(100%_-_64px)] min-h-[calc(100%-64px)]'>
