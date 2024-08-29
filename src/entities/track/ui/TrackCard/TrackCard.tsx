@@ -1,6 +1,11 @@
 'use client';
 
-import { detectOverflow, MiddlewareState, offset } from '@floating-ui/react';
+import {
+  detectOverflow,
+  flip,
+  MiddlewareState,
+  offset,
+} from '@floating-ui/react';
 import { forwardRef, memo, useMemo, useRef } from 'react';
 
 import { cn, preventAll } from '@/shared/lib';
@@ -78,7 +83,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       >
         <Popover
           placement='bottom-start'
-          middleware={[offset(5), overflowMiddleware]}
+          middleware={[flip({ padding: 5 }), offset(5), overflowMiddleware]}
         >
           <PopoverTrigger
             ref={popoverTriggerRef}
