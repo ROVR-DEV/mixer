@@ -7,8 +7,9 @@ export interface TracksUpdateDto {
 export interface TrackUpdateDto {
   id: number;
   offset: number;
-  duration: number;
   filters?: {
+    cutin?: number;
+    cutout?: number;
     fadein?: number;
     fadeout?: number;
   };
@@ -25,8 +26,9 @@ export const trackToTrackUpdateDto = (
 ): TrackUpdateDto => ({
   id: track.meta.id,
   offset: track.startTime,
-  duration: track.duration,
   filters: {
+    cutin: track.startTrimDuration,
+    cutout: track.endTrimDuration,
     fadein: track.filters.fadeInDuration,
     fadeout: track.filters.fadeOutDuration,
   },
