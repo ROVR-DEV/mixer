@@ -7,6 +7,8 @@ import { cn } from '@/shared/lib';
 import { Badge, IconButton } from '@/shared/ui';
 import { AutomationChannelIcon, CrossIcon } from '@/shared/ui/assets';
 
+import { formatChannelNumber } from '@/entities/channel';
+
 import { MuteButtonView } from '../MuteButtonView';
 import { SoloButtonView } from '../SoloButtonView';
 
@@ -21,14 +23,7 @@ export const ChannelControl = observer(function ChannelControl({
   className,
   ...props
 }: ChannelControlProps) {
-  const channelNumber = useMemo(
-    () =>
-      number.toLocaleString('en-US', {
-        minimumIntegerDigits: 2,
-        useGrouping: false,
-      }),
-    [number],
-  );
+  const channelNumber = useMemo(() => formatChannelNumber(number), [number]);
 
   return (
     <div

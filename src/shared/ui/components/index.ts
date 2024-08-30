@@ -9,3 +9,4 @@ export * from './TrimMarker';
 export * from './Version';
 export * from './Menu';
 export * from './ProgressBar';
+export * from './Dialog';
