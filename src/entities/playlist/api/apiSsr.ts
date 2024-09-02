@@ -1,3 +1,4 @@
+import { HEADERS_WITH_AUTHORIZATION, JSON_HEADERS } from '@/shared/config';
 import { FetchResult, customFetch, fetchJson } from '@/shared/lib';
 
 import {
@@ -10,15 +11,7 @@ import {
 import { invalidatePlaylist } from '../lib';
 import { Playlist, PlaylistDTO, toPlaylist } from '../model';
 
-const PLAYLIST_BASE_URL = 'https://app.rovr.live/api/playlist';
-
-const HEADERS_WITH_AUTHORIZATION = {
-  Authorization: 'Bearer 1e10f824-8fb2-4951-9815-d84d7bb141f5',
-};
-
-const JSON_HEADERS = {
-  'Content-Type': 'application/json',
-};
+import { PLAYLIST_BASE_URL } from './endpoints';
 
 export const getPlaylist = async (
   id: string,

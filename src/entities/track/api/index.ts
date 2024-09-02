@@ -1,1 +1,2 @@
-export * from './trackApiSsr';
+export * from './apiSsr';
+export * from './endpoints';
