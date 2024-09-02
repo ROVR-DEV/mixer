@@ -2,7 +2,7 @@
 
 import { observer } from 'mobx-react-lite';
 import Link from 'next/link';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib';
 import { Button, IconButton } from '@/shared/ui';
@@ -18,12 +18,20 @@ export const RightControlPanel = observer(function RightControlPanel({
   ...props
 }: RightControlPanelProps) {
   const audioEditor = useMemo(() => initializeAudioEditor(), []);
+  const [isRequestSending, setIsRequestSending] = useState(false);
 
   const onPublish = useCallback(() => {
-    if (audioEditor.player.playlist?.id === undefined) {
-      return;
-    }
-    updateTracksInfo(audioEditor.player.playlist.id, audioEditor.player.tracks);
+    (async () => {
+      if (audioEditor.player.playlist?.id === undefined) {
+        return;
+      }
+      setIsRequestSending(true);
+      await updateTracksInfo(
+        audioEditor.player.playlist.id,
+        audioEditor.player.tracks,
+      );
+      setIsRequestSending(false);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -39,6 +47,7 @@ export const RightControlPanel = observer(function RightControlPanel({
         aria-label='Publish'
         title='Publish'
         className='h-7 text-[13px] uppercase italic'
+        disabled={isRequestSending}
         onClick={onPublish}
       >
         <span className='font-fix'>{'Publish'}</span>

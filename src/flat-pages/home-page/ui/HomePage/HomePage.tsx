@@ -8,7 +8,14 @@ import { TrackEditor } from '@/widgets/track-editor';
 import { HomePageProps } from './interfaces';
 
 export const HomePage = async ({ searchParams }: HomePageProps) => {
-  const { data: playlist } = await getPlaylist(searchParams.id);
+  const { data: playlist, error } = await getPlaylist(searchParams.id);
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Unable to get playlist with id: ${searchParams.id}`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
 
   if (process.env.NEXT_PUBLIC_DEBUG_TRACKS_MAX_COUNT && !!playlist) {
     playlist.tracks = playlist.tracks.slice(
