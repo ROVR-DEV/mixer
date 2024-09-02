@@ -21,6 +21,7 @@ export const AudioEditorView = observer(function AudioEditorView({
   playlist,
   playlistKey,
   trackEditor: TrackEditor,
+  playlistLoadingProgressDialog: PlaylistLoadingProgressDialog,
   className,
   ...props
 }: AudioEditorViewProps) {
@@ -50,6 +51,7 @@ export const AudioEditorView = observer(function AudioEditorView({
             <TrackEditor className='absolute bottom-[100px] z-40 h-[43%] max-h-[466px] min-h-[161px] w-full' />
           )}
         </div>
+        <PlaylistLoadingProgressDialog />
       </PlayerContext.Provider>
     </AudioEditorContext.Provider>
   );

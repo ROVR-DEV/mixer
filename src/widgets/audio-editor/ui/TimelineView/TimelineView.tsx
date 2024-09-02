@@ -76,26 +76,26 @@ export const TimelineView = observer(function TimelineView({
       ref={timelineRef}
       {...props}
     >
-      {player.trackLoader.loadedTracksCount !==
+      {/* {player.trackLoader.loadedTracksCount !==
       player.trackLoader.tracksData.size ? (
         <span className='flex size-full flex-col items-center justify-center'>
           <span>{'Loading...'}</span>
           <span>{`${player.trackLoader.loadedTracksCount} / ${player.tracks.length}`}</span>
         </span>
-      ) : (
-        <>
-          <div className='absolute size-full'>
-            <TimelineChannelsList itemClassName='border-b border-secondary' />
-          </div>
-          <TimelineGridMemoized
-            className='pointer-events-none absolute w-full'
-            height={gridHeight}
-            controlRef={handleGridRef}
-          />
-          <AudioEditorTracksList player={player} />
-          {children}
-        </>
-      )}
+      ) : ( */}
+      {/* <> */}
+      <div className='absolute size-full'>
+        <TimelineChannelsList itemClassName='border-b border-secondary' />
+      </div>
+      <TimelineGridMemoized
+        className='pointer-events-none absolute w-full'
+        height={gridHeight}
+        controlRef={handleGridRef}
+      />
+      <AudioEditorTracksList player={player} />
+      {children}
+      {/* </> */}
+      {/* )} */}
     </div>
   );
 });

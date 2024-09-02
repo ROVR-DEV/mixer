@@ -6,7 +6,7 @@ import {
   values,
 } from 'mobx';
 
-import { arrayBufferToBlob } from '@/shared/lib';
+import { arrayBufferToBlob, FetchResult } from '@/shared/lib';
 
 import { Track } from './track';
 import { TrackData } from './trackData';
@@ -37,6 +37,30 @@ export interface TrackLoader {
 const getLoadTrackWorker = (): Worker =>
   new Worker(new URL('./loadTrackWorker', import.meta.url));
 
+const loadTrackThroughWorker = (trackUuid: string) =>
+  new Promise<Omit<FetchResult<ArrayBuffer | null>, 'response'>>(
+    (resolve, reject) => {
+      const worker = getLoadTrackWorker();
+
+      worker.onmessage = async ({
+        data,
+      }: MessageEvent<Omit<FetchResult<ArrayBuffer | null>, 'response'>>) => {
+        resolve(data);
+        worker.terminate();
+      };
+
+      worker.onerror = async (error: ErrorEvent) => {
+        reject(error.error);
+      };
+
+      worker.postMessage({ uuid: trackUuid, cache: true });
+    },
+  );
+
+const ATTEMPTS_COUNT = 5;
+
+const MAX_SIMULTANEOUS_REQUESTS = 4;
+
 export class ObserverTrackLoader implements TrackLoader {
   readonly tracksData: ObservableMap<string, TrackData> = observable.map();
 
@@ -57,9 +81,21 @@ export class ObserverTrackLoader implements TrackLoader {
     tracks: Track[],
     onLoaded?: TrackLoadedFunction,
   ): Promise<void> => {
-    await Promise.all(
-      tracks.map((track) => this.downloadTrack(track, onLoaded)),
-    );
+    tracks.forEach((track) => this._ensureTrackDataExists(track));
+
+    const requests = tracks
+      .slice(0, MAX_SIMULTANEOUS_REQUESTS)
+      .map((track) => this.downloadTrack(track, onLoaded));
+
+    let current_track_index = MAX_SIMULTANEOUS_REQUESTS;
+    requests.forEach(async (request) => {
+      await request;
+
+      while (current_track_index < tracks.length) {
+        await this.downloadTrack(tracks[current_track_index], onLoaded);
+        current_track_index++;
+      }
+    });
   };
 
   downloadTrack = async (
@@ -85,21 +121,21 @@ export class ObserverTrackLoader implements TrackLoader {
       onLoaded?.(trackData);
     };
 
-    await new Promise((resolve, reject) => {
-      const worker = getLoadTrackWorker();
+    let attempt = 0;
+    while (attempt < ATTEMPTS_COUNT) {
+      try {
+        const res = await loadTrackThroughWorker(track.uuid);
 
-      worker.onmessage = async ({ data }: MessageEvent<ArrayBuffer | null>) => {
-        await onDataLoaded(data);
-        worker.terminate();
-        resolve();
-      };
-
-      worker.onerror = async (error: ErrorEvent) => {
-        reject(error.error);
-      };
-
-      worker.postMessage({ uuid: track.uuid, cache: true });
-    });
+        if (res.data) {
+          onDataLoaded(res.data);
+          break;
+        }
+      } catch {
+        /* empty */
+      } finally {
+        attempt++;
+      }
+    }
   };
 
   clearData = (): void => {

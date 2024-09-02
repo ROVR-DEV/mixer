@@ -14,6 +14,8 @@ import {
 } from '@floating-ui/react';
 import * as React from 'react';
 
+import { cn } from '@/shared/lib';
+
 import { DialogProps } from './interfaces';
 
 export function useDialog({
@@ -167,7 +169,7 @@ export const DialogContent = React.forwardRef<
 export const DialogHeading = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLProps<HTMLHeadingElement>
->(function DialogHeading({ children, ...props }, ref) {
+>(function DialogHeading({ className, children, ...props }, ref) {
   const { setLabelId } = useDialogContext();
   const id = useId();
 
@@ -179,7 +181,12 @@ export const DialogHeading = React.forwardRef<
   }, [id, setLabelId]);
 
   return (
-    <h2 {...props} ref={ref} id={id}>
+    <h2
+      className={cn('text-[18px] font-bold font-fix', className)}
+      {...props}
+      ref={ref}
+      id={id}
+    >
       {children}
     </h2>
   );

@@ -1,11 +1,4 @@
-import {
-  fetchArrayBuffer,
-  FetchResult,
-  getCachedData,
-  responseToArrayBufferData,
-} from '@/shared/lib';
-
-import { TRACK_BASE_URL } from '../api';
+import { getTrack } from '../api';
 
 interface TrackLoadData {
   uuid: string;
@@ -13,51 +6,16 @@ interface TrackLoadData {
 }
 
 self.onmessage = async (event: MessageEvent<TrackLoadData>) => {
-  const data = await downloadTrack(event.data.uuid, event.data.cache);
+  const data = await getTrack(event.data.uuid, event.data.cache);
 
+  let transfer = {};
   if (!data.data) {
-    self.postMessage(null);
-    return;
-  }
-
-  const arrayBuffer = data.data;
-
-  self.postMessage(arrayBuffer, { transfer: [arrayBuffer] });
-};
-
-const downloadTrack = async (
-  uuid: string,
-  cache: boolean,
-): Promise<FetchResult<ArrayBuffer>> => {
-  const cacheName = 'tracks';
-
-  const trackUrl = `${TRACK_BASE_URL}/${uuid}/play`;
-
-  const req = new Request(trackUrl, {
-    headers: {
-      Authorization: 'Bearer 1e10f824-8fb2-4951-9815-d84d7bb141f5',
-    },
-  });
-
-  if (cache) {
-    const cachedData = await getCachedData(cacheName, trackUrl);
-
-    if (cachedData) {
-      return await responseToArrayBufferData(cachedData);
-    }
-
-    const cacheStorage = await caches.open(cacheName);
-
-    await cacheStorage.add(req);
-
-    const res = await getCachedData(cacheName, trackUrl);
-
-    if (!res) {
-      throw new Error('Failed to get from cache or fetch');
-    }
-
-    return responseToArrayBufferData(res);
+    data.data = null;
   } else {
-    return await fetchArrayBuffer(req);
+    transfer = { transfer: [data.data] };
   }
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  self.postMessage({ data: data.data, error: data.error }, transfer);
 };

@@ -3,6 +3,7 @@ import MurmurHash3 from 'imurmurhash';
 import { getPlaylist } from '@/entities/playlist';
 
 import { AudioEditorView } from '@/widgets/audio-editor';
+import { PlaylistLoadingProgressDialog } from '@/widgets/playlist-loading-progress-dialog';
 import { TrackEditor } from '@/widgets/track-editor';
 
 import { HomePageProps } from './interfaces';
@@ -36,6 +37,7 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
           playlist={playlist}
           playlistKey={playlistKey}
           trackEditor={TrackEditor}
+          playlistLoadingProgressDialog={PlaylistLoadingProgressDialog}
         />
       ) : (
         <div className='flex size-full items-center justify-center text-2xl font-bold text-third'>

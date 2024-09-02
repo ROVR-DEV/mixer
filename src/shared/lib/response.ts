@@ -5,7 +5,7 @@ export type FetchResult<D, E = Error> =
       response: Response;
     }
   | {
-      data: undefined;
+      data: undefined | null;
       error: E;
       response: Response | null;
     };
