@@ -70,6 +70,7 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
         left: position,
         width: width,
       }}
+      onClick={preventAll}
       {...props}
     >
       <CustomDraggable
