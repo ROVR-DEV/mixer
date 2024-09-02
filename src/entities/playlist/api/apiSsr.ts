@@ -44,7 +44,7 @@ export const updateTracksInfo = async (
 ) => {
   const body: TracksUpdateDto = tracksToTracksUpdateDto(tracks);
 
-  return await customFetch(`${PLAYLIST_BASE_URL}/${playlistId}/mix/manual`, {
+  return await customFetch(`${PLAYLIST_BASE_URL}/${playlistId}/mix/mixer`, {
     method: 'POST',
     headers: {
       ...HEADERS_WITH_AUTHORIZATION,
