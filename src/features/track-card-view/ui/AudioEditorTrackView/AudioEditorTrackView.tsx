@@ -17,7 +17,7 @@ import {
   preventAll,
   useIsMouseClickStartsOnThisSpecificElement,
 } from '@/shared/lib';
-import { Point } from '@/shared/model';
+import { Point, Rect } from '@/shared/model';
 
 import {
   useAudioEditor,
@@ -51,7 +51,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   );
 
   const isInteractive = useMemo(
-    () => isDraggable || audioEditor.tool === 'scissors',
+    () =>
+      isDraggable ||
+      audioEditor.tool === 'scissors' ||
+      audioEditor.tool === 'magnifier',
     [audioEditor.tool, isDraggable],
   );
 
@@ -139,6 +142,19 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
           audioEditor.selectTrack(copiedTrack);
 
           audioEditor.saveState();
+        } else if (audioEditor.tool === 'magnifier') {
+          if (audioEditor.isMagnifyActivated) {
+            audioEditor.unMagnify();
+          } else {
+            audioEditor.magnify(
+              new Rect(
+                track.trimStartTime * timeline.pixelsPerSecond,
+                0,
+                track.trimDuration * timeline.pixelsPerSecond,
+                0,
+              ),
+            );
+          }
         }
       }
     },

@@ -34,6 +34,7 @@ export interface AudioEditor {
   readonly draggingTracksMaxChannelIndex: number;
 
   readonly isFitActivated: boolean;
+  readonly isMagnifyActivated: boolean;
 
   timeline: Timeline | null;
 
@@ -160,6 +161,10 @@ export class ObservableAudioEditor implements AudioEditor {
     this._tool = value;
   }
 
+  get isMagnifyActivated(): boolean {
+    return this._zoomBeforeMagnifier !== null;
+  }
+
   get isFitActivated(): boolean {
     return this._zoomBeforeFit !== null;
   }
@@ -175,6 +180,7 @@ export class ObservableAudioEditor implements AudioEditor {
 
     makeAutoObservable(this, {
       tool: computed,
+      isMagnifyActivated: computed,
       isFitActivated: computed,
     });
   }
