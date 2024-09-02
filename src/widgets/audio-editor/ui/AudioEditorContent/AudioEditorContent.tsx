@@ -26,7 +26,7 @@ export const AudioEditorContent = observer(function AudioEditorBody({
   const timeline = useTimelineZoomScroll({
     timelineRef,
     timelineRulerRef: rulerWrapperRef,
-    duration: playlist.duration_in_seconds + 2,
+    duration: playlist.duration_in_seconds + 6,
   });
 
   useEffect(() => {

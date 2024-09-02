@@ -13,6 +13,7 @@ import {
 
 import { AudioEditorRegionPanel } from '@/features/audio-editor-region';
 import {
+  TimelineEndBorder,
   TimelinePlayHeadView,
   TimelineRulerMemoized,
   TimelineRulerRef,
@@ -90,6 +91,7 @@ export const TimelineHeader = observer(function TimelineHeader({
         canvasProps={canvasProps}
         controlRef={rulerControlRef}
       />
+      <TimelineEndBorder />
     </div>
   );
 });

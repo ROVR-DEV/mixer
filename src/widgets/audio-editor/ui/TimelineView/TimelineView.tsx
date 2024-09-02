@@ -7,7 +7,11 @@ import { cn } from '@/shared/lib';
 
 import { usePlayer, useTimeline } from '@/entities/audio-editor';
 
-import { TimelineGridMemoized, TimelineGridRef } from '@/features/timeline';
+import {
+  TimelineEndBorder,
+  TimelineGridMemoized,
+  TimelineGridRef,
+} from '@/features/timeline';
 
 import { renderDefaultTimelineGrid } from '../../lib';
 import { AudioEditorTracksList } from '../AudioEditorTracksList';
@@ -76,14 +80,6 @@ export const TimelineView = observer(function TimelineView({
       ref={timelineRef}
       {...props}
     >
-      {/* {player.trackLoader.loadedTracksCount !==
-      player.trackLoader.tracksData.size ? (
-        <span className='flex size-full flex-col items-center justify-center'>
-          <span>{'Loading...'}</span>
-          <span>{`${player.trackLoader.loadedTracksCount} / ${player.tracks.length}`}</span>
-        </span>
-      ) : ( */}
-      {/* <> */}
       <div className='absolute size-full'>
         <TimelineChannelsList itemClassName='border-b border-secondary' />
       </div>
@@ -92,10 +88,9 @@ export const TimelineView = observer(function TimelineView({
         height={gridHeight}
         controlRef={handleGridRef}
       />
+      <TimelineEndBorder />
       <AudioEditorTracksList player={player} />
       {children}
-      {/* </> */}
-      {/* )} */}
     </div>
   );
 });
