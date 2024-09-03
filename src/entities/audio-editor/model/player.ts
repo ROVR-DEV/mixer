@@ -186,14 +186,12 @@ export class ObservablePlayer implements Player {
 
       if (withPeaks) {
         const generateAndSetPeaks = async () => {
-          const buffer = await trackData.blob?.arrayBuffer();
-
-          if (!buffer) {
+          if (!trackData.arrayBuffer) {
             track.setPeaks([]);
             return;
           }
 
-          const peaks = await calculatePeaks(buffer);
+          const peaks = await calculatePeaks(trackData.arrayBuffer);
 
           track.setPeaks(peaks);
         };

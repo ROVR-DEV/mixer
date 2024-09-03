@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 
-import { Tick } from '../model';
+import { TimelineTicks } from '../model';
 
 import { drawVerticalLine } from './drawVerticalLine';
 
@@ -26,32 +26,31 @@ const drawMainDash = (
 
 export const drawRuler = (
   ctx: CanvasRenderingContext2D,
-  ticks: { mainTicks: Tick[]; subTicks: Tick[] },
+  ticks: TimelineTicks,
   subTickHeight: { short: number; tall: number },
-  ticksStartPadding: number,
-  shiftWidth: number,
+  zeroMarkOffset: number,
+  scroll: number,
   tickTextConverter: (value: number) => string,
   color: CSSProperties['color'] = 'white',
 ) => {
-  const bufferWidth = 1000;
-  ticks.mainTicks.forEach((tick) => {
-    if (tick.x >= shiftWidth - bufferWidth) {
-      drawMainDash(
-        ctx,
-        tick.x + ticksStartPadding - shiftWidth,
-        tickTextConverter(tick.number),
-        tick.x === 0,
-        color,
-      );
+  const startX = zeroMarkOffset - scroll;
 
-      ticks.subTicks.forEach((subTick) =>
-        drawVerticalLine(
-          ctx,
-          tick.x + subTick.x + ticksStartPadding - shiftWidth,
-          subTickHeight.short,
-          color,
-        ),
-      );
-    }
+  ticks.mainTicks.forEach((tick) => {
+    drawMainDash(
+      ctx,
+      tick.x + startX,
+      tickTextConverter(tick.number),
+      tick.x === 0,
+      color,
+    );
+
+    ticks.subTicks.forEach((subTick) =>
+      drawVerticalLine(
+        ctx,
+        tick.x + subTick.x + startX,
+        subTickHeight.short,
+        color,
+      ),
+    );
   });
 };

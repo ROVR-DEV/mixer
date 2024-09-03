@@ -18,7 +18,7 @@ export const renderDefaultTimelineGrid = (
   requestAnimationFrame(() => {
     gridRef.current?.render(
       ticks ?? emptyTicks,
-      scroll * pixelsPerSecond,
+      scroll,
       timelineLeftPadding,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (resolvedTailwindConfig.theme.colors as any).grid.light,

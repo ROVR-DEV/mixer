@@ -41,13 +41,7 @@ export const useAudioEditorSelection = (
     (rect: Rect) => {
       if (audioEditor.tool === 'magnifier') {
         const virtualRect = new Rect(
-          timeline.timeToVirtualPixels(
-            timeline.virtualPixelsToTime(
-              rect.x +
-                timeline.boundingClientRect.x +
-                timeline.timelineLeftPadding,
-            ),
-          ),
+          rect.x + timeline.scroll,
           rect.y,
           rect.width,
           rect.height,

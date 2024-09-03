@@ -135,9 +135,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
             clickTimerRef.current = delay(cursorOnClick, 160, e);
           }
         } else if (audioEditor.tool === 'scissors') {
-          const copiedTrack = track.split(
-            timeline.virtualPixelsToTime(e.pageX),
-          );
+          const copiedTrack = track.split(timeline.mapGlobalToTime(e.pageX));
 
           audioEditor.selectTrack(copiedTrack);
 

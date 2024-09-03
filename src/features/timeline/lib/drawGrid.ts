@@ -1,35 +1,29 @@
 import { Property } from 'csstype';
 
-import { Tick } from '../model';
+import { TimelineTicks } from '../model';
 
 import { drawVerticalLine } from './drawVerticalLine';
 
 export const drawGrid = (
   ctx: CanvasRenderingContext2D,
-  ticks: { mainTicks: Tick[]; subTicks: Tick[] },
-  ticksStartPadding: number,
-  shiftWidth: number,
+  ticks: TimelineTicks,
+  zeroMarkOffset: number,
+  scroll: number,
   tickColor: Property.Color = 'white',
   subTickColor: Property.Color = 'white',
 ) => {
-  const bufferWidth = 1000;
+  const startX = zeroMarkOffset - scroll;
+
   ticks.mainTicks.forEach((tick) => {
-    if (tick.x >= shiftWidth - bufferWidth) {
+    drawVerticalLine(ctx, tick.x + startX, ctx.canvas.height, tickColor);
+
+    ticks.subTicks.forEach((subTick) =>
       drawVerticalLine(
         ctx,
-        tick.x + ticksStartPadding - shiftWidth,
+        tick.x + subTick.x + startX,
         ctx.canvas.height,
-        tickColor,
-      );
-
-      ticks.subTicks.forEach((subTick) =>
-        drawVerticalLine(
-          ctx,
-          tick.x + subTick.x + ticksStartPadding - shiftWidth,
-          ctx.canvas.height,
-          subTickColor,
-        ),
-      );
-    }
+        subTickColor,
+      ),
+    );
   });
 };

@@ -62,7 +62,7 @@ export const selectTracksInSelection = (
     }
 
     const virtualRect = new Rect(
-      rect.x + timeline.realToVirtualPixels(timeline.scroll),
+      rect.x + timeline.scroll,
       rect.y,
       rect.width,
       rect.height,

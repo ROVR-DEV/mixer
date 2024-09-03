@@ -7,7 +7,7 @@ import {
   values,
 } from 'mobx';
 
-import { arrayBufferToBlob, FetchResult } from '@/shared/lib';
+import { FetchResult } from '@/shared/lib';
 
 import { getTrackFromCache, getTrackPlayUrl } from '../api';
 
@@ -79,7 +79,7 @@ export class ObserverTrackLoader implements TrackLoader {
     cachedTracks?.forEach(async (cachedTrack) => {
       const trackData = this._ensureTrackDataExists(cachedTrack.track);
       const data = await (cachedTrack.data as Response).arrayBuffer();
-      trackData.setData(arrayBufferToBlob(data));
+      trackData.setDataAsArrayBuffer(data);
       onLoaded?.(trackData);
     });
 
@@ -128,7 +128,7 @@ export class ObserverTrackLoader implements TrackLoader {
         const res = await loadTrackThroughWorker(track.uuid);
 
         if (res.data) {
-          trackData.setData(arrayBufferToBlob(res.data));
+          trackData.setDataAsArrayBuffer(res.data);
           onLoaded?.(trackData);
           break;
         }

@@ -41,7 +41,7 @@ const setTrim = throttle(
     }
 
     const time = clamp(
-      timeline.virtualPixelsToTime(e.pageX),
+      timeline.mapGlobalToTime(e.pageX),
       Math.max(0, track.startTime, bounds.left),
       Math.min(track.endTime, bounds.right),
     );

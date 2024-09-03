@@ -18,7 +18,7 @@ export const usePlayHead = (
     (time: number) => {
       return (
         timeline.timeToVirtualPixels(time) -
-        timeline.realToVirtualPixels(timeline.scroll) +
+        timeline.scroll +
         timeline.timelineLeftPadding
       );
     },
@@ -27,12 +27,11 @@ export const usePlayHead = (
 
   const setViewToPlayHead = useCallback(
     (playHeadPosition: number) => {
-      const virtualScroll = timeline.realToVirtualPixels(timeline.scroll);
-      const globalPlayHeadPosition = playHeadPosition + virtualScroll;
+      const globalPlayHeadPosition = playHeadPosition + timeline.scroll;
 
       if (
-        globalPlayHeadPosition < virtualScroll ||
-        globalPlayHeadPosition > timeline.timelineClientWidth + virtualScroll
+        globalPlayHeadPosition < timeline.scroll ||
+        globalPlayHeadPosition > timeline.timelineClientWidth + timeline.scroll
       ) {
         timeline.scroll =
           globalPlayHeadPosition / timeline.timelineContainer.pixelsPerSecond;

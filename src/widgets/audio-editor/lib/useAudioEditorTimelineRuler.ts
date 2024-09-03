@@ -22,7 +22,7 @@ export const useAudioEditorTimelineRuler = (
       requestAnimationFrame(() => {
         rulerRef.current?.render(
           ticks ?? emptyTicks,
-          scroll * pixelsPerSecond,
+          scroll,
           timelineLeftPadding,
           zoom,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

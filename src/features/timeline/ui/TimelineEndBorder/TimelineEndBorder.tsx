@@ -16,16 +16,15 @@ export const TimelineEndBorder = observer(function TimelineEndBorder({
 
   const position = useMemo(() => {
     return (
-      timeline.totalTime * timeline.pixelsPerSecond -
-      timeline.scroll * timeline.pixelsPerSecond -
+      timeline.timelineScrollWidth -
+      timeline.scroll -
       -timeline.timelineLeftPadding -
       20
     );
   }, [
-    timeline.pixelsPerSecond,
     timeline.scroll,
     timeline.timelineLeftPadding,
-    timeline.totalTime,
+    timeline.timelineScrollWidth,
   ]);
 
   return (

@@ -27,7 +27,7 @@ const getFractionRuleByZoom = (zoom: number) => {
   }
 };
 
-const tickValueToTime = (value: number, zoom: number) => {
+export const tickValueToTime = (value: number, zoom: number) => {
   const minutes = Math.floor(value / 60);
   const seconds = getFractionRuleByZoom(zoom).format(value - minutes * 60);
 

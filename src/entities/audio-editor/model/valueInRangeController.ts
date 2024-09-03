@@ -90,7 +90,7 @@ export class ValueInRangeController {
   };
 
   // TODO: bool as argument is bad practice, negative step is better solution
-  private handleZoomStep(shouldIncrease = false): number {
+  private handleStep(shouldIncrease = false): number {
     this._value = this._clamp(
       this.rule(this._value, this._step, shouldIncrease),
     );
@@ -99,9 +99,9 @@ export class ValueInRangeController {
     return this._value;
   }
 
-  public increase = (): number => this.handleZoomStep(true);
+  public increase = (): number => this.handleStep(true);
 
-  public decrease = (): number => this.handleZoomStep(false);
+  public decrease = (): number => this.handleStep(false);
 
   private _triggerAllListeners = () => {
     if (this.disableListeners) {

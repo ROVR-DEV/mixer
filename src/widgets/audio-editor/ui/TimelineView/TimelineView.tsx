@@ -32,8 +32,6 @@ export const TimelineView = observer(function TimelineView({
 
   const handleGridRef = useCallback((ref: TimelineGridRef | null) => {
     gridControlRef.current = ref;
-    renderGrid();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderGrid = useCallback(() => {
@@ -45,7 +43,7 @@ export const TimelineView = observer(function TimelineView({
       timeline.timelineLeftPadding,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [timeline.ticks]);
 
   const gridHeight = useMemo(
     () =>
@@ -62,8 +60,6 @@ export const TimelineView = observer(function TimelineView({
   useEffect(() => {
     timeline.scrollController.addListener(renderGrid);
     timeline.zoomController.addListener(renderGrid);
-
-    renderGrid();
 
     return () => {
       timeline.scrollController.removeListener(renderGrid);

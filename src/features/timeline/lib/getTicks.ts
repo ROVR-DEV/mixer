@@ -4,12 +4,7 @@ import { Tick } from '../model';
 
 import { getTickSegmentWidthZoomed } from './getTickSegmentWidthZoomed';
 
-const createTick = (
-  index: number,
-  segmentWidth: number,
-  isFirstTick: boolean,
-  step: number,
-) => ({
+const createTick = (index: number, segmentWidth: number, step: number) => ({
   x: index * segmentWidth,
   number: index * step,
 });
@@ -20,11 +15,13 @@ export const getMainTicks = (
   step: number,
   segmentWidth: number,
 ) => {
-  const count = Math.ceil(visibleWidth / segmentWidth) + 100;
-  const startIndex = Math.floor(shift / segmentWidth) - 50;
+  const bufferTicksCount = 2;
+
+  const count = Math.ceil(visibleWidth / segmentWidth) + bufferTicksCount;
+  const startIndex = Math.floor(shift / segmentWidth) - bufferTicksCount / 2;
 
   return Array.from(Array(count)).map((_, i) =>
-    createTick(startIndex + i, segmentWidth, startIndex + i === 0, step),
+    createTick(startIndex + i, segmentWidth, step),
   );
 };
 
@@ -39,7 +36,7 @@ export const getSubTicks = (
   subTickSegmentWidth: number,
 ) => {
   return Array.from(Array(subTickCount)).map((_, i) =>
-    createTick(i + 1, subTickSegmentWidth, false, 1),
+    createTick(i + 1, subTickSegmentWidth, 1),
   );
 };
 
@@ -64,19 +61,12 @@ export const getTicks = (
   const zoomStepBreakpoint = zoomStepBreakpointRule(zoom);
 
   const tickSegmentWidth = tickSegmentWidthRule(zoom);
-  // const subTickSegmentWidth = subTickSegmentWidthRule(zoom);
 
   const tickSegmentWidthZoomed = getTickSegmentWidthZoomed(
     tickSegmentWidth.min,
     zoom,
     zoomStepBreakpoint,
   );
-
-  // const subTickSegmentWidthZoomed = getTickSegmentWidthZoomed(
-  //   subTickSegmentWidth.min,
-  //   zoom,
-  //   zoomStepBreakpoint,
-  // );
 
   const subTickCount = subTickCountRule(step);
 

@@ -68,13 +68,12 @@ export const useAudioEditorTrack = (
       return;
     }
 
-    const virtualScrollOffsetX = timeline.scroll * timeline.pixelsPerSecond;
     const bufferViewWidth = 400;
 
     const isVisible =
       trackStartXGlobal <
-        timeline.timelineClientWidth + virtualScrollOffsetX + bufferViewWidth &&
-      trackEndXGlobal > virtualScrollOffsetX - bufferViewWidth;
+        timeline.timelineClientWidth + timeline.scroll + bufferViewWidth &&
+      trackEndXGlobal > timeline.scroll - bufferViewWidth;
 
     if (isVisible) {
       trackRef.current.classList.remove('content-hidden');
@@ -120,11 +119,9 @@ export const useAudioEditorTrack = (
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
-      const virtualScrollOffsetX =
-        timeline.scroll * timeline.timelineContainer.pixelsPerSecond;
-      return globalX - virtualScrollOffsetX;
+      return globalX - timeline.scroll;
     },
-    [timeline.timelineContainer.pixelsPerSecond, timeline.scroll],
+    [timeline],
   );
 
   const updateTrackHorizontalPosition = useCallback(() => {
@@ -146,11 +143,14 @@ export const useAudioEditorTrack = (
 
   const calcNewStartTime = useCallback(
     (pageX: number, track: AudioEditorTrack, leftBound: number = 0) => {
-      const currentTime = timeline.virtualPixelsToTime(pageX);
-      const dragStartTime = timeline.virtualPixelsToTime(track.dndInfo.startX);
+      const currentTime = timeline.mapGlobalToTime(pageX);
+      const dragStartTime = timeline.mapGlobalToTime(track.dndInfo.startX);
 
       const timeOffset =
-        currentTime - dragStartTime - track.dndInfo.scroll + timeline.scroll;
+        currentTime -
+        dragStartTime -
+        track.dndInfo.scroll / timeline.pixelsPerSecond +
+        timeline.scroll / timeline.pixelsPerSecond;
 
       return clamp(track.dndInfo.startTime + timeOffset, leftBound);
     },

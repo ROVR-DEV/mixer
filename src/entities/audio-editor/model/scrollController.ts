@@ -11,7 +11,7 @@ export const scrollRule = (
   return value + (increase ? 1 : -1) * step;
 };
 
-const SCROLL_DELTA_X_STEP_COEFFICIENT = 10;
+const SCROLL_DELTA_X_STEP_COEFFICIENT = 1;
 
 export class ScrollController extends ValueInRangeController {
   constructor(
@@ -31,7 +31,7 @@ export class ScrollController extends ValueInRangeController {
   public shiftX(deltaX: number): number {
     const coefficient = deltaX / SCROLL_DELTA_X_STEP_COEFFICIENT;
 
-    this.value = this.value + coefficient;
+    this.value += coefficient;
 
     return coefficient;
   }

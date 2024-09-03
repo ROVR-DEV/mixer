@@ -25,31 +25,13 @@ export interface TimelineZoomScrollProps {
   onChange?: (zoom: number, scroll: number, pixelsPerSecond: number) => void;
 }
 
-const getScrollToAdjustZoomOffset = (
-  x: number,
-  scroll: number,
-  currentZoom: number,
-  newZoom: number,
-  pixelsPerSecond: number,
-) => {
-  const virtualShift = scroll * pixelsPerSecond;
-
-  const newPixelsPerSeconds = newZoom * pixelsPerSecond;
-
-  const currentVirtualX = virtualShift + x * currentZoom;
-
-  const newVirtualX = virtualShift + x * newZoom;
-
-  return scroll + (newVirtualX - currentVirtualX) / newPixelsPerSeconds;
-};
-
 export const useTimelineZoomScroll = ({
   timelineRef,
   timelineRulerRef,
   startTime = 0,
   duration,
   zoomStep = 1.25,
-  scrollStep = 1,
+  scrollStep = 100, // Default chrome scroll step
   minZoom = 1,
   maxZoom = Math.pow(1.25, 33),
   timelineLeftPadding = TIMELINE_LEFT_PADDING,
@@ -85,33 +67,14 @@ export const useTimelineZoomScroll = ({
   );
 
   const scrollToZoom = useCallback(
-    (e: WheelEvent) => {
-      if (
-        (timeline.zoomController.value <= 1 && e.deltaY >= 0) ||
-        (timeline.zoomController.value >= Math.pow(1.25, 33) && e.deltaY <= 0)
-      ) {
-        return;
-      }
+    (prevTime: number, nextTime: number) => {
+      const timeDiff = prevTime - nextTime;
 
-      const newZoom = timeline.zoomController.rule(
-        timeline.zoomController.value,
-        timeline.zoomController.step,
-        e.deltaY <= 0,
-      );
+      const pixelsDiff = timeDiff * timeline.pixelsPerSecond;
 
-      const x =
-        e.pageX - timeline.boundingClientRect.x - timeline.timelineLeftPadding;
-
-      timeline.scrollController.value = getScrollToAdjustZoomOffset(
-        x,
-        timeline.scrollController.value,
-        timeline.zoomController.value,
-        newZoom,
-        timeline.timelineContainer.pixelsPerSecond,
-      );
+      timeline.scrollController.value += pixelsDiff;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeline.scrollController, timeline.zoomController],
+    [timeline],
   );
 
   const handleWheelZoom = useCallback(
@@ -122,7 +85,7 @@ export const useTimelineZoomScroll = ({
         audioEditor.fit();
       }
 
-      isZoomIn
+      return isZoomIn
         ? timeline.zoomController.increase()
         : timeline.zoomController.decrease();
     },
@@ -144,8 +107,14 @@ export const useTimelineZoomScroll = ({
         e.preventDefault();
         e.stopPropagation();
 
+        const prevTime = timeline.mapGlobalToTime(e.pageX);
+
+        timeline.zoomController.value;
         handleWheelZoom(e.deltaY);
-        scrollToZoom(e);
+
+        const nextTime = timeline.mapGlobalToTime(e.pageX);
+
+        scrollToZoom(prevTime, nextTime);
       }
 
       // Mouse scroll
@@ -163,7 +132,7 @@ export const useTimelineZoomScroll = ({
         handleWheelHorizontalScroll(e.deltaX);
       }
     },
-    [handleWheelHorizontalScroll, handleWheelZoom, scrollToZoom],
+    [handleWheelHorizontalScroll, handleWheelZoom, scrollToZoom, timeline],
   );
 
   // Zoom/scroll change listeners

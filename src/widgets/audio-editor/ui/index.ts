@@ -10,3 +10,4 @@ export * from './TimelineView';
 export * from './TimelineChannelsList';
 export * from './AudioEditorContentHeader';
 export * from './AudioEditorContentBody';
+export * from './TimelineInfo';

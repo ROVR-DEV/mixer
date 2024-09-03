@@ -174,11 +174,7 @@ export class Timeline {
   }
 
   get ticks(): TimelineTicks {
-    return getTicksForSeconds(
-      this.timelineClientWidth,
-      this.zoom,
-      this.scroll * this.timelineContainer.pixelsPerSecond,
-    );
+    return getTicksForSeconds(this.timelineClientWidth, this.zoom, this.scroll);
   }
 
   addWheelListener = (listener: WheelEventListener) => {
@@ -259,10 +255,27 @@ export class Timeline {
     return time * this.timelineContainer.pixelsPerSecond;
   };
 
+  /**
+   * @deprecated
+   */
   virtualPixelsToTime = (x: number) => {
     return this.realLocalPixelsToGlobal(
       this.virtualToRealPixels(x - this.boundingClientRect.x),
     );
+  };
+
+  mapGlobalToTime = (x: number, isPageCoordinates: boolean = true) => {
+    if (isPageCoordinates) {
+      x -= this.boundingClientRect.x;
+    }
+
+    x -= this.timelineLeftPadding;
+
+    x += this.scroll;
+
+    x /= this.pixelsPerSecond;
+
+    return x;
   };
 
   setViewBoundsInPixels = (startX: number, endX: number): void => {
@@ -310,8 +323,9 @@ export class Timeline {
   ) => {
     runInAction(() => {
       this.scrollController.max =
-        (timelineScrollWidth - timelineClientWidth) / pixelsPerSecond +
-        this.startTime;
+        timelineScrollWidth -
+        timelineClientWidth +
+        this.startTime * pixelsPerSecond;
 
       this._timelineClientHeight = timelineClientHeight;
       this._timelineClientWidth = timelineClientWidth;
@@ -332,8 +346,6 @@ export class Timeline {
     runInAction(() => {
       this.timelineContainer.pixelsPerSecond = getPixelPerSeconds(zoom);
       this._zoom = zoom;
-
-      this.scrollController.step = 50 / this.zoom;
     });
   };
 }
