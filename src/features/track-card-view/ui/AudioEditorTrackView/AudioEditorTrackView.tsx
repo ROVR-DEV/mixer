@@ -91,6 +91,14 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     disableInteractive || !isDraggable,
   );
 
+  const [isDraggedBefore, setIsDraggedBefore] = useState(false);
+
+  useEffect(() => {
+    if (isDragging) {
+      setIsDraggedBefore(true);
+    }
+  }, [isDragging]);
+
   const { onClick: onElementClick, onMouseDown: onElementMouseDown } =
     useIsMouseClickStartsOnThisSpecificElement();
 
@@ -127,6 +135,11 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         return;
       }
 
+      if (isDraggedBefore) {
+        setIsDraggedBefore(false);
+        return;
+      }
+
       if (e.detail === 1) {
         if (audioEditor.tool === 'cursor') {
           if (disableInteractive) {
@@ -159,10 +172,11 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [
       onElementClick,
       audioEditor,
+      disableInteractive,
+      isDraggedBefore,
+      cursorOnClick,
       track,
       timeline,
-      disableInteractive,
-      cursorOnClick,
     ],
   );
 
