@@ -73,11 +73,12 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
       return;
     }
 
-    if (
-      audioEditor.editableTrack.isTrimming &&
-      timeline.scroll > audioEditor.editableTrack.trimStartTime
-    ) {
-      timeline.scroll = audioEditor.editableTrack.trimStartTime;
+    const trackStartX =
+      audioEditor.editableTrack.trimStartTime * timeline.pixelsPerSecond +
+      timeline.timelineLeftPadding;
+
+    if (audioEditor.editableTrack.isTrimming && timeline.scroll > trackStartX) {
+      timeline.scroll = trackStartX;
     }
   }, [
     audioEditor.editableTrack,
@@ -91,7 +92,11 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
       return;
     }
 
-    timeline.scroll = audioEditor.editableTrack.trimStartTime;
+    const trackStartX =
+      audioEditor.editableTrack.trimStartTime * timeline.pixelsPerSecond +
+      timeline.timelineLeftPadding;
+
+    timeline.scroll = trackStartX;
   }, [audioEditor.editableTrack, timeline]);
 
   useEffect(() => {

@@ -322,6 +322,7 @@ export class Timeline {
     size: Rect | null,
   ) => {
     runInAction(() => {
+      this.scrollController.min = this.startTime * pixelsPerSecond;
       this.scrollController.max =
         timelineScrollWidth -
         timelineClientWidth +

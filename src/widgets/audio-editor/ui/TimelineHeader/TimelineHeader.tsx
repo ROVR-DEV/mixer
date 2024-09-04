@@ -26,6 +26,7 @@ import { TimelineHeaderProps } from './interfaces';
 export const TimelineHeader = observer(function TimelineHeader({
   rulerRef,
   centerLine,
+  endBorder,
   className,
   ...props
 }: TimelineHeaderProps) {
@@ -84,14 +85,14 @@ export const TimelineHeader = observer(function TimelineHeader({
       {...props}
     >
       <TimelinePlayHeadView className='absolute z-20' />
-      <AudioEditorRegionPanel className='absolute top-[50px] z-20 h-[12px] w-full overflow-x-clip' />
+      <AudioEditorRegionPanel className='absolute bottom-px z-20 h-[12px] w-full overflow-x-clip' />
       <TimelineRulerMemoized
         className='pointer-events-none w-full'
         centerLine={centerLine}
         canvasProps={canvasProps}
         controlRef={rulerControlRef}
       />
-      <TimelineEndBorder />
+      {!endBorder ? null : <TimelineEndBorder />}
     </div>
   );
 });

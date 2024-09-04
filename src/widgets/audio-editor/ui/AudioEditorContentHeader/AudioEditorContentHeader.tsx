@@ -19,7 +19,11 @@ export const AudioEditorContentHeader = ({
         playlist={playlist}
         style={{ minWidth: SIDEBAR_WIDTH }}
       />
-      <TimelineHeader className='pb-[9px]' rulerRef={rulerWrapperRef} />
+      <TimelineHeader
+        className='mb-[9px]'
+        rulerRef={rulerWrapperRef}
+        endBorder
+      />
     </div>
   );
 };
