@@ -23,8 +23,8 @@ export const TrimBackgroundView = observer(function TrimBackgroundView({
           className,
         )}
         style={{
-          width: timeline.timeToVirtualPixels(track.duration),
-          left: -timeline.timeToVirtualPixels(track.startTrimDuration),
+          width: timeline.timeToPixels(track.duration),
+          left: -timeline.timeToPixels(track.startTrimDuration),
         }}
         {...props}
       />

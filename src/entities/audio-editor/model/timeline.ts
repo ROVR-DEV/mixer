@@ -205,65 +205,12 @@ export class Timeline {
     this._wheelEventTriggerElements.delete(element);
   };
 
-  mapPixelsToLocal = (x: number) => {
-    return x + this.scroll;
-  };
-
-  mapPixelsToGlobal = (x: number) => {
-    return x - this.scroll;
-  };
-
-  timeToPixels = (time: number) => {
-    return (
-      time * this.pixelsPerSecond +
-      this.timelineLeftPadding * this.timelineContainer.pixelsPerSecond
-    );
-  };
-
-  pixelsToTime = (x: number, relativeToContainer = true) => {
-    return (
-      (x -
-        (relativeToContainer ? this.boundingClientRect.x : 0) -
-        this.timelineLeftPadding) /
-      this.timelineContainer.pixelsPerSecond
-    );
-  };
-
-  realGlobalPixelsToLocal = (x: number) => {
-    return x - this._scroll;
-  };
-
-  realLocalPixelsToGlobal = (x: number) => {
-    return x + this._scroll;
-  };
-
-  virtualToRealPixels = (x: number) => {
-    return (
-      (x - this._timelineLeftPadding) / this.timelineContainer.pixelsPerSecond
-    );
-  };
-
-  virtualToRealGlobalPixels = (x: number) => {
-    return this.realLocalPixelsToGlobal(this.virtualToRealPixels(x));
-  };
-
-  realToVirtualPixels = (x: number) => {
-    return x * this.timelineContainer.pixelsPerSecond;
-  };
-
-  timeToVirtualPixels = (time: number) => {
-    return time * this.timelineContainer.pixelsPerSecond;
-  };
-
   /**
-   * @deprecated
+   * @description Map pixels relative to the timeline container view with scroll to time
+   * @param x x coordinate in pixels
+   * @param isPageCoordinates is the x coordinate relative to the page or to the timeline container
+   * @returns time in seconds
    */
-  virtualPixelsToTime = (x: number) => {
-    return this.realLocalPixelsToGlobal(
-      this.virtualToRealPixels(x - this.boundingClientRect.x),
-    );
-  };
-
   mapGlobalToTime = (x: number, isPageCoordinates: boolean = true) => {
     if (isPageCoordinates) {
       x -= this.boundingClientRect.x;
@@ -278,9 +225,63 @@ export class Timeline {
     return x;
   };
 
+  /**
+   * @description Map pixels relative to the timeline container except scroll to time
+   * @param x x coordinate in pixels
+   * @param isPageCoordinates is the x coordinate relative to the page or to the timeline container
+   * @returns time in seconds
+   */
+  mapLocalToTime = (x: number, isPageCoordinates: boolean = true): number => {
+    if (isPageCoordinates) {
+      x -= this.boundingClientRect.x;
+    }
+
+    x -= this.timelineLeftPadding;
+
+    x /= this.pixelsPerSecond;
+
+    return x;
+  };
+
+  /**
+   *
+   * @param time time in seconds
+   * @returns x coordinate in pixels relative to the timeline container view with scroll
+   */
+  timeToGlobal = (time: number): number => {
+    return time * this.pixelsPerSecond + this.timelineLeftPadding;
+  };
+
+  /**
+   *
+   * @param time time in seconds
+   * @returns x coordinate in pixels relative to the timeline container without scroll
+   */
+  timeToLocal = (time: number): number => {
+    return time * this.pixelsPerSecond + this.timelineLeftPadding - this.scroll;
+  };
+
+  /**
+   * @description Convert time to pixels
+   * @param time time in seconds
+   * @returns pixels
+   */
+  timeToPixels = (time: number): number => {
+    return time * this.pixelsPerSecond;
+  };
+
+  /**
+   * @description Convert pixels to time
+   * @param x pixels
+   * @returns time in seconds
+   */
+  pixelsToTime = (x: number): number => {
+    return x * this.pixelsPerSecond;
+  };
+
   setViewBoundsInPixels = (startX: number, endX: number): void => {
     runInAction(() => {
-      const startTime = clamp(this.virtualToRealPixels(startX), 0);
+      const startTime = clamp(this.mapLocalToTime(startX, false), 0);
       const newZoom = clamp(this._getNewZoomToReachBounds(startX, endX), 0.1);
 
       if (!isNaN(newZoom)) {

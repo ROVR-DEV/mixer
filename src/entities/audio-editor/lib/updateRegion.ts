@@ -26,7 +26,7 @@ export const updateRegionRect = (
   }
 
   region.setBounds(
-    timeline.pixelsToTime(rect.left),
-    timeline.pixelsToTime(rect.right),
+    timeline.mapLocalToTime(rect.left),
+    timeline.mapLocalToTime(rect.right),
   );
 };

@@ -14,17 +14,6 @@ export const usePlayHead = (
     [timeline.timelineClientHeight],
   );
 
-  const getPlayHeadPosition = useCallback(
-    (time: number) => {
-      return (
-        timeline.timeToVirtualPixels(time) -
-        timeline.scroll +
-        timeline.timelineLeftPadding
-      );
-    },
-    [timeline],
-  );
-
   const setViewToPlayHead = useCallback(
     (playHeadPosition: number) => {
       const globalPlayHeadPosition = playHeadPosition + timeline.scroll;
@@ -74,7 +63,7 @@ export const usePlayHead = (
         return;
       }
 
-      const newPosition = getPlayHeadPosition(time);
+      const newPosition = timeline.timeToLocal(time);
 
       setPlayHeadPosition(newPosition);
       if (isPlaying) {
@@ -83,10 +72,10 @@ export const usePlayHead = (
       updatePlayHeadDisplayState(newPosition);
     },
     [
-      getPlayHeadPosition,
       playHeadRef,
       setPlayHeadPosition,
       setViewToPlayHead,
+      timeline,
       updatePlayHeadDisplayState,
     ],
   );

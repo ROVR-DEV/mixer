@@ -26,7 +26,7 @@ export const FadeOverlay = observer(function FadePoint({
   const { fadeDuration, ariaAttributes } = useFadeData(track, side, timeline);
 
   const width = useMemo(
-    () => timeline.timeToVirtualPixels(fadeDuration),
+    () => timeline.timeToPixels(fadeDuration),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fadeDuration, timeline, timeline.zoom],
   );

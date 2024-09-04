@@ -63,7 +63,7 @@ export const TrackWaveform = observer(function TrackWaveform({
         return;
       }
 
-      waveformRef.current.style.width = `${timeline.timeToVirtualPixels(trackDuration)}px`;
+      waveformRef.current.style.width = `${timeline.timeToPixels(trackDuration)}px`;
     },
     [timeline],
   );
@@ -92,7 +92,7 @@ export const TrackWaveform = observer(function TrackWaveform({
       <WaveformMemoized
         ref={waveformRef}
         className='absolute w-full'
-        style={{ left: -timeline.timeToVirtualPixels(track.startTrimDuration) }}
+        style={{ left: -timeline.timeToPixels(track.startTrimDuration) }}
         color={color}
         waveColor={track.color ?? undefined}
         trimStart={

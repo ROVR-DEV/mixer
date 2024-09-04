@@ -7,6 +7,7 @@ import { CustomDraggableProps } from '@/shared/ui';
 
 import {
   AudioEditor,
+  getTimeAfterDrag,
   isAudioEditorDragDataFilled,
   Timeline,
   // eslint-disable-next-line boundaries/element-types
@@ -64,11 +65,7 @@ export const useFadeMarkerDnD = ({
         return;
       }
 
-      const timeOffset =
-        timeline.pixelsToTime(data.x) -
-        timeline.pixelsToTime(customData.startX);
-
-      const newTime = customData.startTime + timeOffset;
+      const newTime = getTimeAfterDrag(timeline, data, customData);
 
       requestAnimationFrame(() => updateFade(newTime, track, side));
     },

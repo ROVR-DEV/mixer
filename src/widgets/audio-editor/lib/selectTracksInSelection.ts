@@ -32,10 +32,9 @@ const selectTrackInSelection = (
 
   const isIntersects = checkCollision(
     new Rect(
-      timeline.timeToVirtualPixels(track.trimStartTime) +
-        timeline.timelineLeftPadding,
+      timeline.timeToGlobal(track.trimStartTime),
       channelStartY + 7,
-      timeline.timeToVirtualPixels(track.trimDuration),
+      timeline.timeToPixels(track.trimDuration),
       timeline.trackHeight - 14,
     ),
     rect,
