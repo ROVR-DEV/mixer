@@ -27,9 +27,15 @@ export const useGlobalControls = (
   handler: (event: GlobalControlsEvent) => void,
 ) => {
   const handleHotKey = useCallback(
-    (e: KeyboardEvent) => processHotKey(e, KEY_BINDINGS, handler),
+    (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
+
+      processHotKey(e, KEY_BINDINGS, handler);
+    },
     [handler],
   );
 
-  useWindowEvent('keyup', handleHotKey);
+  useWindowEvent('keydown', handleHotKey);
 };
