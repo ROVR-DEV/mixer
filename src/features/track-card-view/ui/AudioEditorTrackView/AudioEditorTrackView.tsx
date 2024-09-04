@@ -16,6 +16,7 @@ import {
   cn,
   preventAll,
   useIsMouseClickStartsOnThisSpecificElement,
+  useWindowEvent,
 } from '@/shared/lib';
 import { Point, Rect } from '@/shared/model';
 
@@ -229,9 +230,6 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
           onRename={handleRename}
           onSnapLeft={handleSnapLeft}
           onSnapRight={handleSnapRight}
-          onClick={preventAll}
-          onMouseDown={preventAll}
-          onMouseUp={preventAll}
         />
       ) : null,
     [EditMenu, handleRename, handleSnapLeft, handleSnapRight],
@@ -256,10 +254,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioEditor.player.playlist?.id, track, track.meta.uuid]);
 
+  const isRightClickOnTrackRef = useRef(false);
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      preventAll(e);
-
+      e.preventDefault();
+      isRightClickOnTrackRef.current = true;
       setContextMenuPosition({ x: e.pageX, y: e.pageY });
     },
     [],
@@ -274,18 +274,22 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const contextMenu = useMemo(
     () =>
       ContextMenu ? (
-        <ContextMenu
-          ref={contextMenuRef}
-          onTrackRemove={handleTrackRemove}
-          onClick={preventAll}
-          onMouseDown={preventAll}
-          onMouseUp={preventAll}
-        />
+        <ContextMenu ref={contextMenuRef} onTrackRemove={handleTrackRemove} />
       ) : null,
     [ContextMenu, handleTrackRemove],
   );
 
   useOutsideClick(contextMenuRef, () => {
+    setContextMenuPosition(undefined);
+  });
+
+  // TODO: refactor
+  useWindowEvent('contextmenu', () => {
+    if (isRightClickOnTrackRef.current) {
+      isRightClickOnTrackRef.current = false;
+      return;
+    }
+
     setContextMenuPosition(undefined);
   });
   //#endregion

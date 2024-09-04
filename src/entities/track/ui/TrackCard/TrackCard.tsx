@@ -103,7 +103,6 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
           </PopoverTrigger>
           <PopoverContent
             className='z-[60]'
-            onClick={preventAll}
             onMouseDown={preventAll}
             onMouseUp={preventAll}
           >
@@ -114,7 +113,6 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
         <Popover open={!!contextMenuPosition}>
           <PopoverContent
             className='z-[60]'
-            onClick={preventAll}
             onMouseDown={preventAll}
             onMouseUp={preventAll}
             style={{
