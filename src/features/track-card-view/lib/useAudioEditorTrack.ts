@@ -424,7 +424,7 @@ export const useAudioEditorTrack = (
       }
 
       const dragUpdate = () => {
-        const side = shiftXTimeline(e, timeline);
+        const side = shiftXTimeline(e.x, timeline);
         track.dndInfo.currentX = e.pageX;
         setTime(e.pageX, track, leftBound);
         setVerticalPosition(e, track, minChannel, maxChannel);

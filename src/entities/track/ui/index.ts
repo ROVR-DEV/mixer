@@ -1,6 +1,6 @@
 export * from './EditBadge';
 export * from './FadeMarker';
-export * from './DraggableFadeMarker';
+export * from './TrackFadeMarker';
 export * from './FadeOverlay';
 export * from './FadeTriangle';
 export * from './TrackCard';

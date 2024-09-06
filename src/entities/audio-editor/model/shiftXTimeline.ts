@@ -22,14 +22,12 @@ const getTimelineRightScrollBounds = (timelineRect: Rect) => {
   };
 };
 
-export const shiftXTimeline = (e: MouseEvent, timeline: Timeline) => {
+export const shiftXTimeline = (mouseX: number, timeline: Timeline) => {
   const timelineElement = timeline.timelineContainer.timelineRef.current;
 
   if (!timelineElement) {
     return 0;
   }
-
-  const { x: mouseX } = e;
 
   const timelineRect = timelineElement.getBoundingClientRect();
 

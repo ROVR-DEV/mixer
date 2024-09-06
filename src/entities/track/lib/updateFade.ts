@@ -3,8 +3,8 @@ import { clamp } from '@/shared/lib';
 import { AudioEditorTrack, FadeSide } from '../model';
 
 export const updateFade = (
-  time: number,
   track: AudioEditorTrack,
+  time: number,
   side: FadeSide,
 ) => {
   const clampedTime = clamp(time, 0, track.duration);

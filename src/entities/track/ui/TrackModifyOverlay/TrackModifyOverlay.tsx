@@ -38,12 +38,12 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
       </div>
       <TrackTrimMarker
         className='absolute bottom-0 left-0 z-20 w-1/2 @[32px]:w-4'
-        trimSide='left'
+        side='left'
         track={track}
       />
       <TrackTrimMarker
         className='absolute bottom-0 right-0 z-20 w-1/2 @[32px]:w-4'
-        trimSide='right'
+        side='right'
         track={track}
       />
     </>

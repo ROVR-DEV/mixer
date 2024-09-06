@@ -1,6 +1,7 @@
 import { DraggableData } from 'react-draggable';
 
 import { clamp } from '@/shared/lib';
+import { RequireBy } from '@/shared/model';
 
 import { Timeline } from './timeline';
 
@@ -11,7 +12,7 @@ export type AudioEditorDragData = Partial<{
 
 export const isAudioEditorDragDataFilled = <T extends AudioEditorDragData>(
   data: T,
-): data is Required<T> =>
+): data is RequireBy<T, 'startTime' | 'startX'> =>
   data.startTime != undefined && data.startX != undefined;
 
 export const getTimeAfterDrag = (

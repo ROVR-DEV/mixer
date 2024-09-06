@@ -9,8 +9,8 @@ import { cn, preventAll } from '@/shared/lib';
 import { useTimeline } from '@/entities/audio-editor';
 
 import { useFadeData } from '../../lib';
-import { DraggableFadeMarker } from '../DraggableFadeMarker';
 import { FadeTriangleMemoized } from '../FadeTriangle';
+import { TrackFadeMarker } from '../TrackFadeMarker';
 
 import { FadeOverlayProps } from './interfaces';
 
@@ -41,7 +41,7 @@ export const FadeOverlay = observer(function FadePoint({
       }}
       {...props}
     >
-      <DraggableFadeMarker
+      <TrackFadeMarker
         className='absolute z-10'
         track={track}
         side={side}

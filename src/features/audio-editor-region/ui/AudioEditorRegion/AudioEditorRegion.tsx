@@ -90,11 +90,11 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
       </CustomDraggable>
       <RegionTrimMarker
         className='absolute -left-1 top-0 h-full w-2'
-        trimSide='left'
+        side='left'
       />
       <RegionTrimMarker
         className='absolute -right-1 top-0 h-full w-2'
-        trimSide='right'
+        side='right'
       />
     </div>
   );

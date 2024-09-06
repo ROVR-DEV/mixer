@@ -13,7 +13,7 @@ import { useRegionTrimMarker } from '../../lib';
 import { AudioEditorRegionTrimMarkerProps } from './interfaces';
 
 export const RegionTrimMarker = observer(function RegionTrimMarker({
-  trimSide,
+  side: trimSide,
   ...props
 }: AudioEditorRegionTrimMarkerProps) {
   const player = usePlayer();
@@ -33,7 +33,7 @@ export const RegionTrimMarker = observer(function RegionTrimMarker({
     >
       <TrimMakerMemoized
         ref={markerRef}
-        trimSide={trimSide}
+        side={trimSide}
         onClick={preventAll}
         {...props}
       />

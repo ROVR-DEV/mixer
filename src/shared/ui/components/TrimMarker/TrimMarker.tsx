@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib';
 import { TrimMarkerProps } from './interfaces';
 
 export const TrimMarker = forwardRef<HTMLDivElement, TrimMarkerProps>(
-  function TrimMaker({ trimSide, className, ...props }, ref) {
+  function TrimMaker({ side: trimSide, className, ...props }, ref) {
     return (
       <div
         ref={ref}

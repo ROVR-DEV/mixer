@@ -7,6 +7,7 @@ import { CustomDraggableProps } from '@/shared/ui';
 
 import {
   AudioEditor,
+  AudioEditorDragData,
   getTimeAfterDrag,
   isAudioEditorDragDataFilled,
   Timeline,
@@ -17,11 +18,6 @@ import { FadeSide, AudioEditorTrack } from '../model';
 
 import { updateFade } from './updateFade';
 
-type CustomDragData = {
-  startX: number;
-  startTime: number;
-};
-
 export interface UseFadeMarkerDnDProps {
   side: FadeSide;
   track: AudioEditorTrack | null;
@@ -30,7 +26,7 @@ export interface UseFadeMarkerDnDProps {
   audioEditor?: AudioEditor;
 }
 
-export const useFadeMarkerDnD = ({
+export const useTrackFadeMarkerDnD = ({
   side,
   track,
   timeline,
@@ -39,7 +35,7 @@ export const useFadeMarkerDnD = ({
   CustomDraggableProps,
   'onDrag' | 'onStart' | 'onStop'
 > => {
-  const onStart: CustomDragEventHandler<CustomDragData> = useCallback(
+  const onStart: CustomDragEventHandler<AudioEditorDragData> = useCallback(
     (_, data, customData) => {
       customData.startX = data.x;
       customData.startTime =
@@ -47,7 +43,6 @@ export const useFadeMarkerDnD = ({
           ? track?.filters.fadeInNode.endTime
           : track?.filters.fadeOutNode.startTime;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       side,
       track?.filters.fadeInNode.endTime,
@@ -55,7 +50,7 @@ export const useFadeMarkerDnD = ({
     ],
   );
 
-  const onDrag: CustomDragEventHandler<CustomDragData> = useCallback(
+  const onDrag: CustomDragEventHandler<AudioEditorDragData> = useCallback(
     (_, data, customData) => {
       if (!track?.filters) {
         return;
@@ -67,7 +62,7 @@ export const useFadeMarkerDnD = ({
 
       const newTime = getTimeAfterDrag(timeline, data, customData);
 
-      requestAnimationFrame(() => updateFade(newTime, track, side));
+      requestAnimationFrame(() => updateFade(track, newTime, side));
     },
     [side, timeline, track],
   );

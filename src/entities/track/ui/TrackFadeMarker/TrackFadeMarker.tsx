@@ -9,12 +9,12 @@ import { CustomDraggable } from '@/shared/ui';
 // eslint-disable-next-line boundaries/element-types
 import { useAudioEditor, useTimeline } from '@/entities/audio-editor';
 
-import { useFadeMarkerDnD } from '../../lib';
+import { useTrackFadeMarkerDnD } from '../../lib';
 import { FadeMarkerMemoized } from '../FadeMarker';
 
 import { FadeMarkerDragHandlerProps } from './interfaces';
 
-export const DraggableFadeMarker = observer(function FadeMarkerDragHandler({
+export const TrackFadeMarker = observer(function FadeMarkerDragHandler({
   track,
   side,
   ...props
@@ -24,7 +24,7 @@ export const DraggableFadeMarker = observer(function FadeMarkerDragHandler({
 
   const markerRef = useRef<HTMLDivElement | null>(null);
 
-  const draggableProps = useFadeMarkerDnD({
+  const draggableProps = useTrackFadeMarkerDnD({
     side,
     track,
     timeline,
