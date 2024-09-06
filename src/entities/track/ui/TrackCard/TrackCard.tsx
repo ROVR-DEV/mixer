@@ -33,6 +33,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       contextMenuContent,
       popoverBoundary,
       className,
+      style,
       children,
       ...props
     },
@@ -62,6 +63,15 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
       [popoverBoundary],
     );
 
+    const memoizedStyle = useMemo(
+      () => ({
+        color: color ?? '',
+        borderColor: color ?? '',
+        ...style,
+      }),
+      [color, style],
+    );
+
     return (
       <div
         className={cn(
@@ -74,13 +84,27 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             'grid-rows-[0_auto_0]': hideTitle,
           },
         )}
-        style={{
-          color: color ?? '',
-          borderColor: color ?? '',
-        }}
+        style={memoizedStyle}
         ref={ref}
         {...props}
       >
+        <div className='row-start-2 w-full py-px'>{waveformComponent}</div>
+
+        {!hideTitle && (
+          <TrackTitle
+            className={cn('row-start-3 px-1', {
+              'z-20': isEditingName,
+            })}
+            track={track}
+            isEditing={isEditingName}
+            onEdited={onNameEdited}
+          />
+        )}
+
+        <div className='absolute -left-px -top-px z-10 row-span-full size-[calc(100%_+_2px)] overflow-hidden rounded-lg'>
+          {children}
+        </div>
+
         <Popover
           placement='bottom-start'
           middleware={[flip({ padding: 5 }), offset(5), overflowMiddleware]}
@@ -123,22 +147,6 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             {contextMenuContent}
           </PopoverContent>
         </Popover>
-
-        <div className='row-start-2 w-full py-px'>{waveformComponent}</div>
-        {!hideTitle && (
-          <TrackTitle
-            className={cn('row-start-3 px-1', {
-              'z-20': isEditingName,
-            })}
-            track={track}
-            isEditing={isEditingName}
-            onEdited={onNameEdited}
-          />
-        )}
-
-        <div className='absolute -left-px -top-px z-10 row-span-full size-[calc(100%_+_2px)] overflow-hidden rounded-lg'>
-          {children}
-        </div>
       </div>
     );
   },

@@ -25,10 +25,9 @@ import {
   useHandleTimeSeek,
   useTimeline,
 } from '@/entities/audio-editor';
-import { removeTrack } from '@/entities/playlist';
 import { TrackCardMemoized } from '@/entities/track';
 
-import { snapTo, useAudioEditorTrack } from '../../lib';
+import { useAudioEditorTrack, useTrackEditMenuHandlers } from '../../lib';
 import { TrimBackgroundView } from '../TrimBackgroundView';
 
 import { AudioEditorTrackViewProps } from './interfaces';
@@ -66,13 +65,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     [disableInteractive, isSelectedInPlayer],
   );
 
-  const [isEditingName, setIsEditingName] = useState(false);
-
   const handleNameEdited = useCallback(
     (title: string | undefined, artist: string | undefined) => {
       track.setTitleAndArtist(title, artist);
-
-      setIsEditingName(false);
+      track.isEditingTitle = false;
 
       // TODO: make meta information observable to do not force update it on every change
       runInAction(() => {
@@ -200,59 +196,13 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   );
   //#endregion
 
-  //#region Edit menu
-  const handleSnapLeft = useCallback(
-    () => {
-      snapTo(track, 'left', audioEditor.player.tracks);
-      audioEditor.saveState();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
-  const handleSnapRight = useCallback(
-    () => {
-      snapTo(track, 'right', audioEditor.player.tracks);
-      audioEditor.saveState();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
-  const handleRename = useCallback(() => {
-    setIsEditingName(true);
-  }, []);
-
+  const editMenuHandlers = useTrackEditMenuHandlers(audioEditor, track);
   const editMenu = useMemo(
-    () =>
-      EditMenu ? (
-        <EditMenu
-          onRename={handleRename}
-          onSnapLeft={handleSnapLeft}
-          onSnapRight={handleSnapRight}
-        />
-      ) : null,
-    [EditMenu, handleRename, handleSnapLeft, handleSnapRight],
+    () => (EditMenu ? <EditMenu {...editMenuHandlers} /> : null),
+    [EditMenu, editMenuHandlers],
   );
-  //#endregion
 
   //#region Context menu
-  const handleTrackRemove = useCallback(async () => {
-    if (audioEditor.player.playlist?.id === undefined) {
-      return;
-    }
-
-    track.channel.removeTrack(track);
-    const res = await removeTrack(
-      audioEditor.player.playlist.id,
-      track.meta.uuid,
-    );
-    if (res.error) {
-      track.channel.addTrack(track);
-    }
-    setContextMenuPosition(undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioEditor.player.playlist?.id, track, track.meta.uuid]);
 
   const isRightClickOnTrackRef = useRef(false);
 
@@ -272,11 +222,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
 
   const contextMenu = useMemo(
-    () =>
-      ContextMenu ? (
-        <ContextMenu ref={contextMenuRef} onTrackRemove={handleTrackRemove} />
-      ) : null,
-    [ContextMenu, handleTrackRemove],
+    () => ContextMenu && <ContextMenu ref={contextMenuRef} track={track} />,
+    [ContextMenu, track],
   );
 
   useOutsideClick(contextMenuRef, () => {
@@ -294,11 +241,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   });
   //#endregion
 
+  // Stop editing track title if track unselected
   useEffect(() => {
     if (!isSelected) {
-      setIsEditingName(false);
+      track.isEditingTitle = false;
     }
-  }, [isSelected]);
+  }, [isSelected, track]);
 
   // Debug
   const title = process.env.NEXT_PUBLIC_DEBUG_SHOW_TRACKS_ID
@@ -311,6 +259,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       className={cn('absolute z-0', className, {
         // Push track up when dragging over timeline
         'z-30': !disableInteractive && (track.isTrimming || isDragging),
+        // Disable interaction, example in track editor
         'pointer-events-none': !isInteractive,
       })}
       title={title}
@@ -331,7 +280,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         isSolo={track.channel?.isSolo}
         isSelected={isSelected}
         hideEditButton={!isDraggable}
-        isEditingName={isEditingName}
+        isEditingName={track.isEditingTitle}
         onNameEdited={handleNameEdited}
         editPopoverContent={editMenu}
         contextMenuPosition={contextMenuPosition}

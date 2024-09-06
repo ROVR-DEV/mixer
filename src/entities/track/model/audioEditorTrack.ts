@@ -64,6 +64,7 @@ export class AudioEditorTrack {
   private _filters: AudioFilters = new AudioFilters();
   private _color: string | null = null;
   private _isTrimming: boolean = false;
+  private _isEditingTitle: boolean = false;
 
   get isPeaksReady(): boolean {
     return this._isPeaksReady;
@@ -103,6 +104,13 @@ export class AudioEditorTrack {
   }
   set isTrimming(value: boolean) {
     this._isTrimming = value;
+  }
+
+  get isEditingTitle() {
+    return this._isEditingTitle;
+  }
+  set isEditingTitle(value: boolean) {
+    this._isEditingTitle = value;
   }
 
   get trimStartTime(): number {

@@ -5,8 +5,8 @@ import { observer } from 'mobx-react-lite';
 import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
 
 import { AudioEditorTrackView } from '@/features/track-card-view';
-import { TrackContextMenu } from '@/features/track-context-menu';
-import { TrackEditMenu } from '@/features/track-edit-menu';
+import { TrackContextMenuView } from '@/features/track-context-menu';
+import { TrackEditMenuMemoized } from '@/features/track-edit-menu';
 
 import { AudioEditorTracksViewProps } from './interfaces';
 
@@ -20,8 +20,8 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         key={`track-${track.id}`}
         track={track}
         waveformComponent={<TrackWaveform track={track} />}
-        editMenu={TrackEditMenu}
-        contextMenu={TrackContextMenu}
+        editMenu={TrackEditMenuMemoized}
+        contextMenu={TrackContextMenuView}
       >
         <TrackModifyOverlay track={track} />
       </AudioEditorTrackView>

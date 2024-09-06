@@ -1,9 +1,12 @@
 import { TrackCardProps, AudioEditorTrack } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
-import { TrackContextMenu } from '@/features/track-context-menu';
-// eslint-disable-next-line boundaries/element-types
-import { TrackEditMenu } from '@/features/track-edit-menu';
+import { TrackContextMenuView } from '@/features/track-context-menu';
+import {
+  TrackEditMenu,
+  TrackEditMenuMemoized,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/features/track-edit-menu';
 
 export interface AudioEditorTrackViewProps
   extends Omit<
@@ -18,6 +21,6 @@ export interface AudioEditorTrackViewProps
   > {
   track: AudioEditorTrack;
   disableInteractive?: boolean;
-  editMenu?: typeof TrackEditMenu;
-  contextMenu?: typeof TrackContextMenu;
+  editMenu?: typeof TrackEditMenu | typeof TrackEditMenuMemoized;
+  contextMenu?: typeof TrackContextMenuView;
 }
