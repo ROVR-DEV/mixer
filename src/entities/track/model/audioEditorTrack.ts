@@ -201,38 +201,53 @@ export class AudioEditorTrack {
   };
 
   split = (time: number) => {
-    const trackCopy = this.clone();
+    const clonedTrack = this.clone();
 
-    trackCopy.setStartTrimDuration(time - trackCopy.startTime);
-    trackCopy.setEndTrimDuration(this.endTrimDuration);
-    trackCopy.setStartTime(time);
+    // Set clonedTrack start time on split time
+    clonedTrack.startTrimDuration = time - clonedTrack.startTime;
+    clonedTrack.setStartTime(time);
 
-    trackCopy.filters.fadeOutNode.linearFadeOut(
-      this.filters.fadeOutNode.startTime,
-      this.filters.fadeOutNode.duration,
+    // Reset cloned track fade in filter
+    clonedTrack.filters.fadeInNode.linearFadeIn(
+      clonedTrack.startTrimDuration,
+      clonedTrack.startTrimDuration,
     );
 
+    clonedTrack.filters.fadeOutNode.linearFadeOut(
+      this.filters.fadeOutNode.startTime,
+      this.filters.fadeOutNode.endTime,
+    );
+
+    // Set original track end time on split time
+    this.endTrimDuration = this.endTime - time;
+
+    // Reset original track fade out filter
     this.filters.fadeOutNode.linearFadeOut(
       this.duration - this.endTrimDuration,
-      0,
+      this.duration - this.endTrimDuration,
     );
 
-    this.setEndTrimDuration(this.endTime - time);
-
-    this.channel.addTrack(trackCopy);
+    this.channel.addTrack(clonedTrack);
 
     adjustTracksOnPaste(this);
-    adjustTracksOnPaste(trackCopy);
+    adjustTracksOnPaste(clonedTrack);
 
-    return trackCopy;
+    return clonedTrack;
   };
 
   clone = () => {
     const clonedTrack = new AudioEditorTrack(this.meta, this.channel);
+
     clonedTrack.color = this.color;
+
     clonedTrack.load(this.mediaElement.src);
     clonedTrack.audioPeaks = this.audioPeaks;
-    clonedTrack.setStartTime(this.startTime);
+
+    clonedTrack.startTrimDuration = this.startTrimDuration;
+    clonedTrack.endTrimDuration = this.endTrimDuration;
+    clonedTrack.startTime = this.startTime;
+    clonedTrack.endTime = this.endTime;
+
     clonedTrack._isPeaksReady = this._isPeaksReady;
 
     return clonedTrack;

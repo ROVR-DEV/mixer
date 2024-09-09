@@ -2,7 +2,13 @@
 
 import { throttle } from 'lodash-es';
 import { runInAction } from 'mobx';
-import React, { RefObject, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 
 import { clamp, useRepeatFun } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
@@ -440,11 +446,15 @@ export const useAudioEditorTrack = (
     ],
   );
 
+  const lastMouseEventRef = useRef<MouseEvent | null>(null);
+
   const onDrag = useCallback(
     (e: MouseEvent) => {
       if (disableInteractive) {
         return;
       }
+
+      lastMouseEventRef.current = e;
 
       handleDrag(e);
     },
@@ -506,6 +516,16 @@ export const useAudioEditorTrack = (
     track.startTime,
     updateTrackAnimation,
   ]);
+
+  // Stop drag on unmount
+  useEffect(() => {
+    return () => {
+      if (lastMouseEventRef.current) {
+        track.dndInfo.isDragging = false;
+        stopDragUpdate();
+      }
+    };
+  }, [stopDragUpdate, track.dndInfo]);
 
   useEffect(() => {
     const updateTrackAnimationWithEvent = () => {

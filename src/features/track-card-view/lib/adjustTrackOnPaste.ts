@@ -1,6 +1,7 @@
 import { AudioEditorTrack } from '@/entities/track';
 
 export const adjustTracksOnPaste = (currentTrack: AudioEditorTrack) => {
+  const tracksToDelete: AudioEditorTrack[] = [];
   currentTrack.channel.tracks.forEach((track) => {
     if (currentTrack.id === track.id) {
       return;
@@ -11,7 +12,7 @@ export const adjustTracksOnPaste = (currentTrack: AudioEditorTrack) => {
       currentTrack.trimEndTime >= track.trimEndTime;
 
     if (trackIntersectsFull) {
-      currentTrack.channel.removeTrack(track);
+      tracksToDelete.push(track);
       return;
     }
 
@@ -40,4 +41,6 @@ export const adjustTracksOnPaste = (currentTrack: AudioEditorTrack) => {
       track.setEndTrimDuration(endOverlapTime);
     }
   });
+
+  tracksToDelete.forEach((track) => currentTrack.channel.removeTrack(track));
 };
