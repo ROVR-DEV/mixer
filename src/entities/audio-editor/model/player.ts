@@ -229,7 +229,11 @@ export class ObservablePlayer implements Player {
   };
 
   setTime = (time: number) => {
-    const newTime = clamp(time, 0);
+    const newTime = clamp(
+      time,
+      0,
+      this.playlist?.duration_in_seconds ?? Infinity,
+    );
     this._time = newTime;
     this._timer?.setTime(newTime * 1000);
     this._emitter.emit('timeupdate', newTime);
@@ -289,6 +293,14 @@ export class ObservablePlayer implements Player {
   }
 
   private _onTimeUpdate = (time: number) => {
+    if (
+      this.playlist?.duration_in_seconds &&
+      time >= this.playlist?.duration_in_seconds
+    ) {
+      this.stop();
+      return;
+    }
+
     this._time = time;
     this._process(time);
     this._emitter.emit('timeupdate', time);

@@ -64,6 +64,7 @@ export class Timer {
   private _tick = (timestamp: number) => {
     if (this.status !== 'started') {
       this.stop();
+      return;
     }
 
     const delta = timestamp - (this.startTimestamp || timestamp);

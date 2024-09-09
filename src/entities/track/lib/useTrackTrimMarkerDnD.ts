@@ -91,10 +91,12 @@ export const useTrackTrimMarkerDnD = ({
 
       const { leftNeighbor, rightNeighbor } = getTrackNeighbors(track);
 
-      customData.leftTimeBound = leftNeighbor?.trimEndTime ?? 0;
-      customData.rightTimeBound = rightNeighbor?.trimStartTime ?? Infinity;
+      customData.leftTimeBound =
+        leftNeighbor?.trimEndTime ?? timeline.startTime;
+      customData.rightTimeBound =
+        rightNeighbor?.trimStartTime ?? timeline.endTime;
     },
-    [track],
+    [track, timeline],
   );
 
   const updateTrim: CustomDragEventHandler<TrackTrimDragData> = useCallback(

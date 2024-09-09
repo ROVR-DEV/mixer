@@ -29,6 +29,9 @@ export interface AudioEditor {
   readonly selectedTracks: Set<AudioEditorTrack>;
 
   readonly draggingTracksMinStartTime: number;
+  readonly draggingTracksMaxStartTime: number;
+
+  readonly draggingTracksMaxDuration: number;
 
   readonly draggingTracksMinChannelIndex: number;
   readonly draggingTracksMaxChannelIndex: number;
@@ -127,6 +130,20 @@ export class ObservableAudioEditor implements AudioEditor {
       const startTime = track.dndInfo.startTime;
       return minStartTime < startTime ? minStartTime : startTime;
     }, Infinity);
+  }
+
+  get draggingTracksMaxStartTime(): number {
+    return this.draggingTracks.reduce((maxStartTime, track) => {
+      const startTime = track.dndInfo.startTime;
+      return maxStartTime > startTime ? maxStartTime : startTime;
+    }, 0);
+  }
+
+  get draggingTracksMaxDuration(): number {
+    return this.draggingTracks.reduce((maxDuration, track) => {
+      const duration = track.dndInfo.duration;
+      return maxDuration > duration ? maxDuration : duration;
+    }, 0);
   }
 
   get draggingTracksMinChannelIndex(): number {

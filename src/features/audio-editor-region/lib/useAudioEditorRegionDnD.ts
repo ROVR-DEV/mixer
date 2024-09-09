@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 
+import { clamp } from '@/shared/lib';
 import { CustomDragEventHandler } from '@/shared/model';
 import { CustomDraggableProps } from '@/shared/ui';
 
@@ -39,7 +40,11 @@ export const useAudioEditorRegionDnD = (
         return;
       }
 
-      const newTime = getTimeAfterDrag(timeline, data, customData);
+      const newTime = clamp(
+        getTimeAfterDrag(timeline, data, customData),
+        0,
+        timeline.endTime - player.region.duration,
+      );
 
       requestAnimationFrame(() =>
         player.region.setBounds(newTime, newTime + player.region.duration),

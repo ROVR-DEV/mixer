@@ -16,8 +16,7 @@ export const useAudioEditorRegion = (player: Player, timeline: Timeline) => {
 
   const offsetRect = useMemo(
     () => new Rect(timeline.scroll, 0, 0, 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeline, timeline.scroll],
+    [timeline.scroll],
   );
 
   return useSelection({

@@ -16,21 +16,14 @@ export const TimelineEndBorder = observer(function TimelineEndBorder({
 
   const position = useMemo(() => {
     return (
-      timeline.timelineScrollWidth -
-      timeline.scroll -
-      -timeline.timelineLeftPadding -
-      20
+      timeline.timelineScrollWidth - timeline.scroll - timeline.endBorderWidth
     );
-  }, [
-    timeline.scroll,
-    timeline.timelineLeftPadding,
-    timeline.timelineScrollWidth,
-  ]);
+  }, [timeline.endBorderWidth, timeline.scroll, timeline.timelineScrollWidth]);
 
   return (
     <div
-      className={cn('absolute w-[20px] bg-black/40 h-full', className)}
-      style={{ left: position }}
+      className={cn('absolute bg-black/40 h-full', className)}
+      style={{ width: timeline.endBorderWidth, left: position }}
       {...props}
     />
   );

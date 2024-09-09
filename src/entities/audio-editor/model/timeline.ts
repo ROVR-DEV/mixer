@@ -23,8 +23,9 @@ export interface TimelineProps {
   maxZoom: number;
   minScroll: number;
   maxScroll?: number;
-  totalTime: number;
+  totalTime?: number;
   startTime?: number;
+  endTime: number;
   timelineLeftPadding?: number;
 }
 
@@ -55,7 +56,11 @@ export class Timeline {
   boundingClientRect: Rect;
 
   totalTime: number;
+
   startTime: number;
+  endTime: number;
+
+  endBorderWidth: number = 20;
 
   get disableListeners(): boolean {
     return this._disableListeners;
@@ -124,23 +129,26 @@ export class Timeline {
     maxScroll,
     totalTime,
     startTime = 0,
+    endTime,
     timelineLeftPadding = 0,
   }: TimelineProps) {
+    this.totalTime = totalTime ?? endTime + 6;
+
     this.zoomController = new ZoomController(zoomStep, minZoom, maxZoom);
 
     this.scrollController = new ScrollController(
       scrollStep,
       minScroll,
-      maxScroll ?? totalTime,
+      maxScroll ?? this.totalTime,
     );
 
     this.timelineContainer = new TimelineContainerObserver(
       timelineRef,
-      totalTime,
+      this.totalTime,
     );
 
-    this.totalTime = totalTime;
     this.startTime = startTime;
+    this.endTime = endTime;
 
     this._zoom = this.zoomController.value;
     this._scroll = this.scrollController.value;

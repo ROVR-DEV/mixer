@@ -2,15 +2,9 @@
 
 import { throttle } from 'lodash-es';
 import { runInAction } from 'mobx';
-import React, {
-  RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo } from 'react';
 
-import { clamp } from '@/shared/lib';
+import { clamp, useRepeatFun } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
 import { AudioEditor, shiftXTimeline, Timeline } from '@/entities/audio-editor';
@@ -142,7 +136,12 @@ export const useAudioEditorTrack = (
   ]);
 
   const calcNewStartTime = useCallback(
-    (pageX: number, track: AudioEditorTrack, leftBound: number = 0) => {
+    (
+      pageX: number,
+      track: AudioEditorTrack,
+      leftBound: number = 0,
+      rightBound: number = 0,
+    ) => {
       const currentTime = timeline.mapGlobalToTime(pageX);
       const dragStartTime = timeline.mapGlobalToTime(track.dndInfo.startX);
 
@@ -152,14 +151,19 @@ export const useAudioEditorTrack = (
         track.dndInfo.scroll / timeline.pixelsPerSecond +
         timeline.scroll / timeline.pixelsPerSecond;
 
-      return clamp(track.dndInfo.startTime + timeOffset, leftBound);
+      return clamp(track.dndInfo.startTime + timeOffset, leftBound, rightBound);
     },
     [timeline],
   );
 
   const setTime = useCallback(
-    (pageX: number, track: AudioEditorTrack, leftBound: number = 0) => {
-      const startTime = calcNewStartTime(pageX, track, leftBound);
+    (
+      pageX: number,
+      track: AudioEditorTrack,
+      leftBound: number = 0,
+      rightBound: number = Infinity,
+    ) => {
+      const startTime = calcNewStartTime(pageX, track, leftBound, rightBound);
 
       if (track.trimStartTime === startTime) {
         return;
@@ -194,11 +198,11 @@ export const useAudioEditorTrack = (
   const updateTrackAnimation = useCallback(
     (eventName?: string) => {
       if (eventName !== undefined && track.dndInfo.isDragging) {
-        setTime(track.dndInfo.currentX, track, 0);
+        setTime(track.dndInfo.currentX, track, 0, timeline.endTime);
       }
       requestAnimationFrame(updateTrack);
     },
-    [setTime, track, updateTrack],
+    [setTime, track, updateTrack, timeline],
   );
 
   const setVerticalPosition = throttle(
@@ -268,6 +272,7 @@ export const useAudioEditorTrack = (
         track.dndInfo.startX = e.pageX;
         track.dndInfo.startY = e.pageY;
         track.dndInfo.startTime = track.trimStartTime;
+        track.dndInfo.duration = track.trimDuration;
         track.dndInfo.startChannelIndex = audioEditor.player.channels.indexOf(
           track.channel,
         );
@@ -278,175 +283,70 @@ export const useAudioEditorTrack = (
     [],
   );
 
-  const setupBounds = useCallback((track: AudioEditorTrack) => {
-    runInAction(() => {
-      track.dndInfo.leftBound =
-        track.dndInfo.startTime - audioEditor.draggingTracksMinStartTime;
+  const setupBounds = useCallback(
+    (track: AudioEditorTrack) => {
+      runInAction(() => {
+        track.dndInfo.leftBound =
+          track.dndInfo.startTime - audioEditor.draggingTracksMinStartTime;
 
-      const startChannelIndex =
-        track.dndInfo.startChannelIndex ??
-        audioEditor.player.channels.indexOf(track.channel);
+        const trackRightBound =
+          audioEditor.draggingTracksMaxStartTime - track.dndInfo.startTime;
 
-      track.dndInfo.minChannel =
-        startChannelIndex - audioEditor.draggingTracksMinChannelIndex;
-      track.dndInfo.maxChannel =
-        startChannelIndex +
-        audioEditor.player.channels.length -
-        1 -
-        audioEditor.draggingTracksMaxChannelIndex;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        track.dndInfo.rightBound = clamp(
+          timeline.endTime -
+            trackRightBound -
+            audioEditor.draggingTracksMaxDuration,
+          0,
+          timeline.endTime - audioEditor.draggingTracksMaxDuration,
+        );
 
-  // const calculatePercent = (currentX: number, startX: number, endX: number) =>
-  //   ((currentX - startX) / (endX - startX)) * 100;
+        const startChannelIndex =
+          track.dndInfo.startChannelIndex ??
+          audioEditor.player.channels.indexOf(track.channel);
 
-  // const shiftXTimelineViewport = useCallback(
-  //   (e: MouseEvent, track: AudioEditorTrack, leftBound: number) => {
-  //     // const timelineElement = timeline.timelineContainer.timelineRef.current;
+        track.dndInfo.minChannel =
+          startChannelIndex - audioEditor.draggingTracksMinChannelIndex;
+        track.dndInfo.maxChannel =
+          startChannelIndex +
+          audioEditor.player.channels.length -
+          1 -
+          audioEditor.draggingTracksMaxChannelIndex;
+      });
+    },
+    [audioEditor, timeline],
+  );
 
-  //     // if (!timelineElement) {
-  //     //   return;
-  //     // }
-
-  //     // const { x: mouseX } = e;
-
-  //     // const { x: timelineContainerX, width: timelineContainerWidth } =
-  //     //   timelineElement.getBoundingClientRect();
-
-  //     // const sideBoxWidth = 100;
-
-  //     // const leftSideBoxStart = timelineContainerX - sideBoxWidth;
-  //     // const leftSideBoxEnd = timelineContainerX + sideBoxWidth;
-
-  //     // const rightSideBoxStart =
-  //     //   timelineContainerX + timelineContainerWidth - sideBoxWidth;
-  //     // const rightSideBoxEnd = timelineContainerX + timelineContainerWidth;
-
-  //     // const isMouseInLeftSideBox =
-  //     //   mouseX < leftSideBoxEnd && mouseX > leftSideBoxStart;
-  //     // const isMouseInRightSideBox =
-  //     //   mouseX > rightSideBoxStart && mouseX < rightSideBoxEnd;
-
-  //     // let percent: number = 0,
-  //     //   time: number = 0;
-
-  //     // let shiftX: number = 0;
-
-  //     // if (isMouseInLeftSideBox) {
-  //     //   percent = calculatePercent(mouseX, leftSideBoxEnd, leftSideBoxStart);
-
-  //     //   shiftX = timeline.scrollController.shiftX(-1 * percent);
-  //     //   time = Math.max(track.startTime + shiftX, 0);
-
-  //     //   // TODO: make separate function for this logic
-  //     //   // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
-  //     //   track.setStartTime(time);
-  //     //   track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-  //     // } else if (isMouseInRightSideBox) {
-  //     //   percent = calculatePercent(mouseX, rightSideBoxStart, rightSideBoxEnd);
-
-  //     //   shiftX = timeline.scrollController.shiftX(1 * percent);
-  //     //   time = Math.min(
-  //     //     track.startTime + shiftX,
-  //     //     timeline.totalTime - track.duration,
-  //     //   );
-
-  //     //   // TODO: make separate function for this logic
-  //     //   // TODO: modify setTime or other method to add ability pass custom time calculation instead of calling to separate track methods
-  //     //   track.setStartTime(time);
-  //     //   track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-  //     // } else {
-  //     const timelineShiftXTime: number = timeline.scrollController.value;
-
-  //     // wide between track start time and mouse time
-  //     const mousePositionTime =
-  //       timelineShiftXTime + timeline.pixelsToTime(e.pageX);
-
-  //     const trackWideToMouseWide =
-  //       timelineShiftXTime +
-  //       timeline.pixelsToTime(track.dndInfo.startX) -
-  //       track.dndInfo.startTime;
-
-  //     // eslint-disable-next-line no-console
-  //     console.log(
-  //       'mousePositionTime - trackWideToMouseWide',
-  //       'смещение\n',
-  //       timelineShiftXTime,
-  //       '\n',
-  //       'смещение (мин)\n',
-  //       timelineShiftXTime / 60,
-  //       '\n',
-  //       'сейчас позиция мыши\n',
-  //       mousePositionTime,
-  //       '\n',
-  //       'сейчас позиция мыши (мин)\n',
-  //       mousePositionTime / 60,
-  //       '\n',
-  //       'сейчас размер\n',
-  //       trackWideToMouseWide,
-  //       '\n',
-  //       'значение времени\n',
-  //       timelineShiftXTime +
-  //         (mousePositionTime - trackWideToMouseWide - timelineShiftXTime),
-  //       '\n',
-  //       'значение времени (мин)\n',
-  //       (timelineShiftXTime +
-  //         (mousePositionTime - trackWideToMouseWide - timelineShiftXTime)) /
-  //         60,
-  //     );
-
-  //     const time = clamp(
-  //       timelineShiftXTime + (mousePositionTime - trackWideToMouseWide),
-  //       leftBound,
-  //     );
-
-  //     track.setStartTime(time);
-  //     track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
-  //     // }
-  //   },
-  //   [timeline, audioEditor.player.time],
-  // );
-
-  const dragTimerIdRef = useRef<number | null>(null);
+  const { repeat: repeatDragUpdate, stop: stopDragUpdate } = useRepeatFun();
 
   const drag = useCallback(
     (
       e: MouseEvent,
       track: AudioEditorTrack,
       leftBound: number = 0,
+      rightBound: number = Infinity,
       minChannel: number = 0,
       maxChannel: number = Infinity,
     ) => {
-      if (dragTimerIdRef.current !== null) {
-        cancelAnimationFrame(dragTimerIdRef.current);
-        dragTimerIdRef.current = null;
-      }
+      repeatDragUpdate(() => {
+        const dragUpdate = () => {
+          track.dndInfo.currentX = e.pageX;
+          setTime(e.pageX, track, leftBound, rightBound);
+          setVerticalPosition(e, track, minChannel, maxChannel);
+        };
 
-      const dragUpdate = () => {
-        const side = shiftXTimeline(e.x, timeline);
-        track.dndInfo.currentX = e.pageX;
-        setTime(e.pageX, track, leftBound);
-        setVerticalPosition(e, track, minChannel, maxChannel);
-        return side;
-      };
+        const globalTime = timeline.mapGlobalToTime(e.x);
 
-      const dragUpdateRec = () => {
-        if (dragTimerIdRef.current !== null) {
-          cancelAnimationFrame(dragTimerIdRef.current);
-          dragTimerIdRef.current = null;
+        if (globalTime < leftBound || globalTime > rightBound) {
+          stopDragUpdate();
+          dragUpdate();
+          return false;
         }
 
-        const side = dragUpdate();
-        if (side === 0 || !track.dndInfo.isDragging) {
-          return;
-        }
-        dragTimerIdRef.current = requestAnimationFrame(dragUpdateRec);
-      };
-
-      requestAnimationFrame(dragUpdateRec);
+        shiftXTimeline(e.x, timeline);
+        dragUpdate();
+      });
     },
-    [timeline, setTime, setVerticalPosition],
+    [repeatDragUpdate, timeline, setTime, setVerticalPosition, stopDragUpdate],
   );
 
   const handleDrag = useCallback(
@@ -458,6 +358,7 @@ export const useAudioEditorTrack = (
           e,
           selectedTrack,
           selectedTrack.dndInfo.leftBound,
+          selectedTrack.dndInfo.rightBound,
           selectedTrack.dndInfo.minChannel,
           selectedTrack.dndInfo.maxChannel,
         );
@@ -552,17 +453,13 @@ export const useAudioEditorTrack = (
 
   const onDragEnd = useCallback(
     (e: MouseEvent | React.MouseEvent<HTMLElement>) => {
+      stopDragUpdate();
       if (disableInteractive) {
         return;
       }
 
       if (!trackRef.current) {
         return;
-      }
-
-      if (dragTimerIdRef.current !== null) {
-        cancelAnimationFrame(dragTimerIdRef.current);
-        dragTimerIdRef.current = null;
       }
 
       clearDragProperties(trackRef.current);
@@ -578,7 +475,7 @@ export const useAudioEditorTrack = (
         audioEditor.saveState();
       });
     },
-    [disableInteractive, trackRef, audioEditor, handleDragEnd],
+    [stopDragUpdate, disableInteractive, trackRef, audioEditor, handleDragEnd],
   );
 
   const { isDragging, onMouseUp, onMouseDown } = useGlobalDnD({
@@ -595,14 +492,10 @@ export const useAudioEditorTrack = (
     if (track.dndInfo.isDragging) {
       setDragProperties(trackRef.current);
     } else {
+      stopDragUpdate();
       clearDragProperties(trackRef.current);
-
-      if (dragTimerIdRef.current !== null) {
-        cancelAnimationFrame(dragTimerIdRef.current);
-        dragTimerIdRef.current = null;
-      }
     }
-  }, [track.dndInfo.isDragging, trackRef]);
+  }, [stopDragUpdate, track.dndInfo.isDragging, trackRef]);
 
   useEffect(() => {
     updateTrackAnimation();

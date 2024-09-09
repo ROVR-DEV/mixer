@@ -14,7 +14,9 @@ export interface TimelineZoomScrollProps {
   timelineRef: RefObject<HTMLDivElement>;
   timelineRulerRef: RefObject<HTMLDivElement>;
   startTime?: number;
-  duration: number;
+  endTime: number;
+  // Explicit set total time
+  totalTime?: number;
   zoomStep?: number;
   scrollStep?: number;
   minZoom?: number;
@@ -28,8 +30,9 @@ export interface TimelineZoomScrollProps {
 export const useTimelineZoomScroll = ({
   timelineRef,
   timelineRulerRef,
+  totalTime,
   startTime = 0,
-  duration,
+  endTime,
   zoomStep = 1.25,
   scrollStep = 100, // Default chrome scroll step
   minZoom = 1,
@@ -50,18 +53,20 @@ export const useTimelineZoomScroll = ({
         maxZoom,
         scrollStep,
         minScroll: startTime,
-        totalTime: duration,
+        totalTime: totalTime,
         startTime: startTime,
+        endTime: endTime,
         timelineLeftPadding,
       }),
     [
-      duration,
+      endTime,
       maxZoom,
       minZoom,
       scrollStep,
       startTime,
       timelineLeftPadding,
       timelineRef,
+      totalTime,
       zoomStep,
     ],
   );
