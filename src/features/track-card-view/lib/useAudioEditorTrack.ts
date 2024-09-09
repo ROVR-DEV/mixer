@@ -142,8 +142,8 @@ export const useAudioEditorTrack = (
       leftBound: number = 0,
       rightBound: number = 0,
     ) => {
-      const currentTime = timeline.mapGlobalToTime(pageX);
-      const dragStartTime = timeline.mapGlobalToTime(track.dndInfo.startX);
+      const currentTime = timeline.globalToTime(pageX);
+      const dragStartTime = timeline.globalToTime(track.dndInfo.startX);
 
       const timeOffset =
         currentTime -
@@ -334,7 +334,7 @@ export const useAudioEditorTrack = (
           setVerticalPosition(e, track, minChannel, maxChannel);
         };
 
-        const globalTime = timeline.mapGlobalToTime(e.x);
+        const globalTime = timeline.globalToTime(e.x);
 
         if (globalTime < leftBound || globalTime > rightBound) {
           stopDragUpdate();

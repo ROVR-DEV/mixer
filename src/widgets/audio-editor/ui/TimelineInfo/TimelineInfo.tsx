@@ -40,7 +40,7 @@ export const TimelineInfo = observer(function TimelineInfo({
       <br />
       {`zoom: ${timeline.zoom.toPrecision(4)} (${Math.round(Math.log(timeline.zoom) / Math.log(1.25))})`}
       <br />
-      {`time: ${Object.values(tickValueToTime(timeline.mapGlobalToTime(mousePosition.x), timeline.zoom)).join(':')}`}
+      {`time: ${Object.values(tickValueToTime(timeline.globalToTime(mousePosition.x), timeline.zoom)).join(':')}`}
     </div>
   );
 });

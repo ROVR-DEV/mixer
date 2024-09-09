@@ -25,8 +25,8 @@ export const updateRegionRect = (
     region.toggle();
   }
 
-  const start = clamp(timeline.mapLocalToTime(rect.left), 0, timeline.endTime);
-  const end = clamp(timeline.mapLocalToTime(rect.right), 0, timeline.endTime);
+  const start = clamp(timeline.localToTime(rect.left), 0, timeline.endTime);
+  const end = clamp(timeline.localToTime(rect.right), 0, timeline.endTime);
 
   region.setBounds(start, end);
 };

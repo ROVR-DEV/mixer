@@ -138,24 +138,20 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
             clickTimerRef.current = delay(cursorOnClick, 160, e);
           }
         } else if (audioEditor.tool === 'scissors') {
-          const copiedTrack = track.split(timeline.mapGlobalToTime(e.pageX));
+          const copiedTrack = track.split(timeline.globalToTime(e.pageX));
 
           audioEditor.selectTrack(copiedTrack);
 
           audioEditor.saveState();
         } else if (audioEditor.tool === 'magnifier') {
-          if (audioEditor.isMagnifyActivated) {
-            audioEditor.unMagnify();
-          } else {
-            audioEditor.magnify(
-              new Rect(
-                track.trimStartTime * timeline.pixelsPerSecond,
-                0,
-                track.trimDuration * timeline.pixelsPerSecond,
-                0,
-              ),
-            );
-          }
+          audioEditor.magnify(
+            new Rect(
+              timeline.timeToGlobal(track.trimStartTime),
+              0,
+              timeline.timeToGlobal(track.trimDuration),
+              0,
+            ),
+          );
         }
       }
     },

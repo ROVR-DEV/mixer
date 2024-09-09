@@ -21,8 +21,7 @@ export const getTimeAfterDrag = (
   customData: Required<AudioEditorDragData>,
 ) => {
   const timeOffset =
-    timeline.mapGlobalToTime(data.x) -
-    timeline.mapGlobalToTime(customData.startX);
+    timeline.globalToTime(data.x) - timeline.globalToTime(customData.startX);
 
   return clamp(customData.startTime + timeOffset, 0);
 };

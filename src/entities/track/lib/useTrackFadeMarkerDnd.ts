@@ -45,7 +45,7 @@ export const useTrackFadeMarkerDnD = ({
       }
 
       repeatFadeUpdate(() => {
-        const globalTime = timeline.mapGlobalToTime(data.x);
+        const globalTime = timeline.globalToTime(data.x);
         const trackTime = track.getRelativeTime(globalTime);
 
         if (globalTime < track.startTime || globalTime > track.endTime) {

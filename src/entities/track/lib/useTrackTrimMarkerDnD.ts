@@ -103,7 +103,7 @@ export const useTrackTrimMarkerDnD = ({
     (_, data, customData) => {
       setTrim(
         track,
-        timeline.mapGlobalToTime(data.x),
+        timeline.globalToTime(data.x),
         side,
         customData.leftTimeBound,
         customData.rightTimeBound,
@@ -121,7 +121,7 @@ export const useTrackTrimMarkerDnD = ({
       }
 
       repeatDragUpdate(() => {
-        const globalTime = timeline.mapGlobalToTime(data.x);
+        const globalTime = timeline.globalToTime(data.x);
 
         if (globalTime < track.startTime || globalTime > track.endTime) {
           stopDragUpdate();

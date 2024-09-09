@@ -112,12 +112,12 @@ export const useTimelineZoomScroll = ({
         e.preventDefault();
         e.stopPropagation();
 
-        const prevTime = timeline.mapGlobalToTime(e.pageX);
+        const prevTime = timeline.globalToTime(e.pageX);
 
         timeline.zoomController.value;
         handleWheelZoom(e.deltaY);
 
-        const nextTime = timeline.mapGlobalToTime(e.pageX);
+        const nextTime = timeline.globalToTime(e.pageX);
 
         scrollToZoom(prevTime, nextTime);
       }

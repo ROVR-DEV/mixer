@@ -37,7 +37,6 @@ export interface AudioEditor {
   readonly draggingTracksMaxChannelIndex: number;
 
   readonly isFitActivated: boolean;
-  readonly isMagnifyActivated: boolean;
 
   timeline: Timeline | null;
 
@@ -79,7 +78,6 @@ export class ObservableAudioEditor implements AudioEditor {
 
   readonly selectedTracks = observable.set<AudioEditorTrack>();
 
-  private _zoomBeforeMagnifier: number | null = null;
   private _zoomBeforeFit: number | null = null;
 
   private _history = new HistoryManager<AudioEditorState>();
@@ -178,10 +176,6 @@ export class ObservableAudioEditor implements AudioEditor {
     this._tool = value;
   }
 
-  get isMagnifyActivated(): boolean {
-    return this._zoomBeforeMagnifier !== null;
-  }
-
   get isFitActivated(): boolean {
     return this._zoomBeforeFit !== null;
   }
@@ -197,7 +191,6 @@ export class ObservableAudioEditor implements AudioEditor {
 
     makeAutoObservable(this, {
       tool: computed,
-      isMagnifyActivated: computed,
       isFitActivated: computed,
     });
   }
@@ -297,18 +290,15 @@ export class ObservableAudioEditor implements AudioEditor {
       this.fit();
     }
 
-    this._zoomBeforeMagnifier = this._timeline.zoom;
-
     this._timeline.setViewBoundsInPixels(virtualRect.left, virtualRect.right);
   };
 
   unMagnify = () => {
-    if (!this._timeline || !this._zoomBeforeMagnifier) {
+    if (!this._timeline) {
       return;
     }
 
-    this._timeline.zoom = this._zoomBeforeMagnifier;
-    this._zoomBeforeMagnifier = null;
+    this._timeline.zoom = 1;
   };
 
   clearState(): void {

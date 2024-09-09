@@ -219,7 +219,7 @@ export class Timeline {
    * @param isPageCoordinates is the x coordinate relative to the page or to the timeline container
    * @returns time in seconds
    */
-  mapGlobalToTime = (x: number, isPageCoordinates: boolean = true) => {
+  globalToTime = (x: number, isPageCoordinates: boolean = true) => {
     if (isPageCoordinates) {
       x -= this.boundingClientRect.x;
     }
@@ -239,7 +239,7 @@ export class Timeline {
    * @param isPageCoordinates is the x coordinate relative to the page or to the timeline container
    * @returns time in seconds
    */
-  mapLocalToTime = (x: number, isPageCoordinates: boolean = true): number => {
+  localToTime = (x: number, isPageCoordinates: boolean = true): number => {
     if (isPageCoordinates) {
       x -= this.boundingClientRect.x;
     }
@@ -289,13 +289,14 @@ export class Timeline {
 
   setViewBoundsInPixels = (startX: number, endX: number): void => {
     runInAction(() => {
-      const startTime = clamp(this.mapLocalToTime(startX, false), 0);
+      const startTime = clamp(this.localToTime(startX, false), 0);
       const newZoom = clamp(this._getNewZoomToReachBounds(startX, endX), 0.1);
 
       if (!isNaN(newZoom)) {
         this.zoom = newZoom;
       }
-      this.scroll = startTime;
+
+      this.scroll = this.timeToPixels(startTime);
     });
   };
 
