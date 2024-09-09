@@ -27,3 +27,4 @@ export * from './useWheel';
 export * from './useWindowEvent';
 export * from './getDroppedFiles';
 export * from './useRepeatFun';
+export * from './toOwnedObservable';

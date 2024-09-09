@@ -1,7 +1,6 @@
 'use client';
 
 import { delay } from 'lodash-es';
-import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, {
   useCallback,
@@ -69,14 +68,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     (title: string | undefined, artist: string | undefined) => {
       track.setTitleAndArtist(title, artist);
       track.isEditingTitle = false;
-
-      // TODO: make meta information observable to do not force update it on every change
-      runInAction(() => {
-        audioEditor.unselectTrack(track);
-        audioEditor.selectTrack(track, true);
-      });
     },
-    [audioEditor, track],
+    [track],
   );
 
   //#region Click handlers

@@ -3,7 +3,7 @@ import { makeAutoObservable } from 'mobx';
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
 
-import { clamp } from '@/shared/lib';
+import { clamp, toOwnedObservable } from '@/shared/lib';
 
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
@@ -76,7 +76,7 @@ export class AudioEditorTrack {
     return this._meta;
   }
   private set meta(value: Track) {
-    this._meta = value;
+    this._meta = toOwnedObservable(value);
   }
 
   get channel(): Channel {
@@ -132,7 +132,7 @@ export class AudioEditorTrack {
   }
 
   constructor(track: Track, channel: Channel) {
-    this._meta = track;
+    this._meta = toOwnedObservable(track);
 
     this._channel = channel;
 
