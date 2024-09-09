@@ -298,7 +298,10 @@ export class ObservableAudioEditor implements AudioEditor {
       return;
     }
 
+    const prevTime = this._timeline.pixelsToTime(this._timeline.scroll);
     this._timeline.zoom = 1;
+    const newScroll = this._timeline.timeToPixels(prevTime);
+    this._timeline.scroll = newScroll;
   };
 
   clearState(): void {

@@ -53,6 +53,8 @@ export class Timeline {
 
   private _disableListeners: boolean = false;
 
+  private _zoomedBefore: boolean = false;
+
   boundingClientRect: Rect;
 
   totalTime: number;
@@ -108,6 +110,8 @@ export class Timeline {
   }
 
   set zoom(zoom: number) {
+    this._zoomedBefore = true;
+    setTimeout(() => (this._zoomedBefore = false), 1000);
     this.zoomController.value = zoom;
   }
 
@@ -117,6 +121,10 @@ export class Timeline {
 
   set scroll(scroll: number) {
     this.scrollController.value = scroll;
+  }
+
+  get zoomedBefore(): boolean {
+    return this._zoomedBefore;
   }
 
   constructor({
@@ -284,7 +292,7 @@ export class Timeline {
    * @returns time in seconds
    */
   pixelsToTime = (x: number): number => {
-    return x * this.pixelsPerSecond;
+    return x / this.pixelsPerSecond;
   };
 
   setViewBoundsInPixels = (startX: number, endX: number): void => {
@@ -355,6 +363,8 @@ export class Timeline {
 
   private _zoomListener = (zoom: number) => {
     runInAction(() => {
+      this._zoomedBefore = true;
+      setTimeout(() => (this._zoomedBefore = false), 1000);
       this.timelineContainer.pixelsPerSecond = getPixelPerSeconds(zoom);
       this._zoom = zoom;
     });

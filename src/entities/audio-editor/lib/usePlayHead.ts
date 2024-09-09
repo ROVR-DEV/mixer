@@ -2,6 +2,8 @@ import { RefObject, useCallback, useMemo } from 'react';
 
 import { Timeline } from '../model';
 
+const TIMELINE_AFTER_SCROLL_VIEW_PADDING = 4;
+
 export const usePlayHead = (
   timeline: Timeline,
   playHeadRef: RefObject<HTMLDivElement>,
@@ -19,11 +21,13 @@ export const usePlayHead = (
       const globalPlayHeadPosition = playHeadPosition + timeline.scroll;
 
       if (
-        globalPlayHeadPosition < timeline.scroll ||
-        globalPlayHeadPosition > timeline.timelineClientWidth + timeline.scroll
+        (globalPlayHeadPosition < timeline.scroll ||
+          globalPlayHeadPosition >
+            timeline.timelineClientWidth + timeline.scroll) &&
+        !timeline.zoomedBefore
       ) {
         timeline.scroll =
-          globalPlayHeadPosition / timeline.timelineContainer.pixelsPerSecond;
+          globalPlayHeadPosition - TIMELINE_AFTER_SCROLL_VIEW_PADDING;
       }
     },
     [timeline],
