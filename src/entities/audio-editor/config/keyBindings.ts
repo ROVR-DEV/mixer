@@ -26,3 +26,16 @@ export const KEY_BINDINGS: Record<KeyBindString, AudioEditorEvent> = {
 
   [new KeyBind({ key: 'KeyS' }).toString()]: 'Solo',
 };
+
+export const KEY_BINDING_REVERSE: Record<AudioEditorEvent, KeyBindString> =
+  Object.fromEntries(
+    Object.entries(KEY_BINDINGS).map(([key, value]) => [value, key]),
+  );
+
+export const KEY_BINDING_REVERSE_TO_OBJECT: Record<AudioEditorEvent, KeyBind> =
+  Object.fromEntries(
+    Object.entries(KEY_BINDINGS).map(([key, value]) => [
+      value,
+      KeyBind.fromString(key),
+    ]),
+  );

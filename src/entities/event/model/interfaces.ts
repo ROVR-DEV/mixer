@@ -38,6 +38,10 @@ export class KeyBind {
     return KeyBind.getStringView(this);
   };
 
+  toHumanString = (): string => {
+    return KeyBind.getStringView(this).replace('Key', '');
+  };
+
   static fromKeyboardEvent = (e: KeyboardEvent): KeyBind => {
     return new KeyBind({
       key: e.code,
@@ -45,6 +49,45 @@ export class KeyBind {
       shift: e.shiftKey,
       alt: e.altKey,
       meta: e.metaKey,
+    });
+  };
+
+  static fromString = (str: string): KeyBind => {
+    const parts = str.split('+').map((s) => s.trim());
+
+    let ctrl: boolean | undefined = undefined;
+    let shift: boolean | undefined = undefined;
+    let alt: boolean | undefined = undefined;
+    let meta: boolean | undefined = undefined;
+
+    let key: string = 'unknown';
+
+    for (const part of parts) {
+      switch (part) {
+        case 'Ctrl':
+          ctrl = true;
+          break;
+        case 'Shift':
+          shift = true;
+          break;
+        case 'Alt':
+          alt = true;
+          break;
+        case 'Meta':
+          meta = true;
+          break;
+        default:
+          key = part;
+          break;
+      }
+    }
+
+    return new KeyBind({
+      ctrl,
+      shift,
+      alt,
+      meta,
+      key,
     });
   };
 
@@ -59,7 +102,7 @@ export class KeyBind {
     const keys = Object.entries(modifiers)
       .filter(([_, value]) => Boolean(value))
       .map(([key, _]) => key)
-      .join('+');
+      .join(' + ');
 
     return `${keys.length ? keys + ' + ' : ''}${keyBind.key}`;
   };

@@ -79,6 +79,7 @@ export class ObservableAudioEditor implements AudioEditor {
   readonly selectedTracks = observable.set<AudioEditorTrack>();
 
   private _zoomBeforeFit: number | null = null;
+  private _scrollBeforeFit: number | null = null;
 
   private _history = new HistoryManager<AudioEditorState>();
 
@@ -177,7 +178,7 @@ export class ObservableAudioEditor implements AudioEditor {
   }
 
   get isFitActivated(): boolean {
-    return this._zoomBeforeFit !== null;
+    return this._zoomBeforeFit !== null && this._scrollBeforeFit !== null;
   }
 
   constructor(
@@ -251,14 +252,19 @@ export class ObservableAudioEditor implements AudioEditor {
       return;
     }
 
-    if (this._zoomBeforeFit) {
+    if (this._zoomBeforeFit !== null && this._scrollBeforeFit !== null) {
       this._timeline.zoom = this._zoomBeforeFit;
       this._timeline.zoomController.min = 1;
+
+      this._timeline.scroll = this._scrollBeforeFit;
+
       this._zoomBeforeFit = null;
+      this._scrollBeforeFit = null;
       return;
     }
 
     this._zoomBeforeFit = this._timeline.zoom;
+    this._scrollBeforeFit = this._timeline.scroll;
 
     const minMax = this.player.tracks.reduce(
       (acc, track) => {
@@ -286,8 +292,12 @@ export class ObservableAudioEditor implements AudioEditor {
       return;
     }
 
-    if (this._zoomBeforeFit) {
+    if (this.isFitActivated) {
+      const prevTimeStart = this._timeline.pixelsToTime(virtualRect.left);
+      const prevTimeWidth = this._timeline.pixelsToTime(virtualRect.width);
       this.fit();
+      virtualRect.x = this._timeline.timeToPixels(prevTimeStart);
+      virtualRect.width = this._timeline.timeToPixels(prevTimeWidth);
     }
 
     this._timeline.setViewBoundsInPixels(virtualRect.left, virtualRect.right);
@@ -298,9 +308,9 @@ export class ObservableAudioEditor implements AudioEditor {
       return;
     }
 
-    const prevTime = this._timeline.pixelsToTime(this._timeline.scroll);
+    const prevScrollTime = this._timeline.pixelsToTime(this._timeline.scroll);
     this._timeline.zoom = 1;
-    const newScroll = this._timeline.timeToPixels(prevTime);
+    const newScroll = this._timeline.timeToPixels(prevScrollTime);
     this._timeline.scroll = newScroll;
   };
 
