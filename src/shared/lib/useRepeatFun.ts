@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * @description Repeat function until it cleaned up or called again
@@ -32,6 +32,11 @@ export const useRepeatFun = () => {
     },
     [loop, stop],
   );
+
+  // Stop dragging on unmount
+  useEffect(() => {
+    return () => stop();
+  }, [stop]);
 
   return {
     /**
