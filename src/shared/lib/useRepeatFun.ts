@@ -8,24 +8,36 @@ import { useCallback, useRef } from 'react';
 export const useRepeatFun = () => {
   const animationIdRef = useRef<number | null>(null);
 
-  const loop = useCallback((repeatFun: FrameRequestCallback) => {
-    requestAnimationFrame(repeatFun);
-    animationIdRef.current = requestAnimationFrame(() => loop(repeatFun));
-  }, []);
-
   const stop = useCallback(() => {
     if (animationIdRef.current !== null) {
       cancelAnimationFrame(animationIdRef.current);
     }
   }, []);
 
+  const loop = useCallback(
+    (repeatFun: () => void | false) => {
+      if (repeatFun() === undefined) {
+        animationIdRef.current = requestAnimationFrame(() => loop(repeatFun));
+      } else {
+        stop();
+      }
+    },
+    [stop],
+  );
+
   const repeat = useCallback(
-    (repeatFun: FrameRequestCallback) => {
+    (repeatFun: () => void | false) => {
       stop();
       loop(repeatFun);
     },
     [loop, stop],
   );
 
-  return { repeat, stop };
+  return {
+    /**
+     * @description Return false to prevent repeating
+     */
+    repeat,
+    stop,
+  };
 };

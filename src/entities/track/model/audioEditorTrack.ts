@@ -3,6 +3,8 @@ import { makeAutoObservable } from 'mobx';
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
 
+import { clamp } from '@/shared/lib';
+
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
 
@@ -192,6 +194,10 @@ export class AudioEditorTrack {
     }
 
     this.meta = { ...this.meta };
+  };
+
+  getRelativeTime = (globalTime: number) => {
+    return clamp(globalTime - this.startTime, 0, this.duration);
   };
 
   split = (time: number) => {

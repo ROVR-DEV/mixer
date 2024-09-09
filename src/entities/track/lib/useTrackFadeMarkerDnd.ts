@@ -2,14 +2,13 @@
 
 import { useCallback } from 'react';
 
+import { useRepeatFun } from '@/shared/lib';
 import { CustomDragEventHandler } from '@/shared/model';
 import { CustomDraggableProps } from '@/shared/ui';
 
 import {
   AudioEditor,
-  AudioEditorDragData,
-  getTimeAfterDrag,
-  isAudioEditorDragDataFilled,
+  shiftXTimeline,
   Timeline,
   // eslint-disable-next-line boundaries/element-types
 } from '@/entities/audio-editor';
@@ -35,41 +34,37 @@ export const useTrackFadeMarkerDnD = ({
   CustomDraggableProps,
   'onDrag' | 'onStart' | 'onStop'
 > => {
-  const onStart: CustomDragEventHandler<AudioEditorDragData> = useCallback(
-    (_, data, customData) => {
-      customData.startX = data.x;
-      customData.startTime =
-        side === 'left'
-          ? track?.filters.fadeInNode.endTime
-          : track?.filters.fadeOutNode.startTime;
-    },
-    [
-      side,
-      track?.filters.fadeInNode.endTime,
-      track?.filters.fadeOutNode.startTime,
-    ],
-  );
+  const onStart: CustomDragEventHandler = useCallback(() => {}, []);
 
-  const onDrag: CustomDragEventHandler<AudioEditorDragData> = useCallback(
-    (_, data, customData) => {
+  const { repeat: repeatFadeUpdate, stop: stopFadeUpdate } = useRepeatFun();
+
+  const onDrag: CustomDragEventHandler = useCallback(
+    (_, data) => {
       if (!track?.filters) {
         return;
       }
 
-      if (!isAudioEditorDragDataFilled(customData)) {
-        return;
-      }
+      repeatFadeUpdate(() => {
+        const globalTime = timeline.mapGlobalToTime(data.x);
+        const trackTime = track.getRelativeTime(globalTime);
 
-      const newTime = getTimeAfterDrag(timeline, data, customData);
+        if (globalTime < track.startTime || globalTime > track.endTime) {
+          stopFadeUpdate();
+          updateFade(track, trackTime, side);
+          return false;
+        }
 
-      requestAnimationFrame(() => updateFade(track, newTime, side));
+        shiftXTimeline(data.x, timeline);
+        updateFade(track, trackTime, side);
+      });
     },
-    [side, timeline, track],
+    [repeatFadeUpdate, side, stopFadeUpdate, timeline, track],
   );
 
-  const onStop = useCallback(() => {
+  const onStop: CustomDragEventHandler = useCallback(() => {
+    stopFadeUpdate();
     audioEditor?.saveState();
-  }, [audioEditor]);
+  }, [audioEditor, stopFadeUpdate]);
 
   return {
     onStart,

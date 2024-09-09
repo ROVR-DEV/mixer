@@ -8,8 +8,6 @@ import { CustomDragEventHandler } from '@/shared/model';
 import { TrimSide } from '@/shared/ui';
 
 import {
-  AudioEditorDragData,
-  isAudioEditorDragDataFilled,
   shiftXTimeline,
   Timeline,
   useAudioEditor,
@@ -69,7 +67,7 @@ const setTrim = throttle(
   3,
 );
 
-type TrackTrimDragData = AudioEditorDragData & {
+type TrackTrimDragData = {
   leftTimeBound: number;
   rightTimeBound: number;
 };
@@ -82,7 +80,7 @@ export const useTrackTrimMarkerDnD = ({
   const audioEditor = useAudioEditor();
 
   const onStart: CustomDragEventHandler<TrackTrimDragData> = useCallback(
-    (_, data, customData) => {
+    (_e, _data, customData) => {
       if (!track) {
         return;
       }
@@ -93,22 +91,14 @@ export const useTrackTrimMarkerDnD = ({
 
       const { leftNeighbor, rightNeighbor } = getTrackNeighbors(track);
 
-      customData.startX = data.x;
-      customData.startTime =
-        side === 'left' ? track.trimStartTime : track.trimEndTime;
-
       customData.leftTimeBound = leftNeighbor?.trimEndTime ?? 0;
       customData.rightTimeBound = rightNeighbor?.trimStartTime ?? Infinity;
     },
-    [track, side],
+    [track],
   );
 
   const updateTrim: CustomDragEventHandler<TrackTrimDragData> = useCallback(
     (_, data, customData) => {
-      if (!isAudioEditorDragDataFilled(customData)) {
-        return;
-      }
-
       setTrim(
         track,
         timeline.mapGlobalToTime(data.x),
@@ -128,15 +118,15 @@ export const useTrackTrimMarkerDnD = ({
         return;
       }
 
-      const dragTime = timeline.mapGlobalToTime(data.x);
-
-      if (dragTime < track.startTime || dragTime > track.endTime) {
-        stopDragUpdate();
-        updateTrim(e, data, customData);
-        return;
-      }
-
       repeatDragUpdate(() => {
+        const globalTime = timeline.mapGlobalToTime(data.x);
+
+        if (globalTime < track.startTime || globalTime > track.endTime) {
+          stopDragUpdate();
+          updateTrim(e, data, customData);
+          return false;
+        }
+
         shiftXTimeline(data.x, timeline);
         updateTrim(e, data, customData);
       });
