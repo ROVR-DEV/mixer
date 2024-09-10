@@ -8,6 +8,7 @@ export class AudioFilters {
   readonly fadeOutNode: FadeFilter = new FadeFilter();
 
   private _audioBuffer: WaveSurfer | null = null;
+  private _mediaElement: HTMLMediaElement | null = null;
   private _unsubscribeFunctions: (() => void)[] = [];
 
   get audioBuffer(): WaveSurfer | null {
@@ -22,11 +23,23 @@ export class AudioFilters {
 
     this._audioBuffer = value;
 
-    this._unsubscribeFunctions.push(
-      this._audioBuffer.once('ready', this._initFilters),
+    this._mediaElement = this._audioBuffer.getMediaElement();
+
+    this._mediaElement.addEventListener('canplay', this._initFilters);
+
+    this._mediaElement.addEventListener(
+      'timeupdate',
+      this._processFiltersWavesurfer,
     );
-    this._unsubscribeFunctions.push(
-      this._audioBuffer.on('timeupdate', this._processFilters),
+
+    this._unsubscribeFunctions.push(() =>
+      this._mediaElement?.removeEventListener('canplay', this._initFilters),
+    );
+    this._unsubscribeFunctions.push(() =>
+      this._mediaElement?.removeEventListener(
+        'timeupdate',
+        this._processFiltersWavesurfer,
+      ),
     );
   }
 
@@ -69,6 +82,8 @@ export class AudioFilters {
       this.fadeInNode.minTime = this.fadeOutNode.minTime = 0;
       this.fadeInNode.maxTime = this.fadeOutNode.maxTime = duration;
     });
+
+    this._mediaElement?.removeEventListener('canplay', this._initFilters);
   };
 
   private _processFade = (time: number, fadeFilter: FadeFilter) => {
@@ -90,6 +105,14 @@ export class AudioFilters {
     if (roundedVolume !== this._audioBuffer.getVolume()) {
       this._audioBuffer.setVolume(roundedVolume);
     }
+  };
+
+  private _processFiltersWavesurfer = () => {
+    if (!this._audioBuffer) {
+      return;
+    }
+
+    this._processFilters(this._audioBuffer.getCurrentTime());
   };
 
   private _processFilters = (time: number) => {
