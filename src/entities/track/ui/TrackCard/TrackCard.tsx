@@ -92,7 +92,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
 
         {!hideTitle && (
           <TrackTitle
-            className={cn('row-start-3 px-1', {
+            className={cn('row-start-3 hidden @[64px]:flex px-1', {
               'z-20': isEditingName,
             })}
             track={track}

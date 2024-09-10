@@ -309,7 +309,12 @@ export class ObservableAudioEditor implements AudioEditor {
     }
 
     const prevScrollTime = this._timeline.pixelsToTime(this._timeline.scroll);
+
+    if (this.isFitActivated) {
+      this.fit();
+    }
     this._timeline.zoom = 1;
+
     const newScroll = this._timeline.timeToPixels(prevScrollTime);
     this._timeline.scroll = newScroll;
   };

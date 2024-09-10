@@ -13,7 +13,12 @@ import React, {
 import { clamp, useRepeatFun } from '@/shared/lib';
 import { useGlobalDnD } from '@/shared/lib/useGlobalDnD';
 
-import { AudioEditor, shiftXTimeline, Timeline } from '@/entities/audio-editor';
+import {
+  AudioEditor,
+  isMouseInScrollBounds,
+  shiftXTimeline,
+  Timeline,
+} from '@/entities/audio-editor';
 import { AudioEditorTrack } from '@/entities/track';
 
 import { getNewChannelIndex } from './getNewChannelIndex';
@@ -114,8 +119,7 @@ export const useAudioEditorTrack = (
 
     trackRef.current.style.top =
       channelOffset * timeline.trackHeight + 6 + 'px';
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackRef]);
+  }, [disableInteractive, trackRef, track, audioEditor, timeline.trackHeight]);
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
@@ -333,18 +337,28 @@ export const useAudioEditorTrack = (
       minChannel: number = 0,
       maxChannel: number = Infinity,
     ) => {
+      const dragUpdate = () => {
+        track.dndInfo.currentX = e.pageX;
+        setTime(e.pageX, track, leftBound, rightBound);
+        setVerticalPosition(e, track, minChannel, maxChannel);
+      };
+
+      const getBounds = () => {
+        return isMouseInScrollBounds(e.x, timeline);
+      };
+
       repeatDragUpdate(() => {
-        const dragUpdate = () => {
-          track.dndInfo.currentX = e.pageX;
-          setTime(e.pageX, track, leftBound, rightBound);
-          setVerticalPosition(e, track, minChannel, maxChannel);
-        };
+        const bounds = getBounds();
 
         const globalTime = timeline.globalToTime(e.x);
 
-        if (globalTime < leftBound || globalTime > rightBound) {
-          stopDragUpdate();
+        if (
+          (bounds.leftBound === undefined && bounds.rightBound === undefined) ||
+          globalTime < leftBound ||
+          globalTime > rightBound
+        ) {
           dragUpdate();
+          stopDragUpdate();
           return false;
         }
 
@@ -525,7 +539,8 @@ export const useAudioEditorTrack = (
         stopDragUpdate();
       }
     };
-  }, [stopDragUpdate, track.dndInfo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stopDragUpdate]);
 
   useEffect(() => {
     const updateTrackAnimationWithEvent = () => {

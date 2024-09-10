@@ -11,19 +11,15 @@ export const useRepeatFun = () => {
   const stop = useCallback(() => {
     if (animationIdRef.current !== null) {
       cancelAnimationFrame(animationIdRef.current);
+      animationIdRef.current = null;
     }
   }, []);
 
-  const loop = useCallback(
-    (repeatFun: () => void | false) => {
-      if (repeatFun() === undefined) {
-        animationIdRef.current = requestAnimationFrame(() => loop(repeatFun));
-      } else {
-        stop();
-      }
-    },
-    [stop],
-  );
+  const loop = useCallback((repeatFun: () => void | false) => {
+    if (repeatFun() === undefined) {
+      animationIdRef.current = requestAnimationFrame(() => loop(repeatFun));
+    }
+  }, []);
 
   const repeat = useCallback(
     (repeatFun: () => void | false) => {
@@ -40,7 +36,7 @@ export const useRepeatFun = () => {
 
   return {
     /**
-     * @description Return false to prevent repeating
+     * @description Return false to prevent next repeating
      */
     repeat,
     stop,

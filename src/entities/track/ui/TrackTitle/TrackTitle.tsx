@@ -51,7 +51,10 @@ export const TrackTitle = ({
 
   return (
     <span
-      className={cn('inline-flex text-nowrap text-[12px]', className)}
+      className={cn(
+        'inline-flex overflow-hidden text-nowrap text-[12px]',
+        className,
+      )}
       {...props}
     >
       {isEditing ? (
