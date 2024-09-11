@@ -343,19 +343,15 @@ export const useAudioEditorTrack = (
         setVerticalPosition(e, track, minChannel, maxChannel);
       };
 
-      const getBounds = () => {
-        return isMouseInScrollBounds(e.x, timeline);
-      };
-
       repeatDragUpdate(() => {
-        const bounds = getBounds();
+        const bounds = isMouseInScrollBounds(e.x, timeline);
 
         const globalTime = timeline.globalToTime(e.x);
 
         if (
           (bounds.leftBound === undefined && bounds.rightBound === undefined) ||
           globalTime < leftBound ||
-          globalTime > rightBound
+          globalTime > rightBound + track.trimDuration
         ) {
           dragUpdate();
           stopDragUpdate();
