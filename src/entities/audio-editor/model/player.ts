@@ -39,6 +39,7 @@ export interface PlayerEvents {
 export interface Player {
   readonly channels: Channel[];
   readonly tracks: AudioEditorTrack[];
+  readonly tracksSortedByStartTime: AudioEditorTrack[];
   readonly tracksByAudioUuid: Map<string, AudioEditorTrack>;
   readonly playlist: Playlist | null;
   readonly trackLoader: TrackLoader;
@@ -114,6 +115,10 @@ export class ObservablePlayer implements Player {
 
   get tracks(): AudioEditorTrack[] {
     return this.channels.flatMap((channel) => channel.tracks);
+  }
+
+  public get tracksSortedByStartTime(): AudioEditorTrack[] {
+    return this.tracks.sort((a, b) => a.startTime - b.startTime);
   }
 
   private get _soloChannels(): Channel[] {
