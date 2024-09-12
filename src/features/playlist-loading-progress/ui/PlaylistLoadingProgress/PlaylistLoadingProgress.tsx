@@ -16,8 +16,8 @@ export const PlaylistLoadingProgress = ({
 
   return (
     <div className='flex flex-col gap-2' {...props}>
-      <ProgressBar className='border border-third' value={progress} />
-      <span className='self-end'>{`${downloadedTracksCount}/${tracksCount}`}</span>
+      <ProgressBar className='border border-accent' value={progress} />
+      <span className='self-end text-[13px] text-accent'>{`${downloadedTracksCount}/${tracksCount}`}</span>
     </div>
   );
 };

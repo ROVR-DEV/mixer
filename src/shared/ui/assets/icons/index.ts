@@ -21,3 +21,5 @@ export { default as CrossIcon } from './cross.svg';
 export { default as ArrowDownIcon } from './arrow-down.svg';
 
 export { default as PlayHeadIcon } from './play-head.svg';
+
+export { default as CloseIcon } from './close.svg';
