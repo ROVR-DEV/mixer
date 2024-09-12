@@ -29,10 +29,10 @@ export const TrackImportMenuPopover = ({
       >
         {isFileUploading ? (
           <div className='flex flex-col gap-2 rounded-lg border border-accent bg-primary px-8 py-4'>
-            <span className='font-bold text-third-light'>
+            <span className='py-1 text-center text-xs font-bold text-accent'>
               {'Uploading track'}
             </span>
-            <ProgressBar value={null} />
+            <ProgressBar className='border border-accent' value={null} />
           </div>
         ) : (
           <TrackImportMenu

@@ -12,9 +12,25 @@ import {
   FloatingOverlay,
   useId,
 } from '@floating-ui/react';
-import * as React from 'react';
+import {
+  forwardRef,
+  useState,
+  useMemo,
+  createContext,
+  type HTMLProps,
+  isValidElement,
+  cloneElement,
+  type ButtonHTMLAttributes,
+  useLayoutEffect,
+  type Dispatch,
+  type ReactNode,
+  useContext,
+  SetStateAction,
+} from 'react';
 
 import { cn } from '@/shared/lib';
+
+import { CloseIcon } from '../../assets';
 
 import { DialogProps } from './interfaces';
 
@@ -23,11 +39,9 @@ export function useDialog({
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: DialogProps = {}) {
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(initialOpen);
-  const [labelId, setLabelId] = React.useState<string | undefined>();
-  const [descriptionId, setDescriptionId] = React.useState<
-    string | undefined
-  >();
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(initialOpen);
+  const [labelId, setLabelId] = useState<string | undefined>();
+  const [descriptionId, setDescriptionId] = useState<string | undefined>();
 
   const open = controlledOpen ?? uncontrolledOpen;
   const setOpen = setControlledOpen ?? setUncontrolledOpen;
@@ -47,7 +61,7 @@ export function useDialog({
 
   const interactions = useInteractions([click, dismiss, role]);
 
-  return React.useMemo(
+  return useMemo(
     () => ({
       open,
       setOpen,
@@ -64,17 +78,15 @@ export function useDialog({
 
 type ContextType =
   | (ReturnType<typeof useDialog> & {
-      setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
-      setDescriptionId: React.Dispatch<
-        React.SetStateAction<string | undefined>
-      >;
+      setLabelId: Dispatch<SetStateAction<string | undefined>>;
+      setDescriptionId: Dispatch<SetStateAction<string | undefined>>;
     })
   | null;
 
-const DialogContext = React.createContext<ContextType>(null);
+const DialogContext = createContext<ContextType>(null);
 
 export const useDialogContext = () => {
-  const context = React.useContext(DialogContext);
+  const context = useContext(DialogContext);
 
   if (context == null) {
     throw new Error('Dialog components must be wrapped in <Dialog />');
@@ -87,7 +99,7 @@ export function Dialog({
   children,
   ...options
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 } & DialogProps) {
   const dialog = useDialog(options);
   return (
@@ -96,13 +108,13 @@ export function Dialog({
 }
 
 interface DialogTriggerProps {
-  children: React.ReactNode;
+  children: ReactNode;
   asChild?: boolean;
 }
 
-export const DialogTrigger = React.forwardRef<
+export const DialogTrigger = forwardRef<
   HTMLElement,
-  React.HTMLProps<HTMLElement> & DialogTriggerProps
+  HTMLProps<HTMLElement> & DialogTriggerProps
 >(function DialogTrigger({ children, asChild = false, ...props }, propRef) {
   const context = useDialogContext();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -110,8 +122,8 @@ export const DialogTrigger = React.forwardRef<
   const ref = useMergeRefs([context.refs.setReference, propRef, childrenRef]);
 
   // `asChild` allows the user to pass any element as the anchor
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(
+  if (asChild && isValidElement(children)) {
+    return cloneElement(
       children,
       context.getReferenceProps({
         ref,
@@ -134,9 +146,9 @@ export const DialogTrigger = React.forwardRef<
   );
 });
 
-export const DialogContent = React.forwardRef<
+export const DialogContent = forwardRef<
   HTMLDivElement,
-  React.HTMLProps<HTMLDivElement>
+  HTMLProps<HTMLDivElement>
 >(function DialogContent(props, propRef) {
   const { context: floatingContext, ...context } = useDialogContext();
   const ref = useMergeRefs([context.refs.setFloating, propRef]);
@@ -166,23 +178,26 @@ export const DialogContent = React.forwardRef<
   );
 });
 
-export const DialogHeading = React.forwardRef<
+export const DialogHeading = forwardRef<
   HTMLHeadingElement,
-  React.HTMLProps<HTMLHeadingElement>
+  HTMLProps<HTMLHeadingElement>
 >(function DialogHeading({ className, children, ...props }, ref) {
   const { setLabelId } = useDialogContext();
   const id = useId();
 
   // Only sets `aria-labelledby` on the Dialog root element
   // if this component is mounted inside it.
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     setLabelId(id);
     return () => setLabelId(undefined);
   }, [id, setLabelId]);
 
   return (
     <h2
-      className={cn('text-[18px] font-bold font-fix', className)}
+      className={cn(
+        'text-[13px] font-bold font-fix text-center text-accent',
+        className,
+      )}
       {...props}
       ref={ref}
       id={id}
@@ -192,33 +207,57 @@ export const DialogHeading = React.forwardRef<
   );
 });
 
-export const DialogDescription = React.forwardRef<
+export const DialogDescription = forwardRef<
   HTMLParagraphElement,
-  React.HTMLProps<HTMLParagraphElement>
+  HTMLProps<HTMLParagraphElement>
 >(function DialogDescription({ children, ...props }, ref) {
   const { setDescriptionId } = useDialogContext();
   const id = useId();
 
   // Only sets `aria-describedby` on the Dialog root element
   // if this component is mounted inside it.
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     setDescriptionId(id);
     return () => setDescriptionId(undefined);
   }, [id, setDescriptionId]);
 
   return (
-    <p {...props} ref={ref} id={id}>
+    <p
+      {...props}
+      className='text-center text-[13px] text-accent'
+      ref={ref}
+      id={id}
+    >
       {children}
     </p>
   );
 });
 
-export const DialogClose = React.forwardRef<
+export const DialogFooter = forwardRef<
+  HTMLDivElement,
+  HTMLProps<HTMLDivElement>
+>(function DialogFooter({ children, ...props }, ref) {
+  return (
+    <div {...props} className='flex justify-center gap-2' ref={ref}>
+      {children}
+    </div>
+  );
+});
+
+export const DialogClose = forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
+  ButtonHTMLAttributes<HTMLButtonElement>
 >(function DialogClose(props, ref) {
   const { setOpen } = useDialogContext();
   return (
-    <button type='button' {...props} ref={ref} onClick={() => setOpen(false)} />
+    <button
+      type='button'
+      className='absolute rounded-full bg-accent p-1 text-[13px] text-accent'
+      {...props}
+      ref={ref}
+      onClick={() => setOpen(false)}
+    >
+      <CloseIcon />
+    </button>
   );
 });

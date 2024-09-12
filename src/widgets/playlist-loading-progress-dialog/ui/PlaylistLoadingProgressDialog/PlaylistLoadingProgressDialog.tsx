@@ -30,7 +30,7 @@ export const PlaylistLoadingProgressDialog = observer(
     return (
       <Dialog open={isDialogOpen} initialOpen {...props}>
         <DialogContent className='flex flex-col gap-2 rounded-lg border border-accent bg-primary px-4 py-3 text-third-light'>
-          <DialogHeading>{'Loading project'}</DialogHeading>
+          <DialogHeading className='py-1'>{'Loading project'}</DialogHeading>
           <PlaylistLoadingProgress
             downloadedTracksCount={player.trackLoader.loadedTracksCount}
             tracksCount={player.trackLoader.tracksData.size}
