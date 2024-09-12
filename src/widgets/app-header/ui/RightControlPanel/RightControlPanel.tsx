@@ -13,6 +13,8 @@ import { updateTracksInfo } from '@/entities/playlist';
 
 import { RightControlPanelProps } from './interfaces';
 
+const MINIMUM_PLAYLIST_DURATION_IN_MINUTES: number = 120;
+
 export const RightControlPanel = observer(function RightControlPanel({
   className,
   ...props
@@ -35,6 +37,32 @@ export const RightControlPanel = observer(function RightControlPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * @description Calculate playlist duration in minutes
+   */
+  const playlistDurationInMinutes = useMemo<number>(() => {
+    const tracks = audioEditor.player.tracksSortedByStartTime;
+
+    const startTrack = tracks[0];
+    const endTrack =
+      tracks[audioEditor.player.tracksSortedByStartTime.length - 1];
+
+    const hasRequiredTracks = startTrack && endTrack;
+
+    if (!hasRequiredTracks) {
+      return 0;
+    }
+
+    const firstTrackStartAt = startTrack.startTime;
+    const lastTrackEndAt = endTrack.endTime;
+
+    return Math.floor((lastTrackEndAt - firstTrackStartAt) / 60);
+  }, [audioEditor.player.tracksSortedByStartTime]);
+
+  const isPublishDisabled: boolean =
+    isRequestSending ||
+    playlistDurationInMinutes < MINIMUM_PLAYLIST_DURATION_IN_MINUTES;
+
   return (
     <div
       className={cn(
@@ -47,7 +75,7 @@ export const RightControlPanel = observer(function RightControlPanel({
         aria-label='Publish'
         title='Publish'
         className='h-7 text-[13px] uppercase italic'
-        disabled={isRequestSending}
+        disabled={isPublishDisabled}
         onClick={onPublish}
       >
         <span className='font-fix'>{'Publish'}</span>
