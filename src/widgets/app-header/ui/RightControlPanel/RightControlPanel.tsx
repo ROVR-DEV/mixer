@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib';
-import { Button, IconButton } from '@/shared/ui';
-import { PersonIcon } from '@/shared/ui/assets';
+import { Button, IconButton, PersonIcon } from '@/shared/ui';
 
 import { initializeAudioEditor } from '@/entities/audio-editor';
 import { updateTracksInfo } from '@/entities/playlist';

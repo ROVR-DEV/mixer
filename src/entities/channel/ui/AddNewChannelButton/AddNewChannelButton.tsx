@@ -1,7 +1,6 @@
 import { memo } from 'react';
 
-import { IconButton } from '@/shared/ui';
-import { PlusIcon } from '@/shared/ui/assets';
+import { IconButton, PlusIcon } from '@/shared/ui';
 
 import { AddNewChannelButtonProps } from './interfaces';
 

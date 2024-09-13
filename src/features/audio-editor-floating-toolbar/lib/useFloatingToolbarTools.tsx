@@ -12,7 +12,7 @@ import {
   RedoIcon,
   ScissorsIcon,
   UndoIcon,
-} from '@/shared/ui/assets';
+} from '@/shared/ui';
 
 import {
   AudioEditorEvent,

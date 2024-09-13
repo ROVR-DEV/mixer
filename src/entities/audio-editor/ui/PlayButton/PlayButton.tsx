@@ -1,5 +1,4 @@
-import { IconButton } from '@/shared/ui';
-import { PlayIcon } from '@/shared/ui/assets';
+import { IconButton, PlayIcon } from '@/shared/ui';
 
 import { PlayButtonProps } from './interfaces';
 

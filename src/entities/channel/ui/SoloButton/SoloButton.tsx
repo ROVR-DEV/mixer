@@ -1,5 +1,4 @@
-import { IconButton } from '@/shared/ui';
-import { SoloChannelIcon } from '@/shared/ui/assets';
+import { IconButton, SoloChannelIcon } from '@/shared/ui';
 
 import { SoloButtonProps } from './interfaces';
 

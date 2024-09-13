@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 
 import { cn } from '@/shared/lib';
-import { IconButton } from '@/shared/ui';
-import { CrossIcon } from '@/shared/ui/assets';
+import { IconButton, CrossIcon } from '@/shared/ui';
 
 import { useAudioEditor } from '@/entities/audio-editor';
 

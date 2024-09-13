@@ -33,6 +33,12 @@ export const AudioEditorContent = observer(function AudioEditorBody({
     audioEditor.timeline = timeline;
   }, [audioEditor, timeline]);
 
+  useEffect(() => {
+    if (audioEditor.player.isPlaying) {
+      timeline.interactedBefore = false;
+    }
+  }, [audioEditor.player.isPlaying, timeline]);
+
   return (
     <TimelineContext.Provider value={timeline}>
       <div

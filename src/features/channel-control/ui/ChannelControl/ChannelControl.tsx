@@ -4,8 +4,12 @@ import { observer } from 'mobx-react-lite';
 import { memo, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
-import { Badge, IconButton } from '@/shared/ui';
-import { AutomationChannelIcon, CrossIcon } from '@/shared/ui/assets';
+import {
+  Badge,
+  IconButton,
+  AutomationChannelIcon,
+  RemoveButton,
+} from '@/shared/ui';
 
 import { formatChannelNumber } from '@/entities/channel';
 
@@ -55,15 +59,7 @@ export const ChannelControl = observer(function ChannelControl({
         <AutomationChannelIcon />
       </IconButton>
       {isAbleToRemove && (
-        <IconButton
-          className='size-7 border-error'
-          variant='secondary'
-          aria-label='Remove channel'
-          title='Remove'
-          onClick={onClickRemove}
-        >
-          <CrossIcon className='size-full p-2 [&_path]:stroke-error' />
-        </IconButton>
+        <RemoveButton aria-label='Remove channel' onClick={onClickRemove} />
       )}
     </div>
   );

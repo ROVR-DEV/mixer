@@ -1,5 +1,4 @@
-import { IconButton } from '@/shared/ui';
-import { MuteChannelIcon } from '@/shared/ui/assets';
+import { IconButton, MuteChannelIcon } from '@/shared/ui';
 
 import { MuteButtonProps } from './interfaces';
 

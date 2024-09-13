@@ -1,7 +1,7 @@
 import { forwardRef, memo } from 'react';
 
 import { cn } from '@/shared/lib';
-import { PlayHeadIcon } from '@/shared/ui/assets';
+import { PlayHeadIcon } from '@/shared/ui';
 
 import { TimelinePlayHeadProps } from './interfaces';
 

@@ -24,7 +24,7 @@ export const usePlayHead = (
         (globalPlayHeadPosition < timeline.scroll ||
           globalPlayHeadPosition >
             timeline.timelineClientWidth + timeline.scroll) &&
-        !timeline.zoomedBefore
+        !timeline.interactedBefore
       ) {
         timeline.scroll =
           globalPlayHeadPosition - TIMELINE_AFTER_SCROLL_VIEW_PADDING;

@@ -1,5 +1,4 @@
-import { IconButton } from '@/shared/ui';
-import { StopIcon } from '@/shared/ui/assets';
+import { IconButton, StopIcon } from '@/shared/ui';
 
 import { StopButtonProps } from './interfaces';
 

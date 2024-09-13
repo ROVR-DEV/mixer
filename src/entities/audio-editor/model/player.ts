@@ -48,6 +48,7 @@ export interface Player {
 
   readonly time: number;
   readonly isPlaying: boolean;
+  readonly loadingStatus: LoadingStatus;
 
   importPlaylist(playlists: Playlist): void;
   updatePlaylist(playlists: Playlist): void;
@@ -76,6 +77,8 @@ export interface Player {
   restoreState(state: PlayerState): void;
 }
 
+type LoadingStatus = 'empty' | 'loading' | 'fulfilled';
+
 export class ObservablePlayer implements Player {
   private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
 
@@ -90,6 +93,7 @@ export class ObservablePlayer implements Player {
   private _timer: Timer | null = null;
   private _time = 0;
   private _isPlaying = false;
+  private _loadingStatus: LoadingStatus = 'empty';
 
   get playlist(): Playlist | null {
     return this._playlist;
@@ -102,8 +106,12 @@ export class ObservablePlayer implements Player {
     this.setTime(value);
   }
 
-  get isPlaying() {
+  get isPlaying(): boolean {
     return this._isPlaying;
+  }
+
+  get loadingStatus(): LoadingStatus {
+    return this._loadingStatus;
   }
 
   get tracksByAudioUuid(): Map<string, AudioEditorTrack> {
@@ -207,7 +215,15 @@ export class ObservablePlayer implements Player {
       track.load(trackData.objectUrl);
     };
 
+    runInAction(() => {
+      this._loadingStatus = 'loading';
+    });
+
     await this.trackLoader.downloadTracks(this._playlist.tracks, onTrackLoad);
+
+    runInAction(() => {
+      this._loadingStatus = 'fulfilled';
+    });
   };
 
   //#region Player actions
@@ -281,6 +297,8 @@ export class ObservablePlayer implements Player {
   //#endregion
 
   clear = () => {
+    this._loadingStatus = 'empty';
+
     this.stop();
 
     this.channels.forEach((channel) => channel.dispose());

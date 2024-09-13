@@ -96,17 +96,19 @@ export class ObserverTrackLoader implements TrackLoader {
 
     // Run the rest in parallel when the first request are done
     let current_track_index = MAX_SIMULTANEOUS_REQUESTS;
-    requests.forEach(async (request) => {
-      await request;
+    await Promise.all(
+      requests.map(async (request) => {
+        await request;
 
-      while (current_track_index < uncachedTracks.length) {
-        await this.downloadTrack(
-          uncachedTracks[current_track_index].track,
-          onLoaded,
-        );
-        current_track_index++;
-      }
-    });
+        while (current_track_index < uncachedTracks.length) {
+          await this.downloadTrack(
+            uncachedTracks[current_track_index].track,
+            onLoaded,
+          );
+          current_track_index++;
+        }
+      }),
+    );
   };
 
   downloadTrack = async (
@@ -137,6 +139,10 @@ export class ObserverTrackLoader implements TrackLoader {
       } finally {
         attempt++;
       }
+    }
+
+    if (attempt >= MAX_RETRIES_COUNT) {
+      trackData.status = 'error';
     }
   };
 

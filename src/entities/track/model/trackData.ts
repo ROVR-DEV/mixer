@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx';
 
 import { arrayBufferToBlob } from '@/shared/lib';
 
-export type TrackDataStatus = 'empty' | 'loading' | 'fulfilled';
+export type TrackDataStatus = 'empty' | 'loading' | 'fulfilled' | 'error';
 
 export class TrackData {
   uuid: string;

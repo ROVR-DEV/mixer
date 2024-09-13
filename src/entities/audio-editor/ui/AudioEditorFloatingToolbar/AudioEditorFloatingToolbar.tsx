@@ -3,8 +3,7 @@
 import { forwardRef, memo, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
-import { IconButton } from '@/shared/ui';
-import { MoveIcon } from '@/shared/ui/assets';
+import { IconButton, MoveIcon } from '@/shared/ui';
 
 import { AudioEditorFloatingToolbarGroup } from '../AudioEditorFloatingToolbarGroup';
 
