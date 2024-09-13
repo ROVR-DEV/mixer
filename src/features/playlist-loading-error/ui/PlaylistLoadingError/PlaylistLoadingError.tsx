@@ -68,7 +68,10 @@ export const PlaylistLoadingError = observer(function PlaylistLoadingError({
       </p>
       <div className='flex flex-col'>
         {errorTracks.map((track) => (
-          <div key={track.id} className='flex items-center gap-4'>
+          <div
+            key={`error-loading-track-${track.meta.uuid}`}
+            className='flex items-center gap-4'
+          >
             <TrackTitle className='w-full' track={track.meta} />
             <RemoveButton
               aria-label='Remove track'
