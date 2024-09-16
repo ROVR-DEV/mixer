@@ -11,7 +11,7 @@ import {
 } from '@/entities/audio-editor';
 
 export interface TimelineZoomScrollProps {
-  timelineRef: RefObject<HTMLDivElement>;
+  container: RefObject<HTMLDivElement>;
   timelineRulerRef: RefObject<HTMLDivElement>;
   startTime?: number;
   endTime: number;
@@ -28,7 +28,7 @@ export interface TimelineZoomScrollProps {
 }
 
 export const useTimelineZoomScroll = ({
-  timelineRef,
+  container,
   timelineRulerRef,
   totalTime,
   startTime = 0,
@@ -47,7 +47,7 @@ export const useTimelineZoomScroll = ({
   const timeline = useMemo(
     () =>
       new Timeline({
-        timelineRef,
+        container: container.current,
         zoomStep,
         minZoom,
         maxZoom,
@@ -56,7 +56,7 @@ export const useTimelineZoomScroll = ({
         totalTime: totalTime,
         startTime: startTime,
         endTime: endTime,
-        timelineLeftPadding,
+        zeroMarkOffsetX: timelineLeftPadding,
       }),
     [
       endTime,
@@ -65,7 +65,7 @@ export const useTimelineZoomScroll = ({
       scrollStep,
       startTime,
       timelineLeftPadding,
-      timelineRef,
+      container,
       totalTime,
       zoomStep,
     ],
@@ -75,9 +75,9 @@ export const useTimelineZoomScroll = ({
     (prevTime: number, nextTime: number) => {
       const timeDiff = prevTime - nextTime;
 
-      const pixelsDiff = timeDiff * timeline.pixelsPerSecond;
+      const pixelsDiff = timeDiff * timeline.hPixelsPerSecond;
 
-      timeline.scrollController.value += pixelsDiff;
+      timeline.hScrollController.value += pixelsDiff;
     },
     [timeline],
   );
@@ -99,9 +99,9 @@ export const useTimelineZoomScroll = ({
 
   const handleWheelHorizontalScroll = useCallback(
     (deltaX: number) => {
-      timeline.scrollController.shiftX(deltaX);
+      timeline.hScrollController.shiftX(deltaX);
     },
-    [timeline.scrollController],
+    [timeline.hScrollController],
   );
 
   // Wheel event handler
@@ -143,28 +143,28 @@ export const useTimelineZoomScroll = ({
   // Zoom/scroll change listeners
   const handleZoomChange = useCallback(
     (zoom: number) => {
-      onZoomChange?.(zoom, timeline.timelineContainer.pixelsPerSecond);
+      onZoomChange?.(zoom, timeline.hPixelsPerSecond);
       onChange?.(
         zoom,
-        timeline.scrollController.value,
-        timeline.timelineContainer.pixelsPerSecond,
+        timeline.hScrollController.value,
+        timeline.hPixelsPerSecond,
       );
     },
     [
       onZoomChange,
-      timeline.timelineContainer.pixelsPerSecond,
-      timeline.scrollController.value,
+      timeline.hPixelsPerSecond,
+      timeline.hScrollController.value,
       onChange,
     ],
   );
 
   const handleScrollChange = useCallback(
     (scroll: number) => {
-      onScrollChange?.(scroll, timeline.timelineContainer.pixelsPerSecond);
+      onScrollChange?.(scroll, timeline.hPixelsPerSecond);
       onChange?.(
         timeline.zoomController.value,
         scroll,
-        timeline.timelineContainer.pixelsPerSecond,
+        timeline.hPixelsPerSecond,
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,29 +179,26 @@ export const useTimelineZoomScroll = ({
   }, [onZoomChange, timeline.zoomController, handleZoomChange]);
 
   useEffect(() => {
-    timeline.scrollController.addListener(handleScrollChange);
+    timeline.hScrollController.addListener(handleScrollChange);
 
-    return () => timeline.scrollController.removeListener(handleScrollChange);
-  }, [handleScrollChange, timeline.scrollController]);
+    return () => timeline.hScrollController.removeListener(handleScrollChange);
+  }, [handleScrollChange, timeline.hScrollController]);
 
   useEffect(() => {
-    timeline.timelineContainer.timelineRef = timelineRef;
+    timeline.container = container.current;
 
-    onZoomChange?.(
-      timeline.zoomController.value,
-      timeline.timelineContainer.pixelsPerSecond,
-    );
+    onZoomChange?.(timeline.zoomController.value, timeline.hPixelsPerSecond);
     onScrollChange?.(
-      timeline.scrollController.value,
-      timeline.timelineContainer.pixelsPerSecond,
+      timeline.hScrollController.value,
+      timeline.hPixelsPerSecond,
     );
     onChange?.(
       timeline.zoomController.value,
-      timeline.scrollController.value,
-      timeline.timelineContainer.pixelsPerSecond,
+      timeline.hScrollController.value,
+      timeline.hPixelsPerSecond,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onChange, onScrollChange, onZoomChange, timelineRef]);
+  }, [onChange, onScrollChange, onZoomChange, container]);
 
   // useEffect(() => {
   //   timeline.addWheelListener(handleWheel);
@@ -210,7 +207,7 @@ export const useTimelineZoomScroll = ({
   // }, [handleWheel, timeline]);
 
   // Setup wheel event handlers
-  useWheel(handleWheel, timelineRef);
+  useWheel(handleWheel, container);
   useWheel(handleWheel, timelineRulerRef);
 
   return timeline;

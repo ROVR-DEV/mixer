@@ -15,3 +15,5 @@ export * from './setupCanvas';
 export * from './getTimelineMaxScroll';
 export * from './getPixelsPerSecond';
 export * from './getTicksForSeconds';
+export * from './useTimelineInitialize';
+export * from './useTimelineWheelHandler';

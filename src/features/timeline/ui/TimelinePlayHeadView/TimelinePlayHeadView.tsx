@@ -41,18 +41,18 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
     update();
 
     timeline.zoomController.addListener(update);
-    timeline.scrollController.addListener(update);
+    timeline.hScrollController.addListener(update);
     return () => {
       timeline.zoomController.removeListener(update);
-      timeline.scrollController.removeListener(update);
+      timeline.hScrollController.removeListener(update);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderPlayHead, timeline.scrollController, timeline.zoomController]);
+  }, [renderPlayHead, timeline.hScrollController, timeline.zoomController]);
 
   return (
     <TimelinePlayHeadMemoized
       ref={playHeadRef}
-      initialPosition={initialPosition || timeline.timelineLeftPadding}
+      initialPosition={initialPosition || timeline.zeroMarkOffsetX}
       style={{
         height: playHeadHeight,
       }}

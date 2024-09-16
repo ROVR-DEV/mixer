@@ -1,9 +1,13 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-import { cn, useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
+import {
+  cn,
+  useGlobalMouseMove,
+  useIsMouseClickStartsOnThisSpecificElement,
+} from '@/shared/lib';
 
 import {
   useTimeline,
@@ -17,14 +21,16 @@ import {
   TimelinePlayHeadView,
   TimelineRulerMemoized,
   TimelineRulerRef,
+  useTimelineWheelHandler,
 } from '@/features/timeline';
 
 import { useAudioEditorTimelineRuler } from '../../lib';
 
 import { TimelineHeaderProps } from './interfaces';
 
+const TIMELINE_RULER_IN_HEADER_CANVAS_PROPS = { className: 'h-[32px]' };
+
 export const TimelineHeader = observer(function TimelineHeader({
-  rulerRef,
   centerLine,
   endBorder,
   className,
@@ -35,6 +41,7 @@ export const TimelineHeader = observer(function TimelineHeader({
 
   const handleClickOnRuler = useHandleTimeSeek(player, timeline);
 
+  const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const rulerControlRef = useRef<TimelineRulerRef | null>(null);
 
   const renderRuler = useAudioEditorTimelineRuler(rulerControlRef);
@@ -60,26 +67,29 @@ export const TimelineHeader = observer(function TimelineHeader({
     renderRuler(
       timeline.ticks,
       timeline.zoom,
-      timeline.scroll,
-      timeline.timelineContainer.pixelsPerSecond,
-      timeline.timelineLeftPadding,
+      timeline.hScroll,
+      timeline.hPixelsPerSecond,
+      timeline.zeroMarkOffsetX,
     );
   }, [
     renderRuler,
     timeline.disableListeners,
-    timeline.scroll,
+    timeline.hScroll,
     timeline.ticks,
-    timeline.timelineContainer.pixelsPerSecond,
-    timeline.timelineLeftPadding,
+    timeline.hPixelsPerSecond,
+    timeline.zeroMarkOffsetX,
     timeline.zoom,
   ]);
 
-  const canvasProps = useMemo(() => ({ className: 'h-[32px]' }), []);
+  const handleTimeSeek = useHandleTimeSeek(player, timeline);
+
+  useTimelineWheelHandler(rulerWrapperRef, timeline);
+  useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
 
   return (
     <div
       className={cn('w-full relative flex items-end', className)}
-      ref={rulerRef}
+      ref={rulerWrapperRef}
       onClick={handleClick}
       onMouseDown={onMouseDown}
       {...props}
@@ -89,7 +99,7 @@ export const TimelineHeader = observer(function TimelineHeader({
       <TimelineRulerMemoized
         className='pointer-events-none w-full'
         centerLine={centerLine}
-        canvasProps={canvasProps}
+        canvasProps={TIMELINE_RULER_IN_HEADER_CANVAS_PROPS}
         controlRef={rulerControlRef}
       />
       {!endBorder ? null : <TimelineEndBorder />}

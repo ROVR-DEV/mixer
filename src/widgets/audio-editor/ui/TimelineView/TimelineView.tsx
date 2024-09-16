@@ -38,9 +38,9 @@ export const TimelineView = observer(function TimelineView({
     renderDefaultTimelineGrid(
       gridControlRef,
       timeline.ticks,
-      timeline.scroll,
-      timeline.timelineContainer.pixelsPerSecond,
-      timeline.timelineLeftPadding,
+      timeline.hScroll,
+      timeline.hPixelsPerSecond,
+      timeline.zeroMarkOffsetX,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeline.ticks]);
@@ -58,11 +58,11 @@ export const TimelineView = observer(function TimelineView({
   }, [gridHeight, renderGrid]);
 
   useEffect(() => {
-    timeline.scrollController.addListener(renderGrid);
+    timeline.hScrollController.addListener(renderGrid);
     timeline.zoomController.addListener(renderGrid);
 
     return () => {
-      timeline.scrollController.removeListener(renderGrid);
+      timeline.hScrollController.removeListener(renderGrid);
       timeline.zoomController.removeListener(renderGrid);
     };
   }, [renderGrid, timeline]);

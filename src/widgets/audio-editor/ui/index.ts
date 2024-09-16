@@ -11,3 +11,4 @@ export * from './TimelineChannelsList';
 export * from './AudioEditorContentHeader';
 export * from './AudioEditorContentBody';
 export * from './TimelineInfo';
+export * from './AudioEditorLayout';

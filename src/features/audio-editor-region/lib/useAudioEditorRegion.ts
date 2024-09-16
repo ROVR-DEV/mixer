@@ -15,8 +15,8 @@ export const useAudioEditorRegion = (player: Player, timeline: Timeline) => {
   );
 
   const offsetRect = useMemo(
-    () => new Rect(timeline.scroll, 0, 0, 0),
-    [timeline.scroll],
+    () => new Rect(timeline.hScroll, 0, 0, 0),
+    [timeline.hScroll],
   );
 
   return useSelection({

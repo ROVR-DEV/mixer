@@ -7,7 +7,8 @@ import { cn } from '@/shared/lib';
 
 import { TimelineContext, useAudioEditor } from '@/entities/audio-editor';
 
-import { useTimelineZoomScroll } from '../../lib';
+import { useTimelineInitialize } from '@/features/timeline';
+
 import { AudioEditorContentBody } from '../AudioEditorContentBody';
 import { AudioEditorContentHeader } from '../AudioEditorContentHeader';
 
@@ -20,12 +21,10 @@ export const AudioEditorContent = observer(function AudioEditorBody({
 }: TimelineViewProps) {
   const audioEditor = useAudioEditor();
 
-  const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
-  const timeline = useTimelineZoomScroll({
+  const timeline = useTimelineInitialize(`${playlist.id}-timeline`, {
     timelineRef,
-    timelineRulerRef: rulerWrapperRef,
     endTime: playlist.duration_in_seconds,
   });
 
@@ -48,14 +47,8 @@ export const AudioEditorContent = observer(function AudioEditorBody({
         )}
         {...props}
       >
-        <AudioEditorContentHeader
-          playlist={playlist}
-          rulerWrapperRef={rulerWrapperRef}
-        />
-        <AudioEditorContentBody
-          rulerWrapperRef={rulerWrapperRef}
-          timelineRef={timelineRef}
-        />
+        <AudioEditorContentHeader playlist={playlist} />
+        <AudioEditorContentBody timelineRef={timelineRef} />
       </div>
     </TimelineContext.Provider>
   );

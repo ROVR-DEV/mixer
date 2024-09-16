@@ -1,3 +1,6 @@
+'use client';
+
+import { observer } from 'mobx-react-lite';
 import { useCallback } from 'react';
 
 import { cn } from '@/shared/lib';
@@ -7,10 +10,10 @@ import { useAudioEditor } from '@/entities/audio-editor';
 
 import { TrackEditorLeftPaneProps } from './interfaces';
 
-export const TrackEditorLeftPane = ({
+export const TrackEditorLeftPane = observer(function TrackEditorLeftPane({
   className,
   ...props
-}: TrackEditorLeftPaneProps) => {
+}: TrackEditorLeftPaneProps) {
   const audioEditor = useAudioEditor();
 
   const handleClose = useCallback(() => {
@@ -27,4 +30,4 @@ export const TrackEditorLeftPane = ({
       <div className='h-full border-r border-r-secondary' />
     </div>
   );
-};
+});

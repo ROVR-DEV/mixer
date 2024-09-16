@@ -1,7 +1,4 @@
-import {
-  ValueInRangeChangeRule,
-  ValueInRangeController,
-} from './valueInRangeController';
+import { RangeStepRule, Range } from './range';
 
 export const scrollRule = (
   value: number,
@@ -13,12 +10,12 @@ export const scrollRule = (
 
 const SCROLL_DELTA_X_STEP_COEFFICIENT = 1;
 
-export class ScrollController extends ValueInRangeController {
+export class ScrollController extends Range {
   constructor(
     step: number,
     min: number,
     max: number,
-    rule: ValueInRangeChangeRule = scrollRule,
+    rule: RangeStepRule = scrollRule,
   ) {
     super(step, min, max, rule);
   }

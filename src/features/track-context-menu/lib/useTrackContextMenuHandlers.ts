@@ -22,6 +22,8 @@ export const useTrackContextMenuHandlers = (
 
     if (res.error) {
       track.channel.addTrack(track);
+    } else {
+      track.dispose();
     }
   }, [audioEditor.player.playlist?.id, track]);
 

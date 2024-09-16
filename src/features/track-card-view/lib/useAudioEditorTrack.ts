@@ -39,21 +39,16 @@ export const useAudioEditorTrack = (
 ) => {
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
 
-  const grid = (timeline.timelineContainer.timelineRef.current as HTMLElement)
-    ?.parentElement;
+  const grid = timeline.container?.parentElement;
 
   const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
     () =>
       getTrackCoordinates(
         track.trimStartTime,
         track.trimEndTime,
-        timeline.timelineContainer.pixelsPerSecond,
+        timeline.hPixelsPerSecond,
       ),
-    [
-      track.trimStartTime,
-      track.trimEndTime,
-      timeline.timelineContainer.pixelsPerSecond,
-    ],
+    [track.trimStartTime, track.trimEndTime, timeline.hPixelsPerSecond],
   );
 
   const updateTrackWidth = useCallback(() => {
@@ -77,8 +72,8 @@ export const useAudioEditorTrack = (
 
     const isVisible =
       trackStartXGlobal <
-        timeline.timelineClientWidth + timeline.scroll + bufferViewWidth &&
-      trackEndXGlobal > timeline.scroll - bufferViewWidth;
+        timeline.clientWidth + timeline.hScroll + bufferViewWidth &&
+      trackEndXGlobal > timeline.hScroll - bufferViewWidth;
 
     if (isVisible) {
       trackRef.current.classList.remove('content-hidden');
@@ -123,7 +118,7 @@ export const useAudioEditorTrack = (
 
   const globalToLocalCoordinates = useCallback(
     (globalX: number) => {
-      return globalX - timeline.scroll;
+      return globalX - timeline.hScroll;
     },
     [timeline],
   );
@@ -134,13 +129,13 @@ export const useAudioEditorTrack = (
     }
 
     const position = globalToLocalCoordinates(
-      trackStartXGlobal + timeline.timelineLeftPadding,
+      trackStartXGlobal + timeline.zeroMarkOffsetX,
     );
 
     trackRef.current.style.left = `${position}px`;
   }, [
     globalToLocalCoordinates,
-    timeline.timelineLeftPadding,
+    timeline.zeroMarkOffsetX,
     trackRef,
     trackStartXGlobal,
   ]);
@@ -158,8 +153,8 @@ export const useAudioEditorTrack = (
       const timeOffset =
         currentTime -
         dragStartTime -
-        track.dndInfo.scroll / timeline.pixelsPerSecond +
-        timeline.scroll / timeline.pixelsPerSecond;
+        track.dndInfo.scroll / timeline.hPixelsPerSecond +
+        timeline.hScroll / timeline.hPixelsPerSecond;
 
       return clamp(track.dndInfo.startTime + timeOffset, leftBound, rightBound);
     },
@@ -173,6 +168,9 @@ export const useAudioEditorTrack = (
       leftBound: number = 0,
       rightBound: number = Infinity,
     ) => {
+      // console.log('Set time');
+      // console.log(track.id, rightBound);
+
       const startTime = calcNewStartTime(pageX, track, leftBound, rightBound);
 
       if (track.trimStartTime === startTime) {
@@ -204,16 +202,6 @@ export const useAudioEditorTrack = (
     updateTrackVisibility,
     updateTrackWidth,
   ]);
-
-  const updateTrackAnimation = useCallback(
-    (eventName?: string) => {
-      if (eventName !== undefined && track.dndInfo.isDragging) {
-        setTime(track.dndInfo.currentX, track, 0, timeline.endTime);
-      }
-      requestAnimationFrame(updateTrack);
-    },
-    [setTime, track, updateTrack, timeline],
-  );
 
   const setVerticalPosition = throttle(
     useCallback(
@@ -277,11 +265,12 @@ export const useAudioEditorTrack = (
   const handleDragStart = useCallback(
     (e: MouseEvent, track: AudioEditorTrack) => {
       runInAction(() => {
-        track.dndInfo.scroll = timeline.scroll;
+        track.dndInfo.scroll = timeline.hScroll;
         track.dndInfo.currentX = e.pageX;
         track.dndInfo.startX = e.pageX;
         track.dndInfo.startY = e.pageY;
         track.dndInfo.startTime = track.trimStartTime;
+        track.dndInfo.endTime = track.trimEndTime;
         track.dndInfo.duration = track.trimDuration;
         track.dndInfo.startChannelIndex = audioEditor.player.channels.indexOf(
           track.channel,
@@ -299,16 +288,10 @@ export const useAudioEditorTrack = (
         track.dndInfo.leftBound =
           track.dndInfo.startTime - audioEditor.draggingTracksMinStartTime;
 
-        const trackRightBound =
-          audioEditor.draggingTracksMaxStartTime - track.dndInfo.startTime;
-
-        track.dndInfo.rightBound = clamp(
+        track.dndInfo.rightBound =
           timeline.endTime -
-            trackRightBound -
-            audioEditor.draggingTracksMaxDuration,
-          0,
-          timeline.endTime - audioEditor.draggingTracksMaxDuration,
-        );
+          track.trimDuration -
+          (audioEditor.draggingTracksMaxEndTime - track.dndInfo.endTime);
 
         const startChannelIndex =
           track.dndInfo.startChannelIndex ??
@@ -346,13 +329,7 @@ export const useAudioEditorTrack = (
       repeatDragUpdate(() => {
         const bounds = isMouseInScrollBounds(e.x, timeline);
 
-        const globalTime = timeline.globalToTime(e.x);
-
-        if (
-          (bounds.leftBound === undefined && bounds.rightBound === undefined) ||
-          globalTime < leftBound ||
-          globalTime > rightBound + track.trimDuration
-        ) {
+        if (bounds.leftBound === undefined && bounds.rightBound === undefined) {
           dragUpdate();
           stopDragUpdate();
           return false;
@@ -518,20 +495,22 @@ export const useAudioEditorTrack = (
   }, [stopDragUpdate, track.dndInfo.isDragging, trackRef]);
 
   useEffect(() => {
-    updateTrackAnimation();
+    updateTrack();
   }, [
     track.startTrimDuration,
     track.endTrimDuration,
     track.channel,
     track.startTime,
-    updateTrackAnimation,
+    updateTrack,
   ]);
 
   // Stop drag on unmount
   useEffect(() => {
     return () => {
       if (lastMouseEventRef.current) {
-        track.dndInfo.isDragging = false;
+        runInAction(() => {
+          track.dndInfo.isDragging = false;
+        });
         stopDragUpdate();
       }
     };
@@ -539,24 +518,16 @@ export const useAudioEditorTrack = (
   }, [stopDragUpdate]);
 
   useEffect(() => {
-    const updateTrackAnimationWithEvent = () => {
-      updateTrackAnimation('event');
-    };
+    timeline.zoomController.addListener(updateTrack);
+    timeline.hScrollController.addListener(updateTrack);
 
-    timeline.zoomController.addListener(updateTrackAnimationWithEvent);
-    timeline.scrollController.addListener(updateTrackAnimationWithEvent);
-
-    updateTrackAnimation();
+    updateTrack();
 
     return () => {
-      timeline.zoomController.removeListener(updateTrackAnimationWithEvent);
-      timeline.scrollController.removeListener(updateTrackAnimationWithEvent);
+      timeline.zoomController.removeListener(updateTrack);
+      timeline.hScrollController.removeListener(updateTrack);
     };
-  }, [
-    timeline.scrollController,
-    timeline.zoomController,
-    updateTrackAnimation,
-  ]);
+  }, [timeline.hScrollController, timeline.zoomController, updateTrack]);
 
   return { isDragging, onMouseUp, onMouseDown };
 };

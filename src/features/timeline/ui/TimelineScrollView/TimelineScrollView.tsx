@@ -25,8 +25,7 @@ export const TimelineScrollView = observer(function TimelineScrollView({
   const updateHorizontalScrollbar = useCallback(
     (scroll: number) => {
       horizontalScrollRef.current?.setScroll(
-        scroll -
-          timeline.startTime * timeline.timelineContainer.pixelsPerSecond,
+        scroll - timeline.timeToPixels(timeline.startTime),
       );
     },
     [timeline],
@@ -34,26 +33,32 @@ export const TimelineScrollView = observer(function TimelineScrollView({
 
   const handleHorizontalScrollbarOnScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
-      timeline.scrollController.value =
-        e.currentTarget.scrollLeft +
-        timeline.startTime * timeline.timelineContainer.pixelsPerSecond;
+      const newValue =
+        e.currentTarget.scrollLeft + timeline.timeToPixels(timeline.startTime);
+
+      timeline.hScrollController.value = newValue;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeline.scrollController],
+    [timeline],
   );
 
   useEffect(() => {
-    timeline.scrollController.addListener(updateHorizontalScrollbar);
+    updateHorizontalScrollbar(timeline.hScroll);
+  }, [timeline.hScroll, updateHorizontalScrollbar]);
+
+  useEffect(() => {
+    timeline.hScrollController.addListener(updateHorizontalScrollbar);
+
+    updateHorizontalScrollbar(timeline.hScroll);
 
     return () =>
-      timeline.scrollController.removeListener(updateHorizontalScrollbar);
-  }, [timeline.scrollController, updateHorizontalScrollbar]);
+      timeline.hScrollController.removeListener(updateHorizontalScrollbar);
+  }, [timeline, updateHorizontalScrollbar]);
 
   return (
     <TimelineScrollMemoized
       className={cn('min-h-[10px]', className)}
       scrollDivRef={horizontalScrollRef}
-      timelineScrollWidth={timeline.timelineContainer.timelineScrollWidth}
+      timelineScrollWidth={timeline.scrollWidth}
       xPadding={4}
       onChange={handleHorizontalScrollbarOnScroll}
       {...props}

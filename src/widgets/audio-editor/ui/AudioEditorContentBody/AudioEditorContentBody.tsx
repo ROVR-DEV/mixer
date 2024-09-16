@@ -13,6 +13,7 @@ import {
 } from '@/entities/audio-editor';
 
 import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating-toolbar';
+import { useTimelineWheelHandler } from '@/features/timeline';
 import {
   useTrackImportMenu,
   TrackImportMenuPopover,
@@ -30,7 +31,6 @@ import { TimelineViewFooterMemoized } from '../TimelineViewFooter';
 import { AudioEditorContentBodyProps } from './interfaces';
 
 export const AudioEditorContentBody = observer(function AudioEditorContentBody({
-  rulerWrapperRef,
   timelineRef,
   ...props
 }: AudioEditorContentBodyProps) {
@@ -56,7 +56,6 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
   const { onMouseDown, onMouseUp } = useAudioEditorEvents(
     audioEditor,
     timeline,
-    rulerWrapperRef,
     rectangularSelectionRef,
   );
 
@@ -75,6 +74,8 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
     floatingToolbarRef,
     timelineContainerRef,
   );
+
+  useTimelineWheelHandler(timelineRef, timeline);
 
   return (
     <div className='flex size-full flex-col overflow-hidden'>

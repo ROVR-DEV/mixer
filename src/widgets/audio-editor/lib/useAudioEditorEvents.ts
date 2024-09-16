@@ -1,10 +1,6 @@
 import { RefObject, useCallback } from 'react';
 
-// eslint-disable-next-line boundaries/element-types
-import {
-  useGlobalMouseMove,
-  useIsMouseClickStartsOnThisSpecificElement,
-} from '@/shared/lib';
+import { useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
 
 import {
   AudioEditor,
@@ -17,7 +13,6 @@ import { useAudioEditorSelection } from './useAudioEditorSelection';
 export const useAudioEditorEvents = (
   audioEditor: AudioEditor,
   timeline: Timeline,
-  rulerWrapperRef: RefObject<HTMLDivElement>,
   rectangularSelectionRef: RefObject<HTMLDivElement>,
 ): { isSelecting: boolean } & Pick<
   React.ComponentProps<'div'>,
@@ -64,8 +59,6 @@ export const useAudioEditorEvents = (
     },
     [audioEditor, handleTimeSeek, isSelecting, onElementClick],
   );
-
-  useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
 
   return { isSelecting, onMouseUp: onMouseUp, onMouseDown: onMouseDown };
 };

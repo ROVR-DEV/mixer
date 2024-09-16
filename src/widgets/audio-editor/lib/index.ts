@@ -2,7 +2,6 @@ export * from './useAudioEditorTimelineRulerAndGrid';
 export * from './useTimelineZoomScroll';
 export * from './useAudioEditorTimelineGrid';
 export * from './useAudioEditorTimelineRuler';
-export * from './useAudioEditorGlobalControls';
 export * from './selectTracksInSelection';
 export * from './useFloatingToolbarDnD';
 export * from './useCurrentCursorIcon';

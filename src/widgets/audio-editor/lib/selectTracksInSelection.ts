@@ -61,7 +61,7 @@ export const selectTracksInSelection = (
     }
 
     const virtualRect = new Rect(
-      rect.x + timeline.scroll,
+      rect.x + timeline.hScroll,
       rect.y,
       rect.width,
       rect.height,

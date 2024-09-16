@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 import { RemoveButton } from '@/shared/ui';
@@ -15,8 +15,6 @@ export const PlaylistLoadingError = observer(function PlaylistLoadingError({
   ...props
 }: PlaylistLoadingErrorProps) {
   const player = usePlayer();
-
-  const [shouldShowError, setShouldShowError] = useState(false);
 
   const errorTracks = useMemo(() => {
     if (player.loadingStatus !== 'fulfilled') {
@@ -49,14 +47,7 @@ export const PlaylistLoadingError = observer(function PlaylistLoadingError({
     [player.playlist?.id],
   );
 
-  useEffect(() => {
-    if (player.loadingStatus === 'fulfilled') {
-      const timerId = setTimeout(setShouldShowError, 200, true);
-      return () => clearTimeout(timerId);
-    }
-  }, [player.loadingStatus]);
-
-  return shouldShowError ? (
+  return player.loadingStatus === 'fulfilled' && errorTracks.length > 0 ? (
     <div className={cn('flex flex-col gap-2', className)} {...props}>
       <p className='inline-flex flex-col'>
         <span className='font-bold text-error'>

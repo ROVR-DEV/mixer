@@ -146,6 +146,13 @@ export class AudioEditorTrack {
     makeAutoObservable(this);
   }
 
+  hydration = (track: Track) => {
+    this.meta = track;
+
+    this.startTime = track.start;
+    this.endTime = track.end;
+  };
+
   setAudioBuffer = (audioBuffer: WaveSurfer) => {
     if (this._audioBuffer === audioBuffer) {
       return;

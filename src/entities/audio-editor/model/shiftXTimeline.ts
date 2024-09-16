@@ -31,16 +31,14 @@ export const isMouseInScrollBounds = (
   mouseX: number,
   timeline: Timeline,
 ): { leftBound: Bound | undefined; rightBound: Bound | undefined } => {
-  const timelineElement = timeline.timelineContainer.timelineRef.current;
+  const timelineElement = timeline.container;
 
   if (!timelineElement) {
     return { leftBound: undefined, rightBound: undefined };
   }
 
-  const timelineRect = timelineElement.getBoundingClientRect();
-
-  const leftBound = getTimelineLeftScrollBounds(timelineRect);
-  const rightBound = getTimelineRightScrollBounds(timelineRect);
+  const leftBound = getTimelineLeftScrollBounds(timeline.boundingClientRect);
+  const rightBound = getTimelineRightScrollBounds(timeline.boundingClientRect);
 
   if (mouseX <= leftBound.end) {
     return { leftBound, rightBound: undefined };
@@ -54,28 +52,28 @@ export const isMouseInScrollBounds = (
 };
 
 export const shiftXTimeline = (mouseX: number, timeline: Timeline) => {
-  const timelineElement = timeline.timelineContainer.timelineRef.current;
+  const timelineElement = timeline.container;
 
   if (!timelineElement) {
     return 0;
   }
 
-  const timelineRect = timelineElement.getBoundingClientRect();
+  const { start: leftStart, end: leftEnd } = getTimelineLeftScrollBounds(
+    timeline.boundingClientRect,
+  );
 
-  const { start: leftStart, end: leftEnd } =
-    getTimelineLeftScrollBounds(timelineRect);
-
-  const { start: rightStart, end: rightEnd } =
-    getTimelineRightScrollBounds(timelineRect);
+  const { start: rightStart, end: rightEnd } = getTimelineRightScrollBounds(
+    timeline.boundingClientRect,
+  );
 
   if (mouseX <= leftEnd) {
     const percent = 100 - calculatePercent(mouseX, leftStart, leftEnd);
-    timeline.scrollController.shiftX(-1 * percent);
+    timeline.hScrollController.shiftX(-1 * percent);
 
     return -1;
   } else if (mouseX >= rightStart) {
     const percent = calculatePercent(mouseX, rightStart, rightEnd);
-    timeline.scrollController.shiftX(1 * percent);
+    timeline.hScrollController.shiftX(1 * percent);
 
     return 1;
   }
@@ -92,7 +90,7 @@ export const shiftXTimelineFromBounds = (
   if (leftBound !== undefined) {
     const percent =
       100 - calculatePercent(mouseX, leftBound.start, leftBound.end);
-    timeline.scrollController.shiftX(-1 * percent);
+    timeline.hScrollController.shiftX(-1 * percent);
 
     return -1;
   } else if (rightBound !== undefined) {
@@ -101,7 +99,7 @@ export const shiftXTimelineFromBounds = (
       rightBound?.start,
       rightBound?.end,
     );
-    timeline.scrollController.shiftX(1 * percent);
+    timeline.hScrollController.shiftX(1 * percent);
 
     return 1;
   }

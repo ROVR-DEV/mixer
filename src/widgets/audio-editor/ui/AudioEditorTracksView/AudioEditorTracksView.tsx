@@ -16,7 +16,7 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
   return channel.tracks.map((track) => {
     return !track ? null : (
       <AudioEditorTrackView
-        className='h-[calc(100%-14px)]'
+        className='h-[calc(100%-13px)]'
         key={`track-${track.id}`}
         track={track}
         waveformComponent={<TrackWaveform track={track} />}

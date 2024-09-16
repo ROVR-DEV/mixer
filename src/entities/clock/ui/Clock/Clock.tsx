@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, memo, useImperativeHandle, useRef } from 'react';
 
 import { cn, parseSecondsToParts } from '@/shared/lib';

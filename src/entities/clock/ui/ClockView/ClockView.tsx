@@ -1,7 +1,11 @@
-import { useEffect, useRef } from 'react';
+'use client';
+
+import { useCallback, useEffect, useRef } from 'react';
 
 // eslint-disable-next-line boundaries/element-types
 import { usePlayer } from '@/entities/audio-editor';
+// eslint-disable-next-line boundaries/element-types
+import { invalidatePlaylist } from '@/entities/playlist';
 
 import { ClockMemoized, ClockRef } from '../Clock';
 
@@ -22,5 +26,20 @@ export const ClockView = ({ ...props }: ClockViewProps) => {
     return () => player.off('timeupdate', updateClock);
   }, [player]);
 
-  return <ClockMemoized ref={clockRef} {...props} />;
+  const kek = useCallback(() => {
+    if (player.playlist?.id === undefined) {
+      return;
+    }
+
+    invalidatePlaylist(player.playlist.id);
+  }, [player.playlist?.id]);
+
+  return (
+    <ClockMemoized
+      className='cursor-pointer'
+      ref={clockRef}
+      onClick={kek}
+      {...props}
+    />
+  );
 };

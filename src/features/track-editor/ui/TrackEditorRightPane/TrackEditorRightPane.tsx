@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { cn, useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
 
@@ -15,11 +15,18 @@ import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
 import { ChannelListItemView } from '@/features/channel-control';
-import { TimelineScrollView } from '@/features/timeline';
+// eslint-disable-next-line boundaries/element-types
+import {
+  TimelineScrollView,
+  useTimelineInitialize,
+  useTimelineWheelHandler,
+  // eslint-disable-next-line boundaries/element-types
+} from '@/features/timeline';
+// eslint-disable-next-line boundaries/element-types
 import { AudioEditorTrackView } from '@/features/track-card-view';
 
 // eslint-disable-next-line boundaries/element-types
-import { TimelineHeader, useTimelineZoomScroll } from '@/widgets/audio-editor';
+import { TimelineHeader } from '@/widgets/audio-editor';
 
 import { TrackEditorRightPaneProps } from './interfaces';
 
@@ -30,34 +37,28 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   const audioEditor = useAudioEditor();
   const player = usePlayer();
 
-  const rulerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
 
-  const timeline = useTimelineZoomScroll({
+  const timeline = useTimelineInitialize('track-editor', {
     timelineRef,
-    timelineRulerRef: rulerRef,
     startTime: audioEditor.editableTrack?.isTrimming
       ? audioEditor.editableTrack.startTime
       : audioEditor.editableTrack?.trimStartTime,
-    endTime: (audioEditor.editableTrack?.duration ?? 0) + 2,
-    totalTime: (audioEditor.editableTrack?.duration ?? 0) + 2,
+    endTime: audioEditor.editableTrack?.trimEndTime ?? 0,
+    trackHeight: '100%',
   });
 
   const waveformComponent = useMemo(
     () =>
-      !audioEditor.editableTrack ? (
-        <></>
-      ) : (
+      !audioEditor.editableTrack ? null : (
         <TrackWaveform track={audioEditor.editableTrack} ignoreSelection />
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [audioEditor.editableTrack],
   );
 
   const handleTimeSeek = useHandleTimeSeek(player, timeline);
 
   const { onMouseDown, onClick } = useIsMouseClickStartsOnThisSpecificElement();
-
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!onClick?.(e)) {
@@ -69,49 +70,12 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     [handleTimeSeek, onClick],
   );
 
-  useEffect(() => {
-    if (!audioEditor.editableTrack) {
-      return;
-    }
-
-    const trackStartX =
-      audioEditor.editableTrack.trimStartTime * timeline.pixelsPerSecond +
-      timeline.timelineLeftPadding;
-
-    if (audioEditor.editableTrack.isTrimming && timeline.scroll > trackStartX) {
-      timeline.scroll = trackStartX;
-    }
-  }, [
-    audioEditor.editableTrack,
-    audioEditor.editableTrack?.isTrimming,
-    audioEditor.editableTrack?.trimStartTime,
-    timeline,
-  ]);
-
-  useEffect(() => {
-    if (!audioEditor.editableTrack) {
-      return;
-    }
-
-    const trackStartX =
-      audioEditor.editableTrack.trimStartTime * timeline.pixelsPerSecond +
-      timeline.timelineLeftPadding;
-
-    timeline.scroll = trackStartX;
-  }, [audioEditor.editableTrack, timeline]);
-
-  useEffect(() => {
-    timeline.trackHeight = '100%';
-  }, [timeline]);
+  useTimelineWheelHandler(timelineRef, timeline);
 
   return (
     <TimelineContext.Provider value={timeline}>
       <div className={cn('flex flex-col', className)} {...props}>
-        <TimelineHeader
-          className='h-16 min-h-16'
-          rulerRef={rulerRef}
-          centerLine={false}
-        />
+        <TimelineHeader className='h-16 min-h-16' centerLine={false} />
         <div className='flex size-full flex-col overflow-hidden'>
           <div
             className='size-full grow overflow-x-clip'

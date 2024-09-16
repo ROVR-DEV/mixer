@@ -36,7 +36,7 @@ export const useRectangularSelection = ({
   const startPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const grid = timeline.timelineContainer.timelineRef.current?.parentElement;
+  const grid = timeline.container?.parentElement;
 
   const getSelectionRec = useCallback((x: number, y: number) => {
     const startX = startPositionRef.current.x;
@@ -197,19 +197,20 @@ export const useRectangularSelection = ({
 
     updateContainerRect();
 
-    timeline.scrollController.addListener(updateContainerRect);
+    timeline.hScrollController.addListener(updateContainerRect);
     timeline.zoomController.addListener(updateContainerRect);
 
     return () => {
       timeline.zoomController.removeListener(updateContainerRect);
-      timeline.scrollController.removeListener(updateContainerRect);
+      timeline.hScrollController.removeListener(updateContainerRect);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    timeline.scrollController,
-    timeline.timelineClientHeight,
-    timeline.timelineScrollWidth,
+    timeline.hScrollController,
+    timeline.clientHeight,
+    timeline.clientWidth,
     timeline.zoomController,
+    updateSelection,
+    getSelectionRec,
   ]);
 
   useEffect(() => {

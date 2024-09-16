@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 
 import { AudioEditor } from '@/entities/audio-editor';
+// eslint-disable-next-line boundaries/element-types
 import { GlobalControlsEvent, useGlobalControls } from '@/entities/event';
 
 export const useAudioEditorGlobalControls = (audioEditor: AudioEditor) => {

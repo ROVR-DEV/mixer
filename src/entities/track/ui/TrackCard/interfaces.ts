@@ -6,7 +6,7 @@ import { Track } from '../../model';
 
 export interface TrackCardProps extends React.ComponentProps<'div'> {
   track: Track;
-  waveformComponent: JSX.Element;
+  waveformComponent: JSX.Element | null;
   isSelected?: boolean;
   isSolo?: boolean;
   color?: string;

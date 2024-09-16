@@ -29,7 +29,7 @@ export interface AudioEditor {
   readonly selectedTracks: Set<AudioEditorTrack>;
 
   readonly draggingTracksMinStartTime: number;
-  readonly draggingTracksMaxStartTime: number;
+  readonly draggingTracksMaxEndTime: number;
 
   readonly draggingTracksMaxDuration: number;
 
@@ -131,10 +131,10 @@ export class ObservableAudioEditor implements AudioEditor {
     }, Infinity);
   }
 
-  get draggingTracksMaxStartTime(): number {
-    return this.draggingTracks.reduce((maxStartTime, track) => {
-      const startTime = track.dndInfo.startTime;
-      return maxStartTime > startTime ? maxStartTime : startTime;
+  get draggingTracksMaxEndTime(): number {
+    return this.draggingTracks.reduce((maxEndTime, track) => {
+      const endTime = track.dndInfo.endTime;
+      return maxEndTime > endTime ? maxEndTime : endTime;
     }, 0);
   }
 
@@ -193,6 +193,11 @@ export class ObservableAudioEditor implements AudioEditor {
     makeAutoObservable(this, {
       tool: computed,
       isFitActivated: computed,
+      draggingTracksMaxChannelIndex: computed,
+      draggingTracksMaxDuration: computed,
+      draggingTracksMaxEndTime: computed,
+      draggingTracksMinChannelIndex: computed,
+      draggingTracksMinStartTime: computed,
     });
   }
 
@@ -256,7 +261,7 @@ export class ObservableAudioEditor implements AudioEditor {
       this._timeline.zoom = this._zoomBeforeFit;
       this._timeline.zoomController.min = 1;
 
-      this._timeline.scroll = this._scrollBeforeFit;
+      this._timeline.hScroll = this._scrollBeforeFit;
 
       this._zoomBeforeFit = null;
       this._scrollBeforeFit = null;
@@ -264,7 +269,7 @@ export class ObservableAudioEditor implements AudioEditor {
     }
 
     this._zoomBeforeFit = this._timeline.zoom;
-    this._scrollBeforeFit = this._timeline.scroll;
+    this._scrollBeforeFit = this._timeline.hScroll;
 
     const minMax = this.player.tracks.reduce(
       (acc, track) => {
@@ -308,7 +313,7 @@ export class ObservableAudioEditor implements AudioEditor {
       return;
     }
 
-    const prevScrollTime = this._timeline.pixelsToTime(this._timeline.scroll);
+    const prevScrollTime = this._timeline.pixelsToTime(this._timeline.hScroll);
 
     if (this.isFitActivated) {
       this.fit();
@@ -316,7 +321,7 @@ export class ObservableAudioEditor implements AudioEditor {
     this._timeline.zoom = 1;
 
     const newScroll = this._timeline.timeToPixels(prevScrollTime);
-    this._timeline.scroll = newScroll;
+    this._timeline.hScroll = newScroll;
   };
 
   clearState(): void {
@@ -358,6 +363,10 @@ export class ObservableAudioEditor implements AudioEditor {
   };
 
   hydration = (playlist: Playlist): void => {
+    if (playlist.hash === this.player.playlist?.hash) {
+      return;
+    }
+
     this._isSaveStatePaused = true;
 
     // Update playlist in player
@@ -365,7 +374,9 @@ export class ObservableAudioEditor implements AudioEditor {
 
     // Add new tracks from playlist
     playlist.tracks.forEach((track) => {
-      if (!this.player.tracksByAudioUuid.has(track.uuid)) {
+      if (this.player.tracksByAudioUuid.has(track.uuid)) {
+        this.player.tracksByAudioUuid.get(track.uuid)?.hydration(track);
+      } else {
         // Temporary logic to import track to a new channel
         const nextTrackChannel = localStorage.getItem('nextTrackChannel');
         let nextTrackChannelIndex;

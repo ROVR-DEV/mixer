@@ -15,10 +15,8 @@ export const TimelineEndBorder = observer(function TimelineEndBorder({
   const timeline = useTimeline();
 
   const position = useMemo(() => {
-    return (
-      timeline.timelineScrollWidth - timeline.scroll - timeline.endBorderWidth
-    );
-  }, [timeline.endBorderWidth, timeline.scroll, timeline.timelineScrollWidth]);
+    return timeline.scrollWidth - timeline.hScroll - timeline.endBorderWidth;
+  }, [timeline.endBorderWidth, timeline.hScroll, timeline.scrollWidth]);
 
   return (
     <div

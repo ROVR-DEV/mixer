@@ -79,6 +79,7 @@ export class Channel {
   };
 
   removeTrack = (track: AudioEditorTrack) => {
+    track.audioBuffer?.pause();
     return this.tracks.remove(track);
   };
 

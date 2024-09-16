@@ -1,5 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
-import { RefObject } from 'react';
+import { computed, makeAutoObservable, runInAction } from 'mobx';
 
 import { clamp } from '@/shared/lib';
 import { Rect } from '@/shared/model';
@@ -12,11 +11,10 @@ import {
 } from '@/features/timeline';
 
 import { ScrollController } from './scrollController';
-import { TimelineContainerObserver } from './timelineContainerObserver';
 import { ZoomController } from './zoomController';
 
 export interface TimelineProps {
-  timelineRef: RefObject<HTMLElement>;
+  container: HTMLElement | null;
   zoomStep: number;
   scrollStep: number;
   minZoom: number;
@@ -26,101 +24,74 @@ export interface TimelineProps {
   totalTime?: number;
   startTime?: number;
   endTime: number;
-  timelineLeftPadding?: number;
+  zeroMarkOffsetX?: number;
+  trackHeight?: number | string;
 }
-
-export type WheelEventListener = (e: WheelEvent) => void;
 
 export class Timeline {
   readonly zoomController: ZoomController;
-  readonly scrollController: ScrollController;
-  readonly timelineContainer: TimelineContainerObserver;
+  readonly hScrollController: ScrollController;
 
-  private _timelineClientHeight: number;
-  private _timelineClientWidth: number;
-  private _timelineScrollWidth: number;
-  private _pixelsPerSecond: number;
+  endBorderWidth: number = 20;
 
-  private _timelineLeftPadding: number;
+  private _container: HTMLElement | null = null;
+  private _resizeObserver: ResizeObserver | null = null;
 
-  private _zoom: number;
-  private _scroll: number;
-
-  private _wheelListeners: Set<WheelEventListener> = new Set();
-  private _wheelEventTriggerElements: Set<RefObject<HTMLElement>> = new Set();
-
-  private _trackHeight: number | string = 98;
+  private _boundingClientRect: Rect = new Rect();
 
   private _disableListeners: boolean = false;
 
   private _interactedBefore: boolean = false;
 
-  boundingClientRect: Rect;
+  private _hScroll: number = 0;
 
-  totalTime: number;
+  private _dpi: number = 1;
 
-  startTime: number;
-  endTime: number;
+  private _zoom: number = 1;
 
-  endBorderWidth: number = 20;
+  private _hPixelsPerSecond: number = 1;
 
-  get disableListeners(): boolean {
-    return this._disableListeners;
+  private _startTime: number;
+  private _endTime: number;
+
+  private _totalTime: number;
+
+  private _zeroMarkOffsetX: number;
+  private _trackHeight: number | string = 98;
+
+  //#region Getters/Setters
+
+  get container(): HTMLElement | null {
+    return this._container;
   }
-  set disableListeners(value: boolean) {
-    this._disableListeners = value;
-    this.zoomController.disableListeners = value;
-    this.scrollController.disableListeners = value;
-  }
-
-  get trackHeight(): number | string {
-    return this._trackHeight;
-  }
-
-  set trackHeight(trackHeight: number | string) {
-    this._trackHeight = trackHeight;
-  }
-
-  get timelineClientWidth() {
-    return this._timelineClientWidth;
+  set container(value: HTMLElement | null) {
+    this._container = value;
+    if (typeof window !== 'undefined') {
+      this._setupResizeObserver();
+    }
   }
 
-  get timelineScrollWidth() {
-    return this._timelineScrollWidth;
+  get boundingClientRect(): Rect {
+    return this._boundingClientRect;
   }
 
-  get timelineClientHeight() {
-    return this._timelineClientHeight;
+  get clientWidth(): number {
+    return (
+      (this._boundingClientRect.width || this._container?.clientWidth) ?? 0
+    );
   }
 
-  get pixelsPerSecond() {
-    return this._pixelsPerSecond;
+  get scrollWidth(): number {
+    return Math.max(
+      this.clientWidth,
+      (this._totalTime - this._startTime) * this._hPixelsPerSecond,
+    );
   }
 
-  get timelineLeftPadding() {
-    return this._timelineLeftPadding;
-  }
-
-  set timelineLeftPadding(timelineLeftPadding: number) {
-    this._timelineLeftPadding = timelineLeftPadding;
-  }
-
-  get zoom() {
-    return this._zoom;
-  }
-
-  set zoom(zoom: number) {
-    this._interactedBefore = true;
-    this.zoomController.value = zoom;
-  }
-
-  get scroll() {
-    return this._scroll;
-  }
-
-  set scroll(scroll: number) {
-    this._interactedBefore = true;
-    this.scrollController.value = scroll;
+  get clientHeight(): number {
+    return (
+      (this._boundingClientRect.height || this._container?.clientHeight) ?? 0
+    );
   }
 
   get interactedBefore(): boolean {
@@ -130,8 +101,85 @@ export class Timeline {
     this._interactedBefore = value;
   }
 
+  get hScroll() {
+    return this._hScroll;
+  }
+  set hScroll(value: number) {
+    this.hScrollController.value = value;
+  }
+
+  get dpi(): number {
+    return 1;
+    // return this._dpi;
+  }
+
+  get zoom() {
+    return this._zoom;
+  }
+  set zoom(value: number) {
+    this.zoomController.value = value;
+  }
+
+  get disableListeners(): boolean {
+    return this._disableListeners;
+  }
+  set disableListeners(value: boolean) {
+    this._disableListeners = value;
+    this.zoomController.disableListeners = value;
+    this.hScrollController.disableListeners = value;
+  }
+
+  get hPixelsPerSecond() {
+    return this._hPixelsPerSecond * this._dpi;
+  }
+
+  get startTime(): number {
+    return this._startTime;
+  }
+  set startTime(value: number) {
+    this._startTime = value;
+    this._updateScrollControllerBounds();
+  }
+
+  get endTime(): number {
+    return this._endTime;
+  }
+  set endTime(value: number) {
+    this._endTime = value;
+    this._totalTime = value + 6;
+
+    this._updateScrollControllerBounds();
+  }
+
+  get totalTime(): number {
+    return this._totalTime;
+  }
+  set totalTime(value: number) {
+    this._totalTime = value;
+    this._updateScrollControllerBounds();
+  }
+
+  get zeroMarkOffsetX() {
+    return this._zeroMarkOffsetX;
+  }
+  set zeroMarkOffsetX(value: number) {
+    this._zeroMarkOffsetX = value;
+  }
+
+  get trackHeight(): number | string {
+    return this._trackHeight;
+  }
+  set trackHeight(value: number | string) {
+    this._trackHeight = value;
+  }
+
+  get ticks(): TimelineTicks {
+    return getTicksForSeconds(this.clientWidth, this.zoom, this.hScroll);
+  }
+  //#endregion
+
   constructor({
-    timelineRef,
+    container: container,
     zoomStep,
     minZoom,
     maxZoom,
@@ -141,88 +189,46 @@ export class Timeline {
     totalTime,
     startTime = 0,
     endTime,
-    timelineLeftPadding = 0,
+    zeroMarkOffsetX = 0,
+    trackHeight,
   }: TimelineProps) {
-    this.totalTime = totalTime ?? endTime + 6;
+    this.container = container;
+
+    this._startTime = startTime;
+    this._endTime = endTime;
+    this._totalTime = totalTime ?? endTime + 6;
 
     this.zoomController = new ZoomController(zoomStep, minZoom, maxZoom);
 
-    this.scrollController = new ScrollController(
+    this.hScrollController = new ScrollController(
       scrollStep,
       minScroll,
-      maxScroll ?? this.totalTime,
+      maxScroll ?? 0,
     );
 
-    this.timelineContainer = new TimelineContainerObserver(
-      timelineRef,
-      this.totalTime,
-    );
+    this._zeroMarkOffsetX = zeroMarkOffsetX;
 
-    this.startTime = startTime;
-    this.endTime = endTime;
-
-    this._zoom = this.zoomController.value;
-    this._scroll = this.scrollController.value;
-
-    this._timelineClientWidth = this.timelineContainer.timelineClientWidth;
-    this._timelineScrollWidth = this.timelineContainer.timelineScrollWidth;
-    this._timelineClientHeight = this.timelineContainer.timelineClientHeight;
-    this._pixelsPerSecond = this.timelineContainer.pixelsPerSecond;
-
-    this._timelineLeftPadding = timelineLeftPadding;
-
-    this.boundingClientRect =
-      this.timelineContainer.timelineRef.current?.getBoundingClientRect() ??
-      new Rect(0, 0, 0, 0);
-
-    this.zoomController.addListener(this._zoomListener);
-    this.scrollController.addListener(this._scrollListener);
-    this.timelineContainer.addListener(this._timelineListener);
-
-    this._zoomListener(this.zoomController.value);
-    this._scrollListener(this.scrollController.value);
-    this._timelineListener(
-      this.timelineContainer.timelineClientWidth,
-      this.timelineContainer.timelineScrollWidth,
-      this.timelineContainer.timelineClientHeight,
-      this.timelineContainer.pixelsPerSecond,
-      new Rect(0, 0, 0, 0),
-    );
-
-    makeAutoObservable(this);
-  }
-
-  get ticks(): TimelineTicks {
-    return getTicksForSeconds(this.timelineClientWidth, this.zoom, this.scroll);
-  }
-
-  addWheelListener = (listener: WheelEventListener) => {
-    this._wheelListeners.add(listener);
-  };
-
-  removeWheelListener = (listener: WheelEventListener) => {
-    this._wheelListeners.delete(listener);
-  };
-
-  addWheelTriggerElement = (element: RefObject<HTMLElement>) => {
-    if (!element.current || this._wheelEventTriggerElements.has(element)) {
-      return;
+    if (trackHeight) {
+      this.trackHeight = trackHeight;
     }
 
-    element.current.addEventListener('wheel', this._wheelListener, {
-      passive: false,
+    this._hPixelsPerSecond = getPixelPerSeconds(minZoom);
+
+    makeAutoObservable(this, {
+      scrollWidth: computed,
+      boundingClientRect: computed,
+      clientWidth: computed,
+      clientHeight: computed,
+      hScroll: computed,
+      dpi: computed,
+      zoom: computed,
+      hPixelsPerSecond: computed,
+      startTime: computed,
+      endTime: computed,
     });
-    this._wheelEventTriggerElements.add(element);
-  };
+  }
 
-  removeWheelTriggerElement = (element: RefObject<HTMLElement>) => {
-    if (!element.current) {
-      return;
-    }
-
-    element.current.removeEventListener('wheel', this._wheelListener);
-    this._wheelEventTriggerElements.delete(element);
-  };
+  //#region Mappings
 
   /**
    * @description Map pixels relative to the timeline container view with scroll to time
@@ -235,11 +241,11 @@ export class Timeline {
       x -= this.boundingClientRect.x;
     }
 
-    x -= this.timelineLeftPadding;
+    x -= this.zeroMarkOffsetX;
 
-    x += this.scroll;
+    x += this.hScroll;
 
-    x /= this.pixelsPerSecond;
+    x /= this.hPixelsPerSecond;
 
     return x;
   };
@@ -255,9 +261,9 @@ export class Timeline {
       x -= this.boundingClientRect.x;
     }
 
-    x -= this.timelineLeftPadding;
+    x -= this.zeroMarkOffsetX;
 
-    x /= this.pixelsPerSecond;
+    x /= this.hPixelsPerSecond;
 
     return x;
   };
@@ -268,7 +274,7 @@ export class Timeline {
    * @returns x coordinate in pixels relative to the timeline container view with scroll
    */
   timeToGlobal = (time: number): number => {
-    return time * this.pixelsPerSecond + this.timelineLeftPadding;
+    return time * this.hPixelsPerSecond + this.zeroMarkOffsetX;
   };
 
   /**
@@ -277,7 +283,7 @@ export class Timeline {
    * @returns x coordinate in pixels relative to the timeline container without scroll
    */
   timeToLocal = (time: number): number => {
-    return time * this.pixelsPerSecond + this.timelineLeftPadding - this.scroll;
+    return time * this.hPixelsPerSecond + this.zeroMarkOffsetX - this.hScroll;
   };
 
   /**
@@ -286,7 +292,7 @@ export class Timeline {
    * @returns pixels
    */
   timeToPixels = (time: number): number => {
-    return time * this.pixelsPerSecond;
+    return time * this.hPixelsPerSecond;
   };
 
   /**
@@ -295,8 +301,10 @@ export class Timeline {
    * @returns time in seconds
    */
   pixelsToTime = (x: number): number => {
-    return x / this.pixelsPerSecond;
+    return x / this.hPixelsPerSecond;
   };
+
+  //#endregion
 
   setViewBoundsInPixels = (startX: number, endX: number): void => {
     runInAction(() => {
@@ -307,14 +315,13 @@ export class Timeline {
         this.zoom = newZoom;
       }
 
-      this.scroll = this.timeToPixels(startTime);
+      this.hScroll = this.timeToPixels(startTime);
     });
   };
 
   private _getNewZoomToReachBounds = (start: number, end: number) => {
     const distance = end - start;
-    const zoomDifference =
-      this.timelineContainer.timelineClientWidth / distance;
+    const zoomDifference = this.clientWidth / distance;
 
     if (zoomDifference < this.zoomController.step) {
       return this.zoom * zoomDifference;
@@ -327,49 +334,121 @@ export class Timeline {
     );
   };
 
-  private _wheelListener = (e: WheelEvent) => {
-    if (this.disableListeners) {
+  //#region Listeners
+
+  // Use only on client side
+  setupObservers = () => {
+    this._setupHScrollObserver();
+    this._setupZoomObserver();
+    this._setupResizeObserver();
+    this._setupDpiObserver();
+  };
+
+  // Use only on client side
+  cleanupObservers = () => {
+    this._setupZoomObserver(true);
+    this._setupHScrollObserver(true);
+    this._setupResizeObserver(true);
+    this._setupDpiObserver(true);
+  };
+
+  private _setupHScrollObserver = (onlyCleanup: boolean = false) => {
+    this.hScrollController.removeListener(this._hScrollCallback);
+
+    if (onlyCleanup) {
       return;
     }
 
-    this._wheelListeners.forEach((listener) => listener(e));
+    this._hScrollCallback(this.hScroll);
+
+    this.hScrollController.addListener(this._hScrollCallback);
   };
 
-  private _timelineListener = (
-    timelineClientWidth: number,
-    timelineScrollWidth: number,
-    timelineClientHeight: number,
-    pixelsPerSecond: number,
-    size: Rect | null,
-  ) => {
+  private _setupZoomObserver = (onlyCleanup: boolean = false) => {
+    this.zoomController.removeListener(this._zoomCallback);
+
+    if (onlyCleanup) {
+      return;
+    }
+
+    this._zoomCallback(this._zoom);
+
+    this.zoomController.addListener(this._zoomCallback);
+  };
+
+  private _setupResizeObserver = (onlyCleanup: boolean = false) => {
+    this._resizeObserver?.disconnect();
+
+    if (onlyCleanup) {
+      return;
+    }
+
+    if (this._resizeObserver === null) {
+      this._resizeObserver = new ResizeObserver(this._resizeCallback);
+    }
+
+    if (this._container === null) {
+      return;
+    }
+
+    this._boundingClientRect = this._container?.getBoundingClientRect();
+    this._resizeObserver.observe(this._container);
+  };
+
+  private _setupDpiObserver = (onlyCleanup: boolean = false) => {
+    if (typeof window === 'undefined') {
+      throw new Error("DPI observer can't be used in SSR");
+    }
+
+    window.removeEventListener('resize', this._dpiCallback);
+
+    if (onlyCleanup) {
+      return;
+    }
+
+    this._dpiCallback();
+
+    window.addEventListener('resize', this._dpiCallback);
+  };
+
+  private _hScrollCallback = (scroll: number) => {
     runInAction(() => {
-      this.scrollController.min = this.startTime * pixelsPerSecond;
-      this.scrollController.max =
-        timelineScrollWidth -
-        timelineClientWidth +
-        this.startTime * pixelsPerSecond;
-
-      this._timelineClientHeight = timelineClientHeight;
-      this._timelineClientWidth = timelineClientWidth;
-      this._timelineScrollWidth = timelineScrollWidth;
-      this._pixelsPerSecond = pixelsPerSecond;
-
-      this.boundingClientRect = size ?? new Rect(0, 0, 0, 0);
+      this._interactedBefore = true;
+      this._hScroll = scroll;
     });
   };
 
-  private _scrollListener = (scroll: number) => {
+  private _zoomCallback = (zoom: number) => {
     runInAction(() => {
       this._interactedBefore = true;
-      this._scroll = scroll;
-    });
-  };
-
-  private _zoomListener = (zoom: number) => {
-    runInAction(() => {
-      this._interactedBefore = true;
-      this.timelineContainer.pixelsPerSecond = getPixelPerSeconds(zoom);
       this._zoom = zoom;
+      this._hPixelsPerSecond = getPixelPerSeconds(zoom);
+
+      this._updateScrollControllerBounds();
     });
+  };
+
+  private _resizeCallback: ResizeObserverCallback = () => {
+    runInAction(() => {
+      if (this._container === null) {
+        return;
+      }
+
+      this._boundingClientRect = this._container.getBoundingClientRect();
+    });
+  };
+
+  private _dpiCallback = () => {
+    runInAction(() => {
+      this._dpi = typeof window === 'undefined' ? 1 : window.devicePixelRatio;
+    });
+  };
+
+  //#endregion
+
+  private _updateScrollControllerBounds = () => {
+    this.hScrollController.min = this.timeToPixels(this._startTime);
+    this.hScrollController.max =
+      this.hScrollController.min + this.scrollWidth - this.clientWidth;
   };
 }

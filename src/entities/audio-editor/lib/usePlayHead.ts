@@ -10,23 +10,22 @@ export const usePlayHead = (
 ) => {
   const playHeadHeight = useMemo(
     () =>
-      timeline.timelineClientHeight
-        ? `calc(100% + ${timeline.timelineClientHeight}px)`
+      timeline.clientHeight
+        ? `calc(100% + ${timeline.clientHeight}px)`
         : '100vh',
-    [timeline.timelineClientHeight],
+    [timeline.clientHeight],
   );
 
   const setViewToPlayHead = useCallback(
     (playHeadPosition: number) => {
-      const globalPlayHeadPosition = playHeadPosition + timeline.scroll;
+      const globalPlayHeadPosition = playHeadPosition + timeline.hScroll;
 
       if (
-        (globalPlayHeadPosition < timeline.scroll ||
-          globalPlayHeadPosition >
-            timeline.timelineClientWidth + timeline.scroll) &&
+        (globalPlayHeadPosition < timeline.hScroll ||
+          globalPlayHeadPosition > timeline.clientWidth + timeline.hScroll) &&
         !timeline.interactedBefore
       ) {
-        timeline.scroll =
+        timeline.hScroll =
           globalPlayHeadPosition - TIMELINE_AFTER_SCROLL_VIEW_PADDING;
       }
     },
@@ -53,11 +52,11 @@ export const usePlayHead = (
       }
 
       const isPlayHeadVisible =
-        playHeadX >= 0 && playHeadX <= timeline.timelineClientWidth;
+        playHeadX >= 0 && playHeadX <= timeline.clientWidth;
 
       playHead.style.display = isPlayHeadVisible ? '' : 'none';
     },
-    [playHeadRef, timeline.timelineClientWidth],
+    [playHeadRef, timeline.clientWidth],
   );
 
   const updatePlayHead = useCallback(

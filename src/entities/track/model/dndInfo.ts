@@ -10,6 +10,7 @@ export class TrackDnDInfo implements DnDInfo {
   startY: number = 0;
 
   startTime: number = 0;
+  endTime: number = 0;
 
   duration: number = 0;
 

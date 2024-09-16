@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/shared/lib';
 
 import { TrackEditorLeftPane } from '../TrackEditorLeftPane';

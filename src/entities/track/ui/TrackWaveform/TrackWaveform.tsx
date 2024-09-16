@@ -82,7 +82,7 @@ export const TrackWaveform = observer(function TrackWaveform({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeline.zoomController, updateWidth]);
 
-  const trackCardBorderWidthCompensatorFactor = 0.1 / timeline.pixelsPerSecond;
+  const trackCardBorderWidthCompensatorFactor = 0.1 / timeline.hPixelsPerSecond;
 
   return (
     <div

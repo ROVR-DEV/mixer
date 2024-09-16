@@ -22,7 +22,6 @@ export * from './useRectangularSelection';
 export * from './useScrollSync';
 export * from './useSelection';
 export * from './useSize';
-export * from './useTimeLoop';
 export * from './useWheel';
 export * from './useWindowEvent';
 export * from './getDroppedFiles';

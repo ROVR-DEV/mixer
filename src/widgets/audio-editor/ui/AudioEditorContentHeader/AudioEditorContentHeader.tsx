@@ -10,7 +10,6 @@ import { AudioEditorContentHeaderProps } from './interfaces';
 export const AudioEditorContentHeader = ({
   className,
   playlist,
-  rulerWrapperRef,
   ...props
 }: AudioEditorContentHeaderProps) => {
   return (
@@ -19,11 +18,7 @@ export const AudioEditorContentHeader = ({
         playlist={playlist}
         style={{ minWidth: SIDEBAR_WIDTH }}
       />
-      <TimelineHeader
-        className='mb-[9px]'
-        rulerRef={rulerWrapperRef}
-        endBorder
-      />
+      <TimelineHeader className='mb-[9px]' endBorder />
     </div>
   );
 };

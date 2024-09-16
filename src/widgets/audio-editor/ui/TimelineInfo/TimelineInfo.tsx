@@ -34,9 +34,9 @@ export const TimelineInfo = observer(function TimelineInfo({
     >
       {`x: ${mousePosition.x}, y: ${mousePosition.y}`}
       <br />
-      {`tX: ${mousePosition.x - timeline.boundingClientRect.x - timeline.timelineLeftPadding + timeline.scroll}`}
+      {`tX: ${mousePosition.x - timeline.boundingClientRect.x - timeline.zeroMarkOffsetX + timeline.hScroll}`}
       <br />
-      {`tScroll: ${timeline.scroll}`}
+      {`tScroll: ${timeline.hScroll}`}
       <br />
       {`zoom: ${timeline.zoom.toPrecision(4)} (${Math.round(Math.log(timeline.zoom) / Math.log(1.25))})`}
       <br />

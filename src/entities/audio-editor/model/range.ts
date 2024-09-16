@@ -1,16 +1,18 @@
+import { clamp } from '@/shared/lib';
+
 export type ValueInRangeListener = (value: number) => void;
 
-export type ValueInRangeChangeRule = (
+export type RangeStepRule = (
   value: number,
   step: number,
   increase: boolean,
 ) => number;
 
-export class ValueInRangeController {
+export class Range {
   private _step: number;
   private _min: number;
   private _max: number;
-  readonly rule: ValueInRangeChangeRule;
+  readonly rule: RangeStepRule;
 
   private _value: number;
 
@@ -18,12 +20,7 @@ export class ValueInRangeController {
 
   private _disableListeners: boolean = false;
 
-  constructor(
-    step: number,
-    min: number,
-    max: number,
-    rule: ValueInRangeChangeRule,
-  ) {
+  constructor(step: number, min: number, max: number, rule: RangeStepRule) {
     this._step = step;
     this._min = min;
     this._max = max;
@@ -54,11 +51,17 @@ export class ValueInRangeController {
   }
 
   set min(min: number) {
-    this._min = min;
+    if (this._min === min) {
+      return;
+    }
+
+    this._min = clamp(0, min);
 
     if (this._value < this._min) {
       this.value = this._min;
     }
+
+    this._triggerAllListeners();
   }
 
   get max() {
@@ -66,11 +69,17 @@ export class ValueInRangeController {
   }
 
   set max(max: number) {
-    this._max = max;
+    if (this._max === max) {
+      return;
+    }
+
+    this._max = clamp(max, this._min);
 
     if (this._value > this._max) {
       this.value = this._max;
     }
+
+    this._triggerAllListeners();
   }
 
   get step() {
@@ -112,9 +121,9 @@ export class ValueInRangeController {
   };
 
   private _clamp = (value: number) => {
-    if (value < this._min) {
+    if (value <= this._min) {
       return this._min;
-    } else if (value > this._max) {
+    } else if (value >= this._max) {
       return this._max;
     } else {
       return value;
