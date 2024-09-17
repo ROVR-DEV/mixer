@@ -27,9 +27,11 @@ export const ChannelRemoveDialog = ({
   return (
     <Dialog onOpenChange={onOpenChange} {...props}>
       <DialogContent className='flex w-96 flex-col rounded-lg border border-accent bg-primary px-4 py-3 text-third-light outline-none'>
-        <DialogHeading>{'Remove channel'}</DialogHeading>
+        <DialogHeading>
+          {`Delete channel ${formatChannelNumber(number)}`}
+        </DialogHeading>
         <DialogDescription>
-          <p>{`Are you sure you want to remove channel ${formatChannelNumber(number)}?`}</p>
+          {`Are you sure you want to delete this channel?`}
         </DialogDescription>
         <DialogFooter>
           <div className='mt-2 flex justify-end gap-2 text-[13px]'>
