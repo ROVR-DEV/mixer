@@ -3,6 +3,7 @@ import {
   fetchArrayBuffer,
   FetchResult,
   getCachedData,
+  removeCachedData,
   responseToArrayBufferData,
 } from '@/shared/lib';
 
@@ -38,6 +39,9 @@ const TRACKS_CACHE_NAME = 'tracks';
 export const getTrackFromCache = async (
   url: string,
 ): Promise<false | Response> => getCachedData(TRACKS_CACHE_NAME, url);
+
+export const removeTrackFromCache = async (url: string): Promise<boolean> =>
+  removeCachedData(TRACKS_CACHE_NAME, url);
 
 // Returns cached data or load if not in cache
 // Returns false if request fails or any error

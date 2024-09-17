@@ -1,13 +1,11 @@
-'use client';
-
 import { preventAll } from '@/shared/lib';
-import { Popover, PopoverContent, ProgressBar } from '@/shared/ui';
+import { Dialog, DialogContent, ProgressBar } from '@/shared/ui';
 
 import { TrackImportMenu } from '..';
 
 import { TrackImportMenuPopoverProps } from './interfaces';
 
-export const TrackImportMenuPopover = ({
+export const TrackImportMenuDialog = ({
   isFileUploading,
   onAddToNewChannel,
   onAddToTheEnd,
@@ -15,14 +13,9 @@ export const TrackImportMenuPopover = ({
   ...props
 }: TrackImportMenuPopoverProps) => {
   return (
-    <Popover {...props}>
-      <PopoverContent
+    <Dialog {...props}>
+      <DialogContent
         className='z-50 outline-none'
-        style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
         onClick={preventAll}
         onMouseDown={preventAll}
         onMouseUp={preventAll}
@@ -36,13 +29,12 @@ export const TrackImportMenuPopover = ({
           </div>
         ) : (
           <TrackImportMenu
-            // ref={importMenuRef}
             onAddToTheEnd={onAddToTheEnd}
             onAddToNewChannel={onAddToNewChannel}
             onCancelUpload={onCancelUpload}
           />
         )}
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -52,7 +52,7 @@ export const addTrack = async (
   data: FormData,
   side: 'first' | 'last',
 ) => {
-  const res = await customFetch(
+  const res = await fetchJson<PlaylistDTO>(
     `${PLAYLIST_BASE_URL}/${playlistId}/track/${side}`,
     {
       method: 'POST',
@@ -69,17 +69,17 @@ export const addTrack = async (
 export const addTrackFirst = async (
   playlistId: number,
   data: FormData,
-): Promise<FetchResult<Response>> => addTrack(playlistId, data, 'first');
+): Promise<FetchResult<PlaylistDTO>> => addTrack(playlistId, data, 'first');
 
 export const addTrackLast = async (
   playlistId: number,
   data: FormData,
-): Promise<FetchResult<Response>> => addTrack(playlistId, data, 'last');
+): Promise<FetchResult<PlaylistDTO>> => addTrack(playlistId, data, 'last');
 
 export const removeTrack = async (
   playlistId: number,
   trackUuid: string,
-): Promise<FetchResult<Response>> => {
+): Promise<FetchResult<PlaylistDTO>> => {
   const url = `${PLAYLIST_BASE_URL}/${playlistId}/track/${trackUuid}`;
 
   const req = new Request(url, {
@@ -87,7 +87,7 @@ export const removeTrack = async (
     headers: HEADERS_WITH_AUTHORIZATION,
   });
 
-  const res = await customFetch(req);
+  const res = await fetchJson<PlaylistDTO>(req);
 
   invalidatePlaylist(playlistId);
 

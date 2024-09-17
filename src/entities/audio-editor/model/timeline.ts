@@ -109,8 +109,7 @@ export class Timeline {
   }
 
   get dpi(): number {
-    return 1;
-    // return this._dpi;
+    return this._dpi;
   }
 
   get zoom() {
@@ -130,7 +129,7 @@ export class Timeline {
   }
 
   get hPixelsPerSecond() {
-    return this._hPixelsPerSecond * this._dpi;
+    return this._hPixelsPerSecond;
   }
 
   get startTime(): number {

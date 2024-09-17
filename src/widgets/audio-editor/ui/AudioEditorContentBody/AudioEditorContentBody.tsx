@@ -16,7 +16,7 @@ import { AudioEditorFloatingToolbarView } from '@/features/audio-editor-floating
 import { useTimelineWheelHandler } from '@/features/timeline';
 import {
   useTrackImportMenu,
-  TrackImportMenuPopover,
+  TrackImportMenuDialog,
 } from '@/features/track-import-menu';
 
 import {
@@ -44,7 +44,6 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
   const rectangularSelectionRef = useRef<HTMLDivElement | null>(null);
 
   const {
-    isFileUploading,
     droppedFiles,
     onDragEnter,
     onDragOver,
@@ -105,11 +104,13 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
               style={{ display: 'none' }}
             />
 
-            <TrackImportMenuPopover
+            <TrackImportMenuDialog
               modal
-              open={!!droppedFiles || isFileUploading}
+              open={
+                !!droppedFiles || audioEditor.player.trackLoader.isUploading
+              }
               onOpenChange={onOpenChange}
-              isFileUploading={isFileUploading}
+              isFileUploading={audioEditor.player.trackLoader.isUploading}
               {...trackImportMenuProps}
             />
           </TimelineView>

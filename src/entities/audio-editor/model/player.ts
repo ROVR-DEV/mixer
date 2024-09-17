@@ -2,6 +2,7 @@ import { EventEmitter } from 'eventemitter3';
 import { computed, makeAutoObservable, observable, runInAction } from 'mobx';
 
 import { clamp, Timer } from '@/shared/lib';
+import { IS_DEBUG_LEVEL_INFO } from '@/shared/model';
 
 import {
   AudioEditorChannelState,
@@ -33,10 +34,13 @@ export interface PlayerState {
 }
 
 export interface PlayerEvents {
+  ready: void;
   timeupdate: number;
 }
 
 export interface Player {
+  readonly events: EventEmitter<PlayerEvents>;
+
   readonly channels: Channel[];
   readonly tracks: AudioEditorTrack[];
   readonly tracksSortedByStartTime: AudioEditorTrack[];
@@ -50,11 +54,12 @@ export interface Player {
   readonly isPlaying: boolean;
   readonly loadingStatus: LoadingStatus;
 
+  readonly duration: number;
+
   importPlaylist(playlists: Playlist): void;
-  updatePlaylist(playlists: Playlist): void;
 
   importTrack(track: Track, channelIndex?: number): void;
-  removeTrack(track: AudioEditorTrack): void;
+  removeTrack(track: AudioEditorTrack, dispose?: boolean): void;
 
   loadTracks(withPeaks?: boolean): Promise<void>;
 
@@ -70,16 +75,17 @@ export interface Player {
 
   clear(): void;
 
-  on(event: keyof PlayerEvents, listener: TimeListener): void;
-  off(event: keyof PlayerEvents, listener: TimeListener): void;
-
   getState(): PlayerState;
   restoreState(state: PlayerState): void;
+
+  hydration(playlists: Playlist): Promise<void>;
 }
 
 type LoadingStatus = 'empty' | 'loading' | 'fulfilled';
 
 export class ObservablePlayer implements Player {
+  readonly events = new EventEmitter<PlayerEvents>();
+
   private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
 
   readonly channels = observable.array<Channel>();
@@ -88,8 +94,6 @@ export class ObservablePlayer implements Player {
 
   private _playlist: Playlist | null = null;
 
-  private _emitter = new EventEmitter<PlayerEvents>();
-
   private _timer: Timer | null = null;
   private _time = 0;
   private _isPlaying = false;
@@ -97,6 +101,10 @@ export class ObservablePlayer implements Player {
 
   get playlist(): Playlist | null {
     return this._playlist;
+  }
+
+  get duration(): number {
+    return this.playlist?.duration_in_seconds ?? 0;
   }
 
   get time() {
@@ -125,7 +133,7 @@ export class ObservablePlayer implements Player {
     return this.channels.flatMap((channel) => channel.tracks);
   }
 
-  public get tracksSortedByStartTime(): AudioEditorTrack[] {
+  get tracksSortedByStartTime(): AudioEditorTrack[] {
     return this.tracks.sort((a, b) => a.startTime - b.startTime);
   }
 
@@ -164,10 +172,6 @@ export class ObservablePlayer implements Player {
     this._playlist = playlist;
   };
 
-  updatePlaylist = (playlist: Playlist): void => {
-    this._playlist = playlist;
-  };
-
   importTrack = (track: Track, channelIndex?: number): void => {
     const index = this.tracks.length;
 
@@ -178,8 +182,21 @@ export class ObservablePlayer implements Player {
     this.channels[channelIndex ?? index % 2]?.importTrack(track);
   };
 
-  removeTrack = (track: AudioEditorTrack): void => {
+  removeTrack = (track: AudioEditorTrack, dispose: boolean = false): void => {
     track.channel.removeTrack(track);
+    if (dispose) {
+      track.dispose();
+    }
+    // if (this.playlist !== null) {
+    //   console.log(this.playlist.duration);
+    //   console.log(this.playlist.tracks);
+    //   this.playlist.tracks = this.playlist.tracks.filter(
+    //     (tr) => tr.uuid !== track.meta.uuid,
+    //   );
+    //   this.playlist.duration_in_seconds -= getPlaylistMaxTime(this.playlist);
+    //   console.log(this.playlist.duration);
+    //   console.log(this.playlist.tracks);
+    // }
   };
 
   loadTracks = async (withPeaks: boolean = true): Promise<void> => {
@@ -196,6 +213,7 @@ export class ObservablePlayer implements Player {
       if (!track) {
         return;
       }
+      track.load(trackData.objectUrl);
 
       if (withPeaks) {
         const generateAndSetPeaks = async () => {
@@ -212,7 +230,25 @@ export class ObservablePlayer implements Player {
         generateAndSetPeaks();
       }
 
-      track.load(trackData.objectUrl);
+      const onLoad = () => {
+        runInAction(() => {
+          if (
+            this.tracks.every((track) => track.mediaElement.readyState === 4)
+          ) {
+            if (IS_DEBUG_LEVEL_INFO) {
+              // eslint-disable-next-line no-console
+              console.info('Player: all tracks loaded');
+            }
+
+            this._loadingStatus = 'fulfilled';
+            this.events.emit('ready');
+          }
+        });
+
+        track.mediaElement.removeEventListener('loadeddata', onLoad);
+      };
+
+      track.mediaElement.addEventListener('loadeddata', onLoad);
     };
 
     runInAction(() => {
@@ -220,10 +256,6 @@ export class ObservablePlayer implements Player {
     });
 
     await this.trackLoader.downloadTracks(this._playlist.tracks, onTrackLoad);
-
-    runInAction(() => {
-      this._loadingStatus = 'fulfilled';
-    });
   };
 
   //#region Player actions
@@ -257,7 +289,7 @@ export class ObservablePlayer implements Player {
     );
     this._time = newTime;
     this._timer?.setTime(newTime * 1000);
-    this._emitter.emit('timeupdate', newTime);
+    this.events.emit('timeupdate', newTime);
 
     this._processTracks(time, (_: number, track: AudioEditorTrack) => {
       if (!track.audioBuffer) {
@@ -308,11 +340,11 @@ export class ObservablePlayer implements Player {
   };
 
   on(event: keyof PlayerEvents, listener: TimeListener): void {
-    this._emitter.on(event, listener);
+    this.events.on(event, listener);
   }
 
   off(event: keyof PlayerEvents, listener: TimeListener): void {
-    this._emitter.off(event, listener);
+    this.events.off(event, listener);
   }
 
   private _onTimeUpdate = (time: number) => {
@@ -326,7 +358,7 @@ export class ObservablePlayer implements Player {
 
     this._time = time;
     this._process(time);
-    this._emitter.emit('timeupdate', time);
+    this.events.emit('timeupdate', time);
   };
 
   private _process = (time: number) => {
@@ -433,5 +465,66 @@ export class ObservablePlayer implements Player {
     tracks.forEach((track) => {
       track.channel.addTrack(track);
     });
+  };
+
+  hydration = async (playlist: Playlist): Promise<void> => {
+    runInAction(() => {
+      this._playlist = playlist;
+
+      // Add new tracks from playlist
+      playlist.tracks.forEach((track) => {
+        const existingTrack = this.tracksByAudioUuid.get(track.uuid);
+
+        if (existingTrack !== undefined) {
+          existingTrack.hydration(track);
+        } else {
+          // Temporary logic to import track to a new channel
+          const nextTrackChannel = localStorage.getItem('nextTrackChannel');
+          let nextTrackChannelIndex;
+
+          if (nextTrackChannel !== null) {
+            nextTrackChannelIndex = parseInt(nextTrackChannel, 10);
+            localStorage.setItem(
+              playlist.id.toString(),
+              JSON.stringify({
+                [track.uuid]: nextTrackChannelIndex,
+              }),
+            );
+            localStorage.removeItem('nextTrackChannel');
+          }
+
+          const playlistInfo = localStorage.getItem(playlist.id.toString());
+          if (playlistInfo !== null) {
+            const parsedInfo = JSON.parse(playlistInfo) as Record<
+              string,
+              number
+            >;
+            if (parsedInfo !== null) {
+              nextTrackChannelIndex = parsedInfo[track.uuid];
+            }
+          }
+          // End logic
+
+          this.importTrack(track, nextTrackChannelIndex);
+        }
+      });
+
+      // Remove tracks that are no longer in the playlist
+      this.tracks.forEach((track) => {
+        if (
+          !playlist.tracks.find((pTrack) => pTrack.uuid === track.meta.uuid)
+        ) {
+          this.removeTrack(track);
+        }
+      });
+    });
+
+    // Load tracks audio
+    await this.loadTracks();
+
+    if (IS_DEBUG_LEVEL_INFO) {
+      // eslint-disable-next-line no-console
+      console.info('Player: hydrated');
+    }
   };
 }

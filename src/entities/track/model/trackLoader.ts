@@ -4,10 +4,14 @@ import {
   computed,
   makeAutoObservable,
   observable,
+  runInAction,
   values,
 } from 'mobx';
 
 import { FetchResult } from '@/shared/lib';
+
+// eslint-disable-next-line boundaries/element-types
+import { addTrackLast, PlaylistDTO } from '@/entities/playlist';
 
 import { getTrackFromCache, getTrackPlayUrl } from '../api';
 
@@ -27,8 +31,18 @@ export interface TrackLoader {
   readonly tracksData: Map<string, TrackData>;
   readonly loadedTracksCount: number;
 
+  readonly isDownloading: boolean;
+  readonly isUploading: boolean;
+
+  uploadTrack: (
+    playlistId: number,
+    file: File,
+  ) => Promise<FetchResult<PlaylistDTO>>;
+
   downloadTracks: (tracks: Track[], onLoaded?: OnTrackLoaded) => Promise<void>;
-  downloadTrack: (uuid: Track, onLoaded?: OnTrackLoaded) => Promise<void>;
+  downloadTrack: (track: Track, onLoaded?: OnTrackLoaded) => Promise<void>;
+
+  deleteTrack: (track: Track) => Promise<void>;
 
   clearData: () => void;
 
@@ -39,6 +53,8 @@ export interface TrackLoader {
 export class ObserverTrackLoader implements TrackLoader {
   readonly tracksData: ObservableMap<string, TrackData> = observable.map();
 
+  private _isUploading = false;
+
   get loadedTracksCount() {
     return values(this.tracksData).reduce(
       (count, track) => count + Number(track.status === 'fulfilled'),
@@ -46,11 +62,41 @@ export class ObserverTrackLoader implements TrackLoader {
     );
   }
 
+  get isDownloading() {
+    return this.loadedTracksCount !== this.tracksData.size;
+  }
+
+  get isUploading() {
+    return this._isUploading;
+  }
+
   constructor() {
     makeAutoObservable(this, {
       loadedTracksCount: computed,
+      isDownloading: computed,
+      isUploading: computed,
     });
   }
+
+  uploadTrack = async (
+    playlistId: number,
+    file: File,
+  ): Promise<FetchResult<PlaylistDTO>> => {
+    const formData = new FormData();
+    formData.append('track', file);
+
+    runInAction(() => {
+      this._isUploading = true;
+    });
+
+    const res = await addTrackLast(playlistId, formData);
+
+    runInAction(() => {
+      this._isUploading = false;
+    });
+
+    return res;
+  };
 
   downloadTracks = async (
     tracks: Track[],
@@ -122,7 +168,9 @@ export class ObserverTrackLoader implements TrackLoader {
       return;
     }
 
-    trackData.status = 'loading';
+    runInAction(() => {
+      trackData.status = 'loading';
+    });
 
     let attempt = 0;
     while (attempt < MAX_RETRIES_COUNT) {
@@ -141,9 +189,18 @@ export class ObserverTrackLoader implements TrackLoader {
       }
     }
 
-    if (attempt >= MAX_RETRIES_COUNT) {
-      trackData.status = 'error';
-    }
+    runInAction(() => {
+      if (attempt >= MAX_RETRIES_COUNT) {
+        trackData.status = 'error';
+      }
+    });
+  };
+
+  deleteTrack = async (track: Track) => {
+    // await removeTrackFromCache(getTrackPlayUrl(track.uuid));
+    runInAction(() => {
+      this.tracksData.delete(track.uuid);
+    });
   };
 
   clearData = (): void => {

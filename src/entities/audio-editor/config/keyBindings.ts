@@ -1,5 +1,4 @@
-// eslint-disable-next-line boundaries/element-types
-import { KeyBind, KeyBindString } from '@/entities/event';
+import { KeyBind, KeyBindString } from '@/shared/model';
 
 import { AudioEditorEvent } from './events';
 

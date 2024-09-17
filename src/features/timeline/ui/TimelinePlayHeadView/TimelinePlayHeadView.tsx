@@ -30,8 +30,10 @@ export const TimelinePlayHeadView = observer(function TimelinePlayHeadView({
   useEffect(() => {
     renderPlayHead(player.time);
 
-    player.on('timeupdate', renderPlayHead);
-    return () => player.off('timeupdate', renderPlayHead);
+    player.events.on('timeupdate', renderPlayHead);
+    return () => {
+      player.events.off('timeupdate', renderPlayHead);
+    };
   }, [player, renderPlayHead]);
 
   useEffect(() => {

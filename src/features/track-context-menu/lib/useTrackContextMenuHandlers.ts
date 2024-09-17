@@ -13,7 +13,7 @@ export const useTrackContextMenuHandlers = (
       return;
     }
 
-    track.channel.removeTrack(track);
+    audioEditor.removeTrack(track, false);
 
     const res = await removeTrack(
       audioEditor.player.playlist.id,
@@ -21,11 +21,12 @@ export const useTrackContextMenuHandlers = (
     );
 
     if (res.error) {
-      track.channel.addTrack(track);
+      // TODO: add to retry queue
     } else {
       track.dispose();
+      audioEditor.player.trackLoader.deleteTrack(track.meta);
     }
-  }, [audioEditor.player.playlist?.id, track]);
+  }, [audioEditor, track]);
 
   return useMemo(() => ({ onTrackRemove }), [onTrackRemove]);
 };

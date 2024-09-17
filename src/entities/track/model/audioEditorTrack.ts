@@ -1,3 +1,4 @@
+import { merge } from 'lodash-es';
 import { makeAutoObservable } from 'mobx';
 // eslint-disable-next-line import/named
 import { v4 } from 'uuid';
@@ -47,8 +48,6 @@ export interface AudioEditorTrackState {
 }
 
 export class AudioEditorTrack {
-  readonly id: string = v4();
-
   readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
   readonly mediaElement: HTMLMediaElement = new Audio();
 
@@ -59,6 +58,7 @@ export class AudioEditorTrack {
   startTrimDuration: number = 0;
   endTrimDuration: number = 0;
 
+  private _id: string = v4();
   private _isPeaksReady: boolean = false;
   private _meta: Track;
   private _channel: Channel;
@@ -67,6 +67,10 @@ export class AudioEditorTrack {
   private _color: string | null = null;
   private _isTrimming: boolean = false;
   private _isEditingTitle: boolean = false;
+
+  get id(): string {
+    return this._id;
+  }
 
   get isPeaksReady(): boolean {
     return this._isPeaksReady;
@@ -147,7 +151,8 @@ export class AudioEditorTrack {
   }
 
   hydration = (track: Track) => {
-    this.meta = track;
+    merge(this.meta, track);
+    // this.meta = track;
 
     this.startTime = track.start;
     this.endTime = track.end;
@@ -293,6 +298,8 @@ export class AudioEditorTrack {
   };
 
   restoreState = (state: AudioEditorTrackState) => {
+    this._id = state.uuid;
+
     this.startTime = state.startTime;
     this.endTime = state.endTime;
     this.startTrimDuration = state.startTrimDuration;
@@ -305,6 +312,7 @@ export class AudioEditorTrack {
     this.color = state.color;
 
     if (state.isPeaksReady) {
+      this._isPeaksReady = state.isPeaksReady;
       this.audioPeaks = state.audioPeaks;
     }
 

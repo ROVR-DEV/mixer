@@ -5,13 +5,12 @@ import { useCallback, useRef, useState } from 'react';
 import { getDroppedFiles, preventAll } from '@/shared/lib';
 
 import { AudioEditor } from '@/entities/audio-editor';
-import { addTrackLast } from '@/entities/playlist';
+import { toPlaylist } from '@/entities/playlist';
 
 import { checkDragFilesMimeType } from './checkDragFilesMimeType';
 
 export const useTrackImportMenu = (audioEditor: AudioEditor) => {
   const [droppedFiles, setDroppedFiles] = useState<File[] | null>(null);
-  const [isFileUploading, setIsFileUploading] = useState(false);
   const isOnlyAudioFilesRef = useRef(false);
 
   const onDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -42,7 +41,7 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
         return;
       }
 
-      if (isFileUploading) {
+      if (audioEditor.player.trackLoader.isUploading) {
         return;
       }
 
@@ -61,7 +60,10 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
 
       setDroppedFiles(files);
     },
-    [audioEditor.player.playlist?.id, isFileUploading],
+    [
+      audioEditor.player.playlist?.id,
+      audioEditor.player.trackLoader.isUploading,
+    ],
   );
 
   const onAddToTheEnd = useCallback(async () => {
@@ -73,14 +75,17 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('track', droppedFiles[0]);
+    const res = await audioEditor.player.trackLoader.uploadTrack(
+      audioEditor.player.playlist.id,
+      droppedFiles[0],
+    );
 
-    setIsFileUploading(true);
-    await addTrackLast(audioEditor.player.playlist.id, formData);
-    setIsFileUploading(false);
+    if (res.data) {
+      audioEditor.hydration(toPlaylist(res.data));
+    }
+
     setDroppedFiles(null);
-  }, [audioEditor.player.playlist?.id, droppedFiles]);
+  }, [audioEditor, droppedFiles]);
 
   const onAddToNewChannel = useCallback(async () => {
     if (audioEditor.player.playlist?.id === undefined) {
@@ -91,23 +96,22 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('track', droppedFiles[0]);
-
     localStorage.setItem(
       'nextTrackChannel',
       audioEditor.player.channels.length.toString(),
     );
 
-    setIsFileUploading(true);
-    await addTrackLast(audioEditor.player.playlist.id, formData);
-    setIsFileUploading(false);
+    const res = await audioEditor.player.trackLoader.uploadTrack(
+      audioEditor.player.playlist.id,
+      droppedFiles[0],
+    );
+
+    if (res.data) {
+      audioEditor.hydration(toPlaylist(res.data));
+    }
+
     setDroppedFiles(null);
-  }, [
-    audioEditor.player.channels.length,
-    audioEditor.player.playlist?.id,
-    droppedFiles,
-  ]);
+  }, [audioEditor, droppedFiles]);
 
   const onCancelUpload = useCallback(() => {
     setDroppedFiles(null);
@@ -120,7 +124,6 @@ export const useTrackImportMenu = (audioEditor: AudioEditor) => {
   }, []);
 
   return {
-    isFileUploading,
     droppedFiles,
     onDragEnter,
     onDragOver,

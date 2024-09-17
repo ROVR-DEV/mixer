@@ -25,7 +25,7 @@ export const AudioEditorContent = observer(function AudioEditorBody({
 
   const timeline = useTimelineInitialize(`${playlist.id}-timeline`, {
     timelineRef,
-    endTime: playlist.duration_in_seconds,
+    endTime: audioEditor.player.duration || playlist.duration_in_seconds,
   });
 
   useEffect(() => {
@@ -47,7 +47,9 @@ export const AudioEditorContent = observer(function AudioEditorBody({
         )}
         {...props}
       >
-        <AudioEditorContentHeader playlist={playlist} />
+        <AudioEditorContentHeader
+          playlist={audioEditor.player.playlist ?? playlist}
+        />
         <AudioEditorContentBody timelineRef={timelineRef} />
       </div>
     </TimelineContext.Provider>

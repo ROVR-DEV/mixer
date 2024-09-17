@@ -8,3 +8,8 @@ export const getCachedData = async (cacheName: string, url: string) => {
 
   return cachedResponse;
 };
+
+export const removeCachedData = async (cacheName: string, url: string) => {
+  const cacheStorage = await caches.open(cacheName);
+  return await cacheStorage.delete(url);
+};

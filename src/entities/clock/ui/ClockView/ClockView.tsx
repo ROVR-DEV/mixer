@@ -22,8 +22,10 @@ export const ClockView = ({ ...props }: ClockViewProps) => {
       });
     updateClock(player.time);
 
-    player.on('timeupdate', updateClock);
-    return () => player.off('timeupdate', updateClock);
+    player.events.on('timeupdate', updateClock);
+    return () => {
+      player.events.on('timeupdate', updateClock);
+    };
   }, [player]);
 
   const kek = useCallback(() => {

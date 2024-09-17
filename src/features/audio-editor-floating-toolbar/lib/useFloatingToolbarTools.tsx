@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 
 import { capitalize } from '@/shared/lib';
+import { KeyBind } from '@/shared/model';
 import {
   CursorIcon,
   FitIcon,
@@ -22,7 +23,6 @@ import {
   ToolGroup,
   useAudioEditor,
 } from '@/entities/audio-editor';
-import { KeyBind } from '@/entities/event';
 
 const TOOL_ICONS: Record<AudioEditorTool, JSX.Element> = {
   cursor: <CursorIcon />,

@@ -1,6 +1,6 @@
-import { computed, makeAutoObservable, observable } from 'mobx';
+import { computed, makeAutoObservable, observable, runInAction } from 'mobx';
 
-import { HistoryManager, Rect } from '@/shared/model';
+import { HistoryManager, IS_DEBUG_LEVEL_INFO, Rect } from '@/shared/model';
 
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
@@ -50,7 +50,7 @@ export interface AudioEditor {
   importPlaylist: (playlist: Playlist) => Promise<void>;
   importTrack(track: Track, channelIndex?: number): Promise<void>;
 
-  removeTrack(track: AudioEditorTrack): void;
+  removeTrack(track: AudioEditorTrack, dispose?: boolean): void;
 
   selectTrack: (track: AudioEditorTrack, multiple?: boolean) => void;
   unselectTrack: (track: AudioEditorTrack) => void;
@@ -215,9 +215,8 @@ export class ObservableAudioEditor implements AudioEditor {
     this.saveState();
   };
 
-  removeTrack = (track: AudioEditorTrack) => {
-    track.dispose();
-    this.player.removeTrack(track);
+  removeTrack = (track: AudioEditorTrack, dispose: boolean = false) => {
+    this.player.removeTrack(track, dispose);
     this.saveState();
   };
 
@@ -362,60 +361,29 @@ export class ObservableAudioEditor implements AudioEditor {
     this.player.restoreState(state.player);
   };
 
-  hydration = (playlist: Playlist): void => {
+  hydration = async (playlist: Playlist): Promise<void> => {
     if (playlist.hash === this.player.playlist?.hash) {
       return;
     }
 
     this._isSaveStatePaused = true;
 
-    // Update playlist in player
-    this.player.updatePlaylist(playlist);
-
-    // Add new tracks from playlist
-    playlist.tracks.forEach((track) => {
-      if (this.player.tracksByAudioUuid.has(track.uuid)) {
-        this.player.tracksByAudioUuid.get(track.uuid)?.hydration(track);
-      } else {
-        // Temporary logic to import track to a new channel
-        const nextTrackChannel = localStorage.getItem('nextTrackChannel');
-        let nextTrackChannelIndex;
-
-        if (nextTrackChannel !== null) {
-          nextTrackChannelIndex = parseInt(nextTrackChannel, 10);
-          localStorage.setItem(
-            playlist.id.toString(),
-            JSON.stringify({
-              [track.uuid]: nextTrackChannelIndex,
-            }),
-          );
-          localStorage.removeItem('nextTrackChannel');
-        }
-
-        const playlistInfo = localStorage.getItem(playlist.id.toString());
-        if (playlistInfo !== null) {
-          const parsedInfo = JSON.parse(playlistInfo) as Record<string, number>;
-          if (parsedInfo !== null) {
-            nextTrackChannelIndex = parsedInfo[track.uuid];
+    this.player.events.once(
+      'ready',
+      () => {
+        runInAction(() => {
+          this._isSaveStatePaused = false;
+          this.saveState();
+          if (IS_DEBUG_LEVEL_INFO) {
+            // eslint-disable-next-line no-console
+            console.info('AudioEditor: hydrated');
           }
-        }
-        // End logic
+        });
+      },
+      this,
+    );
 
-        this.importTrack(track, nextTrackChannelIndex);
-      }
-    });
-
-    // Remove tracks that are no longer in the playlist
-    this.player.tracks.forEach((track) => {
-      if (!playlist.tracks.find((pTrack) => pTrack.uuid === track.meta.uuid)) {
-        this.removeTrack(track);
-      }
-    });
-
-    // Load tracks audio
-    this.player.loadTracks();
-
-    this._isSaveStatePaused = false;
-    this.saveState();
+    // Update playlist in player
+    await this.player.hydration(playlist);
   };
 }

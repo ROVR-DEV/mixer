@@ -14,7 +14,7 @@ import { TrackFadeMarker } from '../TrackFadeMarker';
 
 import { FadeOverlayProps } from './interfaces';
 
-export const FadeOverlay = observer(function FadePoint({
+export const FadeOverlay = observer(function FadeOverlay({
   track,
   side,
   isTrackSelected,
@@ -23,7 +23,7 @@ export const FadeOverlay = observer(function FadePoint({
 }: FadeOverlayProps) {
   const timeline = useTimeline();
 
-  const { fadeDuration, ariaAttributes } = useFadeData(track, side, timeline);
+  const { fadeDuration, ariaAttributes } = useFadeData(track, side);
 
   const width = useMemo(
     () => timeline.timeToPixels(fadeDuration),

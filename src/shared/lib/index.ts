@@ -4,7 +4,7 @@ export * from './cn';
 export * from './converters';
 export * from './dynamicWaveColorPlugin';
 export * from './extractPeaksPromise';
-export * from './getCachedData';
+export * from './cacheApi';
 export * from './ghostResizePlugin';
 export * from './parseSecondsToParts';
 export * from './preventAll';

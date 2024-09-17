@@ -2,15 +2,22 @@
 
 import { useCallback } from 'react';
 
-import { AudioEditor } from '@/entities/audio-editor';
-// eslint-disable-next-line boundaries/element-types
-import { GlobalControlsEvent, useGlobalControls } from '@/entities/event';
+import { useWindowEvent } from '@/shared/lib';
+import { KeyBind } from '@/shared/model/';
+
+import {
+  AudioEditor,
+  AudioEditorEvent,
+  KEY_BINDINGS,
+} from '@/entities/audio-editor';
 
 export const useAudioEditorGlobalControls = (audioEditor: AudioEditor) => {
-  const handleGlobalControls = useCallback(
-    (event: GlobalControlsEvent) => {
-      switch (event.type) {
+  const handleEvent = useCallback(
+    (e: KeyboardEvent, type: AudioEditorEvent) => {
+      switch (type) {
         case 'Play/Pause':
+          e.preventDefault();
+
           if (audioEditor.player.isPlaying) {
             audioEditor.player.stop();
           } else {
@@ -48,5 +55,26 @@ export const useAudioEditorGlobalControls = (audioEditor: AudioEditor) => {
     [audioEditor],
   );
 
-  useGlobalControls(handleGlobalControls);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (
+        audioEditor.player.trackLoader.isDownloading ||
+        audioEditor.player.trackLoader.isUploading
+      ) {
+        return;
+      }
+
+      const keyBind = KeyBind.fromKeyboardEvent(e);
+      const type = KEY_BINDINGS[keyBind.toString()];
+
+      handleEvent(e, type);
+    },
+    [
+      audioEditor.player.trackLoader.isDownloading,
+      audioEditor.player.trackLoader.isUploading,
+      handleEvent,
+    ],
+  );
+
+  useWindowEvent('keydown', handleKeyDown);
 };
