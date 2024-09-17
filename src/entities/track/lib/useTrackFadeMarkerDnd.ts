@@ -8,6 +8,7 @@ import { CustomDraggableProps } from '@/shared/ui';
 
 import {
   AudioEditor,
+  isMouseInScrollBounds,
   shiftXTimeline,
   Timeline,
   // eslint-disable-next-line boundaries/element-types
@@ -48,7 +49,13 @@ export const useTrackFadeMarkerDnD = ({
         const globalTime = timeline.globalToTime(data.x);
         const trackTime = track.getRelativeTime(globalTime);
 
-        if (globalTime < track.startTime || globalTime > track.endTime) {
+        const bounds = isMouseInScrollBounds(data.x, timeline);
+
+        if (
+          (bounds.leftBound === undefined && bounds.rightBound === undefined) ||
+          globalTime < track.startTime ||
+          globalTime > track.endTime
+        ) {
           stopFadeUpdate();
           updateFade(track, trackTime, side);
           return false;

@@ -25,5 +25,12 @@ export const useFadeData = (track: AudioEditorTrack | null, side: FadeSide) => {
       fadeDuration: isNaN(fadeDuration) ? 0 : fadeDuration,
       ariaAttributes,
     };
-  }, [track, side]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    track,
+    track?.filters,
+    track?.filters.fadeInDuration,
+    track?.filters.fadeOutDuration,
+    side,
+  ]);
 };

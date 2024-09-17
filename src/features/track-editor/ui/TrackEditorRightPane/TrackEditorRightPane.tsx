@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { cn, useIsMouseClickStartsOnThisSpecificElement } from '@/shared/lib';
 
@@ -29,6 +29,8 @@ import { AudioEditorTrackView } from '@/features/track-card-view';
 import { TimelineHeader } from '@/widgets/audio-editor';
 
 import { TrackEditorRightPaneProps } from './interfaces';
+
+let currentEditableTrackId: string | undefined = undefined;
 
 export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   className,
@@ -71,6 +73,13 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
   );
 
   useTimelineWheelHandler(timelineRef, timeline);
+
+  useEffect(() => {
+    if (audioEditor.editableTrack?.id !== currentEditableTrackId) {
+      timeline.zoom = 0;
+      currentEditableTrackId = audioEditor.editableTrack?.id;
+    }
+  }, [audioEditor.editableTrack, timeline]);
 
   return (
     <TimelineContext.Provider value={timeline}>

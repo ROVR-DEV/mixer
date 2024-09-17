@@ -8,6 +8,7 @@ import { CustomDragEventHandler } from '@/shared/model';
 import { TrimSide } from '@/shared/ui';
 
 import {
+  isMouseInScrollBounds,
   shiftXTimeline,
   Timeline,
   useAudioEditor,
@@ -91,12 +92,14 @@ export const useTrackTrimMarkerDnD = ({
 
       const { leftNeighbor, rightNeighbor } = getTrackNeighbors(track);
 
+      const globalTimeline = audioEditor.timeline || timeline;
+
       customData.leftTimeBound =
-        leftNeighbor?.trimEndTime ?? timeline.startTime;
+        leftNeighbor?.trimEndTime ?? globalTimeline.startTime;
       customData.rightTimeBound =
-        rightNeighbor?.trimStartTime ?? timeline.endTime;
+        rightNeighbor?.trimStartTime ?? globalTimeline.endTime;
     },
-    [track, timeline],
+    [track, audioEditor.timeline, timeline],
   );
 
   const updateTrim: CustomDragEventHandler<TrackTrimDragData> = useCallback(
@@ -123,7 +126,13 @@ export const useTrackTrimMarkerDnD = ({
       repeatDragUpdate(() => {
         const globalTime = timeline.globalToTime(data.x);
 
-        if (globalTime < track.startTime || globalTime > track.endTime) {
+        const bounds = isMouseInScrollBounds(data.x, timeline);
+
+        if (
+          (bounds.leftBound === undefined && bounds.rightBound === undefined) ||
+          globalTime < track.startTime ||
+          globalTime > track.endTime
+        ) {
           stopDragUpdate();
           updateTrim(e, data, customData);
           return false;
