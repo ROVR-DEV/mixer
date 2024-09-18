@@ -1,4 +1,4 @@
-import { extractPeaksPromise } from '@/shared/lib';
+import extractPeaks from 'webaudio-peaks';
 
 export const calculatePeaks = async (
   arrayBuffer: ArrayBuffer,
@@ -9,15 +9,13 @@ export const calculatePeaks = async (
     sampleRate: 8000,
   });
 
-  const peaks = await extractPeaksPromise(
-    audioContext,
-    arrayBuffer,
-    527,
-    false,
-    undefined,
-    undefined,
-    16,
-  );
+  try {
+    const decodedData = await audioContext.decodeAudioData(arrayBuffer);
 
-  return [[...peaks.data[0]], [...peaks.data[1]]];
+    const peaks = extractPeaks(decodedData, 256, false);
+
+    return [[...peaks.data[0]], [...peaks.data[1]]];
+  } catch {
+    return [];
+  }
 };

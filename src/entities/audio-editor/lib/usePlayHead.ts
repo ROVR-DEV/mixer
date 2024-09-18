@@ -1,6 +1,6 @@
 import { RefObject, useCallback, useMemo } from 'react';
 
-import { Timeline } from '../model';
+import { Timeline, useAudioEditor } from '../model';
 
 const TIMELINE_AFTER_SCROLL_VIEW_PADDING = 4;
 
@@ -8,6 +8,8 @@ export const usePlayHead = (
   timeline: Timeline,
   playHeadRef: RefObject<HTMLDivElement>,
 ) => {
+  const audioEditor = useAudioEditor();
+
   const playHeadHeight = useMemo(
     () =>
       timeline.clientHeight
@@ -18,6 +20,10 @@ export const usePlayHead = (
 
   const setViewToPlayHead = useCallback(
     (playHeadPosition: number) => {
+      if (audioEditor.timeline) {
+        timeline.interactedBefore = audioEditor.timeline.interactedBefore;
+      }
+
       const globalPlayHeadPosition = playHeadPosition + timeline.hScroll;
 
       if (
@@ -27,9 +33,10 @@ export const usePlayHead = (
       ) {
         timeline.hScroll =
           globalPlayHeadPosition - TIMELINE_AFTER_SCROLL_VIEW_PADDING;
+        timeline.interactedBefore = false;
       }
     },
-    [timeline],
+    [audioEditor.timeline, timeline],
   );
 
   const setPlayHeadPosition = useCallback(

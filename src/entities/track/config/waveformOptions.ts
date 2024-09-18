@@ -15,7 +15,6 @@ const secondaryColor = (resolvedTailwindConfig.theme.colors as any).third
 export const DEFAULT_WAVEFORM_OPTIONS: Partial<WaveSurferOptions> = {
   barWidth: 1.5,
   barGap: 2.8,
-  // barHeight: 1.5,
   height: 'auto',
   interact: false,
   normalize: false,
