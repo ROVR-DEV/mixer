@@ -69,7 +69,6 @@ export class GhostResizePlugin extends BasePlugin<
       top: '0',
       width: '100%',
       height: '100%',
-      zIndex: '10',
     };
 
     const position =
@@ -138,12 +137,12 @@ export class GhostResizePlugin extends BasePlugin<
 
   setLeftGhostWidthInPercent(widthPercent: number) {
     this.trimStart = widthPercent;
-    this.ghostLeftOverlayWrapper.style.clipPath = `rect(auto ${widthPercent}% auto auto)`;
+    this.ghostLeftOverlayWrapper.style.clipPath = `polygon(0% 0%, ${widthPercent}% 0%, ${widthPercent}% 100%, 0% 100%)`;
   }
 
   setRightGhostWidthInPercent(widthPercent: number) {
     this.trimEnd = widthPercent;
-    this.ghostRightOverlayWrapper.style.clipPath = `rect(auto auto auto ${100 - widthPercent}%)`;
+    this.ghostRightOverlayWrapper.style.clipPath = `polygon(${100 - widthPercent}% 0%, 100% 0%, 100% 100%, ${100 - widthPercent}% 100%)`;
   }
 
   private initWaveSurferEvents() {

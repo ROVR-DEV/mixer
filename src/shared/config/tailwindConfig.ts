@@ -41,12 +41,6 @@ export const tailwindConfig: Config = {
     containerQueries,
     plugin(({ addUtilities }) => {
       addUtilities({
-        'content-auto': {
-          contentVisibility: 'auto',
-        },
-        'content-hidden': {
-          contentVisibility: 'hidden',
-        },
         '.font-fix': {
           paddingTop: '4px',
         },

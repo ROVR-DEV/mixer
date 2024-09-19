@@ -41,3 +41,17 @@ body {
     background: rgba(0, 0, 0, 0.53);
   }
 }
+
+@layer utilities {
+  @supports (content-visibility: hidden) {
+    .content-hidden {
+      content-visibility: hidden;
+    }
+  }
+
+  @supports not (content-visibility: hidden) {
+    .content-hidden {
+      display: none;
+    }
+  }
+}
