@@ -46,16 +46,13 @@ export const AudioEditorRegion = observer(function AudioEditorRegion({
   );
 
   const position = useMemo(
-    () =>
-      timeline.timeToPixels(player.region.start) -
-      timeline.hScroll +
-      timeline.zeroMarkOffsetX,
+    () => timeline.timeToLocal(player.region.start),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       timeline,
       timeline.hScroll,
       timeline.zeroMarkOffsetX,
-      timeline.zoom,
+      timeline.hPixelsPerSecond,
       player,
       player.region.start,
     ],

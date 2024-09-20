@@ -21,7 +21,6 @@ export interface TimelineProps {
   maxZoom: number;
   minScroll: number;
   maxScroll?: number;
-  totalTime?: number;
   startTime?: number;
   endTime: number;
   zeroMarkOffsetX?: number;
@@ -54,8 +53,6 @@ export class Timeline {
   private _startTime: number;
   private _endTime: number;
 
-  private _totalTime: number;
-
   private _zeroMarkOffsetX: number;
   private _trackHeight: number | string = 98;
 
@@ -84,7 +81,9 @@ export class Timeline {
   get scrollWidth(): number {
     return Math.max(
       this.clientWidth,
-      (this._totalTime - this._startTime) * this._hPixelsPerSecond,
+      (this._endTime - this._startTime) * this._hPixelsPerSecond +
+        this.zeroMarkOffsetX +
+        this.endBorderWidth,
     );
   }
 
@@ -145,16 +144,6 @@ export class Timeline {
   }
   set endTime(value: number) {
     this._endTime = value;
-    this._totalTime = value + 6;
-
-    this._updateScrollControllerBounds();
-  }
-
-  get totalTime(): number {
-    return this._totalTime;
-  }
-  set totalTime(value: number) {
-    this._totalTime = value;
     this._updateScrollControllerBounds();
   }
 
@@ -185,7 +174,6 @@ export class Timeline {
     scrollStep,
     minScroll,
     maxScroll,
-    totalTime,
     startTime = 0,
     endTime,
     zeroMarkOffsetX = 0,
@@ -195,7 +183,6 @@ export class Timeline {
 
     this._startTime = startTime;
     this._endTime = endTime;
-    this._totalTime = totalTime ?? endTime + 6;
 
     this.zoomController = new ZoomController(zoomStep, minZoom, maxZoom);
 

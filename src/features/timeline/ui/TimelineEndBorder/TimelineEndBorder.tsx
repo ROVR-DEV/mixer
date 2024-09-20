@@ -1,4 +1,5 @@
 'use client';
+
 import { observer } from 'mobx-react-lite';
 import { useMemo } from 'react';
 
@@ -21,7 +22,12 @@ export const TimelineEndBorder = observer(function TimelineEndBorder({
   return (
     <div
       className={cn('absolute bg-black/40 h-full', className)}
-      style={{ width: timeline.endBorderWidth, left: position }}
+      style={{
+        minWidth: timeline.endBorderWidth,
+        maxWidth: timeline.endBorderWidth,
+        width: timeline.endBorderWidth,
+        left: position,
+      }}
       {...props}
     />
   );

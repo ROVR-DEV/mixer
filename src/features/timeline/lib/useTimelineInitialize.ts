@@ -15,7 +15,6 @@ export interface TimelineInitializeProps {
   minZoom?: number;
   maxZoom?: number;
   // Explicit set total time
-  totalTime?: number;
   startTime?: number;
   endTime: number;
   zeroMarkOffsetX?: number;
@@ -26,7 +25,6 @@ export const useTimelineInitialize = (
   key: string,
   {
     timelineRef,
-    totalTime,
     startTime = 0,
     endTime,
     zoomStep = 1.25,
@@ -45,7 +43,6 @@ export const useTimelineInitialize = (
       maxZoom,
       scrollStep,
       minScroll: startTime,
-      totalTime,
       startTime,
       endTime,
       zeroMarkOffsetX,
@@ -85,12 +82,6 @@ export const useTimelineInitialize = (
   }, [scrollStep, timeline]);
 
   useEffect(() => {
-    if (totalTime && timeline.totalTime !== totalTime) {
-      timeline.totalTime = totalTime;
-    }
-  }, [timeline, startTime, totalTime]);
-
-  useEffect(() => {
     if (timeline.startTime !== startTime) {
       timeline.startTime = startTime;
     }
@@ -100,11 +91,7 @@ export const useTimelineInitialize = (
     if (timeline.endTime !== endTime) {
       timeline.endTime = endTime;
     }
-
-    if (!totalTime) {
-      timeline.totalTime = endTime + 6;
-    }
-  }, [timeline, endTime, totalTime]);
+  }, [timeline, endTime]);
 
   useEffect(() => {
     if (timeline.zeroMarkOffsetX !== zeroMarkOffsetX) {
