@@ -10,8 +10,11 @@ export const updateFade = (
   const clampedTime = clamp(time, 0, track.duration);
 
   if (side === 'left') {
-    track.filters.setFadeInEndTime(clampedTime);
+    track.filters.fadeInNode.linearFadeIn(track.startTrimDuration, clampedTime);
   } else if (side === 'right') {
-    track.filters.setFadeOutStartTime(clampedTime);
+    track.filters.fadeOutNode.linearFadeOut(
+      clampedTime,
+      track.duration - track.endTrimDuration,
+    );
   }
 };

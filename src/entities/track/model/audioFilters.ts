@@ -55,6 +55,9 @@ export class AudioFilters {
     makeAutoObservable(this);
   }
 
+  /**
+   * @deprecated
+   */
   setFadeInEndTime = (time: number) => {
     this.fadeInNode.linearFadeIn(this.fadeInNode.minTime, time);
 
@@ -63,6 +66,9 @@ export class AudioFilters {
     }
   };
 
+  /**
+   * @deprecated
+   */
   setFadeOutStartTime = (time: number) => {
     this.fadeOutNode.linearFadeOut(time, this.fadeOutNode.maxTime);
 
