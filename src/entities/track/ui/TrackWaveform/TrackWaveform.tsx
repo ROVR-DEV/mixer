@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 // eslint-disable-next-line boundaries/element-types
@@ -34,7 +34,7 @@ export const TrackWaveform = observer(function TrackWaveform({
     return isSelected ? 'primary' : 'secondary';
   }, [ignoreSelection, isSelectedInPlayer]);
 
-  const finalOptions = useMemo(() => {
+  const combinedOptions = useMemo(() => {
     return {
       ...DEFAULT_WAVEFORM_OPTIONS,
       media: track?.mediaElement ?? undefined,
@@ -43,6 +43,11 @@ export const TrackWaveform = observer(function TrackWaveform({
       ...options,
     };
   }, [options, track.audioPeaks, track.duration, track?.mediaElement]);
+
+  const trackCardBorderWidthCompensatorFactor = useMemo(
+    () => 0.1 / timeline.hPixelsPerSecond,
+    [timeline.hPixelsPerSecond],
+  );
 
   const handleMount = useCallback(
     (wavesurfer: WaveSurfer) => {
@@ -57,32 +62,48 @@ export const TrackWaveform = observer(function TrackWaveform({
     [track],
   );
 
-  const updateWidth = useCallback(
-    (trackDuration: number) => {
-      if (!waveformRef.current) {
-        return;
-      }
-
-      waveformRef.current.style.width = `${timeline.timeToPixels(trackDuration)}px`;
-    },
-    [timeline],
+  const trimStart = useMemo(
+    () =>
+      ((track.startTrimDuration - trackCardBorderWidthCompensatorFactor) /
+        track.duration) *
+      100,
+    [
+      track.duration,
+      track.startTrimDuration,
+      trackCardBorderWidthCompensatorFactor,
+    ],
   );
 
-  useEffect(() => {
-    updateWidth(track.duration);
-  }, [track.duration, updateWidth]);
+  const trimEnd = useMemo(
+    () =>
+      ((track.endTrimDuration - trackCardBorderWidthCompensatorFactor) /
+        track.duration) *
+      100,
+    [
+      track.duration,
+      track.endTrimDuration,
+      trackCardBorderWidthCompensatorFactor,
+    ],
+  );
 
-  useEffect(() => {
-    const update = () => {
-      updateWidth(track.duration);
-    };
-
-    timeline.zoomController.addListener(update);
-    return () => timeline.zoomController.removeListener(update);
+  const width = useMemo(
+    () => timeline.timeToPixels(track.duration),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeline.zoomController, updateWidth]);
+    [timeline, track.duration, timeline.hPixelsPerSecond],
+  );
 
-  const trackCardBorderWidthCompensatorFactor = 0.1 / timeline.hPixelsPerSecond;
+  const position = useMemo(
+    () => -timeline.timeToPixels(track.startTrimDuration),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeline, track.startTrimDuration, timeline.hPixelsPerSecond],
+  );
+
+  const style = useMemo(() => {
+    return {
+      width,
+      left: position,
+    };
+  }, [position, width]);
 
   return (
     <div
@@ -92,20 +113,12 @@ export const TrackWaveform = observer(function TrackWaveform({
       <WaveformMemoized
         ref={waveformRef}
         className='absolute w-full'
-        style={{ left: -timeline.timeToPixels(track.startTrimDuration) }}
+        style={style}
         color={color}
         waveColor={track.color ?? undefined}
-        trimStart={
-          ((track.startTrimDuration - trackCardBorderWidthCompensatorFactor) /
-            track.duration) *
-          100
-        }
-        trimEnd={
-          ((track.endTrimDuration - trackCardBorderWidthCompensatorFactor) /
-            track.duration) *
-          100
-        }
-        options={finalOptions}
+        trimStart={trimStart}
+        trimEnd={trimEnd}
+        options={combinedOptions}
         onMount={handleMount}
         {...props}
       />
