@@ -4,8 +4,9 @@ import { observer } from 'mobx-react-lite';
 import { useCallback, useState } from 'react';
 
 import { useAudioEditor } from '@/entities/audio-editor';
+import { removeTrack } from '@/entities/playlist';
 
-import { ChannelControlMemoized, ChannelRemoveDialog } from '..';
+import { ChannelControl, ChannelRemoveDialog } from '..';
 
 import { ChannelControlViewProps } from './interfaces';
 
@@ -28,6 +29,11 @@ export const ChannelControlView = observer(function ChannelControlView({
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       channel.tracks.forEach((track) => audioEditor.unselectTrack(track));
+      channel.tracks.forEach((track) => {
+        if (audioEditor.player.playlist !== null) {
+          removeTrack(audioEditor.player.playlist.id, track.meta.uuid);
+        }
+      });
       audioEditor.player.removeChannel(channel);
       audioEditor.saveState();
       setIsConfirmationDialogOpen(false);
@@ -37,7 +43,7 @@ export const ChannelControlView = observer(function ChannelControlView({
 
   return (
     <>
-      <ChannelControlMemoized
+      <ChannelControl
         channel={channel}
         number={number}
         isSelected={audioEditor.selectedChannel === channel}

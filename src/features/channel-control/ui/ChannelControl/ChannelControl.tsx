@@ -1,7 +1,7 @@
 'use client';
 
 import { observer } from 'mobx-react-lite';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
 import {
@@ -64,5 +64,3 @@ export const ChannelControl = observer(function ChannelControl({
     </div>
   );
 });
-
-export const ChannelControlMemoized = memo(ChannelControl);
