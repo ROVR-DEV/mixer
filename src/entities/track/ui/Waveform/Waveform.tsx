@@ -4,7 +4,7 @@ import { forwardRef, memo, useEffect, useMemo, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 import { resolvedTailwindConfig } from '@/shared/config';
-import { cn, DynamicWaveColorPlugin, GhostResizePlugin } from '@/shared/lib';
+import { cn, DynamicWaveColorPlugin } from '@/shared/lib';
 
 import { WAVEFORM_COLORS } from '../../config';
 
@@ -28,7 +28,7 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
   ) {
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const ghostResizePluginRef = useRef<GhostResizePlugin | null>(null);
+    // const ghostResizePluginRef = useRef<GhostResizePlugin | null>(null);
     const dynamicWaveColorPluginRef = useRef<DynamicWaveColorPlugin | null>(
       null,
     );
@@ -63,9 +63,9 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
       const baseWaveColor = (resolvedTailwindConfig.theme.colors as any).third
         .DEFAULT;
 
-      ghostResizePluginRef.current = GhostResizePlugin.create({
-        overlayColor: baseWaveColor,
-      });
+      // ghostResizePluginRef.current = GhostResizePlugin.create({
+      //   overlayColor: baseWaveColor,
+      // });
 
       dynamicWaveColorPluginRef.current = DynamicWaveColorPlugin.create({
         waveColor: overrideWaveColor[color],
@@ -77,7 +77,7 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
         waveColor: baseWaveColor,
         progressColor: baseWaveColor,
         plugins: [
-          ghostResizePluginRef.current,
+          // ghostResizePluginRef.current,
           dynamicWaveColorPluginRef.current,
         ],
       });
@@ -121,12 +121,12 @@ export const Waveform = forwardRef<HTMLDivElement, WaveformProps>(
     }, [color, overrideWaveColor]);
 
     useEffect(() => {
-      ghostResizePluginRef.current?.setLeftGhostWidthInPercent(trimStart ?? 0);
+      // ghostResizePluginRef.current?.setLeftGhostWidthInPercent(trimStart ?? 0);
       dynamicWaveColorPluginRef.current?.setStartInPercent(trimStart ?? 0);
     }, [trimStart]);
 
     useEffect(() => {
-      ghostResizePluginRef.current?.setRightGhostWidthInPercent(trimEnd ?? 0);
+      // ghostResizePluginRef.current?.setRightGhostWidthInPercent(trimEnd ?? 0);
       dynamicWaveColorPluginRef.current?.setEndInPercent(trimEnd ?? 0);
     }, [trimEnd]);
 

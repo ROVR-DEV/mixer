@@ -95,7 +95,7 @@ export const TimelineHeader = observer(function TimelineHeader({
       {...props}
     >
       <TimelinePlayHeadView className='absolute z-20' />
-      <AudioEditorRegionPanel className='absolute bottom-px z-20 h-[12px] w-full overflow-x-clip' />
+      <AudioEditorRegionPanel className='absolute bottom-px z-20 h-[12px] w-full overflow-x-hidden' />
       <TimelineRulerMemoized
         className='pointer-events-none w-full'
         centerLine={centerLine}

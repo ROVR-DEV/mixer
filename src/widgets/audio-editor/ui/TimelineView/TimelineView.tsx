@@ -70,7 +70,7 @@ export const TimelineView = observer(function TimelineView({
   return (
     <div
       className={cn(
-        'relative min-h-max w-full grow overflow-x-clip',
+        'relative min-h-max w-full grow overflow-x-hidden',
         className,
       )}
       ref={timelineRef}

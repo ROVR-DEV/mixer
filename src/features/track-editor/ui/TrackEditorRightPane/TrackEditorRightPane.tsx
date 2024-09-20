@@ -87,7 +87,7 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
         <TimelineHeader className='h-16 min-h-16' centerLine={false} />
         <div className='flex size-full flex-col overflow-hidden'>
           <div
-            className='size-full grow overflow-x-clip'
+            className='size-full grow overflow-x-hidden'
             ref={timelineRef}
             onClick={handleClick}
             onMouseDown={onMouseDown}

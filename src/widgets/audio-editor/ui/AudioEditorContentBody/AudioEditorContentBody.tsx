@@ -83,7 +83,7 @@ export const AudioEditorContentBody = observer(function AudioEditorContentBody({
         className='relative size-full overflow-y-hidden'
         {...props}
       >
-        <div className='relative flex size-full overflow-y-auto overflow-x-clip'>
+        <div className='relative flex size-full overflow-y-auto overflow-x-hidden'>
           <AudioEditorChannelsList
             className='h-max min-h-full bg-primary'
             style={{

@@ -6,6 +6,7 @@
   display: none;
 }
 
+/* 
 @supports (content-visibility: hidden) {
   .waveform ::part(canvases) {
     content-visibility: hidden;
@@ -16,4 +17,8 @@
   .waveform ::part(canvases) {
     display: none;
   }
+} */
+
+.waveform ::part(canvases) {
+  clip-path: none !important;
 }
