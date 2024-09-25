@@ -1,11 +1,6 @@
 import { AudioEditorTrack } from '../../model';
-import { WaveformProps } from '../Waveform';
 
-export interface TrackWaveformProps
-  extends Omit<
-    WaveformProps,
-    'ref' | 'onMount' | 'isSelected' | 'color' | 'waveColor'
-  > {
+export interface TrackWaveformProps {
   track: AudioEditorTrack;
   ignoreSelection?: boolean;
 }

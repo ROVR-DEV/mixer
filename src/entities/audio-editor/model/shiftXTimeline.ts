@@ -1,5 +1,5 @@
 import { clamp } from '@/shared/lib';
-import { Rect } from '@/shared/model';
+import { Bounds, Rect } from '@/shared/model';
 
 import { Timeline } from './timeline';
 
@@ -8,19 +8,14 @@ const calculatePercent = (currentX: number, startX: number, endX: number) =>
 
 const SCROLL_AREA_HALF_WIDTH = 100;
 
-export interface Bound {
-  start: number;
-  end: number;
-}
-
-const getTimelineLeftScrollBounds = (timelineRect: Rect): Bound => {
+const getTimelineLeftScrollBounds = (timelineRect: Rect): Bounds => {
   return {
     start: timelineRect.x - SCROLL_AREA_HALF_WIDTH,
     end: timelineRect.x + SCROLL_AREA_HALF_WIDTH,
   };
 };
 
-const getTimelineRightScrollBounds = (timelineRect: Rect): Bound => {
+const getTimelineRightScrollBounds = (timelineRect: Rect): Bounds => {
   return {
     start: timelineRect.x + timelineRect.width - SCROLL_AREA_HALF_WIDTH,
     end: timelineRect.x + timelineRect.width + SCROLL_AREA_HALF_WIDTH,
@@ -30,7 +25,7 @@ const getTimelineRightScrollBounds = (timelineRect: Rect): Bound => {
 export const isMouseInScrollBounds = (
   mouseX: number,
   timeline: Timeline,
-): { leftBound: Bound | undefined; rightBound: Bound | undefined } => {
+): { leftBound: Bounds | undefined; rightBound: Bounds | undefined } => {
   const timelineElement = timeline.container;
 
   if (!timelineElement) {
@@ -84,8 +79,8 @@ export const shiftXTimeline = (mouseX: number, timeline: Timeline) => {
 export const shiftXTimelineFromBounds = (
   mouseX: number,
   timeline: Timeline,
-  leftBound: Bound | undefined,
-  rightBound: Bound | undefined,
+  leftBound: Bounds | undefined,
+  rightBound: Bounds | undefined,
 ) => {
   if (leftBound !== undefined) {
     const percent =

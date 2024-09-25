@@ -9,7 +9,9 @@ import {
   useRef,
 } from 'react';
 
-import { drawGrid, getDpi, setupCanvasAndCtx } from '../../lib';
+import { getDpi } from '@/shared/lib/getDpi';
+
+import { drawGrid, setupCanvasAndCtx } from '../../lib';
 import { Tick } from '../../model';
 
 import { TimelineGridProps, TimelineGridRef } from './interfaces';

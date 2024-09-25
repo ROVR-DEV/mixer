@@ -9,5 +9,5 @@ export * from './TrackInfoView';
 export * from './TrackModifyOverlay';
 export * from './TrackTitle';
 export * from './TrackTrimMarker';
+export * from './OptimizedWaveform';
 export * from './TrackWaveform';
-export * from './Waveform';

@@ -23,12 +23,7 @@ import { AudioEditorTrack } from '@/entities/track';
 
 import { getNewChannelIndex } from './getNewChannelIndex';
 
-import {
-  adjustTracksOnPaste,
-  clearDragProperties,
-  getTrackCoordinates,
-  setDragProperties,
-} from '.';
+import { adjustTracksOnPaste, clearDragProperties, setDragProperties } from '.';
 
 export const useAudioEditorTrack = (
   trackRef: RefObject<HTMLDivElement>,
@@ -41,27 +36,54 @@ export const useAudioEditorTrack = (
 
   const grid = timeline.container?.parentElement;
 
-  const { trackWidth, trackStartXGlobal, trackEndXGlobal } = useMemo(
-    () =>
-      getTrackCoordinates(
-        track.trimStartTime,
-        track.trimEndTime,
-        timeline.hPixelsPerSecond,
-      ),
-    [track.trimStartTime, track.trimEndTime, timeline.hPixelsPerSecond],
-  );
+  const { trimStartXGlobal, trimEndXGlobal } = useMemo(() => {
+    const trimStartXGlobal = timeline.timeToGlobal(track.trimStartTime);
+    const trimEndXGlobal = timeline.timeToGlobal(track.trimEndTime);
+    const trackWidth = trimEndXGlobal - trimStartXGlobal;
+
+    return {
+      trimStartXGlobal: trimStartXGlobal,
+      trimEndXGlobal: trimEndXGlobal,
+      trackWidth,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    track.trimStartTime,
+    track.trimEndTime,
+    timeline.hPixelsPerSecond,
+    timeline.zeroMarkOffsetX,
+  ]);
 
   const updateTrackWidth = useCallback(() => {
     if (!trackRef.current) {
       return;
     }
 
-    if (trackRef.current.style.width === `${trackWidth}px`) {
+    const startX = clamp(
+      trimStartXGlobal,
+      timeline.viewportBoundsWithBuffer.start,
+    );
+    const endX = clamp(
+      trimEndXGlobal,
+      startX,
+      timeline.viewportBoundsWithBuffer.end,
+    );
+    const adjustedTrackWidth = endX - startX;
+
+    const newWidth = `${adjustedTrackWidth}px`;
+
+    if (trackRef.current.style.width === newWidth) {
       return;
     }
 
-    trackRef.current.style.width = `${trackWidth}px`;
-  }, [trackRef, trackWidth]);
+    trackRef.current.style.width = newWidth;
+  }, [
+    trimEndXGlobal,
+    trackRef,
+    trimStartXGlobal,
+    timeline.viewportBoundsWithBuffer.end,
+    timeline.viewportBoundsWithBuffer.start,
+  ]);
 
   const updateTrackVisibility = useCallback(() => {
     if (!trackRef.current) {
@@ -71,9 +93,9 @@ export const useAudioEditorTrack = (
     const bufferViewWidth = 400;
 
     const isVisible =
-      trackStartXGlobal <
+      trimStartXGlobal <
         timeline.clientWidth + timeline.hScroll + bufferViewWidth &&
-      trackEndXGlobal > timeline.hScroll - bufferViewWidth;
+      trimEndXGlobal > timeline.hScroll - bufferViewWidth;
 
     if (isVisible) {
       trackRef.current.classList.remove('content-hidden');
@@ -81,7 +103,7 @@ export const useAudioEditorTrack = (
       trackRef.current.classList.add('content-hidden');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackEndXGlobal, trackRef, trackStartXGlobal]);
+  }, [trimEndXGlobal, trackRef, trimStartXGlobal]);
 
   const updateTrackVerticalPosition = useCallback(() => {
     if (disableInteractive) {
@@ -116,28 +138,26 @@ export const useAudioEditorTrack = (
       channelOffset * timeline.trackHeight + 6 + 'px';
   }, [disableInteractive, trackRef, track, audioEditor, timeline.trackHeight]);
 
-  const globalToLocalCoordinates = useCallback(
-    (globalX: number) => {
-      return globalX - timeline.hScroll;
-    },
-    [timeline],
-  );
-
   const updateTrackHorizontalPosition = useCallback(() => {
     if (!trackRef.current) {
       return;
     }
 
-    const position = globalToLocalCoordinates(
-      trackStartXGlobal + timeline.zeroMarkOffsetX,
+    const position = timeline.globalToLocal(
+      clamp(
+        trimStartXGlobal,
+        timeline.viewportBoundsWithBuffer.start,
+        timeline.viewportBoundsWithBuffer.end,
+      ),
     );
 
     trackRef.current.style.left = `${position}px`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    globalToLocalCoordinates,
-    timeline.zeroMarkOffsetX,
+    timeline,
     trackRef,
-    trackStartXGlobal,
+    trimStartXGlobal,
+    timeline.viewportBoundsWithBuffer.start,
   ]);
 
   const calcNewStartTime = useCallback(
@@ -178,7 +198,7 @@ export const useAudioEditorTrack = (
       }
 
       track.setStartTime(startTime);
-      track.audioBuffer?.setTime(audioEditor.player.time - track.startTime);
+      track.audio.setTime(audioEditor.player.time - track.startTime);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [calcNewStartTime],

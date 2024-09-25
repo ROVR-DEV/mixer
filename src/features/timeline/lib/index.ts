@@ -10,7 +10,6 @@ export * from './getByRanges';
 export * from './drawGrid';
 export * from './drawGridInSeconds';
 export * from './useTicks';
-export * from './getDpi';
 export * from './setupCanvas';
 export * from './getTimelineMaxScroll';
 export * from './getPixelsPerSecond';

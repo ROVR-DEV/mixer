@@ -213,7 +213,7 @@ export class ObservablePlayer implements Player {
       if (!track) {
         return;
       }
-      track.load(trackData.objectUrl);
+      track.audio.load(trackData.objectUrl);
 
       if (withPeaks) {
         const generateAndSetPeaks = async () => {
@@ -277,7 +277,7 @@ export class ObservablePlayer implements Player {
     this._timer?.pause();
 
     this._processTracks(this.time, (_: number, track: AudioEditorTrack) =>
-      track.audioBuffer?.pause(),
+      track.audio.pause(),
     );
   };
 
@@ -292,13 +292,9 @@ export class ObservablePlayer implements Player {
     this.events.emit('timeupdate', newTime);
 
     this._processTracks(time, (_: number, track: AudioEditorTrack) => {
-      if (!track.audioBuffer) {
-        return;
-      }
-
       if (this._isTimeInTrackBounds(time, track)) {
         const trackTime = time - track.startTime;
-        track.audioBuffer.setTime(trackTime);
+        track.audio.setTime(trackTime);
       }
     });
   };
@@ -386,26 +382,22 @@ export class ObservablePlayer implements Player {
   };
 
   private _processTrack = (time: number, track: AudioEditorTrack) => {
-    if (!track.audioBuffer) {
-      return;
-    }
-
     if (!this._isTimeInTrackBounds(time, track)) {
-      if (track.audioBuffer.isPlaying()) {
-        track.audioBuffer.pause();
+      if (track.audio.isPlaying()) {
+        track.audio.pause();
       }
       return;
     }
 
     const isChannelMuted = this.isChannelMuted(track.channel);
-    const isPlaying = track.audioBuffer.isPlaying();
+    const isPlaying = track.audio.isPlaying();
 
     if (!isChannelMuted && !isPlaying) {
       const trackTime = time - track.startTime;
-      track.audioBuffer.setTime(trackTime);
-      track.audioBuffer.play();
+      track.audio.setTime(trackTime);
+      track.audio.play();
     } else if (isChannelMuted && isPlaying) {
-      track.audioBuffer.pause();
+      track.audio.pause();
     }
   };
 

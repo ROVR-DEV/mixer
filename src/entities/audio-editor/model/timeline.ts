@@ -1,7 +1,7 @@
 import { computed, makeAutoObservable, runInAction } from 'mobx';
 
 import { clamp } from '@/shared/lib';
-import { Rect } from '@/shared/model';
+import { Bounds, Rect } from '@/shared/model';
 
 import {
   TimelineTicks,
@@ -31,6 +31,7 @@ export class Timeline {
   readonly zoomController: ZoomController;
   readonly hScrollController: ScrollController;
 
+  viewportBoundsBufferWidth = 100;
   endBorderWidth: number = 20;
 
   private _container: HTMLElement | null = null;
@@ -91,6 +92,28 @@ export class Timeline {
     return (
       (this._boundingClientRect.height || this._container?.clientHeight) ?? 0
     );
+  }
+
+  get viewportBounds(): Bounds {
+    return {
+      start: clamp(this.hScroll, 0),
+      end: clamp(
+        this.hScroll + this.clientWidth,
+        0,
+        this.timeToGlobal(this.endTime),
+      ),
+    };
+  }
+
+  get viewportBoundsWithBuffer(): Bounds {
+    return {
+      start: clamp(this.hScroll - this.viewportBoundsBufferWidth, 0),
+      end: clamp(
+        this.hScroll + this.clientWidth + this.viewportBoundsBufferWidth,
+        0,
+        Infinity,
+      ),
+    };
   }
 
   get interactedBefore(): boolean {
@@ -211,10 +234,30 @@ export class Timeline {
       hPixelsPerSecond: computed,
       startTime: computed,
       endTime: computed,
+      viewportBounds: computed,
+      viewportBoundsWithBuffer: computed,
     });
   }
 
   //#region Mappings
+
+  /**
+   * @description Map pixels from timeline view to global coordinates
+   * @param x global coordinate in pixels
+   * @returns local coordinate in pixels
+   */
+  globalToLocal = (x: number): number => {
+    return x - this.hScroll;
+  };
+
+  /**
+   * @description Map pixels from global coordinates to timeline view
+   * @param x local coordinate in pixels
+   * @returns global coordinate in pixels
+   */
+  localToGlobal = (x: number): number => {
+    return x + this.hScroll;
+  };
 
   /**
    * @description Map pixels relative to the timeline container view with scroll to time

@@ -258,10 +258,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
     >
-      <TrimBackgroundView
-        className='absolute left-0 top-0 z-10'
-        track={track}
-      />
+      {track.isTrimming && (
+        <TrimBackgroundView
+          className='absolute left-0 top-0 z-10'
+          track={track}
+        />
+      )}
       <TrackCardMemoized
         className='size-full'
         color={track.color ?? undefined}

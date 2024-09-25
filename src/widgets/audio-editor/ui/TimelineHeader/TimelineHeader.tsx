@@ -7,6 +7,7 @@ import {
   cn,
   useGlobalMouseMove,
   useIsMouseClickStartsOnThisSpecificElement,
+  useWindowEvent,
 } from '@/shared/lib';
 
 import {
@@ -44,7 +45,7 @@ export const TimelineHeader = observer(function TimelineHeader({
   const rulerWrapperRef = useRef<HTMLDivElement | null>(null);
   const rulerControlRef = useRef<TimelineRulerRef | null>(null);
 
-  const renderRuler = useAudioEditorTimelineRuler(rulerControlRef);
+  const renderDefaultRuler = useAudioEditorTimelineRuler(rulerControlRef);
 
   const { onMouseDown, onClick } = useIsMouseClickStartsOnThisSpecificElement();
 
@@ -59,18 +60,23 @@ export const TimelineHeader = observer(function TimelineHeader({
     [handleClickOnRuler, onClick],
   );
 
-  useEffect(() => {
+  const renderRuler = useCallback(() => {
     if (timeline.disableListeners) {
       return;
     }
 
-    renderRuler(
+    renderDefaultRuler(
       timeline.ticks,
       timeline.zoom,
       timeline.hScroll,
       timeline.hPixelsPerSecond,
       timeline.zeroMarkOffsetX,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderDefaultRuler, timeline.ticks]);
+
+  useEffect(() => {
+    renderRuler();
   }, [
     renderRuler,
     timeline.disableListeners,
@@ -85,6 +91,8 @@ export const TimelineHeader = observer(function TimelineHeader({
 
   useTimelineWheelHandler(rulerWrapperRef, timeline);
   useGlobalMouseMove(handleTimeSeek, rulerWrapperRef);
+
+  useWindowEvent('resize', renderRuler);
 
   return (
     <div

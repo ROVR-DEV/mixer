@@ -46,14 +46,17 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
     startTime: audioEditor.editableTrack?.isTrimming
       ? audioEditor.editableTrack.startTime
       : audioEditor.editableTrack?.trimStartTime,
-    endTime: audioEditor.editableTrack?.trimEndTime ?? 0,
+    endTime:
+      (audioEditor.editableTrack?.isTrimming
+        ? audioEditor.editableTrack.endTime
+        : audioEditor.editableTrack?.trimEndTime) ?? 0,
     trackHeight: '100%',
   });
 
   const waveformComponent = useMemo(
     () =>
       !audioEditor.editableTrack ? null : (
-        <TrackWaveform track={audioEditor.editableTrack} ignoreSelection />
+        <TrackWaveform ignoreSelection track={audioEditor.editableTrack} />
       ),
     [audioEditor.editableTrack],
   );

@@ -10,3 +10,4 @@ export * from './Version';
 export * from './Menu';
 export * from './ProgressBar';
 export * from './Dialog';
+export * from './HiDpiCanvas';

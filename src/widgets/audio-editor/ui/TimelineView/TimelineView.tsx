@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { cn } from '@/shared/lib';
+import { cn, useWindowEvent } from '@/shared/lib';
 
 import { usePlayer, useTimeline } from '@/entities/audio-editor';
 
@@ -66,6 +66,8 @@ export const TimelineView = observer(function TimelineView({
       timeline.zoomController.removeListener(renderGrid);
     };
   }, [renderGrid, timeline]);
+
+  useWindowEvent('resize', renderGrid);
 
   return (
     <div

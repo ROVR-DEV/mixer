@@ -4,7 +4,9 @@ import { makeAutoObservable } from 'mobx';
 import { v4 } from 'uuid';
 import WaveSurfer from 'wavesurfer.js';
 
+// eslint-disable-next-line boundaries/element-types
 import { clamp, toOwnedObservable } from '@/shared/lib';
+import { AudioPlayer, HTMLMediaElementAudioPlayer } from '@/shared/model';
 
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
@@ -58,6 +60,9 @@ export class AudioEditorTrack {
   startTrimDuration: number = 0;
   endTrimDuration: number = 0;
 
+  private _audio: AudioPlayer = new HTMLMediaElementAudioPlayer(
+    this.mediaElement,
+  );
   private _id: string = v4();
   private _isPeaksReady: boolean = false;
   private _meta: Track;
@@ -67,6 +72,10 @@ export class AudioEditorTrack {
   private _color: string | null = null;
   private _isTrimming: boolean = false;
   private _isEditingTitle: boolean = false;
+
+  get audio(): AudioPlayer {
+    return this._audio;
+  }
 
   get id(): string {
     return this._id;
@@ -143,6 +152,7 @@ export class AudioEditorTrack {
     this.startTime = track.start;
     this.endTime = track.end;
 
+    this.filters.audio = this._audio as HTMLMediaElementAudioPlayer;
     this._updateAudioFiltersBounds();
     this._filters.fadeInNode.linearFadeInDuration(0);
     this._filters.fadeOutNode.linearFadeOutDuration(0);
@@ -164,11 +174,7 @@ export class AudioEditorTrack {
     }
 
     this._audioBuffer = audioBuffer;
-    this._filters.audioBuffer = audioBuffer;
-  };
-
-  load = (src: HTMLMediaElement['src']) => {
-    this.mediaElement.src = src;
+    // this._filters.audio = audioBuffer;
   };
 
   setPeaks = (peaks: typeof this.audioPeaks) => {
@@ -252,7 +258,7 @@ export class AudioEditorTrack {
 
     clonedTrack.color = this.color;
 
-    clonedTrack.load(this.mediaElement.src);
+    clonedTrack.audio.load(this.mediaElement.src);
     clonedTrack.audioPeaks = this.audioPeaks;
 
     clonedTrack.startTrimDuration = this.startTrimDuration;
@@ -307,7 +313,7 @@ export class AudioEditorTrack {
 
     this.meta = state.meta;
     if (!this.mediaElement.src) {
-      this.load(state.src);
+      this.audio.load(state.src);
     }
     this.color = state.color;
 

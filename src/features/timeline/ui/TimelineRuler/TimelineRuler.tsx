@@ -5,20 +5,14 @@ import {
   forwardRef,
   memo,
   useCallback,
-  useEffect,
   useImperativeHandle,
-  useRef,
+  useState,
 } from 'react';
 
 import { cn } from '@/shared/lib';
+import { HiDpiCanvasMemoized } from '@/shared/ui';
 
-import {
-  drawRuler,
-  getDpi,
-  getSubTickHeight,
-  setupCanvasAndCtx,
-  tickValueToString,
-} from '../../lib';
+import { drawRuler, getSubTickHeight, tickValueToString } from '../../lib';
 import { Tick } from '../../model';
 
 import { TimelineRulerProps } from './interfaces';
@@ -36,33 +30,7 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
     },
     ref,
   ) {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-    const dpi = getDpi();
-
-    const handleCanvasRef = (newRef: HTMLCanvasElement | null) => {
-      if (!newRef) {
-        return;
-      }
-
-      canvasRef.current = newRef;
-
-      const canvas = canvasRef.current;
-
-      if (!canvas) {
-        return;
-      }
-
-      const dpi = getDpi();
-
-      const ctx = setupCanvasAndCtx(canvas, dpi);
-
-      if (!ctx) {
-        return;
-      }
-
-      canvasCtxRef.current = ctx;
-    };
+    const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
     const render = useCallback(
       (
@@ -72,8 +40,6 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         zoom: number,
         color?: Property.Color | undefined,
       ) => {
-        const ctx = canvasCtxRef.current;
-
         if (!ctx) {
           return;
         }
@@ -92,7 +58,7 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           color,
         );
       },
-      [],
+      [ctx],
     );
 
     useImperativeHandle(
@@ -101,30 +67,8 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         render,
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [render, dpi],
+      [render],
     );
-
-    useEffect(() => {
-      const recalculateDpi = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) {
-          return;
-        }
-
-        const dpi = getDpi();
-
-        const ctx = setupCanvasAndCtx(canvas, dpi);
-        if (!ctx) {
-          return;
-        }
-
-        canvasCtxRef.current = ctx;
-      };
-
-      window.addEventListener('resize', recalculateDpi);
-      return () => window.removeEventListener('resize', recalculateDpi);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return (
       <div
@@ -132,9 +76,9 @@ export const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         ref={ref}
         {...props}
       >
-        <canvas
+        <HiDpiCanvasMemoized
           className={cn('pointer-events-none w-full', canvasClassName)}
-          ref={handleCanvasRef}
+          onHiDpiCtxCreate={setCtx}
           {...canvasProps}
         />
         {!centerLine ? null : (
