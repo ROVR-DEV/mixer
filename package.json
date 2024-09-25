@@ -1,6 +1,6 @@
 {
   "name": "mixer",
-  "version": "0.13.11",
+  "version": "0.14.11",
   "private": true,
   "type": "module",
   "scripts": {
