@@ -3,7 +3,7 @@
 import { observer } from 'mobx-react-lite';
 import { useMemo } from 'react';
 
-import { cn, preventAll } from '@/shared/lib';
+import { cn, preventAll, stopPropagation } from '@/shared/lib';
 
 // eslint-disable-next-line boundaries/element-types
 import { useTimeline } from '@/entities/audio-editor';
@@ -39,6 +39,7 @@ export const FadeOverlay = observer(function FadeOverlay({
         left: side === 'left' ? '0' : '',
         right: side === 'right' ? '0' : '',
       }}
+      onClick={stopPropagation}
       {...props}
     >
       <TrackFadeMarker
