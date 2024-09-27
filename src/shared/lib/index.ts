@@ -26,3 +26,4 @@ export * from './useRepeatFun';
 export * from './toOwnedObservable';
 export * from './renderBarWaveform';
 export * from './recolorCanvas';
+export * from './useContainer';

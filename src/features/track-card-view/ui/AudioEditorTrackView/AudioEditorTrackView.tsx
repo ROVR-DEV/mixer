@@ -24,7 +24,7 @@ import {
   useHandleTimeSeek,
   useTimeline,
 } from '@/entities/audio-editor';
-import { TrackCardMemoized } from '@/entities/track';
+import { TrackCardMemoized, TrackModifyOverlay } from '@/entities/track';
 
 import { useAudioEditorTrack, useTrackEditMenuHandlers } from '../../lib';
 import { TrimBackgroundView } from '../TrimBackgroundView';
@@ -279,6 +279,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         popoverBoundary={timeline.boundingClientRect}
         {...props}
       />
+      <TrackModifyOverlay track={track} trackRef={trackRef} />
     </div>
   );
 });

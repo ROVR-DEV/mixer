@@ -2,7 +2,7 @@
 
 import { observer } from 'mobx-react-lite';
 
-import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
+import { TrackWaveform } from '@/entities/track';
 
 import { AudioEditorTrackView } from '@/features/track-card-view';
 import { TrackContextMenuView } from '@/features/track-context-menu';
@@ -22,9 +22,7 @@ export const AudioEditorTracksView = observer(function AudioEditorTracksView({
         waveformComponent={<TrackWaveform track={track} />}
         editMenu={TrackEditMenuMemoized}
         contextMenu={TrackContextMenuView}
-      >
-        <TrackModifyOverlay track={track} />
-      </AudioEditorTrackView>
+      />
     );
   });
 });
