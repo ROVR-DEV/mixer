@@ -23,7 +23,7 @@
     "@react-hook/resize-observer": "^1.2.6",
     "@tailwindcss/container-queries": "^0.1.1",
     "clsx": "^2.1.1",
-    "container-query-polyfill": "^1.0.2",
+    "cqfill": "^0.6.1",
     "eventemitter3": "^5.0.1",
     "flatted": "^3.3.1",
     "imurmurhash": "^0.1.4",

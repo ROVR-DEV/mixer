@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib';
 
 import { AppHeader } from '@/widgets/app-header';
 
-import { appMetadata, kernFont } from './__init';
+import { appMetadata, kernFont, PolyfillProvider } from './__init';
 
 export const metadata = appMetadata;
 
@@ -16,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang='en' className={cn('font-sans', kernFont.variable)}>
       <body className='flex h-screen min-h-screen flex-col font-sans'>
-        <AppHeader />
-        {children}
+        <PolyfillProvider>
+          <AppHeader />
+          {children}
+        </PolyfillProvider>
       </body>
     </html>
   );
