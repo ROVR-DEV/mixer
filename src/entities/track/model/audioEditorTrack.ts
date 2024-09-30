@@ -35,8 +35,6 @@ export interface AudioEditorTrackState {
   audioPeaks: Array<Float32Array | number[]> | null;
   isPeaksReady: boolean;
 
-  src: HTMLMediaElement['src'];
-
   color: string | null;
 
   filters: {
@@ -53,7 +51,6 @@ export interface AudioEditorTrackState {
 
 export class AudioEditorTrack {
   readonly dndInfo: TrackDnDInfo = new TrackDnDInfo();
-  readonly mediaElement: HTMLMediaElement = new Audio();
 
   audioPeaks: Array<Float32Array | number[]> | null = [];
 
@@ -284,7 +281,6 @@ export class AudioEditorTrack {
       endTime: this.endTime,
       startTrimDuration: this.startTrimDuration,
       endTrimDuration: this.endTrimDuration,
-      src: this.mediaElement.src,
       color: this.color,
       meta: this.meta,
       isPeaksReady: this._isPeaksReady,
@@ -312,7 +308,7 @@ export class AudioEditorTrack {
     this.endTrimDuration = state.endTrimDuration;
 
     this.meta = state.meta;
-    if (!this.mediaElement.src && state.audioBuffer) {
+    if (state.audioBuffer) {
       this.audio.load(state.audioBuffer);
     }
     this.color = state.color;

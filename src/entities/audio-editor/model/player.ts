@@ -208,48 +208,39 @@ export class ObservablePlayer implements Player {
         return;
       }
 
-      if (withPeaks) {
-        const generateAndSetPeaks = async () => {
-          if (!trackData.arrayBuffer) {
-            track.setPeaks([]);
-            return;
-          }
-          if (!this.audioContext) {
-            return;
-          }
-          if ('decodeAudioData' in this.audioContext) {
-            const audioBuffer = await this.audioContext.decodeAudioData(
-              trackData.arrayBuffer,
-            );
-            const peaks = await calculatePeaks(audioBuffer);
-            track.setPeaks(peaks);
+      if (this.audioContext && trackData.arrayBuffer) {
+        const audioBuffer = await this.audioContext.decodeAudioData(
+          trackData.arrayBuffer,
+        );
 
-            await track.audio.load(audioBuffer);
-          }
-        };
+        if (withPeaks) {
+          const peaks = await calculatePeaks(audioBuffer);
+          track.setPeaks(peaks);
+        }
 
-        generateAndSetPeaks();
+        await track.audio.load(audioBuffer);
       }
 
-      const onLoad = () => {
-        runInAction(() => {
-          if (
-            this.tracks.every((track) => track.mediaElement.readyState === 4)
-          ) {
-            if (IS_DEBUG_LEVEL_INFO) {
-              // eslint-disable-next-line no-console
-              console.info('Player: all tracks loaded');
-            }
-
-            this._loadingStatus = 'fulfilled';
-            this.events.emit('ready');
-          }
-        });
-
-        track.mediaElement.removeEventListener('loadeddata', onLoad);
-      };
-
-      track.mediaElement.addEventListener('loadeddata', onLoad);
+      this.events.emit('ready');
+      // const onLoad = () => {
+      //   runInAction(() => {
+      //     if (
+      //       this.tracks.every((track) => track.mediaElement.readyState === 4)
+      //     ) {
+      //       if (IS_DEBUG_LEVEL_INFO) {
+      //         // eslint-disable-next-line no-console
+      //         console.info('Player: all tracks loaded');
+      //       }
+      //
+      //       this._loadingStatus = 'fulfilled';
+      //       this.events.emit('ready');
+      //     }
+      //   });
+      //
+      //   track.mediaElement.removeEventListener('loadeddata', onLoad);
+      // };
+      //
+      // track.mediaElement.addEventListener('loadeddata', onLoad);
     };
 
     runInAction(() => {
