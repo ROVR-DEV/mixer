@@ -199,6 +199,7 @@ export const useAudioEditorTrack = (
 
       track.setStartTime(startTime);
       track.audio.setTime(audioEditor.player.time - track.startTime);
+      // track.audio.play(audioEditor.player.time - track.startTime);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [calcNewStartTime],

@@ -140,6 +140,9 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         } else if (audioEditor.tool === 'scissors') {
           const copiedTrack = track.split(timeline.globalToTime(e.pageX));
 
+          if (!copiedTrack) {
+            return;
+          }
           audioEditor.selectTrack(copiedTrack);
 
           audioEditor.saveState();

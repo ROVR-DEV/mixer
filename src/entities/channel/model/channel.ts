@@ -22,8 +22,8 @@ export class Channel {
   isMuted: boolean = false;
   isSolo: boolean = false;
 
+  private _audioContext: AudioContext;
   readonly tracks: IObservableArray<AudioEditorTrack> = observable.array();
-
   private _colorsGenerator: TrackColorsGenerator | null = null;
 
   get colorsGenerator(): TrackColorsGenerator | null {
@@ -33,8 +33,16 @@ export class Channel {
     this._colorsGenerator = value;
   }
 
-  constructor(id: string = v4()) {
+  get audioContext() {
+    return this._audioContext;
+  }
+  set audioContext(value: AudioContext) {
+    this._audioContext = value;
+  }
+
+  constructor(audioContext: AudioContext, id: string = v4()) {
     this.id = id;
+    this._audioContext = audioContext;
 
     makeAutoObservable(this);
   }
@@ -60,7 +68,11 @@ export class Channel {
   };
 
   importTrack = (track: Track) => {
-    const audioEditorTrack = new AudioEditorTrack(track, this);
+    const audioEditorTrack = new AudioEditorTrack(
+      track,
+      this,
+      this.audioContext,
+    );
 
     if (this._colorsGenerator) {
       audioEditorTrack.color = this._colorsGenerator.next().value;

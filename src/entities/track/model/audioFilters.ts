@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 
-import { HTMLMediaElementAudioPlayer } from '@/shared/model';
+import { AudioBufferPlayer } from '@/shared/model';
 
 import { FadeFilter } from './fadeFilter';
 
@@ -8,13 +8,13 @@ export class AudioFilters {
   readonly fadeInNode: FadeFilter = new FadeFilter();
   readonly fadeOutNode: FadeFilter = new FadeFilter();
 
-  private _audio: HTMLMediaElementAudioPlayer | null = null;
+  private _audio: AudioBufferPlayer | null = null;
   private _unsubscribeFunctions: (() => void)[] = [];
 
-  get audio(): HTMLMediaElementAudioPlayer | null {
-    return this.audio;
+  get audio(): AudioBufferPlayer | null {
+    return this._audio;
   }
-  set audio(value: HTMLMediaElementAudioPlayer) {
+  set audio(value: AudioBufferPlayer) {
     if (this._audio === value) {
       return;
     }
@@ -23,25 +23,12 @@ export class AudioFilters {
 
     this._audio = value;
 
-    this._audio.mediaElement.addEventListener('canplay', this._initFilters);
+    this._audio.canplay(this._initFilters);
 
-    this._audio.mediaElement.addEventListener(
-      'timeupdate',
-      this._processFiltersWrapper,
-    );
+    this._audio.timeupdate(this._processFiltersWrapper);
 
-    this._unsubscribeFunctions.push(() =>
-      this._audio?.mediaElement.removeEventListener(
-        'canplay',
-        this._initFilters,
-      ),
-    );
-    this._unsubscribeFunctions.push(() =>
-      this._audio?.mediaElement.removeEventListener(
-        'timeupdate',
-        this._processFiltersWrapper,
-      ),
-    );
+    this._unsubscribeFunctions.push(() => this._audio?.removeCanplay());
+    this._unsubscribeFunctions.push(() => this._audio?.removeTimeupdate());
   }
 
   get fadeInDuration(): number {
@@ -90,10 +77,7 @@ export class AudioFilters {
       this.fadeInNode.maxTime = this.fadeOutNode.maxTime = duration;
     });
 
-    this._audio?.mediaElement?.removeEventListener(
-      'canplay',
-      this._initFilters,
-    );
+    this._audio?.removeCanplay();
   };
 
   private _processFade = (time: number, fadeFilter: FadeFilter) => {

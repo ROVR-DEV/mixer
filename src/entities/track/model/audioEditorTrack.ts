@@ -6,7 +6,7 @@ import WaveSurfer from 'wavesurfer.js';
 
 // eslint-disable-next-line boundaries/element-types
 import { clamp, toOwnedObservable } from '@/shared/lib';
-import { AudioPlayer, HTMLMediaElementAudioPlayer } from '@/shared/model';
+import { AudioPlayer, AudioBufferPlayer } from '@/shared/model';
 
 // eslint-disable-next-line boundaries/element-types
 import { Channel } from '@/entities/channel';
@@ -24,6 +24,8 @@ export interface AudioEditorTrackState {
 
   startTime: number;
   endTime: number;
+
+  audioBuffer: AudioBuffer | null;
 
   startTrimDuration: number;
   endTrimDuration: number;
@@ -60,9 +62,7 @@ export class AudioEditorTrack {
   startTrimDuration: number = 0;
   endTrimDuration: number = 0;
 
-  private _audio: AudioPlayer = new HTMLMediaElementAudioPlayer(
-    this.mediaElement,
-  );
+  private _audio: AudioPlayer;
   private _id: string = v4();
   private _isPeaksReady: boolean = false;
   private _meta: Track;
@@ -144,15 +144,17 @@ export class AudioEditorTrack {
     return this.trimEndTime - this.trimStartTime;
   }
 
-  constructor(track: Track, channel: Channel) {
+  constructor(track: Track, channel: Channel, audioContext: AudioContext) {
     this._meta = toOwnedObservable(track);
+
+    this._audio = new AudioBufferPlayer(audioContext);
 
     this._channel = channel;
 
     this.startTime = track.start;
     this.endTime = track.end;
 
-    this.filters.audio = this._audio as HTMLMediaElementAudioPlayer;
+    this.filters.audio = this._audio as AudioBufferPlayer;
     this._updateAudioFiltersBounds();
     this._filters.fadeInNode.linearFadeInDuration(0);
     this._filters.fadeOutNode.linearFadeOutDuration(0);
@@ -166,15 +168,6 @@ export class AudioEditorTrack {
 
     this.startTime = track.start;
     this.endTime = track.end;
-  };
-
-  setAudioBuffer = (audioBuffer: WaveSurfer) => {
-    if (this._audioBuffer === audioBuffer) {
-      return;
-    }
-
-    this._audioBuffer = audioBuffer;
-    // this._filters.audio = audioBuffer;
   };
 
   setPeaks = (peaks: typeof this.audioPeaks) => {
@@ -220,6 +213,9 @@ export class AudioEditorTrack {
 
   split = (time: number) => {
     const clonedTrack = this.clone();
+    if (!clonedTrack) {
+      return;
+    }
 
     // Set clonedTrack start time on split time
     clonedTrack.startTrimDuration = time - clonedTrack.startTime;
@@ -254,11 +250,14 @@ export class AudioEditorTrack {
   };
 
   clone = () => {
-    const clonedTrack = new AudioEditorTrack(this.meta, this.channel);
+    const clonedTrack = new AudioEditorTrack(
+      this.meta,
+      this.channel,
+      this._channel.audioContext,
+    );
 
     clonedTrack.color = this.color;
 
-    clonedTrack.audio.load(this.mediaElement.src);
     clonedTrack.audioPeaks = this.audioPeaks;
 
     clonedTrack.startTrimDuration = this.startTrimDuration;
@@ -290,6 +289,7 @@ export class AudioEditorTrack {
       meta: this.meta,
       isPeaksReady: this._isPeaksReady,
       audioPeaks: this.audioPeaks,
+      audioBuffer: this.audio.getAudioBuffer(),
       filters: {
         fadeIn: {
           startTime: this.filters.fadeInNode.startTime,
@@ -312,8 +312,8 @@ export class AudioEditorTrack {
     this.endTrimDuration = state.endTrimDuration;
 
     this.meta = state.meta;
-    if (!this.mediaElement.src) {
-      this.audio.load(state.src);
+    if (!this.mediaElement.src && state.audioBuffer) {
+      this.audio.load(state.audioBuffer);
     }
     this.color = state.color;
 

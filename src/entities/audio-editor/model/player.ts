@@ -57,12 +57,11 @@ export interface Player {
   readonly duration: number;
 
   importPlaylist(playlists: Playlist): void;
-
   importTrack(track: Track, channelIndex?: number): void;
+
   removeTrack(track: AudioEditorTrack, dispose?: boolean): void;
 
   loadTracks(withPeaks?: boolean): Promise<void>;
-
   play(): void;
   stop(): void;
 
@@ -87,6 +86,8 @@ export class ObservablePlayer implements Player {
   readonly events = new EventEmitter<PlayerEvents>();
 
   private _colorsGenerator = trackColorsGenerator(TRACK_COLORS);
+
+  private audioContext: AudioContext | null = null;
 
   readonly channels = observable.array<Channel>();
   readonly region: Region = new ObservableRegion();
@@ -143,6 +144,9 @@ export class ObservablePlayer implements Player {
 
   constructor(playlist?: Playlist) {
     this._timer = new Timer((time: number) => this._onTimeUpdate(time / 1000));
+    if (typeof window !== 'undefined') {
+      this.audioContext = new AudioContext();
+    }
 
     this.addChannel();
     this.addChannel();
@@ -187,16 +191,6 @@ export class ObservablePlayer implements Player {
     if (dispose) {
       track.dispose();
     }
-    // if (this.playlist !== null) {
-    //   console.log(this.playlist.duration);
-    //   console.log(this.playlist.tracks);
-    //   this.playlist.tracks = this.playlist.tracks.filter(
-    //     (tr) => tr.uuid !== track.meta.uuid,
-    //   );
-    //   this.playlist.duration_in_seconds -= getPlaylistMaxTime(this.playlist);
-    //   console.log(this.playlist.duration);
-    //   console.log(this.playlist.tracks);
-    // }
   };
 
   loadTracks = async (withPeaks: boolean = true): Promise<void> => {
@@ -204,7 +198,7 @@ export class ObservablePlayer implements Player {
       return;
     }
 
-    const onTrackLoad = (trackData: TrackData) => {
+    const onTrackLoad = async (trackData: TrackData) => {
       if (!trackData.objectUrl || !trackData.blob) {
         return;
       }
@@ -213,7 +207,6 @@ export class ObservablePlayer implements Player {
       if (!track) {
         return;
       }
-      track.audio.load(trackData.objectUrl);
 
       if (withPeaks) {
         const generateAndSetPeaks = async () => {
@@ -221,10 +214,18 @@ export class ObservablePlayer implements Player {
             track.setPeaks([]);
             return;
           }
+          if (!this.audioContext) {
+            return;
+          }
+          if ('decodeAudioData' in this.audioContext) {
+            const audioBuffer = await this.audioContext.decodeAudioData(
+              trackData.arrayBuffer,
+            );
+            const peaks = await calculatePeaks(audioBuffer);
+            track.setPeaks(peaks);
 
-          const peaks = await calculatePeaks(trackData.arrayBuffer);
-
-          track.setPeaks(peaks);
+            await track.audio.load(audioBuffer);
+          }
         };
 
         generateAndSetPeaks();
@@ -302,7 +303,11 @@ export class ObservablePlayer implements Player {
   //#endregion
 
   //#region Channel actions
-  addChannel = (channel: Channel = new Channel()) => {
+  addChannel = () => {
+    if (!this.audioContext) {
+      return;
+    }
+    const channel: Channel = new Channel(this.audioContext);
     channel.colorsGenerator = this._colorsGenerator;
     this.channels.push(channel);
   };
@@ -368,7 +373,6 @@ export class ObservablePlayer implements Player {
     ) {
       this.setTime(this.region.start);
     }
-
     this._processTracks(time, this._processTrack);
   };
 
@@ -394,8 +398,9 @@ export class ObservablePlayer implements Player {
 
     if (!isChannelMuted && !isPlaying) {
       const trackTime = time - track.startTime;
+
       track.audio.setTime(trackTime);
-      track.audio.play();
+      track.audio.play(trackTime);
     } else if (isChannelMuted && isPlaying) {
       track.audio.pause();
     }
@@ -417,6 +422,10 @@ export class ObservablePlayer implements Player {
   }
 
   restoreState = (state: PlayerState) => {
+    if (!this.audioContext) {
+      return;
+    }
+    const audioContext = this.audioContext;
     const stateTracksIds = state.tracks.map((track) => track.uuid);
 
     const tracks = [...this.tracks].filter((track) =>
@@ -424,7 +433,7 @@ export class ObservablePlayer implements Player {
     );
 
     const channels = state.channels.map((channelState) => {
-      const newChannel = new Channel(channelState.id);
+      const newChannel = new Channel(audioContext, channelState.id);
       newChannel.restoreState(channelState);
       return newChannel;
     });
@@ -440,7 +449,11 @@ export class ObservablePlayer implements Player {
         )!;
 
         if (!foundTrack) {
-          const newTrack = new AudioEditorTrack(trackState.meta, foundChannel);
+          const newTrack = new AudioEditorTrack(
+            trackState.meta,
+            foundChannel,
+            audioContext,
+          );
 
           newTrack.restoreState(trackState);
 

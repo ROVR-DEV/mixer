@@ -181,14 +181,10 @@ export class ObservableAudioEditor implements AudioEditor {
     return this._zoomBeforeFit !== null && this._scrollBeforeFit !== null;
   }
 
-  constructor(
-    player: Player = new ObservablePlayer(),
-    options: AudioEditorOptions = AUDIO_EDITOR_DEFAULT_OPTIONS,
-  ) {
+  constructor(options: AudioEditorOptions = AUDIO_EDITOR_DEFAULT_OPTIONS) {
     this.options = options;
     this._tool = options.availableTools[0];
-
-    this._player = player;
+    this._player = new ObservablePlayer();
 
     makeAutoObservable(this, {
       tool: computed,

@@ -1,5 +1,5 @@
 export interface AudioPlayer {
-  play: () => void;
+  play: (time: number) => void;
   pause: () => void;
   stop: () => void;
 
@@ -10,63 +10,162 @@ export interface AudioPlayer {
   getCurrentTime: () => number;
   setTime: (time: number) => void;
 
+  getAudioBuffer: () => AudioBuffer | null;
+
   setVolume: (volume: number) => void;
   getVolume: () => number;
 
-  load(src: string): void;
+  load(audioBuffer: AudioBuffer): void;
 }
 
-export class HTMLMediaElementAudioPlayer implements AudioPlayer {
-  // Make private
-  readonly mediaElement: HTMLMediaElement;
+export class AudioBufferPlayer implements AudioPlayer {
+  private audioContext: AudioContext;
+  private bufferSource: AudioBufferSourceNode | null = null;
+  private audioBuffer: AudioBuffer | null = null;
+  private gainNode: GainNode;
+  private startTime: number = 0;
+  private pauseTime: number = 0;
+  private timeUpdateInterval: number | null = null;
+  private canPlayCallback: (() => void) | null = null;
+  private timeUpdateCallback: (() => void) | null = null;
+  private _isPlaying: boolean = false;
 
-  constructor(player: HTMLMediaElement) {
-    this.mediaElement = player;
+  constructor(audioContext: AudioContext) {
+    this.audioContext = audioContext;
+    this.gainNode = this.audioContext.createGain();
+    this.gainNode.connect(this.audioContext.destination);
   }
 
-  play = () => {
-    this.mediaElement.play();
+  load = async (audioBuffer: AudioBuffer): Promise<void> => {
+    this.audioBuffer = audioBuffer;
+    this.fireCanPlay();
+  };
+
+  setTime = (time: number) => {
+    this.pauseTime = time;
+
+    if (time && this.isPlaying()) {
+      this.play(time);
+    }
+  };
+
+  play = (time: number = 0) => {
+    if (!this.audioBuffer) {
+      return;
+    }
+
+    // Очищаем старый источник
+    if (this.bufferSource) {
+      this.bufferSource.disconnect();
+    }
+
+    this.bufferSource = this.audioContext.createBufferSource();
+    this.bufferSource.buffer = this.audioBuffer;
+    this.bufferSource.connect(this.gainNode);
+
+    const offset = time || this.pauseTime || 0;
+    if (offset < 0) {
+      return;
+    }
+
+    this._isPlaying = true;
+
+    this.bufferSource.start(0, offset);
+
+    this.startTime = this.audioContext.currentTime - offset;
+    this.bufferSource.onended = this.onEnd;
+    this.startTimeUpdate();
   };
 
   pause = () => {
-    this.mediaElement.pause();
+    if (!this.bufferSource) {
+      return;
+    }
+
+    // if (this._isPlaying) {
+    //   this._isPlaying = false;
+    // }
+
+    this.bufferSource.stop();
   };
 
   stop = () => {
-    this.mediaElement.pause();
-    this.mediaElement.currentTime = 0;
+    if (this.bufferSource) {
+      this.bufferSource.stop();
+      this.bufferSource = null;
+      this.pauseTime = 0;
+      this._isPlaying = false;
+      this.stopTimeUpdate();
+    }
   };
 
   isPlaying = () => {
-    return (
-      this.mediaElement.currentTime > 0 &&
-      !this.mediaElement.ended &&
-      !this.mediaElement.paused &&
-      this.mediaElement.readyState > 2
-    );
+    return this._isPlaying;
   };
 
+  getAudioBuffer() {
+    return this.audioBuffer;
+  }
+
   getDuration = (): number => {
-    return this.mediaElement.duration;
+    return this.audioBuffer ? this.audioBuffer.duration : 0;
   };
 
   getCurrentTime = (): number => {
-    return this.mediaElement.currentTime;
-  };
-
-  setTime = (value: number) => {
-    this.mediaElement.currentTime = value;
+    if (this.bufferSource) {
+      return this.audioContext.currentTime - this.startTime;
+    }
+    return this.pauseTime;
   };
 
   setVolume = (volume: number) => {
-    this.mediaElement.volume = volume;
+    this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
   };
 
   getVolume = (): number => {
-    return this.mediaElement.volume;
+    return this.gainNode.gain.value;
   };
 
-  load(src: string): void {
-    this.mediaElement.src = src;
+  private fireCanPlay() {
+    if (this.canPlayCallback) {
+      this.canPlayCallback();
+    }
+  }
+
+  private startTimeUpdate() {
+    if (this.timeUpdateInterval === null) {
+      this.timeUpdateInterval = window.setInterval(() => {
+        if (this.timeUpdateCallback) {
+          this.timeUpdateCallback();
+        }
+      }, 100); // Call every 100ms to simulate `timeupdate`
+    }
+  }
+
+  private stopTimeUpdate() {
+    if (this.timeUpdateInterval !== null) {
+      clearInterval(this.timeUpdateInterval);
+      this.timeUpdateInterval = null;
+    }
+  }
+
+  private onEnd = () => {
+    this.bufferSource = null;
+    this._isPlaying = false;
+    this.pauseTime = 0;
+    this.stopTimeUpdate();
+  };
+
+  canplay(callback: () => void) {
+    this.canPlayCallback = callback;
+  }
+  removeCanplay() {
+    this.canPlayCallback = null;
+  }
+  timeupdate(callback: () => void) {
+    this.timeUpdateCallback = callback;
+  }
+  removeTimeupdate() {
+    this.timeUpdateCallback = null;
   }
 }
