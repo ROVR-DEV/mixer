@@ -30,6 +30,7 @@ export const useAudioEditorTrack = (
   track: AudioEditorTrack,
   audioEditor: AudioEditor,
   timeline: Timeline,
+  setFadePosition: (left: number, right: number) => void,
   disableInteractive?: boolean,
 ) => {
   const isSelectedInPlayer = audioEditor.isTrackSelected(track);
@@ -149,6 +150,14 @@ export const useAudioEditorTrack = (
         timeline.viewportBoundsWithBuffer.start,
         timeline.viewportBoundsWithBuffer.end,
       ),
+    );
+    const fadeLeftPosition =
+      trimStartXGlobal - timeline.viewportBoundsWithBuffer.start;
+    const fadeRightPosition =
+      timeline.viewportBoundsWithBuffer.end - trimEndXGlobal;
+    setFadePosition(
+      fadeLeftPosition < 0 ? fadeLeftPosition : 0,
+      fadeRightPosition < 0 ? fadeRightPosition : 0,
     );
 
     trackRef.current.style.left = `${position}px`;

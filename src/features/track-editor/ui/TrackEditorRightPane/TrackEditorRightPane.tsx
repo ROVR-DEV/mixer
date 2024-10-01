@@ -11,7 +11,7 @@ import {
   useHandleTimeSeek,
   useAudioEditor,
 } from '@/entities/audio-editor';
-import { TrackModifyOverlay, TrackWaveform } from '@/entities/track';
+import { TrackWaveform } from '@/entities/track';
 
 // eslint-disable-next-line boundaries/element-types
 import { ChannelListItemView } from '@/features/channel-control';
@@ -108,12 +108,8 @@ export const TrackEditorRightPane = observer(function TrackEditorRightPane({
                   waveformComponent={waveformComponent}
                   disableInteractive
                   hideTitle
-                >
-                  <TrackModifyOverlay
-                    track={audioEditor.editableTrack}
-                    ignoreSelection
-                  />
-                </AudioEditorTrackView>
+                  ignoreSelection
+                />
               </ChannelListItemView>
             )}
           </div>

@@ -19,6 +19,7 @@ export const FadeOverlay = observer(function FadeOverlay({
   side,
   isTrackSelected,
   className,
+  position,
   ...props
 }: FadeOverlayProps) {
   const timeline = useTimeline();
@@ -28,16 +29,16 @@ export const FadeOverlay = observer(function FadeOverlay({
   const width = useMemo(
     () => timeline.timeToPixels(fadeDuration),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fadeDuration, timeline, timeline.zoom],
+    [fadeDuration, timeline, timeline.hPixelsPerSecond],
   );
 
   return (
     <div
-      className={cn('relative h-full', className)}
+      className={cn('absolute h-full', className)}
       style={{
         width: width,
-        left: side === 'left' ? '0' : '',
-        right: side === 'right' ? '0' : '',
+        left: side === 'left' ? position : '',
+        right: side === 'right' ? position : '',
       }}
       onClick={stopPropagation}
       {...props}

@@ -42,6 +42,10 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
   const audioEditor = useAudioEditor();
   const timeline = useTimeline();
 
+  const [fadePosition, setFadePosition] = useState({
+    right: 0,
+    left: 0,
+  });
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   const isDraggable = useMemo(
@@ -71,6 +75,8 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     },
     [track],
   );
+  const changeFadePosition = (left: number, right: number) =>
+    setFadePosition({ left, right });
 
   //#region Click handlers
   const { isDragging, onMouseUp, onMouseDown } = useAudioEditorTrack(
@@ -78,6 +84,7 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
     track,
     audioEditor,
     timeline,
+    changeFadePosition,
     disableInteractive || !isDraggable,
   );
 
@@ -282,7 +289,12 @@ export const AudioEditorTrackView = observer(function AudioEditorTrackView({
         popoverBoundary={timeline.boundingClientRect}
         {...props}
       />
-      <TrackModifyOverlay track={track} trackRef={trackRef} />
+      <TrackModifyOverlay
+        track={track}
+        trackRef={trackRef}
+        fadePosition={fadePosition}
+        ignoreSelection={props.ignoreSelection}
+      />
     </div>
   );
 });

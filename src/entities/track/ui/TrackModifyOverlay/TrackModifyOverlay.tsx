@@ -16,6 +16,7 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
   track,
   ignoreSelection,
   trackRef,
+  fadePosition,
 }: TrackModifyOverlayProps) {
   const audioEditor = useAudioEditor();
 
@@ -32,6 +33,7 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
           className='h-full'
           side='left'
           track={track}
+          position={fadePosition.left}
           isTrackSelected={isSelectedInEditor}
         />
         <div className='grow' />
@@ -39,6 +41,7 @@ export const TrackModifyOverlay = observer(function TrackModifyOverlay({
           className='h-full'
           side='right'
           track={track}
+          position={fadePosition.right}
           isTrackSelected={isSelectedInEditor}
         />
       </div>

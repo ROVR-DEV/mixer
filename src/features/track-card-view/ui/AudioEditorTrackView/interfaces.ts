@@ -23,4 +23,5 @@ export interface AudioEditorTrackViewProps
   disableInteractive?: boolean;
   editMenu?: typeof TrackEditMenu | typeof TrackEditMenuMemoized;
   contextMenu?: typeof TrackContextMenuView;
+  ignoreSelection?: boolean;
 }
